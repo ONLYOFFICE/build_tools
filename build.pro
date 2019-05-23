@@ -43,13 +43,16 @@ SUBDIRS = \
     x2t
 	
 desktop {
+message(desktop)
+
+SUBDIRS += \
 	hunspell \
 	ooxmlsignature \
 	documentscore \
 	videoplayer \
 	\
 	projicons \
-	desktopapp
+	desktopapp	
 }
 
 CONFIG += ordered

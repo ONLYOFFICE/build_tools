@@ -8,6 +8,8 @@ MAKEFILE=makefiles/build.makefile
 
 include($$CORE_ROOT_DIR/Common/base.pri)
 
+CONFIG += ordered
+
 SUBDIRS = \
 	cryptopp \
 	\
@@ -24,11 +26,6 @@ SUBDIRS = \
 	\
 	htmlfileinternal \
 	\
-	hunspell \
-	ooxmlsignature \
-	documentscore \
-	videoplayer \
-	\
 	allfontsgen \
 	\
 	docbuilder \
@@ -44,6 +41,16 @@ SUBDIRS = \
     odffilewriter \
     xlsformat \
     x2t
+	
+desktop {
+	hunspell \
+	ooxmlsignature \
+	documentscore \
+	videoplayer \
+	\
+	projicons \
+	desktopapp
+}
 
 CONFIG += ordered
 
@@ -62,11 +69,6 @@ doctrenderer.file       = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrendere
 
 htmlfileinternal.file   = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
 
-hunspell.file           = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
-ooxmlsignature.file     = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
-documentscore.file      = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-videoplayer.file        = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-
 allfontsgen.file        = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
 
 docbuilder.file         = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
@@ -83,6 +85,16 @@ odffilewriter.file      = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/OdfFileWriterL
 xlsformat.file          = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro
 x2t.file                = $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro
 
+desktop {
+	hunspell.file           = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
+	ooxmlsignature.file     = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
+	documentscore.file      = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
+	videoplayer.file        = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
+	
+	projicons.file          = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
+	desktopapp.file     	= $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
+}
+
 # DEPENDS
 kernel.depends            = cryptopp
 graphics.depends          = kernel unicodeconverter
@@ -96,13 +108,18 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 
 htmlfileinternal.depends  = kernel unicodeconverter graphics
 
-ooxmlsignature.depends    = kernel unicodeconverter graphics
-documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
-videoplayer.depends       = kernel unicodeconverter graphics
-
 allfontsgen.depends       = kernel unicodeconverter graphics
 
 docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
+
+desktop {
+	ooxmlsignature.depends    = kernel unicodeconverter graphics
+	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
+	videoplayer.depends       = kernel unicodeconverter graphics
+	
+	projicons.depends 		  = documentscore videoplayer
+	desktopapp.depends        = documentscore videoplayer
+}
 
 x2t.depends = \
     docxformat \

@@ -5,6 +5,12 @@ call %~dp0scripts\json_value.bat update    OO_UPDATE     1
 call %~dp0scripts\json_value.bat clean     OO_CLEAN      0
 call %~dp0scripts\json_value.bat platform  OO_PLATFORM   native
 call %~dp0scripts\json_value.bat config    OO_CONFIG     no_vlc
+call %~dp0scripts\json_value.bat deploy    OO_DEPLOY     1
+call %~dp0scripts\json_value.bat install   OO_INSTALL    1
+
+set "ADDITIONAL_COMMAND="
+if %OO_DEPLOY%=="1" ( set "ADDITIONAL_COMMAND=%ADDITIONAL_COMMAND% deploy" )
+if %OO_INSTALL%=="1" ( set "ADDITIONAL_COMMAND=%ADDITIONAL_COMMAND% install" )
 
 if "%OO_UPDATE%"=="1" (
 	call scripts\git-fetch.bat core
@@ -29,6 +35,6 @@ call "%OO_QT_DIR%\qmake" -nocache build.pro "CONFIG+=%OO_CONFIG%"
 if "%OO_CLEAN%"=="1" (
 	call nmake clean -f "makefiles/build.makefile"
 )
-call nmake -f "makefiles/build.makefile"
+call nmake -f "makefiles/build.makefile" %ADDITIONAL_COMMAND%
 
 endlocal

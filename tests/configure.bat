@@ -5,4 +5,6 @@ call %~dp0..\configure.bat ^
  --update 1^
  --branch release/v5.3.0^
  --clean^
- --config "vlc"
+ --config no_vlc^
+ --deploy^
+ --install

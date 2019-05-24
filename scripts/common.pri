@@ -31,7 +31,7 @@ defineTest(createDirectory) {
 		
     win32:dir ~= s,/,\\,g
 	
-	system($$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t))
+	system($$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t))
 }
 
 defineTest(removeDirectory) {

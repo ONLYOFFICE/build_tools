@@ -8,10 +8,6 @@ call %~dp0scripts\json_value.bat config    OO_CONFIG     no_vlc
 call %~dp0scripts\json_value.bat deploy    OO_DEPLOY     1
 call %~dp0scripts\json_value.bat install   OO_INSTALL    1
 
-set "ADDITIONAL_COMMAND="
-if %OO_DEPLOY%=="1" ( set "ADDITIONAL_COMMAND=%ADDITIONAL_COMMAND% deploy" )
-if %OO_INSTALL%=="1" ( set "ADDITIONAL_COMMAND=%ADDITIONAL_COMMAND% install" )
-
 if "%OO_UPDATE%"=="1" (
 	call scripts\git-fetch.bat core
 	call scripts\git-fetch.bat desktop-sdk
@@ -21,8 +17,6 @@ if "%OO_UPDATE%"=="1" (
 	
 	if not "%OO_MODULE%"=="%OO_MODULE:desktop=%" (
 		call scripts\git-fetch.bat desktop-apps
-		call scripts\git-fetch.bat desktop-apps-ext
-		call scripts\git-fetch.bat core-ext
 		
 		set "OO_CONFIG=%OO_CONFIG% desktop"
 	)
@@ -38,6 +32,13 @@ call "%OO_QT_DIR%\qmake" -nocache build.pro "CONFIG+=%OO_CONFIG%"
 if "%OO_CLEAN%"=="1" (
 	call nmake clean -f "makefiles/build.makefile"
 )
-call nmake -f "makefiles/build.makefile" %ADDITIONAL_COMMAND%
+call nmake -f "makefiles/build.makefile"
+
+if %OO_DEPLOY%=="1" (
+	call scripts\deploy.bat
+)
+if %OO_INSTALL%=="1" (
+	call scripts\install.bat
+)
 
 endlocal

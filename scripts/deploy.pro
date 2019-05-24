@@ -6,6 +6,9 @@ MAKEFILE=$$PWD/../makefiles/deploy.makefile
 include($$PWD/../../core/Common/base.pri)
 include($$PWD/common.pri)
 
+OS_CURRENT=$$(OS_DEPLOY)
+QT_CURRENT=$$(QT_DEPLOY)
+
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
@@ -37,33 +40,33 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal$$EXE_EXT)
 	
 	copyDirectory($$ROOT_GIT_DIR/dictionaries, $$CUR_ROOT/dictionaries)
-	removeDicrionary($$CUR_ROOT/dictionaries/.git)
+	removeDirectory($$CUR_ROOT/dictionaries/.git)
 	
 	copyDirectory($$ROOT_GIT_DIR/desktop-apps/common/package/fonts, $$CUR_ROOT/fonts)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE, $$CUR_ROOT/3DPARTYLICENSE)
 	
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build/*, $$CUR_ROOT/.)
 		
-	copyFile($$OO_QT_DIR/Qt5Core$$LIB_EXT, Qt5Core$$LIB_EXT)
-	copyFile($$OO_QT_DIR/Qt5Gui$$LIB_EXT, Qt5Gui$$LIB_EXT)
-	copyFile($$OO_QT_DIR/Qt5PrintSupport$$LIB_EXT, Qt5PrintSupport$$LIB_EXT)
-	copyFile($$OO_QT_DIR/Qt5Svg$$LIB_EXT, Qt5Svg$$LIB_EXT)
-	copyFile($$OO_QT_DIR/Qt5Widgets$$LIB_EXT, Qt5Widgets$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Core$$LIB_EXT, $$CUR_ROOT/Qt5Core$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Gui$$LIB_EXT, $$CUR_ROOT/Qt5Gui$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5PrintSupport$$LIB_EXT, $$CUR_ROOT/Qt5PrintSupport$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Svg$$LIB_EXT, $$CUR_ROOT/Qt5Svg$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Widgets$$LIB_EXT, $$CUR_ROOT/Qt5Widgets$$LIB_EXT)
 	
-	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/hunspell$$EXE_EXT, $$CUR_ROOT/hunspell$$EXE_EXT)
+	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/hunspell$$LIB_EXT, $$CUR_ROOT/hunspell$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ooxmlsignature$$LIB_EXT, $$CUR_ROOT/ooxmlsignature$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
 	
-	copyQtPlugin($$OO_QT_DIR/../plugins/iconengines, $$CUR_ROOT/iconengines)
-	copyQtPlugin($$OO_QT_DIR/../plugins/imageformats, $$CUR_ROOT/imageformats)
-	copyQtPlugin($$OO_QT_DIR/../plugins/platforms, $$CUR_ROOT/platforms)
-	copyQtPlugin($$OO_QT_DIR/../plugins/printsupport, $$CUR_ROOT/printsupport)	
-	copyQtPlugin($$OO_QT_DIR/../plugins/styles, $$CUR_ROOT/styles)
+	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
+	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
+	copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
+	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
+	copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
 	
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons.exe, $$CUR_ROOT/DesktopEditors.exe)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors.exe, $$CUR_ROOT/editors.exe)
-)
+}
 
 builder {
 	

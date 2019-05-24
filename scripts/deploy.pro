@@ -14,6 +14,8 @@ DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
 createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
 
+JS_ROOT=$$DEPLOY_DIR/js
+
 desktop {
 	
 	CUR_ROOT=$$DEPLOY_DIR/$$OS_CURRENT/desktop
@@ -66,6 +68,12 @@ desktop {
 	
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons.exe, $$CUR_ROOT/DesktopEditors.exe)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors.exe, $$CUR_ROOT/editors.exe)
+
+	createDirectory($$CUR_ROOT/editors)
+	copyDirectory($$JS_ROOT/desktop/sdkjs, $$CUR_ROOT/editors/sdkjs)
+	copyDirectory($$JS_ROOT/desktop/web-apps, $$CUR_ROOT/editors/web-apps)
+	copyFile($$JS_ROOT/desktop/index.html, $$CUR_ROOT/index.html)
+
 }
 
 builder {

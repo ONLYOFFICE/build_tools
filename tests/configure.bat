@@ -1,6 +1,6 @@
 call %~dp0..\configure.bat ^
  --module "desktop builder tests"^
- --platform all^
+ --platform native^
  --branding default^
  --update 1^
  --branch release/v5.3.0^

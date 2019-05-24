@@ -34,6 +34,8 @@ if "%OO_CLEAN%"=="1" (
 )
 call nmake -f "makefiles/build.makefile"
 
+call "%OO_QT_DIR%\qmake" -nocache scripts\build_js.pro "CONFIG+=%OO_MODULE%"
+
 if %OO_DEPLOY%=="1" (
 	call scripts\deploy.bat
 )

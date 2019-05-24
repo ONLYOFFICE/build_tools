@@ -1,3 +1,21 @@
+LIB_EXT=.so
+core_windows {
+	LIB_EXT=.dll
+}
+core_mac {
+	LIB_EXT=.dylib
+}
+
+EXE_EXT=
+core_windows {
+	EXE_EXT=.exe
+}
+
+CALL_COMMAND=
+core_windows {
+	CALL_COMMAND="call "
+}
+
 defineTest(copyDirectory) {
     src = $$1
     dst = $$2
@@ -48,19 +66,39 @@ defineTest(copyQtPlugin) {
 	copyFile($$1/*$$LIB_EXT, $$2/.)
 }
 
+
+defineTest(runNPM) {    
+    dir = $$1
+		
+    win32:dir ~= s,/,\\,g
+
+    system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) $$escape_expand(\\n\\t))
+}
+
+defineTest(gruntInterface) {    
+    dir = $$1
+		
+    win32:dir ~= s,/,\\,g
+
+    system($$CALL_COMMAND grunt --force --base $$shell_quote($$dir) $$escape_expand(\\n\\t))
+}
+
+defineTest(gruntBuilder) {    
+    dir = $$1
+		
+    win32:dir ~= s,/,\\,g
+
+    system($$CALL_COMMAND grunt --base $$shell_quote($$dir) --level=ADVANCED $$escape_expand(\\n\\t))
+}
+
+defineTest(gruntDesktop) {    
+    dir = $$1
+		
+    win32:dir ~= s,/,\\,g
+
+    system($$CALL_COMMAND grunt --base $$shell_quote($$dir) --level=ADVANCED --desktop=true $$escape_expand(\\n\\t))
+}
+
 #copyFile($$PWD/path_to_file_1, $$PWD/path_to_file_2)
 #copyDir($$PWD/path_to_folder_1, $$PWD/path_to_folder_2)
 #copyFile($$PWD/path_to_folder/*, $$PWD/path_to_folder/.)
-
-LIB_EXT=.so
-core_windows {
-	LIB_EXT=.dll
-}
-core_mac {
-	LIB_EXT=.dylib
-}
-
-EXE_EXT=
-core_windows {
-	EXE_EXT=.exe
-}

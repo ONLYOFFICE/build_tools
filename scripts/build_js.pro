@@ -77,7 +77,7 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/web-apps-pro/apps/api/documents/index.html.desktop, $$CUR_ROOT/web-apps/apps/api/documents/index.html)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/loginpage/deploy/index.html, $$CUR_ROOT/index.html)
 
-	runNPM($$ROOT_GIT_DIR/desktop-apps/common/loginpage/build)
+	runNPM2($$ROOT_GIT_DIR/desktop-apps/common/loginpage/build)
 	gruntInterface($$ROOT_GIT_DIR/desktop-apps/common/loginpage/build)
 
 }

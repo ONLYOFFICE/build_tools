@@ -75,6 +75,14 @@ defineTest(runNPM) {
     system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) $$escape_expand(\\n\\t))
 }
 
+defineTest(runNPM2) {    
+    dir = $$1
+		
+    win32:dir ~= s,/,\\,g
+
+    system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) git://github.com/gruntjs/grunt-contrib-uglify.git#harmony $$escape_expand(\\n\\t))
+}
+
 defineTest(gruntInterface) {    
     dir = $$1
 		

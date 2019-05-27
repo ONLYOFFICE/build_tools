@@ -12,6 +12,13 @@ QT_CURRENT=$$(QT_DEPLOY)
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
+
+PUBLISHER_NAME = $$(DEPLOY_BRANDING)
+!isEmpty(PUBLISHER_NAME) {
+    DEPLOY_DIR=$$DEPLOY_DIR/PUBLISHER_NAME
+	createDirectory($$DEPLOY_DIR)
+}
+
 createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
 
 JS_ROOT=$$DEPLOY_DIR/js
@@ -20,6 +27,12 @@ desktop {
 	
 	CUR_ROOT=$$DEPLOY_DIR/$$OS_CURRENT/desktop
 	createDirectory($$CUR_ROOT)
+
+	build_xp {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+	} else {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+	}
 
 	createDirectory($$CUR_ROOT/converter)
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/converter/x2t$$EXE_EXT)
@@ -32,7 +45,6 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/XpsFile$$LIB_EXT, $$CUR_ROOT/converter/XpsFile$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFile$$LIB_EXT, $$CUR_ROOT/converter/HtmlFile$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlRenderer$$LIB_EXT, $$CUR_ROOT/converter/HtmlRenderer$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58$$LIB_EXT, $$CUR_ROOT/converter/icudt58$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/converter/icuuc58$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudtl.dat, $$CUR_ROOT/converter/icudtl.dat)
@@ -58,7 +70,12 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/hunspell$$LIB_EXT, $$CUR_ROOT/hunspell$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ooxmlsignature$$LIB_EXT, $$CUR_ROOT/ooxmlsignature$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
+
+	build_xp {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
+	} else {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
+	}
 	
 	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
 	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)

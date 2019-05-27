@@ -4,9 +4,12 @@ ROOT_DIR=$$PWD/..
 DEPLOY_DIR=$$PWD/deploy
 CORE_ROOT_DIR=$$ROOT_DIR/core
 
-MAKEFILE=makefiles/build.makefile
-
 include($$CORE_ROOT_DIR/Common/base.pri)
+
+MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
+build_xp {
+	MAKEFILE=$$MAKEFILE_xp
+}
 
 CONFIG += ordered
 

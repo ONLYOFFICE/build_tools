@@ -24,19 +24,87 @@ if "%OO_UPDATE%"=="1" (
 	)
 )
 
+set "BUILD_PLATFORM=%OO_PLATFORM%"
 call ../core/Common/3dParty/make.bat
 
 cd %~dp0
 
-call "%OO_VS_DIR%\vcvarsall.bat" amd64
-call "%OO_QT_DIR%\qmake" -nocache build.pro "CONFIG+=%OO_CONFIG%"
+set "IS_NEED_NATIVE=true"
 
-if "%OO_CLEAN%"=="1" (
-	call nmake clean -f "makefiles/build.makefile"
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
+
+	call "%OO_VS_DIR%\vcvarsall.bat" x64
+	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
+	set "OS_DEPLOY=win_64"
+	call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	if "%OO_CLEAN%"=="1" (
+		call nmake clean -f "makefiles/build.makefile_win_64"
+	)
+	call nmake -f "makefiles/build.makefile_win_64"
+
+	call "%OO_VS_DIR%\vcvarsall.bat" x86
+	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
+	set "OS_DEPLOY=win_32"
+	call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	if "%OO_CLEAN%"=="1" (
+		call nmake clean -f "makefiles/build.makefile_win_32"
+	)
+	call nmake -f "makefiles/build.makefile_win_32"
+
+	set "IS_NEED_NATIVE=false"
 )
-call nmake -f "makefiles/build.makefile"
 
-call "%OO_QT_DIR%\qmake" -nocache scripts\build_js.pro "CONFIG+=%OO_MODULE%"
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
+
+	call "%OO_VS_DIR%\vcvarsall.bat" x64
+	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
+	set "OS_DEPLOY=win_64"
+	call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	if "%OO_CLEAN%"=="1" (
+		call nmake clean -f "makefiles/build.makefile_win_64_xp"
+	)
+	call nmake -f "makefiles/build.makefile_win_64_xp"
+
+	call "%OO_VS_DIR%\vcvarsall.bat" x86
+	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
+	set "OS_DEPLOY=win_32"
+	call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	if "%OO_CLEAN%"=="1" (
+		call nmake clean -f "makefiles/build.makefile_win_32_xp"
+	)
+	call nmake -f "makefiles/build.makefile_win_32_xp"
+	
+)
+
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
+
+	if "%IS_NEED_NATIVE%"=="true" (
+
+		if exist "%PROGRAMFILES(X86)%" (
+			call "%OO_VS_DIR%\vcvarsall.bat" x64
+			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
+			set "OS_DEPLOY=win_64"
+			call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+			if "%OO_CLEAN%"=="1" (
+				call nmake clean -f "makefiles/build.makefile_win_64"
+			)
+			call nmake -f "makefiles/build.makefile_win_64"
+		) else (
+			call "%OO_VS_DIR%\vcvarsall.bat" x86
+			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
+			set "OS_DEPLOY=win_32"
+			call "%QT_DEPLOY%\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+			if "%OO_CLEAN%"=="1" (
+				call nmake clean -f "makefiles/build.makefile_win_32"
+			)
+			call nmake -f "makefiles/build.makefile_win_32"
+		)
+
+	)
+
+)
+
+call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
 
 if %OO_DEPLOY%=="1" (
 	call scripts\deploy.bat

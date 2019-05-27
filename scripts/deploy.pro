@@ -74,7 +74,7 @@ desktop {
 	copyDirectory($$JS_ROOT/desktop/web-apps, $$CUR_ROOT/editors/web-apps)
 	copyFile($$JS_ROOT/desktop/index.html, $$CUR_ROOT/index.html)
 
-	copyFile(($$ROOT_GIT_DIR/desktop-apps/common/loginpage/addon/externalcloud.json, $$CUR_ROOT/editors/externalcloud.json)
+	copyFile($$ROOT_GIT_DIR/desktop-apps/common/loginpage/addon/externalcloud.json, $$CUR_ROOT/editors/externalcloud.json)
 
 	createDirectory($$CUR_ROOT/editors/sdkjs-plugins)
 	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/LICENSE.txt, $$CUR_ROOT/editors/sdkjs-plugins/LICENSE.txt)

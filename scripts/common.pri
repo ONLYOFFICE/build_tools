@@ -66,7 +66,6 @@ defineTest(copyQtPlugin) {
 	copyFile($$1/*$$LIB_EXT, $$2/.)
 }
 
-
 defineTest(runNPM) {    
     dir = $$1
 		
@@ -80,7 +79,7 @@ defineTest(runNPM2) {
 		
     win32:dir ~= s,/,\\,g
 
-    system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) git://github.com/gruntjs/grunt-contrib-uglify.git#harmony $$escape_expand(\\n\\t))
+    system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) $$shell_quote(git://github.com/gruntjs/grunt-contrib-uglify.git$${LITERAL_HASH}harmony) $$escape_expand(\\n\\t))
 }
 
 defineTest(gruntInterface) {    
@@ -106,7 +105,3 @@ defineTest(gruntDesktop) {
 
     system($$CALL_COMMAND grunt --base $$shell_quote($$dir) --level=ADVANCED --desktop=true $$escape_expand(\\n\\t))
 }
-
-#copyFile($$PWD/path_to_file_1, $$PWD/path_to_file_2)
-#copyDir($$PWD/path_to_folder_1, $$PWD/path_to_folder_2)
-#copyFile($$PWD/path_to_folder/*, $$PWD/path_to_folder/.)

@@ -74,6 +74,28 @@ desktop {
 	copyDirectory($$JS_ROOT/desktop/web-apps, $$CUR_ROOT/editors/web-apps)
 	copyFile($$JS_ROOT/desktop/index.html, $$CUR_ROOT/index.html)
 
+	copyFile(($$ROOT_GIT_DIR/desktop-apps/common/loginpage/addon/externalcloud.json, $$CUR_ROOT/editors/externalcloud.json)
+
+	createDirectory($$CUR_ROOT/editors/sdkjs-plugins)
+	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/LICENSE.txt, $$CUR_ROOT/editors/sdkjs-plugins/LICENSE.txt)
+	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/README.md, $$CUR_ROOT/editors/sdkjs-plugins/README.md)
+	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/plugins.css, $$CUR_ROOT/editors/sdkjs-plugins/plugins.css)
+	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/pluginBase.js, $$CUR_ROOT/editors/sdkjs-plugins/pluginBase.js)
+
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/symboltable, $$CUR_ROOT/editors/sdkjs-plugins/{03C18A8D-8E01-444A-86EB-EDDFA7773157})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/youtube, $$CUR_ROOT/editors/sdkjs-plugins/{38E022EA-AD92-45FC-B22B-49DF39746DB4})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/ocr, $$CUR_ROOT/editors/sdkjs-plugins/{440EBF13-9B19-4BD8-8621-05200E58140B})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/translate, $$CUR_ROOT/editors/sdkjs-plugins/{7327FC95-16DA-41D9-9AF2-0E7F449F687D})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/synonim, $$CUR_ROOT/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9840})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/code, $$CUR_ROOT/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/photoeditor, $$CUR_ROOT/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/macros, $$CUR_ROOT/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B})
+	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/clipart, $$CUR_ROOT/editors/sdkjs-plugins/{F5BACB61-64C5-4711-AC8A-D01EC3B2B6F1})
+
+	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}, $$CUR_ROOT/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8})
+	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}, $$CUR_ROOT/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4})
+	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/blockchain/{B17BDC61-59FC-41A7-A471-CD2C415A665E}, $$CUR_ROOT/editors/sdkjs-plugins/{B17BDC61-59FC-41A7-A471-CD2C415A665E})
+
 }
 
 builder {
@@ -100,5 +122,16 @@ builder {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
 	copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
 	
-	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/docbuilder$$EXE_EXT, $$CUR_ROOT/converter/docbuilder$$EXE_EXT)
+	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/docbuilder$$EXE_EXT, $$CUR_ROOT/docbuilder$$EXE_EXT)
+
+	copyFile($$ROOT_GIT_DIR/DocumentBuilder/DoctRenderer.config, $$CUR_ROOT/DoctRenderer.config)
+	
+	copyDirectory($$JS_ROOT/builder/sdkjs, $$CUR_ROOT/sdkjs)
+	createDirectory($$CUR_ROOT/sdkjs/vendor)
+	copyDirectory($$JS_ROOT/builder/web-apps/vendor/jquery, $$CUR_ROOT/sdkjs/vendor/jquery)
+	copyDirectory($$JS_ROOT/builder/web-apps/vendor/xregexp, $$CUR_ROOT/sdkjs/vendor/xregexp)
+
+	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/empty, $$CUR_ROOT/empty)
+	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/samples, $$CUR_ROOT/samples)
+
 }

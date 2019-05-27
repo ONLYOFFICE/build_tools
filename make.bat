@@ -14,6 +14,7 @@ if "%OO_UPDATE%"=="1" (
 	call scripts\git-fetch.bat sdkjs
 	call scripts\git-fetch.bat web-apps-pro
 	call scripts\git-fetch.bat dictionaries
+	call scripts\git-fetch.bat DocumentBuilder
 	
 	if not "%OO_MODULE%"=="%OO_MODULE:desktop=%" (
 		call scripts\git-fetch.bat desktop-apps

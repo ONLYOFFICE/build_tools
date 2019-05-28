@@ -29,31 +29,37 @@ if "%OO_UPDATE%"=="1" (
 )
 
 set "BUILD_PLATFORM=%OO_PLATFORM%"
-call ../core/Common/3dParty/make.bat
+rem call ../core/Common/3dParty/make.bat
 
 cd %~dp0
+
+set "CONFIG_ADDON=updmodule LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml"
 
 set "IS_NEED_NATIVE=true"
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 
+	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%"
 	if "%OO_CLEAN%"=="1" (
-		call nmake clean -f "makefiles/build.makefile_win_64"
+		call nmake clean -f "makefiles\build.makefile_win_64"
 	)
-	call nmake -f "makefiles/build.makefile_win_64"
+	call nmake -f "makefiles\build.makefile_win_64"
+	del ".qmake.stash"
 
+	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%"
 	if "%OO_CLEAN%"=="1" (
-		call nmake clean -f "makefiles/build.makefile_win_32"
+		call nmake clean -f "makefiles\build.makefile_win_32"
 	)
-	call nmake -f "makefiles/build.makefile_win_32"
+	call nmake -f "makefiles\build.makefile_win_32"
+	del ".qmake.stash"
 
 	set "IS_NEED_NATIVE=false"
 
@@ -64,20 +70,20 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%"
 	if "%OO_CLEAN%"=="1" (
-		call nmake clean -f "makefiles/build.makefile_win_64_xp"
+		call nmake clean -f "makefiles\build.makefile_win_64_xp"
 	)
-	call nmake -f "makefiles/build.makefile_win_64_xp"
+	call nmake -f "makefiles\build.makefile_win_64_xp"
 
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%"
 	if "%OO_CLEAN%"=="1" (
-		call nmake clean -f "makefiles/build.makefile_win_32_xp"
+		call nmake clean -f "makefiles\build.makefile_win_32_xp"
 	)
-	call nmake -f "makefiles/build.makefile_win_32_xp"
+	call nmake -f "makefiles\build.makefile_win_32_xp"
 	
 )
 
@@ -89,20 +95,20 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 			call "%OO_VS_DIR%\vcvarsall.bat" x64
 			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 			set "OS_DEPLOY=win_64"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%"
 			if "%OO_CLEAN%"=="1" (
-				call nmake clean -f "makefiles/build.makefile_win_64"
+				call nmake clean -f "makefiles\build.makefile_win_64"
 			)
-			call nmake -f "makefiles/build.makefile_win_64"
+			call nmake -f "makefiles\build.makefile_win_64"
 		) else (
 			call "%OO_VS_DIR%\vcvarsall.bat" x86
 			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 			set "OS_DEPLOY=win_32"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%"
 			if "%OO_CLEAN%"=="1" (
-				call nmake clean -f "makefiles/build.makefile_win_32"
+				call nmake clean -f "makefiles\build.makefile_win_32"
 			)
-			call nmake -f "makefiles/build.makefile_win_32"
+			call nmake -f "makefiles\build.makefile_win_32"
 		)
 
 	)

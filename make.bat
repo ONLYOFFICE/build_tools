@@ -26,6 +26,11 @@ if "%OO_UPDATE%"=="1" (
 		
 		set "OO_CONFIG=%OO_CONFIG% desktop"
 	)
+
+	if not "%OO_MODULE%"=="%OO_MODULE:commercial=%" (
+		call scripts\git-fetch.bat core-ext
+		call scripts\git-fetch.bat desktop-apps-ext			
+	)
 )
 
 set "BUILD_PLATFORM=%OO_PLATFORM%"
@@ -115,7 +120,9 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 
 )
 
-call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
+if "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (
+	call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
+)
 
 if %OO_DEPLOY%=="1" (
 	call scripts\deploy.bat

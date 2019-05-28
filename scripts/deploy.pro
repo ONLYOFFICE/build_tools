@@ -13,20 +13,20 @@ ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
 
-build_xp {
-	DEPLOY_DIR=$$PWD/../out/xp
-	createDirectory($$DEPLOY_DIR)
-}
-
-PUBLISHER_NAME = $$(DEPLOY_BRANDING)
+PUBLISHER_NAME = $$(OO_BRANDING)
 !isEmpty(PUBLISHER_NAME) {
     DEPLOY_DIR=$$DEPLOY_DIR/PUBLISHER_NAME
 	createDirectory($$DEPLOY_DIR)
 }
 
-createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
-
 JS_ROOT=$$DEPLOY_DIR/js
+
+build_xp {
+	DEPLOY_DIR=$$DEPLOY_DIR/xp
+	createDirectory($$DEPLOY_DIR)
+}
+
+createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
 
 desktop {
 	

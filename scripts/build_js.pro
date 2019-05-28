@@ -12,6 +12,13 @@ QT_CURRENT=$$(QT_DEPLOY)
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
+
+PUBLISHER_NAME = $$(OO_BRANDING)
+!isEmpty(PUBLISHER_NAME) {
+    DEPLOY_DIR=$$DEPLOY_DIR/PUBLISHER_NAME
+	createDirectory($$DEPLOY_DIR)
+}
+
 createDirectory($$DEPLOY_DIR/js)
 
 CONFIG += min_build

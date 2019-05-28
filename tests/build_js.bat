@@ -1,5 +1,4 @@
-set OO_QT_DIR=C:\Qt510\5.10.1\msvc2015_64\bin
-set OO_QT_XP_DIR=C:\QtXP\5.10.1\msvc2015_64\bin
+set OO_QT_DIR=C:\Qt510\5.10.1
 
 call %~dp0..\scripts\json_value.bat module    OO_MODULE     "desktop builder"
 

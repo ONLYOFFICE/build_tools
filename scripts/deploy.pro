@@ -13,6 +13,11 @@ ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
 
+build_xp {
+	DEPLOY_DIR=$$PWD/../out/xp
+	createDirectory($$DEPLOY_DIR)
+}
+
 PUBLISHER_NAME = $$(DEPLOY_BRANDING)
 !isEmpty(PUBLISHER_NAME) {
     DEPLOY_DIR=$$DEPLOY_DIR/PUBLISHER_NAME
@@ -47,7 +52,14 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlRenderer$$LIB_EXT, $$CUR_ROOT/converter/HtmlRenderer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58$$LIB_EXT, $$CUR_ROOT/converter/icudt58$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/converter/icuuc58$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudtl.dat, $$CUR_ROOT/converter/icudtl.dat)
+
+	build_xp {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudtl.dat, $$CUR_ROOT/converter/icudtl.dat)
+	} else {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudtl.dll, $$CUR_ROOT/converter/icudtl.dll)
+	}
+
+
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/converter/DoctRenderer.config, $$CUR_ROOT/converter/DoctRenderer.config)
 	copyDirectory($$ROOT_GIT_DIR/desktop-apps/common/converter/empty, $$CUR_ROOT/converter/empty)
 	

@@ -9,8 +9,11 @@ include($$PWD/scripts/common.pri)
 
 MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
 message(makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX)
+
+PRO_SUFFIX=$$CORE_BUILDS_PLATFORM_PREFIX
 build_xp {
-	MAKEFILE=$$MAKEFILE_xp
+	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
+	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_xp")
 }
 
 CONFIG += ordered
@@ -64,98 +67,98 @@ CONFIG += ordered
 
 # PROJECTS
 cryptopp.file              = $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro
-cryptopp.makefile          = $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/Makefile.cryptopp$$CORE_BUILDS_PLATFORM_PREFIX
+cryptopp.makefile          = $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/Makefile.cryptopp$$PRO_SUFFIX
 
 kernel.file                = $$CORE_ROOT_DIR/Common/kernel.pro
-kernel.makefile            = $$CORE_ROOT_DIR/Common/Makefile.kernel$$CORE_BUILDS_PLATFORM_PREFIX
+kernel.makefile            = $$CORE_ROOT_DIR/Common/Makefile.kernel$$PRO_SUFFIX
 
 unicodeconverter.file      = $$CORE_ROOT_DIR/UnicodeConverter/UnicodeConverter.pro
-unicodeconverter.makefile  = $$CORE_ROOT_DIR/UnicodeConverter/Makefile.UnicodeConverter$$CORE_BUILDS_PLATFORM_PREFIX
+unicodeconverter.makefile  = $$CORE_ROOT_DIR/UnicodeConverter/Makefile.UnicodeConverter$$PRO_SUFFIX
 
 graphics.file              = $$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro
-graphics.makefile          = $$CORE_ROOT_DIR/DesktopEditor/graphics/pro/Makefile.graphics$$CORE_BUILDS_PLATFORM_PREFIX
+graphics.makefile          = $$CORE_ROOT_DIR/DesktopEditor/graphics/pro/Makefile.graphics$$PRO_SUFFIX
 
 pdfwriter.file             = $$CORE_ROOT_DIR/PdfWriter/PdfWriter.pro
-pdfwriter.makefile         = $$CORE_ROOT_DIR/PdfWriter/Makefile.PdfWriter$$CORE_BUILDS_PLATFORM_PREFIX
+pdfwriter.makefile         = $$CORE_ROOT_DIR/PdfWriter/Makefile.PdfWriter$$PRO_SUFFIX
 
 djvufile.file              = $$CORE_ROOT_DIR/DjVuFile/DjVuFile.pro
-djvufile.makefile          = $$CORE_ROOT_DIR/DjVuFile/Makefile.DjVuFile$$CORE_BUILDS_PLATFORM_PREFIX
+djvufile.makefile          = $$CORE_ROOT_DIR/DjVuFile/Makefile.DjVuFile$$PRO_SUFFIX
 
 xpsfile.file               = $$CORE_ROOT_DIR/XpsFile/XpsFile.pro
-xpsfile.makefile           = $$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$CORE_BUILDS_PLATFORM_PREFIX
+xpsfile.makefile           = $$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$PRO_SUFFIX
 
 htmlrenderer.file          = $$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro
-htmlrenderer.makefile      = $$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$CORE_BUILDS_PLATFORM_PREFIX
+htmlrenderer.makefile      = $$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX
 
 pdfreader.file             = $$CORE_ROOT_DIR/PdfReader/PdfReader.pro
-pdfreader.makefile         = $$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$CORE_BUILDS_PLATFORM_PREFIX
+pdfreader.makefile         = $$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX
 
 htmlfile.file              = $$CORE_ROOT_DIR/HtmlFile/HtmlFile.pro
-htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$CORE_BUILDS_PLATFORM_PREFIX
+htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX
 
 doctrenderer.file          = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro
-doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$CORE_BUILDS_PLATFORM_PREFIX
+doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
 
 htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
-htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$CORE_BUILDS_PLATFORM_PREFIX
+htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
 
 allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
-allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$CORE_BUILDS_PLATFORM_PREFIX
+allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
 
 docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
-docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$CORE_BUILDS_PLATFORM_PREFIX
+docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
 
 docxformat.file            = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro
-docxformat.makefile        = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+docxformat.makefile        = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX
 
 pptxformat.file            = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/PPTXFormatLib.pro
-pptxformat.makefile        = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+pptxformat.makefile        = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX
 
 docxfile.file              = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/ASCOfficeDocxFile2Lib.pro
-docxfile.makefile          = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$CORE_BUILDS_PLATFORM_PREFIX
+docxfile.makefile          = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX
 
 txtxmlformat.file          = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/TxtXmlFormatLib.pro
-txtxmlformat.makefile      = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+txtxmlformat.makefile      = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX
 
 rtfformat.file             = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/RtfFormatLib.pro
-rtfformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+rtfformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX
 
 pptformat.file             = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/PPTFormatLib.pro
-pptformat.makefile         = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+pptformat.makefile         = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX
 
 docformat.file             = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/DocFormatLib.pro
-docformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+docformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX
 
 odffilereader.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/OdfFileReaderLib.pro
-odffilereader.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$CORE_BUILDS_PLATFORM_PREFIX
+odffilereader.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX
 
 odffilewriter.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/OdfFileWriterLib.pro
-odffilewriter.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$CORE_BUILDS_PLATFORM_PREFIX
+odffilewriter.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX
 
 xlsformat.file             = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro
-xlsformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$CORE_BUILDS_PLATFORM_PREFIX
+xlsformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX
 
 x2t.file                   = $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro
-x2t.makefile               = $$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$CORE_BUILDS_PLATFORM_PREFIX
+x2t.makefile               = $$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX
 
 desktop {
 	hunspell.file            = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
-	hunspell.makefile        = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$CORE_BUILDS_PLATFORM_PREFIX
+	hunspell.makefile        = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX
 
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
-	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$CORE_BUILDS_PLATFORM_PREFIX
+	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
 
 	documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-	documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$CORE_BUILDS_PLATFORM_PREFIX
+	documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
 
 	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$CORE_BUILDS_PLATFORM_PREFIX
+	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 	
 	projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
-	projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$CORE_BUILDS_PLATFORM_PREFIX
+	projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
 
 	desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
-	desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$CORE_BUILDS_PLATFORM_PREFIX
+	desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 }
 
 # DEPENDS

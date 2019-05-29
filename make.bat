@@ -80,6 +80,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 		call nmake clean -f "makefiles\build.makefile_win_64_xp"
 	)
 	call nmake -f "makefiles\build.makefile_win_64_xp"
+	del ".qmake.stash"
 
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
@@ -89,6 +90,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 		call nmake clean -f "makefiles\build.makefile_win_32_xp"
 	)
 	call nmake -f "makefiles\build.makefile_win_32_xp"
+	del ".qmake.stash"
 	
 )
 
@@ -105,6 +107,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 				call nmake clean -f "makefiles\build.makefile_win_64"
 			)
 			call nmake -f "makefiles\build.makefile_win_64"
+			del ".qmake.stash"
 		) else (
 			call "%OO_VS_DIR%\vcvarsall.bat" x86
 			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
@@ -114,6 +117,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 				call nmake clean -f "makefiles\build.makefile_win_32"
 			)
 			call nmake -f "makefiles\build.makefile_win_32"
+			del ".qmake.stash"
 		)
 
 	)

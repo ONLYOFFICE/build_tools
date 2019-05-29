@@ -34,7 +34,7 @@ if "%OO_UPDATE%"=="1" (
 )
 
 set "BUILD_PLATFORM=%OO_PLATFORM%"
-rem call ../core/Common/3dParty/make.bat
+call ../core/Common/3dParty/make.bat
 
 cd %~dp0
 

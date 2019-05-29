@@ -124,15 +124,12 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 
 )
 
-if "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (
+if not "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (
 	call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
 )
 
-if %OO_DEPLOY%=="1" (
+if "%OO_DEPLOY%"=="1" (
 	call scripts\deploy.bat
-)
-if %OO_INSTALL%=="1" (
-	call scripts\install.bat
 )
 
 endlocal

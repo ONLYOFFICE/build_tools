@@ -1,10 +1,12 @@
 TEMPLATE=aux
 
-CONFIG -= debug_and_release debug_and_release_target
-MAKEFILE=$$PWD/../makefiles/deploy.makefile
-
 include($$PWD/../../core/Common/base.pri)
 include($$PWD/common.pri)
+
+MAKEFILE=$$PWD/../makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
+build_xp {
+	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
+}
 
 OS_CURRENT=$$(OS_DEPLOY)
 QT_CURRENT=$$(QT_DEPLOY)

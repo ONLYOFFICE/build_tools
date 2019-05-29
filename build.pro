@@ -8,7 +8,6 @@ include($$CORE_ROOT_DIR/Common/base.pri)
 include($$PWD/scripts/common.pri)
 
 MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
-message(makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX)
 
 PRO_SUFFIX=$$CORE_BUILDS_PLATFORM_PREFIX
 build_xp {

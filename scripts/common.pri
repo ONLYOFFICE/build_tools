@@ -58,7 +58,12 @@ defineTest(removeDirectory) {
     win32:dir ~= s,/,\\,g
 	
 	system($$QMAKE_CHK_DIR_EXISTS $$shell_quote($$dir) $$QMAKE_MKDIR $$shell_quote($$dir) $$escape_expand(\\n\\t))
-	system($$QMAKE_DEL_DIR $$shell_quote($$dir) $$escape_expand(\\n\\t))
+
+	core_windows {
+		system(rmdir /S /Q $$shell_quote($$dir) $$escape_expand(\\n\\t))
+	} else {
+		system(rm -rf $$shell_quote($$dir) $$escape_expand(\\n\\t))
+	}
 }
 
 defineTest(copyQtPlugin) {

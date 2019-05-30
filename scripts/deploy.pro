@@ -11,6 +11,14 @@ build_xp {
 OS_CURRENT=$$(OS_DEPLOY)
 QT_CURRENT=$$(QT_DEPLOY)
 
+APPS_POSTFIX=$$OS_CURRENT
+build_xp {
+	APPS_POSTFIX=$$join(APPS_POSTFIX, APPS_POSTFIX, "", "_xp")
+}
+core_windows {
+	APPS_POSTFIX=$$join(APPS_POSTFIX, APPS_POSTFIX, "", ".exe")
+}
+
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
@@ -104,8 +112,8 @@ desktop {
 	copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
 	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
 	
-	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons.exe, $$CUR_ROOT/DesktopEditors.exe)
-	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors.exe, $$CUR_ROOT/editors.exe)
+	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
+	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
 
 	createDirectory($$CUR_ROOT/editors)
 	copyDirectory($$JS_ROOT/desktop/sdkjs, $$CUR_ROOT/editors/sdkjs)

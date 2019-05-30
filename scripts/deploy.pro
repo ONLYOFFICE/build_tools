@@ -80,22 +80,29 @@ desktop {
 	copyFile($$QT_CURRENT/Qt5PrintSupport$$LIB_EXT, $$CUR_ROOT/Qt5PrintSupport$$LIB_EXT)
 	copyFile($$QT_CURRENT/Qt5Svg$$LIB_EXT, $$CUR_ROOT/Qt5Svg$$LIB_EXT)
 	copyFile($$QT_CURRENT/Qt5Widgets$$LIB_EXT, $$CUR_ROOT/Qt5Widgets$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Multimedia$$LIB_EXT, $$CUR_ROOT/Qt5Multimedia$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5MultimediaWidgets$$LIB_EXT, $$CUR_ROOT/Qt5MultimediaWidgets$$LIB_EXT)
+	copyFile($$QT_CURRENT/Qt5Network$$LIB_EXT, $$CUR_ROOT/Qt5Network$$LIB_EXT)
 	
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/hunspell$$LIB_EXT, $$CUR_ROOT/hunspell$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ooxmlsignature$$LIB_EXT, $$CUR_ROOT/ooxmlsignature$$LIB_EXT)
 
 	build_xp {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
 		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
 	} else {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
 		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
 	}
 	
+	copyQtPlugin($$QT_CURRENT/../plugins/bearer, $$CUR_ROOT/bearer)
+	copyQtPlugin($$QT_CURRENT/../plugins/playlistformats, $$CUR_ROOT/playlistformats)
 	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
 	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
 	copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
 	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
 	copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
+	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
 	
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons.exe, $$CUR_ROOT/DesktopEditors.exe)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors.exe, $$CUR_ROOT/editors.exe)

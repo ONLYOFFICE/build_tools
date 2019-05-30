@@ -66,7 +66,7 @@ defineTest(copyQtPlugin) {
 	copyFile($$1/*$$LIB_EXT, $$2/.)
 }
 
-defineTest(runNPM) {    
+defineTest(runNPM) {
     dir = $$1
 		
     win32:dir ~= s,/,\\,g
@@ -74,7 +74,7 @@ defineTest(runNPM) {
     system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) $$escape_expand(\\n\\t))
 }
 
-defineTest(runNPM2) {    
+defineTest(runNPM2) {
     dir = $$1
 		
     win32:dir ~= s,/,\\,g
@@ -82,7 +82,7 @@ defineTest(runNPM2) {
     system($$CALL_COMMAND npm --prefix $$shell_quote($$dir) install $$shell_quote($$dir) $$shell_quote(git://github.com/gruntjs/grunt-contrib-uglify.git$${LITERAL_HASH}harmony) $$escape_expand(\\n\\t))
 }
 
-defineTest(gruntInterface) {    
+defineTest(gruntInterface) {
     dir = $$1
 		
     win32:dir ~= s,/,\\,g
@@ -90,7 +90,7 @@ defineTest(gruntInterface) {
     system($$CALL_COMMAND grunt --force --base $$shell_quote($$dir) $$escape_expand(\\n\\t))
 }
 
-defineTest(gruntBuilder) {    
+defineTest(gruntBuilder) {
     dir = $$1
 		
     win32:dir ~= s,/,\\,g
@@ -98,7 +98,7 @@ defineTest(gruntBuilder) {
     system($$CALL_COMMAND grunt --base $$shell_quote($$dir) --level=ADVANCED $$escape_expand(\\n\\t))
 }
 
-defineTest(gruntDesktop) {    
+defineTest(gruntDesktop) {
     dir = $$1
 		
     win32:dir ~= s,/,\\,g

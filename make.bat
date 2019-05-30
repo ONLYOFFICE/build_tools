@@ -25,12 +25,7 @@ if "%OO_UPDATE%"=="1" (
 		call scripts\git-fetch.bat desktop-apps
 		
 		set "OO_CONFIG=%OO_CONFIG% desktop"
-	)
-
-	if not "%OO_MODULE%"=="%OO_MODULE:commercial=%" (
-		call scripts\git-fetch.bat core-ext
-		call scripts\git-fetch.bat desktop-apps-ext			
-	)
+	)	
 )
 
 set "BUILD_PLATFORM=%OO_PLATFORM%"

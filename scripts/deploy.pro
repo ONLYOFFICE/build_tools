@@ -82,8 +82,7 @@ desktop {
 	} else {
 		core_win_64 {
 			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_64/build, $$CUR_ROOT/.)
-		}
-		core_win_32 {
+		} else {
 			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_32/build, $$CUR_ROOT/.)
 		}
 	}
@@ -180,11 +179,11 @@ builder {
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/icuuc58$$LIB_EXT)
 
 	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/)
 	} else {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
 	}
 	
 	!build_xp {

@@ -1,12 +1,14 @@
-if not defined OO_VS_DIR (
-	if defined ProgramFiles(x86) (
-		SET "OO_VS_DIR=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
-	) else (
-		SET "OO_VS_DIR=%ProgramFiles%\Microsoft Visual Studio 14.0\VC"
-	)
-)
 
 setlocal enabledelayedexpansion
+
+SET "OO_VS_DIR_DEF=%ProgramFiles%\Microsoft Visual Studio 14.0\VC"
+if defined ProgramFiles(x86) (
+	SET "OO_VS_DIR_DEF=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
+)
+
+if not defined OO_VS_DIR (
+	SET "OO_VS_DIR=%OO_VS_DIR_DEF%"
+)
 
 call %~dp0scripts\json_value.bat module    OO_MODULE     "desktop builder"
 call %~dp0scripts\json_value.bat update    OO_UPDATE     1

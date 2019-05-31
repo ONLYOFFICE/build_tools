@@ -31,9 +31,33 @@ if "%OO_UPDATE%"=="1" (
 set "BUILD_PLATFORM=%OO_PLATFORM%"
 call ../core/Common/3dParty/make.bat
 
-cd %~dp0
+if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
+	set "CONFIG_ADDON=updmodule"
+	set "QMAKE_ADDON=LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml"
 
-set "CONFIG_ADDON=updmodule"
+	if not exist tools\WinSparkle-0.7.0.zip (
+		call tools\win\curl\curl.exe "https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip" --output tools\WinSparkle-0.7.0.zip
+	)
+
+	if not exist tools\WinSparkle-0.7.0 (
+		call tools\win\7z\7z.exe x tools\WinSparkle-0.7.0.zip -otools
+	)
+
+	if not exist "..\desktop-apps\win-linux\3dparty" (
+		mkdir "..\desktop-apps\win-linux\3dparty"
+	)
+	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle" (
+		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle"
+	)
+	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle\include" (
+		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle\include"
+	)
+
+	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_32"
+	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\x64\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_64"	
+)
+
+cd %~dp0
 
 set "IS_NEED_NATIVE=true"
 
@@ -43,7 +67,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_64"
 	)
@@ -54,7 +78,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_32"
 	)
@@ -70,7 +94,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_64_xp"
 	)
@@ -80,7 +104,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_32_xp"
 	)
@@ -97,7 +121,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 			call "%OO_VS_DIR%\vcvarsall.bat" x64
 			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 			set "OS_DEPLOY=win_64"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 			if "%OO_CLEAN%"=="1" (
 				call nmake clean -f "makefiles\build.makefile_win_64"
 			)
@@ -107,7 +131,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 			call "%OO_VS_DIR%\vcvarsall.bat" x86
 			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 			set "OS_DEPLOY=win_32"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml
+			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 			if "%OO_CLEAN%"=="1" (
 				call nmake clean -f "makefiles\build.makefile_win_32"
 			)

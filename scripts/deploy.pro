@@ -43,12 +43,6 @@ desktop {
 	CUR_ROOT=$$DEPLOY_DIR/$$OS_CURRENT/desktop
 	createDirectory($$CUR_ROOT)
 
-	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-	} else {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-	}
-
 	createDirectory($$CUR_ROOT/converter)
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/converter/x2t$$EXE_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/kernel$$LIB_EXT, $$CUR_ROOT/converter/kernel$$LIB_EXT)
@@ -64,9 +58,11 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/converter/icuuc58$$LIB_EXT)
 
 	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudtl.dat, $$CUR_ROOT/converter/icudtl.dat)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
 	} else {
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudtl.dll, $$CUR_ROOT/converter/icudtl.dll)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
 	}
 
 
@@ -81,7 +77,16 @@ desktop {
 	copyDirectory($$ROOT_GIT_DIR/desktop-apps/common/package/fonts, $$CUR_ROOT/fonts)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE, $$CUR_ROOT/3DPARTYLICENSE)
 	
-	copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/.)
+	!build_xp {
+		copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/.)
+	} else {
+		core_win_64 {
+			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_64/build, $$CUR_ROOT/.)
+		}
+		core_win_32 {
+			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_32/build, $$CUR_ROOT/.)
+		}
+	}
 		
 	copyFile($$QT_CURRENT/Qt5Core$$LIB_EXT, $$CUR_ROOT/Qt5Core$$LIB_EXT)
 	copyFile($$QT_CURRENT/Qt5Gui$$LIB_EXT, $$CUR_ROOT/Qt5Gui$$LIB_EXT)
@@ -108,9 +113,12 @@ desktop {
 	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
 	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
 	copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
-	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
-	copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
+	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)
 	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
+
+	!build_xp {
+		copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
+	}
 	
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
 	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
@@ -142,6 +150,15 @@ desktop {
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}, $$CUR_ROOT/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4})
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/blockchain/{B17BDC61-59FC-41A7-A471-CD2C415A665E}, $$CUR_ROOT/editors/sdkjs-plugins/{B17BDC61-59FC-41A7-A471-CD2C415A665E})
 
+	core_windows {
+		updmodule {
+			copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/3dparty/WinSparkle/$$OS_CURRENT/WinSparkle$$LIB_EXT, $$CUR_ROOT/WinSparkle$$LIB_EXT)
+		}
+
+		removeFile($$CUR_ROOT/cef_sandbox.lib)
+		removeFile($$CUR_ROOT/libcef.lib)
+	}
+
 }
 
 builder {
@@ -159,14 +176,27 @@ builder {
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/XpsFile$$LIB_EXT, $$CUR_ROOT/XpsFile$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFile$$LIB_EXT, $$CUR_ROOT/HtmlFile$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlRenderer$$LIB_EXT, $$CUR_ROOT/HtmlRenderer$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/doctrenderer$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58$$LIB_EXT, $$CUR_ROOT/icudt58$$LIB_EXT)
 	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/icuuc58$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudtl.dat, $$CUR_ROOT/icudtl.dat)
+
+	build_xp {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
+	} else {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+	}
 	
-	createDirectory($$CUR_ROOT/HtmlFileInternal)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
-	copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
+	!build_xp {
+		createDirectory($$CUR_ROOT/HtmlFileInternal)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
+		copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
+
+		core_windows {
+			removeFile($$CUR_ROOT/HtmlFileInternal/cef_sandbox.lib)
+			removeFile($$CUR_ROOT/HtmlFileInternal/libcef.lib)
+		}
+	}
 	
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/docbuilder$$EXE_EXT, $$CUR_ROOT/docbuilder$$EXE_EXT)
 

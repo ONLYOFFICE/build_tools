@@ -97,6 +97,9 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 
+	cd %~dp0
+	del "..\desktop-apps\win-linux\qrc_resources.cpp"
+
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
@@ -107,6 +110,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	call nmake -f "makefiles\build.makefile_win_64_xp"
 	del ".qmake.stash"
 
+	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"

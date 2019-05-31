@@ -1,5 +1,9 @@
 if not defined OO_VS_DIR (
-	SET "OO_VS_DIR=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
+	if defined ProgramFiles(x86) (
+		SET "OO_VS_DIR=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
+	) else (
+		SET "OO_VS_DIR=%ProgramFiles%\Microsoft Visual Studio 14.0\VC"
+	)
 )
 
 setlocal enabledelayedexpansion
@@ -50,7 +54,7 @@ if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
 		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle"
 	)
 	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle\include" (
-		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle\include"
+		xcopy /s /q /y /i "tools\WinSparkle-0.7.0\include" "..\desktop-apps\win-linux\3dparty\WinSparkle\include"
 	)
 
 	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_32"

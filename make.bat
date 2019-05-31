@@ -120,6 +120,9 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	)
 	call nmake -f "makefiles\build.makefile_win_32_xp"
 	del ".qmake.stash"
+
+	cd %~dp0
+	del "..\desktop-apps\win-linux\qrc_resources.cpp"
 	
 )
 

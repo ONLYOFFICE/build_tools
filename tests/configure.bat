@@ -7,4 +7,6 @@ call %~dp0..\configure.bat ^
  --clean 1^
  --config no_vlc^
  --deploy^
- --install
+ --install^
+ --qt-dir "C:\Qt5.10.1\5.10.1"^
+ --qt-dir-xp "C:\Qt5.6.3\5.6.3"

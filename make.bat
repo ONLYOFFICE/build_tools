@@ -1,22 +1,20 @@
 
 setlocal enabledelayedexpansion
 
-SET "OO_VS_DIR_DEF=%ProgramFiles%\Microsoft Visual Studio 14.0\VC"
+SET "OO_VS_DIR=%ProgramFiles%\Microsoft Visual Studio 14.0\VC"
 if defined ProgramFiles(x86) (
-	SET "OO_VS_DIR_DEF=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
+	SET "OO_VS_DIR=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
 )
 
-if not defined OO_VS_DIR (
-	SET "OO_VS_DIR=%OO_VS_DIR_DEF%"
-)
-
-call %~dp0scripts\json_value.bat module    OO_MODULE     "desktop builder"
-call %~dp0scripts\json_value.bat update    OO_UPDATE     1
-call %~dp0scripts\json_value.bat clean     OO_CLEAN      0
-call %~dp0scripts\json_value.bat platform  OO_PLATFORM   native
-call %~dp0scripts\json_value.bat config    OO_CONFIG     no_vlc
-call %~dp0scripts\json_value.bat deploy    OO_DEPLOY     1
-call %~dp0scripts\json_value.bat install   OO_INSTALL    1
+call %~dp0scripts\config_value.bat module    OO_MODULE     "desktop builder"
+call %~dp0scripts\config_value.bat update    OO_UPDATE     1
+call %~dp0scripts\config_value.bat clean     OO_CLEAN      0
+call %~dp0scripts\config_value.bat platform  OO_PLATFORM   native
+call %~dp0scripts\config_value.bat config    OO_CONFIG     no_vlc
+call %~dp0scripts\config_value.bat deploy    OO_DEPLOY     1
+call %~dp0scripts\config_value.bat install   OO_INSTALL    1
+call %~dp0scripts\config_value.bat qt-dir    OO_QT_DIR     "set qt path"
+call %~dp0scripts\config_value.bat qt-dir-xp OO_QT_XP_DIR  "set qt path (windows xp version)"
 
 if "%OO_UPDATE%"=="1" (
 	call scripts\git-fetch.bat core

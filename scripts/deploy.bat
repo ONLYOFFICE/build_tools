@@ -1,7 +1,9 @@
 setlocal enabledelayedexpansion
 
-call %~dp0json_value.bat module    OO_MODULE     "desktop builder"
-call %~dp0json_value.bat platform  OO_PLATFORM   "native"
+call %~dp0config_value.bat module    OO_MODULE     "desktop builder"
+call %~dp0config_value.bat platform  OO_PLATFORM   "native"
+call %~dp0config_value.bat qt-dir    OO_QT_DIR     "set qt path"
+call %~dp0config_value.bat qt-dir-xp OO_QT_XP_DIR  "set qt path (windows xp version)"
 
 cd %~dp0..
 

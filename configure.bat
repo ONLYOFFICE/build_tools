@@ -1,8 +1,8 @@
 @echo off
 
-if exist config.json del /F config.json
+setlocal enabledelayedexpansion
 
-echo {>> config.json
+if exist config del /F config
 
 :loop
 
@@ -13,35 +13,33 @@ if "%local1%"=="" (
 	GOTO :end
 )
 
+set local1=%~1TEST
+
 if not "%local1:~0,2%"=="--" (
 	SHIFT
 	GOTO :loop
 )
 
 if "%local2:~0,2%"=="--" (
-	echo ^"%local1%^" : ^"1^",>> config.json
+	echo %local1:~2,-4%=^"1^">> config
 	SHIFT
 	GOTO :loop
 )
 
 if "%local2%"=="" (
-	echo ^"%local1%^" : ^"1^">> config.json
+	echo %local1:~2,-4%=^"1^">> config
 	GOTO :end
 )
 
 SHIFT
 SHIFT
 
-if "%~2"=="" (
-	echo ^"%local1%^" : ^"%local2%^">> config.json
-) else (
-	echo ^"%local1%^" : ^"%local2%^",>> config.json
-)
+echo %local1:~2,-4%=^"%local2%^">> config
 
 GOTO :loop
 
 :end
 
-echo }>> config.json
+endlocal
 
 @echo on

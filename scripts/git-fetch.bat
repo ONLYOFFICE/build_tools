@@ -3,7 +3,7 @@ setlocal
 set REPO_NAME=%1
 set REPO_LOCAL_DIR=%~dp0..\..
 
-call %~dp0json_value.bat branch OO_BRANCH master
+call %~dp0config_value.bat branch OO_BRANCH master
 
 SET LOCAL_CD=%cd%
 cd %REPO_LOCAL_DIR%

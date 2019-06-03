@@ -1,1 +1,0 @@
-echo TODO: INSTALL SCRIPT

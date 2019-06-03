@@ -8,5 +8,6 @@ call %~dp0..\configure.bat ^
  --config no_vlc^
  --deploy^
  --install^
+ --git-protocol https^
  --qt-dir "C:\Qt5.10.1\5.10.1"^
  --qt-dir-xp "C:\Qt5.6.3\5.6.3"

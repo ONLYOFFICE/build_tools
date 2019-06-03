@@ -1,0 +1,17 @@
+#!/bin/bash
+
+SCRIPT=$(readlink -f "$0" || grealpath "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+
+"$SCRIPTPATH/../configure"\
+ --module "desktop builder tests updmodule"\
+ --platform native\
+ --branding default\
+ --update 1\
+ --branch develop\
+ --clean 1\
+ --deploy\
+ --install\
+ --git-protocol https\
+ --qt-dir "~/Qt5.10.1/5.10.1"\
+ --qt-dir-xp "~/Qt5.6.3/5.6.3"

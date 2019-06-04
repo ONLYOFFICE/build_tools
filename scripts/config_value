@@ -2,7 +2,6 @@
 
 SCRIPT=$(readlink -f "$0" || grealpath "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
-echo "OLEG: $SCRIPTPATH"
 
 key=$1
 var=$2
@@ -29,6 +28,6 @@ while read line; do
     fi
     iskey=false
   done
-done < "$SCRIPTPATH/../config"
+done < "config"
 
 export $var="${val:1:(-1)}"

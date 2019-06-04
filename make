@@ -89,6 +89,7 @@ fi
 
 if [[ "$OO_NO_BUILD_JS" == "1" ]]
 then
+   :
 else
    "$OO_QT_DIR/gcc_64/bin/make" -f -nocache ./scripts/build_js.pro "CONFIG+=$OO_MODULE"
 fi

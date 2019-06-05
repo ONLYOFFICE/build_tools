@@ -45,26 +45,36 @@ desktop {
 
 	createDirectory($$CUR_ROOT/converter)
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/converter/x2t$$EXE_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/kernel$$LIB_EXT, $$CUR_ROOT/converter/kernel$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/UnicodeConverter$$LIB_EXT, $$CUR_ROOT/converter/UnicodeConverter$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/graphics$$LIB_EXT, $$CUR_ROOT/converter/graphics$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/PdfWriter$$LIB_EXT, $$CUR_ROOT/converter/PdfWriter$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/PdfReader$$LIB_EXT, $$CUR_ROOT/converter/PdfReader$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/DjVuFile$$LIB_EXT, $$CUR_ROOT/converter/DjVuFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/XpsFile$$LIB_EXT, $$CUR_ROOT/converter/XpsFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFile$$LIB_EXT, $$CUR_ROOT/converter/HtmlFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlRenderer$$LIB_EXT, $$CUR_ROOT/converter/HtmlRenderer$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58$$LIB_EXT, $$CUR_ROOT/converter/icudt58$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/converter/icuuc58$$LIB_EXT)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, kernel)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, UnicodeConverter)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, graphics)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, PdfWriter)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, PdfReader)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, DjVuFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, XpsFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, HtmlFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, HtmlRenderer)
 
-	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
-	} else {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/converter/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+	core_windows {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58.dll, $$CUR_ROOT/converter/icudt58.dll)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58.dll, $$CUR_ROOT/converter/icuuc58.dll)
+	} 
+	core_linux {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicudata.so.58, $$CUR_ROOT/converter/libicudata.so.58)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicuuc.so.58, $$CUR_ROOT/converter/libicuuc.so.58)
+	}
+	core_mac {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicudata.58.dylib, $$CUR_ROOT/converter/libicudata.58.dylib)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicuuc.58.dylib, $$CUR_ROOT/converter/libicuuc.58.dylib)
 	}
 
+	build_xp {
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT/converter, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
+	} else {
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+	}
 
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/converter/DoctRenderer.config, $$CUR_ROOT/converter/DoctRenderer.config)
 	copyDirectory($$ROOT_GIT_DIR/desktop-apps/common/converter/empty, $$CUR_ROOT/converter/empty)
@@ -87,24 +97,24 @@ desktop {
 		}
 	}
 		
-	copyFile($$QT_CURRENT/Qt5Core$$LIB_EXT, $$CUR_ROOT/Qt5Core$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5Gui$$LIB_EXT, $$CUR_ROOT/Qt5Gui$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5PrintSupport$$LIB_EXT, $$CUR_ROOT/Qt5PrintSupport$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5Svg$$LIB_EXT, $$CUR_ROOT/Qt5Svg$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5Widgets$$LIB_EXT, $$CUR_ROOT/Qt5Widgets$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5Multimedia$$LIB_EXT, $$CUR_ROOT/Qt5Multimedia$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5MultimediaWidgets$$LIB_EXT, $$CUR_ROOT/Qt5MultimediaWidgets$$LIB_EXT)
-	copyFile($$QT_CURRENT/Qt5Network$$LIB_EXT, $$CUR_ROOT/Qt5Network$$LIB_EXT)
-	
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/hunspell$$LIB_EXT, $$CUR_ROOT/hunspell$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ooxmlsignature$$LIB_EXT, $$CUR_ROOT/ooxmlsignature$$LIB_EXT)
+	copyQtLib(Qt5Core, $$CUR_ROOT)
+	copyQtLib(Qt5Gui, $$CUR_ROOT)
+	copyQtLib(Qt5PrintSupport, $$CUR_ROOT)
+	copyQtLib(Qt5Svg, $$CUR_ROOT)
+	copyQtLib(Qt5Widgets, $$CUR_ROOT)
+	copyQtLib(Qt5Multimedia, $$CUR_ROOT)
+	copyQtLib(Qt5MultimediaWidgets, $$CUR_ROOT)
+	copyQtLib(Qt5Network, $$CUR_ROOT)
+
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
 
 	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/xp/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/xp/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)
 	} else {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/videoplayer$$LIB_EXT, $$CUR_ROOT/videoplayer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ascdocumentscore$$LIB_EXT, $$CUR_ROOT/ascdocumentscore$$LIB_EXT)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)
 	}
 	
 	copyQtPlugin($$QT_CURRENT/../plugins/bearer, $$CUR_ROOT/bearer)
@@ -115,12 +125,19 @@ desktop {
 	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)
 	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
 
-	!build_xp {
-		copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
+	core_windows {
+		!build_xp {
+			copyQtPlugin($$QT_CURRENT/../plugins/styles, $$CUR_ROOT/styles)
+		}
 	}
 	
-	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
-	copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
+	core_windows {	
+		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
+		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
+	} else {
+		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors)
+	}
+	
 
 	createDirectory($$CUR_ROOT/editors)
 	copyDirectory($$JS_ROOT/desktop/sdkjs, $$CUR_ROOT/editors/sdkjs)
@@ -166,24 +183,35 @@ builder {
 	createDirectory($$CUR_ROOT)
 	
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/x2t$$EXE_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/kernel$$LIB_EXT, $$CUR_ROOT/kernel$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/UnicodeConverter$$LIB_EXT, $$CUR_ROOT/UnicodeConverter$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/graphics$$LIB_EXT, $$CUR_ROOT/graphics$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/PdfWriter$$LIB_EXT, $$CUR_ROOT/PdfWriter$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/PdfReader$$LIB_EXT, $$CUR_ROOT/PdfReader$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/DjVuFile$$LIB_EXT, $$CUR_ROOT/DjVuFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/XpsFile$$LIB_EXT, $$CUR_ROOT/XpsFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFile$$LIB_EXT, $$CUR_ROOT/HtmlFile$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlRenderer$$LIB_EXT, $$CUR_ROOT/HtmlRenderer$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58$$LIB_EXT, $$CUR_ROOT/icudt58$$LIB_EXT)
-	copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58$$LIB_EXT, $$CUR_ROOT/icuuc58$$LIB_EXT)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, kernel)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, UnicodeConverter)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, graphics)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, PdfWriter)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, PdfReader)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, DjVuFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, XpsFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, HtmlFile)
+	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, HtmlRenderer)
+
+	core_windows {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58.dll, $$CUR_ROOT/icudt58.dll)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58.dll, $$CUR_ROOT/icuuc58.dll)
+	} 
+	core_linux {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicudata.so.58, $$CUR_ROOT/libicudata.so.58)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicuuc.so.58, $$CUR_ROOT/libicuuc.so.58)
+	}
+	core_mac {
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicudata.58.dylib, $$CUR_ROOT/libicudata.58.dylib)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/libicuuc.58.dylib, $$CUR_ROOT/libicuuc.58.dylib)
+	}
 
 	build_xp {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer$$LIB_EXT, $$CUR_ROOT/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
 	} else {
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer$$LIB_EXT, $$CUR_ROOT/doctrenderer$$LIB_EXT)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
 	}
 	
 	!build_xp {

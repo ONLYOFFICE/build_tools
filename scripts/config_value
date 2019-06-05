@@ -8,26 +8,26 @@ var=$2
 val=$3
 
 while read line; do
-  IFS='=' read -ra values <<< "$line"
-  iskey=true
-  isnextval=false
-  for item in "${values[@]}"; do
-    if [ "$iskey" = false ]
-      then
-      if [ "$isnextval" = true ]
-      then
-      val=$item
-      break
-      fi
-      iskey=true
-      continue
-    fi
-    if [ "$item" = "$key" ]
-      then
-      isnextval=true
-    fi
-    iskey=false
-  done
+	IFS='=' read -ra values <<< "$line"
+	iskey=true
+	isnextval=false
+	for item in "${values[@]}"; do
+	if [ "$iskey" = false ]
+	then
+		if [ "$isnextval" = true ]
+		then
+			val=$item
+			break
+		fi
+		iskey=true
+		continue
+	fi
+	if [ "$item" = "$key" ]
+	then
+		isnextval=true
+	fi
+	iskey=false
+	done
 done < "config"
 
 export $var="${val:1:(-1)}"

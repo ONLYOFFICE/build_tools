@@ -9,7 +9,6 @@ source ./scripts/config_value clean     OO_CLEAN      0
 source ./scripts/config_value platform  OO_PLATFORM   native
 source ./scripts/config_value config    OO_CONFIG     no_vlc
 source ./scripts/config_value deploy    OO_DEPLOY     1
-source ./scripts/config_value install   OO_INSTALL    1
 source ./scripts/config_value qt-dir    OO_QT_DIR     "set qt path"
 
 if [ "$OO_UPDATE" == "1" ]
@@ -63,8 +62,8 @@ fi
 
 if [[ "$IS_NEED_64" == true ]]
 then
-   QT_DEPLOY=$OO_QT_DIR/gcc_64/bin
-   OS_DEPLOY=linux_64
+   export QT_DEPLOY=$OO_QT_DIR/gcc_64/bin
+   export OS_DEPLOY=linux_64
    "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
@@ -76,8 +75,8 @@ fi
 
 if [[ "$IS_NEED_32" == false ]]
 then
-   QT_DEPLOY=$OO_QT_DIR/gcc/bin
-   OS_DEPLOY=linux_32
+   export QT_DEPLOY=$OO_QT_DIR/gcc/bin
+   export OS_DEPLOY=linux_32
    "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
@@ -87,14 +86,15 @@ then
    rm ".qmake.stash"
 fi
 
+cd "$SCRIPTPATH"
 if [[ "$OO_NO_BUILD_JS" == "1" ]]
 then
-   :
+   echo "no build js!!!"
 else
-   "$OO_QT_DIR/gcc_64/bin/make" -f -nocache ./scripts/build_js.pro "CONFIG+=$OO_MODULE"
+   "$OO_QT_DIR/gcc_64/bin/qmake" -nocache ./scripts/build_js.pro "CONFIG+=$OO_MODULE"
 fi
 
 if [[ "$OO_DEPLOY" == "1" ]]
 then
-   ./scripts/deploy.sh
+   ./scripts/deploy
 fi

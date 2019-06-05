@@ -1,0 +1,19 @@
+#!/bin/bash
+
+sudo apt-get install build-essential -y
+sudo apt-get install cmake -y
+sudo apt-get install glib-2.0-dev -y
+sudo apt-get install libgtk2.0-dev -y
+sudo apt-get install libtool -y
+sudo apt-get install subversion -y
+sudo apt-get install git -y
+sudo apt-get install autoconf2.13 -y
+sudo apt-get install p7zip-full -y
+sudo apt-get install libglu1-mesa-dev -y
+sudo apt-get install libpulse-dev -y
+sudo apt-get install libpulse-dev -y
+sudo apt-get install -yq curl apt-transport-https ca-certificates
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm install -g npm
+npm install -g grunt-cli

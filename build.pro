@@ -56,10 +56,14 @@ SUBDIRS += \
 	hunspell \
 	ooxmlsignature \
 	documentscore \
-	videoplayer \
-	\
-	projicons \
-	desktopapp	
+	videoplayer
+
+core_windows {
+SUBDIRS += projicons
+}
+
+SUBDIRS += desktopapp
+
 }
 
 CONFIG += ordered
@@ -147,14 +151,23 @@ desktop {
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
 
-	documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-	documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
+	core_windows {
+		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
+		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
+	}
+
+	core_linux {
+		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_linux.pro
+		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX
+	}
 
 	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
 	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 	
-	projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
-	projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+	core_windows {
+		projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
+		projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+	}
 
 	desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
 	desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX

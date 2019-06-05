@@ -6,9 +6,6 @@ MAKEFILE=$$PWD/../makefiles/build_js.makefile
 include($$PWD/../../core/Common/base.pri)
 include($$PWD/common.pri)
 
-OS_CURRENT=$$(OS_DEPLOY)
-QT_CURRENT=$$(QT_DEPLOY)
-
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)

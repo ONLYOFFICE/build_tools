@@ -46,12 +46,18 @@ defineTest(copyLib) {
 	dir2 = $$2
 	lib = $$3
 
-	win32:dir1 ~= s,/,\\,g
-	win32:dir2 ~= s,/,\\,g
+	LIBNAME=$$join(lib, lib, "$$LIB_PRE", "$$LIB_EXT")
 
-	LIBNAME=$$join(lib, lib, $$LIB_PRE, $$LIB_EXT)
+	core_windows {
+		dir1=$$dir1/$$LIBNAME
+		dir2=$$dir2/$$LIBNAME
+		dir1 ~= s,/,\\,g
+		dir2 ~= s,/,\\,g
 
-	system($$QMAKE_COPY_FILE $$shell_quote($$dir1/$$LIBNAME) $$shell_quote($$dir2/$$LIBNAME) $$escape_expand(\\n\\t))
+		system($$QMAKE_COPY_FILE $$shell_quote($$dir1) $$shell_quote($$dir2) $$escape_expand(\\n\\t))
+	} else {
+		system($$QMAKE_COPY_FILE $$shell_quote($$dir1/$$LIBNAME) $$shell_quote($$dir2/$$LIBNAME) $$escape_expand(\\n\\t))
+	}
 }
 
 defineTest(removeFile) {
@@ -96,7 +102,7 @@ defineTest(copyQtLib) {
 	createDirectory($$2);
 
 	core_windows {
-		copyLib($$QT_CURRENT, $$2, $$1$$LIB_EXT)
+		copyLib($$QT_CURRENT, $$2, $$1)
 	}
 	core_linux {
 		file=$$1

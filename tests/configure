@@ -9,7 +9,7 @@ SCRIPTPATH=$(dirname "$SCRIPT")
  --branding default\
  --update 1\
  --branch develop\
- --clean 1\
+ --clean 0\
  --deploy\
  --install\
  --git-protocol https\

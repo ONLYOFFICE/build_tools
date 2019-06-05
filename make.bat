@@ -155,6 +155,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 )
 
 if not "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (
+	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
 )
 

@@ -73,7 +73,12 @@ desktop {
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/converter/)
 	} else {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, doctrenderer)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+
+		core_windows {
+			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/converter/)
+		} else {
+			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/icudtl.dat, $$CUR_ROOT/converter/)
+		}
 	}
 
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/converter/DoctRenderer.config, $$CUR_ROOT/converter/DoctRenderer.config)
@@ -88,7 +93,7 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE, $$CUR_ROOT/3DPARTYLICENSE)
 	
 	!build_xp {
-		copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/.)
+		copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build/., $$CUR_ROOT/)
 	} else {
 		core_win_64 {
 			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_64/build, $$CUR_ROOT/.)
@@ -211,7 +216,12 @@ builder {
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/)
 	} else {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, doctrenderer)
-		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
+
+		core_windows {
+			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
+		} else {
+			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/icudtl.dat, $$CUR_ROOT/)
+		}			
 	}
 	
 	!build_xp {

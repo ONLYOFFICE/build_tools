@@ -17,3 +17,10 @@ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
 sudo npm install -g npm
 npm install -g grunt-cli
+
+# Ubuntu 14
+#sudo add-apt-repository ppa:openjdk-r/ppa
+#sudo apt-get update
+#sudo apt-get install openjdk-8-jdk
+#sudo update-alternatives --config java
+#sudo update-alternatives --config javac

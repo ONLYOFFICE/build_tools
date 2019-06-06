@@ -33,7 +33,6 @@ desktop {
 
 	CUR_ROOT=$$DEPLOY_DIR/js/desktop
 	createDirectory($$CUR_ROOT)
-	createDirectory($$CUR_ROOT/sdkjs)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)
 	gruntDesktop($$ROOT_GIT_DIR/sdkjs/build)
@@ -62,7 +61,6 @@ builder {
 	
 	CUR_ROOT=$$DEPLOY_DIR/js/builder
 	createDirectory($$CUR_ROOT)
-	createDirectory($$CUR_ROOT/sdkjs)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)
 	gruntBuilder($$ROOT_GIT_DIR/sdkjs/build)

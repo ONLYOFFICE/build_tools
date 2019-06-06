@@ -16,7 +16,7 @@ sudo apt-get install -yq curl apt-transport-https ca-certificates
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
 sudo npm install -g npm
-npm install -g grunt-cli
+sudo npm install -g grunt-cli
 
 # Ubuntu 14
 #sudo add-apt-repository ppa:openjdk-r/ppa

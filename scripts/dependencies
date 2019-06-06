@@ -8,7 +8,7 @@ sudo apt-get install libtool -y
 sudo apt-get install subversion -y
 sudo apt-get install git -y
 sudo apt-get install autoconf2.13 -y
-sudo apt-get install p7zip-full -y
+sudo apt-get install p7zip-full -y
 sudo apt-get install libglu1-mesa-dev -y
 sudo apt-get install libpulse-dev -y
 sudo apt-get install libpulse-dev -y

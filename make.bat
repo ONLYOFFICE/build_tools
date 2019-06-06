@@ -35,6 +35,8 @@ if "%OO_UPDATE%"=="1" (
 set "BUILD_PLATFORM=%OO_PLATFORM%"
 call ../core/Common/3dParty/make.bat
 
+cd %~dp0
+
 if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
 	set "CONFIG_ADDON=updmodule"
 	set "QMAKE_ADDON=LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml"

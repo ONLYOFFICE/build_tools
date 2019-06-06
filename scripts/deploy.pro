@@ -124,8 +124,8 @@ desktop {
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
 
 	build_xp {
-		copyLib($$ROOT_GIT_DIR/core/build/lib/xp/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
-		copyLib($$ROOT_GIT_DIR/core/build/lib/xp/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, videoplayer)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, ascdocumentscore)
 	} else {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)

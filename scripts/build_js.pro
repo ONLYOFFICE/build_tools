@@ -11,18 +11,25 @@ DEPLOY_DIR=$$PWD/../out
 createDirectory($$DEPLOY_DIR)
 
 PUBLISHER_NAME = $$(OO_BRANDING)
-!isEmpty(PUBLISHER_NAME) {
-    DEPLOY_DIR=$$DEPLOY_DIR/$$PUBLISHER_NAME
-	createDirectory($$DEPLOY_DIR)
+isEmpty(PUBLISHER_NAME) {
+	core_windows {
+		PUBLISHER_NAME=ONLYOFFICE
+	} else {
+		PUBLISHER_NAME=onlyoffice
+	}
 }
 
+createDirectory($$DEPLOY_DIR)
 createDirectory($$DEPLOY_DIR/js)
+createDirectory($$DEPLOY_DIR/js/$$PUBLISHER_NAME)
+
+DEPLOY_DIR=$$DEPLOY_DIR/js/$$PUBLISHER_NAME
 
 CONFIG += min_build
 
 min_build {
 	
-	CUR_ROOT=$$DEPLOY_DIR/js/desktop
+	CUR_ROOT=$$DEPLOY_DIR/desktop
 	createDirectory($$CUR_ROOT)
 
 	runNPM($$ROOT_GIT_DIR/web-apps-pro/build)
@@ -31,7 +38,7 @@ min_build {
 
 desktop {
 
-	CUR_ROOT=$$DEPLOY_DIR/js/desktop
+	CUR_ROOT=$$DEPLOY_DIR/desktop
 	createDirectory($$CUR_ROOT)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)
@@ -59,7 +66,7 @@ desktop {
 
 builder {
 	
-	CUR_ROOT=$$DEPLOY_DIR/js/builder
+	CUR_ROOT=$$DEPLOY_DIR/builder
 	createDirectory($$CUR_ROOT)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)

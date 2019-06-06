@@ -21,26 +21,35 @@ core_windows {
 
 ROOT_GIT_DIR=$$PWD/../..
 DEPLOY_DIR=$$PWD/../out
-createDirectory($$DEPLOY_DIR)
 
 PUBLISHER_NAME = $$(OO_BRANDING)
-!isEmpty(PUBLISHER_NAME) {
-    DEPLOY_DIR=$$DEPLOY_DIR/$$PUBLISHER_NAME
-	createDirectory($$DEPLOY_DIR)
+isEmpty(PUBLISHER_NAME) {
+	core_windows {
+		PUBLISHER_NAME=ONLYOFFICE
+	} else {
+		PUBLISHER_NAME=onlyoffice
+	}
 }
 
-JS_ROOT=$$DEPLOY_DIR/js
+createDirectory($$DEPLOY_DIR)
+createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
+createDirectory($$DEPLOY_DIR/$$OS_CURRENT/$$PUBLISHER_NAME)
+
+JS_ROOT=$$DEPLOY_DIR/js/$$PUBLISHER_NAME
+DEPLOY_DIR=$$DEPLOY_DIR/$$OS_CURRENT/$$PUBLISHER_NAME
 
 build_xp {
 	DEPLOY_DIR=$$DEPLOY_DIR/xp
 	createDirectory($$DEPLOY_DIR)
 }
 
-createDirectory($$DEPLOY_DIR/$$OS_CURRENT)
-
 desktop {
 	
-	CUR_ROOT=$$DEPLOY_DIR/$$OS_CURRENT/desktop
+	core_windows {
+		CUR_ROOT=$$DEPLOY_DIR/DesktopEditors
+	} else {
+		CUR_ROOT=$$DEPLOY_DIR/desktopeditors
+	}
 	createDirectory($$CUR_ROOT)
 
 	createDirectory($$CUR_ROOT/converter)
@@ -184,7 +193,11 @@ desktop {
 
 builder {
 	
-	CUR_ROOT=$$DEPLOY_DIR/$$OS_CURRENT/builder
+	core_windows {
+		CUR_ROOT=$$DEPLOY_DIR/DocumentBuilder
+	} else {
+		CUR_ROOT=$$DEPLOY_DIR/documentbuilder
+	}
 	createDirectory($$CUR_ROOT)
 	
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/x2t$$EXE_EXT)

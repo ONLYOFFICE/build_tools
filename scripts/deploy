@@ -42,7 +42,7 @@ then
 	"$QT_DEPLOY/qmake" -nocache "$SCRIPTPATH/deploy.pro" "CONFIG+=$OO_CONFIG $OO_MODULE"
 fi
 
-if [[ "$IS_NEED_64" == true ]]
+if [[ "$IS_NEED_32" == true ]]
 then
 	export QT_DEPLOY=$OO_QT_DIR/gcc/bin
 	export OS_DEPLOY=linux_32

@@ -16,6 +16,18 @@ call %~dp0scripts\config_value.bat install   OO_INSTALL    1
 call %~dp0scripts\config_value.bat qt-dir    OO_QT_DIR     "set qt path"
 call %~dp0scripts\config_value.bat qt-dir-xp OO_QT_XP_DIR  "set qt path (windows xp version)"
 
+if "%OO_UPDATE%"=="true" (
+	set "OO_UPDATE=1"
+)
+
+if "%OO_CLEAN%"=="true" (
+	set "OO_CLEAN=1"
+)
+
+if "%OO_DEPLOY%"=="true" (
+	set "OO_DEPLOY=1"
+)
+
 if "%OO_UPDATE%"=="1" (
 	call scripts\git-fetch.bat core
 	call scripts\git-fetch.bat desktop-sdk

@@ -148,6 +148,7 @@ desktop {
 	core_windows {	
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
+		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/res/icons/desktopeditors.ico, $$CUR_ROOT/app.ico)
 	} else {
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors)
 	}

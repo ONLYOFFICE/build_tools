@@ -11,6 +11,21 @@ source ./scripts/config_value config    OO_CONFIG     no_vlc
 source ./scripts/config_value deploy    OO_DEPLOY     1
 source ./scripts/config_value qt-dir    OO_QT_DIR     "set qt path"
 
+if [ "$OO_UPDATE" == "true" ]
+then
+   OO_UPDATE=1
+fi
+
+if [ "$OO_CLEAN" == "true" ]
+then
+   OO_CLEAN=1
+fi
+
+if [ "$OO_DEPLOY" == "true" ]
+then
+   OO_DEPLOY=1
+fi
+
 if [ "$OO_UPDATE" == "1" ]
 then
    ./scripts/git-fetch core

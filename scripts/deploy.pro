@@ -133,12 +133,19 @@ desktop {
 	}
 	
 	copyQtPlugin($$QT_CURRENT/../plugins/bearer, $$CUR_ROOT/bearer)
-	copyQtPlugin($$QT_CURRENT/../plugins/playlistformats, $$CUR_ROOT/playlistformats)
 	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
 	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
 	copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
-	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)
+	copyQtPlugin($$QT_CURRENT/../plugins/platforminputcontexts, $$CUR_ROOT/platforminputcontexts)
+	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
 	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
+	copyQtPlugin($$QT_CURRENT/../plugins/playlistformats, $$CUR_ROOT/playlistformats)
+	
+	core_linux {
+		copyQtPlugin($$QT_CURRENT/../plugins/platformthemes, $$CUR_ROOT/platformthemes)
+		copyQtPlugin($$QT_CURRENT/../plugins/xcbglintegrations, $$CUR_ROOT/xcbglintegrations)
+		copyFile($$QT_CURRENT/../lib/libqgsttools_p.so.1.0.0, $$CUR_ROOT/libqgsttools_p.so)
+	}
 
 	core_windows {
 		!build_xp {

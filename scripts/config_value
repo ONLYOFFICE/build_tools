@@ -7,6 +7,8 @@ key=$1
 var=$2
 val=$3
 
+isfound=false
+
 while read line; do
 	IFS='=' read -ra values <<< "$line"
 	iskey=true
@@ -17,6 +19,7 @@ while read line; do
 		if [ "$isnextval" = true ]
 		then
 			val=$item
+			isfound=true
 			break
 		fi
 		iskey=true
@@ -30,4 +33,10 @@ while read line; do
 	done
 done < "config"
 
-export $var="${val:1:(-1)}"
+if [ "$isfound" = false ]
+then
+	export $var="$val"
+else
+	#export $var="${val:1:(-1)}"
+	export $var="${val:1:${#val}-2}"
+fi

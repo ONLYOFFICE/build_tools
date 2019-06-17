@@ -10,6 +10,7 @@ source ./scripts/config_value platform  OO_PLATFORM   native
 source ./scripts/config_value config    OO_CONFIG     no_vlc
 source ./scripts/config_value deploy    OO_DEPLOY     1
 source ./scripts/config_value qt-dir    OO_QT_DIR     "set qt path"
+source ./scripts/config_value compiler  OO_COMPILER   gcc
 
 if [ "$OO_UPDATE" == "true" ]
 then
@@ -25,6 +26,8 @@ if [ "$OO_DEPLOY" == "true" ]
 then
    OO_DEPLOY=1
 fi
+
+OO_COMPILER_X64="${OO_COMPILER}_64"
 
 if [ "$OO_UPDATE" == "1" ]
 then
@@ -66,6 +69,14 @@ then
 IS_NEED_32=true
 fi
 
+OO_OS=$(uname -s)
+OS_DEPLOY_64=""
+case "$OO_OS" in
+  Linux*)   OS_DEPLOY_64="linux_64" ;;
+  Darwin*)  OS_DEPLOY_64="mac_64" ;; 
+  *)        exit ;;
+esac
+
 if [[ "$OO_PLATFORM" == *"native"* ]]
 then
 architecture=$(uname -m)
@@ -77,20 +88,20 @@ fi
 
 if [[ "$IS_NEED_64" == true ]]
 then
-   export QT_DEPLOY=$OO_QT_DIR/gcc_64/bin
-   export OS_DEPLOY=linux_64
+   export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER_X64}/bin"
+   export OS_DEPLOY=$OS_DEPLOY_64
    "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
-      make clean -f "makefiles/build.makefile_linux_64"
+      make clean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
    fi
-   make -f "makefiles/build.makefile_linux_64"
+   make -f "makefiles/build.makefile_${OS_DEPLOY_64}"
    rm ".qmake.stash"
 fi
 
 if [[ "$IS_NEED_32" == false ]]
 then
-   export QT_DEPLOY=$OO_QT_DIR/gcc/bin
+   export QT_DEPLOY=${OO_QT_DIR}/${OO_COMPILER}/bin
    export OS_DEPLOY=linux_32
    "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
@@ -106,7 +117,7 @@ if [[ "$OO_NO_BUILD_JS" == "1" ]]
 then
    echo "no build js!!!"
 else
-   "$OO_QT_DIR/gcc_64/bin/qmake" -nocache ./scripts/build_js.pro "CONFIG+=$OO_MODULE"
+   "${OO_QT_DIR}/${OO_COMPILER_X64}/bin/qmake" -nocache ./scripts/build_js.pro "CONFIG+=$OO_MODULE"
 fi
 
 if [[ "$OO_DEPLOY" == "1" ]]

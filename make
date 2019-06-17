@@ -77,7 +77,7 @@ case "$OO_OS" in
   *)        exit ;;
 esac
 
-if [[ "$OS_DEPLOY_64" == "mac_64" ]]
+if [[ "${OS_DEPLOY_64}" == "mac_64" ]]
 then
   IS_NEED_32=false
 fi
@@ -94,8 +94,8 @@ fi
 if [[ "$IS_NEED_64" == true ]]
 then
    export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER_X64}/bin"
-   export OS_DEPLOY=$OS_DEPLOY_64
-   "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
+   export OS_DEPLOY="${OS_DEPLOY_64}"
+   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
       make clean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
@@ -104,11 +104,11 @@ then
    rm ".qmake.stash"
 fi
 
-if [[ "$IS_NEED_32" == false ]]
+if [[ "$IS_NEED_32" == true ]]
 then
    export QT_DEPLOY=${OO_QT_DIR}/${OO_COMPILER}/bin
    export OS_DEPLOY=linux_32
-   "$QT_DEPLOY/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
+   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
       make clean -f "makefiles/build.makefile_linux_32"

@@ -31,8 +31,6 @@ SUBDIRS = \
 	htmlfile \
 	doctrenderer \
 	\
-	htmlfileinternal \
-	\
 	allfontsgen \
 	\
 	docbuilder \
@@ -48,6 +46,10 @@ SUBDIRS = \
     odffilewriter \
     xlsformat \
     x2t
+
+!core_mac {
+	SUBDIRS += htmlfileinternal
+}
 	
 desktop {
 message(desktop)

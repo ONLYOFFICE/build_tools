@@ -77,6 +77,11 @@ case "$OO_OS" in
   *)        exit ;;
 esac
 
+if [[ "$OS_DEPLOY_64" == "mac_64" ]]
+then
+  IS_NEED_32=false
+fi
+
 if [[ "$OO_PLATFORM" == *"native"* ]]
 then
 architecture=$(uname -m)

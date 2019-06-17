@@ -119,6 +119,7 @@ desktop {
 	copyQtLib(Qt5Multimedia, $$CUR_ROOT)
 	copyQtLib(Qt5MultimediaWidgets, $$CUR_ROOT)
 	copyQtLib(Qt5Network, $$CUR_ROOT)
+	copyQtLib(Qt5OpenGL, $$CUR_ROOT)
 
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)

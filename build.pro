@@ -56,15 +56,20 @@ message(desktop)
 
 SUBDIRS += \
 	hunspell \
-	ooxmlsignature \
-	documentscore \
-	videoplayer
+	ooxmlsignature
 
 core_windows {
 SUBDIRS += projicons
 }
 
-SUBDIRS += desktopapp
+!core_mac {
+
+SUBDIRS += \
+	documentscore \
+	videoplayer \
+	desktopapp
+
+}
 
 }
 

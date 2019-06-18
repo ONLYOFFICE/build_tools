@@ -117,6 +117,12 @@ then
    rm ".qmake.stash"
 fi
 
+if [[ "${OS_DEPLOY_64}" == "mac_64" ]]
+then
+   xcodebuild -project "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore/ascdocumentscore.xcodeproj" -target "ascdocumentscore" -configuration Release
+   xcodebuild -project "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore Helper/ONLYOFFICE Helper.xcodeproj" -target "ONLYOFFICE Helper" -configuration Release
+fi
+
 cd "$SCRIPTPATH"
 if [[ "$OO_NO_BUILD_JS" == "1" ]]
 then

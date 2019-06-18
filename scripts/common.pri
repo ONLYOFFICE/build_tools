@@ -118,6 +118,17 @@ defineTest(copyQtLib) {
 
 defineTest(copyQtPlugin) {
 	copyDirectory($$1, $$2)
+
+	core_windows {
+		qt_libs = $$files($$2/*, false)
+		win32:qt_libs ~= s,/,\\,g
+		
+		for(qt_lib, qt_libs) {
+			qt_lib_test=$$qt_lib
+			qt_lib_test=$$replace(qt_lib_test, .dll, d.dll)
+			system(if exist $$shell_quote($$qt_lib_test) $$QMAKE_DEL_FILE $$shell_quote($$qt_lib_test) $$escape_expand(\\n\\t))
+		}
+	}
 }
 
 defineTest(runNPM) {

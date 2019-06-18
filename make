@@ -91,15 +91,22 @@ case "$architecture" in
 esac
 fi
 
+if [ "$OO_CLEAN" == "1" ]
+then
+  rm -rf out
+fi
+
 if [[ "$IS_NEED_64" == true ]]
 then
    export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER_X64}/bin"
    export OS_DEPLOY="${OS_DEPLOY_64}"
-   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
       make clean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
+      make distclean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
    fi
+   "${QT_DEPLOY}/qmake" -nocache build_clean.pro
+   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    make -f "makefiles/build.makefile_${OS_DEPLOY_64}"
    rm ".qmake.stash"
 fi
@@ -108,11 +115,13 @@ if [[ "$IS_NEED_32" == true ]]
 then
    export QT_DEPLOY=${OO_QT_DIR}/${OO_COMPILER}/bin
    export OS_DEPLOY=linux_32
-   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    if [ "$OO_CLEAN" == "1" ]
    then
       make clean -f "makefiles/build.makefile_linux_32"
+      make distclean -f "makefiles/build.makefile_linux_32"
    fi
+   "${QT_DEPLOY}/qmake" -nocache build_clean.pro
+   "${QT_DEPLOY}/qmake" -nocache build.pro "CONFIG+=$OO_CONFIG $OO_MODULE"
    make -f "makefiles/build.makefile_linux_32"
    rm ".qmake.stash"
 fi

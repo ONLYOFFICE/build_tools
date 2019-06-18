@@ -28,6 +28,10 @@ isEmpty(OO_OS) {
 		mac_64$$OO_BRANDING_SUFFIX
 	}
 } else {
+	build_xp {
+		OO_OS=$$join(OO_OS, OO_OS, "", "_xp")
+	}
+
 	PLATFORMS = $$OO_OS
 
 	OO_BRANDING_SUFFIX = $$(OO_BRANDING)

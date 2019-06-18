@@ -65,7 +65,11 @@ defineTest(removeFile) {
 		
 	win32:file ~= s,/,\\,g
 
-	system($$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+	core_windows {
+		system(if exist $$shell_quote($$file) $$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+	} else {
+		system($$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+	}	
 }
 
 defineTest(createDirectory) {

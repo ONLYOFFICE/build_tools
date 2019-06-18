@@ -44,6 +44,10 @@ if "%OO_UPDATE%"=="1" (
 	)	
 )
 
+if "%OO_CLEAN%"=="1" (
+	rmdir /S /Q out
+)
+
 set "BUILD_PLATFORM=%OO_PLATFORM%"
 call ../core/Common/3dParty/make.bat
 
@@ -77,34 +81,51 @@ if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
 
 cd %~dp0
 
-set "IS_NEED_NATIVE=true"
+set "IS_NEED_64=0"
+set "IS_NEED_32=0"
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
+	set "IS_NEED_64=1"
+	set "IS_NEED_32=1"
+)
 
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
+	if exist "%PROGRAMFILES(X86)%" (
+		set "IS_NEED_64=1"
+	) else (
+		set "IS_NEED_32=1"
+	)
+)
+
+if "%IS_NEED_64%"=="1" (
 	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_64"
+		call nmake distclean -f "makefiles\build.makefile_win_64"
 	)
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
+
 	call nmake -f "makefiles\build.makefile_win_64"
 	del ".qmake.stash"
+)
 
+if "%IS_NEED_32%"=="1" (
 	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_32"
+		call nmake distclean -f "makefiles\build.makefile_win_32"
 	)
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	call nmake -f "makefiles\build.makefile_win_32"
 	del ".qmake.stash"
-
-	set "IS_NEED_NATIVE=false"
-
 )
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
@@ -115,57 +136,31 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_64_xp"
+		call nmake distclean -f "makefiles\build.makefile_win_64_xp"
 	)
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	call nmake -f "makefiles\build.makefile_win_64_xp"
 	del ".qmake.stash"
 
 	cd %~dp0
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
-	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
+	set "OS_DEPLOY=win_32"	
 	if "%OO_CLEAN%"=="1" (
 		call nmake clean -f "makefiles\build.makefile_win_32_xp"
+		call nmake distclean -f "makefiles\build.makefile_win_32_xp"
 	)
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%"
 	call nmake -f "makefiles\build.makefile_win_32_xp"
 	del ".qmake.stash"
 
 	cd %~dp0
 	del "..\desktop-apps\win-linux\qrc_resources.cpp"
 	
-)
-
-if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
-
-	if "%IS_NEED_NATIVE%"=="true" (
-
-		if exist "%PROGRAMFILES(X86)%" (
-			call "%OO_VS_DIR%\vcvarsall.bat" x64
-			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
-			set "OS_DEPLOY=win_64"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
-			if "%OO_CLEAN%"=="1" (
-				call nmake clean -f "makefiles\build.makefile_win_64"
-			)
-			call nmake -f "makefiles\build.makefile_win_64"
-			del ".qmake.stash"
-		) else (
-			call "%OO_VS_DIR%\vcvarsall.bat" x86
-			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
-			set "OS_DEPLOY=win_32"
-			call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% %CONFIG_ADDON%" "%QMAKE_ADDON%"
-			if "%OO_CLEAN%"=="1" (
-				call nmake clean -f "makefiles\build.makefile_win_32"
-			)
-			call nmake -f "makefiles\build.makefile_win_32"
-			del ".qmake.stash"
-		)
-
-	)
-
 )
 
 if not "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (

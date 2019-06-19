@@ -3,7 +3,7 @@ TEMPLATE=aux
 include($$PWD/../core/Common/base.pri)
 include($$PWD/scripts/common.pri)
 
-MAKEFILE=$$PWD/../makefiles/build_clean.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
+MAKEFILE=$$PWD/makefiles/build_clean.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
 
 OO_OS = $$(OS_DEPLOY)
 isEmpty(OO_OS) {

@@ -12,21 +12,33 @@ if defined ProgramFiles(x86) (
 
 cd %~dp0..
 
-set "IS_NEED_NATIVE=true"
+set "IS_NEED_64=0"
+set "IS_NEED_32=0"
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
+	set "IS_NEED_64=1"
+	set "IS_NEED_32=1"
+)
 
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
+	if exist "%PROGRAMFILES(X86)%" (
+		set "IS_NEED_64=1"
+	) else (
+		set "IS_NEED_32=1"
+	)
+)
+
+if "%IS_NEED_64%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
-
+)
+if "%IS_NEED_32%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
-
-	set "IS_NEED_NATIVE=false"
 )
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
@@ -41,26 +53,6 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	set "OS_DEPLOY=win_32"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
 	
-)
-
-if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
-
-	if "%IS_NEED_NATIVE%"=="true" (
-
-		if exist "%PROGRAMFILES(X86)%" (
-			call "%OO_VS_DIR%\vcvarsall.bat" x64
-			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
-			set "OS_DEPLOY=win_64"
-		) else (
-			call "%OO_VS_DIR%\vcvarsall.bat" x86
-			set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
-			set "OS_DEPLOY=win_32"
-		)
-
-		call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
-
-	)
-
 )
 
 endlocal

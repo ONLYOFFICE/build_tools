@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPTPATH_FETCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 REPO_NAME=$1
 
@@ -15,7 +15,7 @@ then
 fi
 
 curdir=$PWD
-cd "$SCRIPTPATH/../../"
+cd "$SCRIPTPATH_FETCH/../../"
 
 if [ ! -d "./$REPO_NAME" ]
 then

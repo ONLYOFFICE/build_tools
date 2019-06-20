@@ -1,7 +1,18 @@
 #!/bin/bash
+SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-SCRIPT=$(readlink -f "$0" || grealpath "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+OO_OS=$(uname -s)
+OS_DEPLOY_64=""
+case "$OO_OS" in
+  Linux*)   OS_DEPLOY_64="linux_64" ;;
+  Darwin*)  OS_DEPLOY_64="mac_64" ;; 
+  *)        exit ;;
+esac
+
+if [[ "${OS_DEPLOY_64}" == "mac_64" ]]
+then
+  export PATH="${SCRIPTPATH}/tools/mac:${PATH}"
+fi
 
 source ./scripts/config_value module    OO_MODULE     "desktop builder"
 source ./scripts/config_value update    OO_UPDATE     1
@@ -68,14 +79,6 @@ if [[ "$OO_PLATFORM" == *"x86"* ]]
 then
 IS_NEED_32=true
 fi
-
-OO_OS=$(uname -s)
-OS_DEPLOY_64=""
-case "$OO_OS" in
-  Linux*)   OS_DEPLOY_64="linux_64" ;;
-  Darwin*)  OS_DEPLOY_64="mac_64" ;; 
-  *)        exit ;;
-esac
 
 if [[ "${OS_DEPLOY_64}" == "mac_64" ]]
 then

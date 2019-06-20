@@ -111,7 +111,7 @@ defineTest(copyQtLib) {
 	core_linux {
 		file=$$1
 		lib1=$$join(file, file, "lib", ".so.$$QT_VERSION")
-		lib2=$$join(file, file, "lib", ".so")
+		lib2=$$join(file, file, "lib", ".so.$$QT_MAJOR_VERSION")
 		system($$QMAKE_COPY_FILE $$shell_quote($$QT_CURRENT/../lib/$$lib1) $$shell_quote($$2/$$lib2) $$escape_expand(\\n\\t))
 	}
 }

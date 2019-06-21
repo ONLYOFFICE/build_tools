@@ -129,6 +129,12 @@ desktop {
 		copyQtLib(Qt5Network, $$CUR_ROOT)
 		copyQtLib(Qt5OpenGL, $$CUR_ROOT)
 
+		core_linux {
+			system(cp -f -av "$$QT_CURRENT/../lib/libicui18n*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
+			system(cp -f -av "$$QT_CURRENT/../lib/libicuuc*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
+			system(cp -f -av "$$QT_CURRENT/../lib/libicudata*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
+		}
+
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
 

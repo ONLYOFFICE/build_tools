@@ -19,6 +19,7 @@ if not exist "%REPO_NAME%" (
 )
 
 cd "%REPO_NAME%"
+call git fetch
 call git checkout -f %OO_BRANCH%
 call git pull
 

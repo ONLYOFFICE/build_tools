@@ -163,7 +163,7 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	
 )
 
-if not "%OO_NO_BUILD_JS%"=="%OO_NO_BUILD_JS:1=%" (
+if "%OO_NO_BUILD_JS%"=="" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	call "%OO_QT_DIR%\msvc2015_64\bin\qmake" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
 )

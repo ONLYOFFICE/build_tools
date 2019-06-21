@@ -22,6 +22,7 @@ source ./scripts/config_value config    OO_CONFIG     no_vlc
 source ./scripts/config_value deploy    OO_DEPLOY     1
 source ./scripts/config_value qt-dir    OO_QT_DIR     "set qt path"
 source ./scripts/config_value compiler  OO_COMPILER   gcc
+source ./scripts/config_value no-apps   OO_NO_APPS    0
 
 if [ "$OO_UPDATE" == "true" ]
 then
@@ -52,7 +53,10 @@ then
 
    if [[ "$OO_MODULE" == *"desktop"* ]]
    then
-      ./scripts/git-fetch desktop-apps
+      if [ "$OO_NO_APPS" == "0" ]
+      then
+         ./scripts/git-fetch desktop-apps
+      fi
       OO_CONFIG="$OO_CONFIG desktop"
    fi
 fi

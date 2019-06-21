@@ -175,7 +175,7 @@ if "%OO_DEPLOY%"=="1" (
 endlocal
 
 :end
-exit
+exit /b 0
 
 :error
 echo "Failed with error #%errorlevel%."

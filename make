@@ -109,7 +109,7 @@ then
    export OS_DEPLOY="${OS_DEPLOY_64}"
    if [ "$OO_CLEAN" == "1" ]
    then
-      make clean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
+      make clean all -f "makefiles/build.makefile_${OS_DEPLOY_64}"
       make distclean -f "makefiles/build.makefile_${OS_DEPLOY_64}"
    fi
    "${QT_DEPLOY}/qmake" -nocache build_clean.pro
@@ -124,7 +124,7 @@ then
    export OS_DEPLOY=linux_32
    if [ "$OO_CLEAN" == "1" ]
    then
-      make clean -f "makefiles/build.makefile_linux_32"
+      make clean all -f "makefiles/build.makefile_linux_32"
       make distclean -f "makefiles/build.makefile_linux_32"
    fi
    "${QT_DEPLOY}/qmake" -nocache build_clean.pro

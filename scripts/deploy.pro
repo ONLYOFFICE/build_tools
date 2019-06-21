@@ -93,7 +93,9 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/desktop-apps/common/converter/DoctRenderer.config, $$CUR_ROOT/converter/DoctRenderer.config)
 	copyDirectory($$ROOT_GIT_DIR/desktop-apps/common/converter/empty, $$CUR_ROOT/converter/empty)
 	
-	copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal$$EXE_EXT)
+	!core_mac {
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal$$EXE_EXT)
+	}
 	
 	copyDirectory($$ROOT_GIT_DIR/dictionaries, $$CUR_ROOT/dictionaries)
 	removeDirectory($$CUR_ROOT/dictionaries/.git)
@@ -110,36 +112,43 @@ desktop {
 			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/winxp_32/build, $$CUR_ROOT/.)
 		}
 	}
-		
-	copyQtLib(Qt5Core, $$CUR_ROOT)
-	copyQtLib(Qt5Gui, $$CUR_ROOT)
-	copyQtLib(Qt5PrintSupport, $$CUR_ROOT)
-	copyQtLib(Qt5Svg, $$CUR_ROOT)
-	copyQtLib(Qt5Widgets, $$CUR_ROOT)
-	copyQtLib(Qt5Multimedia, $$CUR_ROOT)
-	copyQtLib(Qt5MultimediaWidgets, $$CUR_ROOT)
-	copyQtLib(Qt5Network, $$CUR_ROOT)
-	copyQtLib(Qt5OpenGL, $$CUR_ROOT)
 
-	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
-	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
-
-	build_xp {
-		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, videoplayer)
-		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, ascdocumentscore)
-	} else {
-		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
+	core_mac {
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)
+		copyDirectory("$$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/ONLYOFFICE Helper.app", $$CUR_ROOT/)
+	} else {
+		copyQtLib(Qt5Core, $$CUR_ROOT)
+		copyQtLib(Qt5Gui, $$CUR_ROOT)
+		copyQtLib(Qt5PrintSupport, $$CUR_ROOT)
+		copyQtLib(Qt5Svg, $$CUR_ROOT)
+		copyQtLib(Qt5Widgets, $$CUR_ROOT)
+		copyQtLib(Qt5Multimedia, $$CUR_ROOT)
+		copyQtLib(Qt5MultimediaWidgets, $$CUR_ROOT)
+		copyQtLib(Qt5Network, $$CUR_ROOT)
+		copyQtLib(Qt5OpenGL, $$CUR_ROOT)
+
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ooxmlsignature)
+
+		build_xp {
+			copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, videoplayer)
+			copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, ascdocumentscore)
+		} else {
+			copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, videoplayer)
+			copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, ascdocumentscore)
+		}
+		
+		copyQtPlugin($$QT_CURRENT/../plugins/bearer, $$CUR_ROOT/bearer)
+		copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
+		copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
+		copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
+		copyQtPlugin($$QT_CURRENT/../plugins/platforminputcontexts, $$CUR_ROOT/platforminputcontexts)
+		copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
+		copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
+		copyQtPlugin($$QT_CURRENT/../plugins/playlistformats, $$CUR_ROOT/playlistformats)
 	}
-	
-	copyQtPlugin($$QT_CURRENT/../plugins/bearer, $$CUR_ROOT/bearer)
-	copyQtPlugin($$QT_CURRENT/../plugins/iconengines, $$CUR_ROOT/iconengines)
-	copyQtPlugin($$QT_CURRENT/../plugins/imageformats, $$CUR_ROOT/imageformats)
-	copyQtPlugin($$QT_CURRENT/../plugins/platforms, $$CUR_ROOT/platforms)
-	copyQtPlugin($$QT_CURRENT/../plugins/platforminputcontexts, $$CUR_ROOT/platforminputcontexts)
-	copyQtPlugin($$QT_CURRENT/../plugins/printsupport, $$CUR_ROOT/printsupport)	
-	copyQtPlugin($$QT_CURRENT/../plugins/mediaservice, $$CUR_ROOT/mediaservice)
-	copyQtPlugin($$QT_CURRENT/../plugins/playlistformats, $$CUR_ROOT/playlistformats)
 	
 	core_linux {
 		copyQtLib(Qt5DBus, $$CUR_ROOT)
@@ -160,10 +169,10 @@ desktop {
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/extras/projicons/projicons_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors.exe)
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/editors.exe)
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/res/icons/desktopeditors.ico, $$CUR_ROOT/app.ico)
-	} else {
+	}
+	core_linux {
 		copyFile($$ROOT_GIT_DIR/desktop-apps/win-linux/DesktopEditors_$$APPS_POSTFIX, $$CUR_ROOT/DesktopEditors)
 	}
-	
 
 	createDirectory($$CUR_ROOT/editors)
 	copyDirectory($$JS_ROOT/desktop/sdkjs, $$CUR_ROOT/editors/sdkjs)
@@ -190,9 +199,11 @@ desktop {
 
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}, $$CUR_ROOT/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8})
 
-	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}, $$CUR_ROOT/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1})
-	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}, $$CUR_ROOT/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3})
-	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}, $$CUR_ROOT/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2})
+	!core_mac {
+		copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}, $$CUR_ROOT/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1})
+		copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}, $$CUR_ROOT/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3})
+		copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}, $$CUR_ROOT/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2})
+	}
 
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}, $$CUR_ROOT/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4})
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/blockchain/{B17BDC61-59FC-41A7-A471-CD2C415A665E}, $$CUR_ROOT/editors/sdkjs-plugins/{B17BDC61-59FC-41A7-A471-CD2C415A665E})
@@ -255,9 +266,12 @@ builder {
 	}
 	
 	!build_xp {
-		createDirectory($$CUR_ROOT/HtmlFileInternal)
-		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
-		copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
+
+		!core_mac {
+			createDirectory($$CUR_ROOT/HtmlFileInternal)
+			copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
+			copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
+		}
 
 		core_windows {
 			removeFile($$CUR_ROOT/HtmlFileInternal/cef_sandbox.lib)

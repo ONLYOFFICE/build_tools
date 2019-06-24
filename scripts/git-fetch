@@ -23,6 +23,7 @@ git clone "$OO_REPO_URL"
 fi
 
 cd "$REPO_NAME"
+git fetch
 git checkout -f $OO_BRANCH
 git pull
 

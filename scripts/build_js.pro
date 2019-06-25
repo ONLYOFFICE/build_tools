@@ -39,6 +39,7 @@ min_build {
 desktop {
 
 	CUR_ROOT=$$DEPLOY_DIR/desktop
+	removeDirectory($$CUR_ROOT)
 	createDirectory($$CUR_ROOT)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)
@@ -67,6 +68,7 @@ desktop {
 builder {
 	
 	CUR_ROOT=$$DEPLOY_DIR/builder
+	removeDirectory($$CUR_ROOT)
 	createDirectory($$CUR_ROOT)
 
 	runNPM($$ROOT_GIT_DIR/sdkjs/build)

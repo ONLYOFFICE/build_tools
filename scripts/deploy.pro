@@ -50,6 +50,7 @@ desktop {
 	} else {
 		CUR_ROOT=$$DEPLOY_DIR/desktopeditors
 	}
+	removeDirectory($$CUR_ROOT)
 	createDirectory($$CUR_ROOT)
 
 	createDirectory($$CUR_ROOT/converter)
@@ -234,6 +235,7 @@ builder {
 	} else {
 		CUR_ROOT=$$DEPLOY_DIR/documentbuilder
 	}
+	removeDirectory($$CUR_ROOT)
 	createDirectory($$CUR_ROOT)
 	
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/x2t$$EXE_EXT, $$CUR_ROOT/x2t$$EXE_EXT)

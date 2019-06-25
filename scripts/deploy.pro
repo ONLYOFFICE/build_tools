@@ -160,9 +160,11 @@ desktop {
 		copyQtLib(Qt5DBus, $$CUR_ROOT)
 		copyQtLib(Qt5X11Extras, $$CUR_ROOT)
 		copyQtLib(Qt5XcbQpa, $$CUR_ROOT)
+		
 		copyQtPlugin($$QT_CURRENT/../plugins/platformthemes, $$CUR_ROOT/platformthemes)
 		copyQtPlugin($$QT_CURRENT/../plugins/xcbglintegrations, $$CUR_ROOT/xcbglintegrations)
-		copyFile($$QT_CURRENT/../lib/libqgsttools_p.so.1.0.0, $$CUR_ROOT/libqgsttools_p.so)
+		
+		system(cp -f -av "$$QT_CURRENT/../lib/libqgsttools_p.so*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
 	}
 
 	core_windows {

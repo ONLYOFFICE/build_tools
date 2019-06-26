@@ -74,12 +74,12 @@ IS_NEED_64=true
 IS_NEED_32=true
 fi
 
-if [[ "$OO_PLATFORM" == *"x64"* ]]
+if [[ "$OO_PLATFORM" == *"x64"* ]] || [[ "$OO_PLATFORM" == *"linux_64"* ]] || [[ "$OO_PLATFORM" == *"mac_64"* ]]
 then
 IS_NEED_64=true
 fi
 
-if [[ "$OO_PLATFORM" == *"x86"* ]]
+if [[ "$OO_PLATFORM" == *"x86"* ]] || [[ "$OO_PLATFORM" == *"linux_32"* ]]
 then
 IS_NEED_32=true
 fi

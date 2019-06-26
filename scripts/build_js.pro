@@ -28,10 +28,6 @@ DEPLOY_DIR=$$DEPLOY_DIR/js/$$PUBLISHER_NAME
 CONFIG += min_build
 
 min_build {
-	
-	CUR_ROOT=$$DEPLOY_DIR/desktop
-	createDirectory($$CUR_ROOT)
-
 	runNPM($$ROOT_GIT_DIR/web-apps-pro/build)
 	gruntInterface($$ROOT_GIT_DIR/web-apps-pro/build)
 }

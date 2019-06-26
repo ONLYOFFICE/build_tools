@@ -89,6 +89,19 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 	set "IS_NEED_32=1"
 )
 
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:x64=%" (
+	set "IS_NEED_64=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_64=%" (
+	set "IS_NEED_64=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:x86=%" (
+	set "IS_NEED_32=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_32=%" (
+	set "IS_NEED_32=1"
+)
+
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 	if exist "%PROGRAMFILES(X86)%" (
 		set "IS_NEED_64=1"

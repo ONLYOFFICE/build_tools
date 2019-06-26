@@ -100,6 +100,10 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
 	set "OO_PLATFORM=%OO_PLATFORM:xp=%"
 )
 
+if "%OO_PLATFORM%"=="" (
+	set "OO_PLATFORM=empty"
+)
+
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 	set "IS_NEED_64=1"
 	set "IS_NEED_32=1"
@@ -125,23 +129,31 @@ if not "%OO_PLATFORM%"=="%OO_PLATFORM:native=%" (
 	)
 )
 
-set "QMAKE_FOR_SCRIPTS=%OO_QT_DIR%\msvc2015_64\bin\qmake.exe"
 if not exist "%OO_QT_DIR%\msvc2015_64\bin\qmake.exe" (
 	set "IS_NEED_64=0"
-	set "QMAKE_FOR_SCRIPTS=%OO_QT_DIR%\msvc2015\bin\qmake.exe"
 )
 if not exist "%OO_QT_DIR%\msvc2015\bin\qmake.exe" (
 	set "IS_NEED_32=0"
-	set "QMAKE_FOR_SCRIPTS=%OO_QT_XP_DIR%\msvc2015_64\bin\qmake.exe"
 )
 if not exist "%OO_QT_XP_DIR%\msvc2015_64\bin\qmake.exe" (
 	set "IS_NEED_XP_64=0"
-	set "QMAKE_FOR_SCRIPTS=%OO_QT_XP_DIR%\msvc2015\bin\qmake.exe"
 )
 if not exist "%OO_QT_XP_DIR%\msvc2015\bin\qmake.exe" (
 	set "IS_NEED_XP_32=0"
 )
 
+set "QMAKE_FOR_SCRIPTS=%OO_QT_DIR%\msvc2015_64\bin\qmake.exe"
+if not exist "%QMAKE_FOR_SCRIPTS%" (
+	"QMAKE_FOR_SCRIPTS=%OO_QT_DIR%\msvc2015\bin\qmake.exe"
+)
+if not exist "%QMAKE_FOR_SCRIPTS%" (
+	"QMAKE_FOR_SCRIPTS=%OO_QT_XP_DIR%\msvc2015_64\bin\qmake.exe"
+)
+if not exist "%QMAKE_FOR_SCRIPTS%" (
+	"QMAKE_FOR_SCRIPTS=%OO_QT_XP_DIR%\msvc2015\bin\qmake.exe"
+)
+
+set "CURRENT_PATH=%PATH%"
 cd %~dp0
 if "%IS_NEED_64%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
@@ -160,6 +172,7 @@ if "%IS_NEED_64%"=="1" (
 	del ".qmake.stash"
 )
 
+set "PATH=%CURRENT_PATH%"
 cd %~dp0
 if "%IS_NEED_32%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
@@ -178,6 +191,7 @@ if "%IS_NEED_32%"=="1" (
 	del ".qmake.stash"
 )
 
+set "PATH=%CURRENT_PATH%"
 cd %~dp0
 if "%IS_NEED_XP_64%"=="1" (
 	del "..\desktop-apps\win-linux\qrc_resources.cpp"
@@ -200,6 +214,7 @@ if "%IS_NEED_XP_64%"=="1" (
 	del "..\desktop-apps\win-linux\qrc_resources.cpp"
 )
 
+set "PATH=%CURRENT_PATH%"
 cd %~dp0
 if "%IS_NEED_XP_32%"=="1" (
 	del "..\desktop-apps\win-linux\qrc_resources.cpp"
@@ -231,29 +246,33 @@ if not "%OO_DEPLOY%"=="1" (
 	GOTO :end
 )
 
+set "PATH=%CURRENT_PATH%"
 if "%IS_NEED_64%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0scripts\deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
 )
+set "PATH=%CURRENT_PATH%"
 if "%IS_NEED_32%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0scripts\deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
 )
+set "PATH=%CURRENT_PATH%"
 if "%IS_NEED_XP_64%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0scripts\deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
 )
+set "PATH=%CURRENT_PATH%"
 if "%IS_NEED_XP_32%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0scripts\deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
 )
 
 :end

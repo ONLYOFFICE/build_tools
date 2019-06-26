@@ -227,13 +227,37 @@ if "%OO_NO_BUILD_JS%"=="" (
 	call "%QMAKE_FOR_SCRIPTS%" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"
 )
 
-if "%OO_DEPLOY%"=="1" (
-	call scripts\deploy.bat
+if not "%OO_DEPLOY%"=="1" (
+	GOTO :end
 )
 
-endlocal
+if "%IS_NEED_64%"=="1" (
+	call "%OO_VS_DIR%\vcvarsall.bat" x64
+	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015_64\bin"
+	set "OS_DEPLOY=win_64"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+)
+if "%IS_NEED_32%"=="1" (
+	call "%OO_VS_DIR%\vcvarsall.bat" x86
+	set "QT_DEPLOY=%OO_QT_DIR%\msvc2015\bin"
+	set "OS_DEPLOY=win_32"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
+)
+if "%IS_NEED_XP_64%"=="1" (
+	call "%OO_VS_DIR%\vcvarsall.bat" x64
+	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
+	set "OS_DEPLOY=win_64"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+)
+if "%IS_NEED_XP_32%"=="1" (
+	call "%OO_VS_DIR%\vcvarsall.bat" x86
+	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
+	set "OS_DEPLOY=win_32"
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
+)
 
 :end
+endlocal
 exit /b 0
 
 :error

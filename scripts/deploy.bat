@@ -14,9 +14,37 @@ cd %~dp0..
 
 set "IS_NEED_64=0"
 set "IS_NEED_32=0"
+set "IS_NEED_XP_64=0"
+set "IS_NEED_XP_32=0"
+
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_64_xp=%" (
+	set "IS_NEED_XP_64=1"
+	set "OO_PLATFORM=%OO_PLATFORM:win_64_xp=%"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_32_xp=%" (
+	set "IS_NEED_XP_32=1"
+	set "OO_PLATFORM=%OO_PLATFORM:win_32_xp=%"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
+	set "IS_NEED_XP_64=1"
+	set "IS_NEED_XP_32=1"
+	set "OO_PLATFORM=%OO_PLATFORM:xp=%"
+)
 
 if not "%OO_PLATFORM%"=="%OO_PLATFORM:all=%" (
 	set "IS_NEED_64=1"
+	set "IS_NEED_32=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:x64=%" (
+	set "IS_NEED_64=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_64=%" (
+	set "IS_NEED_64=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:x86=%" (
+	set "IS_NEED_32=1"
+)
+if not "%OO_PLATFORM%"=="%OO_PLATFORM:win_32=%" (
 	set "IS_NEED_32=1"
 )
 
@@ -40,19 +68,17 @@ if "%IS_NEED_32%"=="1" (
 	set "OS_DEPLOY=win_32"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE%"
 )
-
-if not "%OO_PLATFORM%"=="%OO_PLATFORM:xp=%" (
-
+if "%IS_NEED_XP_64%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015_64\bin"
 	set "OS_DEPLOY=win_64"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
-
+)
+if "%IS_NEED_XP_32%"=="1" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x86
 	set "QT_DEPLOY=%OO_QT_XP_DIR%\msvc2015\bin"
 	set "OS_DEPLOY=win_32"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0deploy.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp"
-	
 )
 
 endlocal

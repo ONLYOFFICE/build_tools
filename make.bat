@@ -44,39 +44,6 @@ if "%OO_UPDATE%"=="1" (
 	)	
 )
 
-set "BUILD_PLATFORM=%OO_PLATFORM%"
-call ../core/Common/3dParty/make.bat
-
-cd %~dp0
-
-if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
-	set "CONFIG_ADDON=updmodule"
-	set "QMAKE_ADDON=LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml"
-
-	if not exist tools\WinSparkle-0.7.0.zip (
-		call tools\win\curl\curl.exe "https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip" --output tools\WinSparkle-0.7.0.zip
-	)
-
-	if not exist tools\WinSparkle-0.7.0 (
-		call tools\win\7z\7z.exe x tools\WinSparkle-0.7.0.zip -otools
-	)
-
-	if not exist "..\desktop-apps\win-linux\3dparty" (
-		mkdir "..\desktop-apps\win-linux\3dparty"
-	)
-	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle" (
-		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle"
-	)
-	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle\include" (
-		xcopy /s /q /y /i "tools\WinSparkle-0.7.0\include" "..\desktop-apps\win-linux\3dparty\WinSparkle\include"
-	)
-
-	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_32"
-	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\x64\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_64"	
-)
-
-cd %~dp0
-
 set "IS_NEED_64=0"
 set "IS_NEED_32=0"
 set "IS_NEED_XP_64=0"
@@ -148,6 +115,52 @@ if not exist "%QMAKE_FOR_SCRIPTS%" (
 if not exist "%QMAKE_FOR_SCRIPTS%" (
 	"QMAKE_FOR_SCRIPTS=%OO_QT_XP_DIR%\msvc2015\bin\qmake.exe"
 )
+
+set "BUILD_PLATFORM=%OO_PLATFORM%"
+if "%IS_NEED_64%"=="1" (
+	if "%IS_NEED_32%"=="1" (
+		set "BUILD_PLATFORM=%BUILD_PLATFORM% all"
+	)
+)
+if "%IS_NEED_XP_64%"=="1" (
+	set "BUILD_PLATFORM=%BUILD_PLATFORM% xp"
+) else (
+	if "%IS_NEED_XP_32%"=="1" (
+		set "BUILD_PLATFORM=%BUILD_PLATFORM% xp"
+	)
+)
+
+call ../core/Common/3dParty/make.bat
+
+cd %~dp0
+
+if not "%OO_MODULE%"=="%OO_MODULE:updmodule=%" (
+	set "CONFIG_ADDON=updmodule"
+	set "QMAKE_ADDON=LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml"
+
+	if not exist tools\WinSparkle-0.7.0.zip (
+		call tools\win\curl\curl.exe "https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip" --output tools\WinSparkle-0.7.0.zip
+	)
+
+	if not exist tools\WinSparkle-0.7.0 (
+		call tools\win\7z\7z.exe x tools\WinSparkle-0.7.0.zip -otools
+	)
+
+	if not exist "..\desktop-apps\win-linux\3dparty" (
+		mkdir "..\desktop-apps\win-linux\3dparty"
+	)
+	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle" (
+		mkdir "..\desktop-apps\win-linux\3dparty\WinSparkle"
+	)
+	if not exist "..\desktop-apps\win-linux\3dparty\WinSparkle\include" (
+		xcopy /s /q /y /i "tools\WinSparkle-0.7.0\include" "..\desktop-apps\win-linux\3dparty\WinSparkle\include"
+	)
+
+	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_32"
+	xcopy /s /q /y /i "tools\WinSparkle-0.7.0\x64\Release" "..\desktop-apps\win-linux\3dparty\WinSparkle\win_64"	
+)
+
+cd %~dp0
 
 set "CURRENT_PATH=%PATH%"
 cd %~dp0

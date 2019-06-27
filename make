@@ -98,11 +98,6 @@ case "$architecture" in
 esac
 fi
 
-if [ "$OO_CLEAN" == "1" ]
-then
-  rm -rf out
-fi
-
 if [[ "$IS_NEED_64" == true ]]
 then
    export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER_X64}/bin"

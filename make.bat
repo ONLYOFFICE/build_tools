@@ -44,10 +44,6 @@ if "%OO_UPDATE%"=="1" (
 	)	
 )
 
-if "%OO_CLEAN%"=="1" (
-	rmdir /S /Q out
-)
-
 set "BUILD_PLATFORM=%OO_PLATFORM%"
 call ../core/Common/3dParty/make.bat
 

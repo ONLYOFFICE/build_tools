@@ -170,3 +170,14 @@ defineTest(gruntDesktop) {
 
 	system($$CALL_COMMAND grunt --base $$shell_quote($$dir) --level=ADVANCED --desktop=true $$escape_expand(\\n\\t))
 }
+
+defineTest(replaceInFile) {
+	file = $$1
+	win32:file ~= s,/,\\,g
+
+	core_windows {
+		system("call powershell -Command \"(Get-Content '$$file') -replace '$$2', '$$3' | Set-Content '$$file'\"")
+	} else {
+		system(sed -i -e 's|$$2|$$3|g' '$$file')
+	}
+}

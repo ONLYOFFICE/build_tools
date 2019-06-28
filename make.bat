@@ -118,8 +118,10 @@ if not exist "%QMAKE_FOR_SCRIPTS%" (
 
 set "BUILD_PLATFORM=%OO_PLATFORM%"
 if "%IS_NEED_64%"=="1" (
+	set "BUILD_PLATFORM=all"
+) else (
 	if "%IS_NEED_32%"=="1" (
-		set "BUILD_PLATFORM=%BUILD_PLATFORM% all"
+		set "BUILD_PLATFORM=all"
 	)
 )
 if "%IS_NEED_XP_64%"=="1" (

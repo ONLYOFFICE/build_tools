@@ -132,7 +132,7 @@ if "%IS_NEED_XP_64%"=="1" (
 	)
 )
 
-call ../core/Common/3dParty/make.bat
+call ../core/Common/3dParty/make.bat || goto :error
 
 cd %~dp0
 

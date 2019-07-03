@@ -17,6 +17,13 @@ build_xp {
 
 CONFIG += ordered
 
+core_mac {
+	CONFIG += no_use_htmlfileinternal
+}
+build_xp {
+	CONFIG += no_use_htmlfileinternal
+}
+
 SUBDIRS = \
 	cryptopp \
 	\
@@ -47,7 +54,7 @@ SUBDIRS = \
     xlsformat \
     x2t
 
-!core_mac {
+!no_use_htmlfileinternal {
 	SUBDIRS += htmlfileinternal
 }
 	
@@ -109,8 +116,10 @@ htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUF
 doctrenderer.file          = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro
 doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
 
-htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
-htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
+!no_use_htmlfileinternal {
+	htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
+	htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
+}
 
 allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
 allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
@@ -191,7 +200,9 @@ pdfreader.depends         = kernel unicodeconverter graphics pdfwriter htmlrende
 htmlfile.depends          = kernel unicodeconverter graphics
 doctrenderer.depends      = kernel unicodeconverter graphics
 
-htmlfileinternal.depends  = kernel unicodeconverter graphics
+!no_use_htmlfileinternal {
+	htmlfileinternal.depends  = kernel unicodeconverter graphics
+}
 
 allfontsgen.depends       = kernel unicodeconverter graphics
 

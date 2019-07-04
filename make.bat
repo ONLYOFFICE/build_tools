@@ -216,7 +216,7 @@ if "%IS_NEED_XP_64%"=="1" (
 		call nmake distclean -f "makefiles\build.makefile_win_64_xp"
 	)
 
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro "CONFIG+=build_xp"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%" || goto :error
 	call nmake -f "makefiles\build.makefile_win_64_xp" || goto :error
 	
@@ -239,7 +239,7 @@ if "%IS_NEED_XP_32%"=="1" (
 		call nmake distclean -f "makefiles\build.makefile_win_32_xp"
 	)
 
-	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro
+	call "!QT_DEPLOY!\qmake" -nocache %~dp0build_clean.pro "CONFIG+=build_xp"
 	call "!QT_DEPLOY!\qmake" -nocache %~dp0build.pro "CONFIG+=%OO_CONFIG% %OO_MODULE% build_xp %CONFIG_ADDON%" "%QMAKE_ADDON%" || goto :error
 	call nmake -f "makefiles\build.makefile_win_32_xp" || goto :error
 	

@@ -178,6 +178,6 @@ defineTest(replaceInFile) {
 	core_windows {
 		system("call powershell -Command \"(Get-Content '$$file') -replace '$$2', '$$3' | Set-Content '$$file'\"")
 	} else {
-		system(sed -i -e 's|$$2|$$3|g' '$$file')
+		system(sed -i -e $$shell_quote(s|$$2|$$3|g) $$shell_quote($$file))
 	}
 }

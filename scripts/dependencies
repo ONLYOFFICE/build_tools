@@ -11,7 +11,6 @@ sudo apt-get install autoconf2.13 -y
 sudo apt-get install p7zip-full -y
 sudo apt-get install libglu1-mesa-dev -y
 sudo apt-get install libpulse-dev -y
-sudo apt-get install libpulse-dev -y
 sudo apt-get install -yq curl apt-transport-https ca-certificates
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs

@@ -39,6 +39,7 @@ SUBDIRS = \
 	doctrenderer \
 	\
 	allfontsgen \
+	allthemesgen \
 	\
 	docbuilder \
 	\
@@ -124,6 +125,9 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
 allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
 
+allthemesgen.file           = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/allthemesgen.pro
+allthemesgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
+
 docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
 docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
 
@@ -205,6 +209,7 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 }
 
 allfontsgen.depends       = kernel unicodeconverter graphics
+allthemesgen.depends       = kernel unicodeconverter graphics
 
 docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
 

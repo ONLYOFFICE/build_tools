@@ -240,6 +240,10 @@ if "%IS_NEED_XP_32%"=="1" (
 	del ".qmake.stash"
 )
 
+if not "%OO_MODULE%"=="%OO_MODULE:builder=%" (
+	call ..\core\DesktopEditor\doctrenderer\docbuilder.com\build.bat || goto :error
+)
+
 if "%OO_NO_BUILD_JS%"=="" (
 	call "%OO_VS_DIR%\vcvarsall.bat" x64
 	call "%QMAKE_FOR_SCRIPTS%" -nocache %~dp0scripts\build_js.pro "CONFIG+=%OO_MODULE%"

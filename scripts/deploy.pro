@@ -316,4 +316,13 @@ builder {
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/empty, $$CUR_ROOT/empty)
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/samples, $$CUR_ROOT/samples)
 
+	copyDirectory($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/include, $$CUR_ROOT/include)
+
+	core_win_32 {
+		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)
+	}
+	core_win_64 {
+		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/x64/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)
+	}
+
 }

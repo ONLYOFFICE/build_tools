@@ -275,11 +275,13 @@ builder {
 
 	build_xp {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer.lib, $$CUR_ROOT/doctrenderer.lib)
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/)
 	} else {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, doctrenderer)
 
 		core_windows {
+			copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer.lib, $$CUR_ROOT/doctrenderer.lib)
 			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
 		} else {
 			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/icudtl.dat, $$CUR_ROOT/)

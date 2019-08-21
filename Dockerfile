@@ -9,8 +9,7 @@ RUN tar -xf qt-everywhere-opensource-src-5.9.8.tar.xz
 
 WORKDIR /tmp/qt-everywhere-opensource-src-5.9.8
 RUN apt-get -y install make g++ 
-RUN apt-get -y install libx11-xcb-dev \
-                       libglu1-mesa-dev \
+RUN apt-get -y install libglu1-mesa-dev \
                        libgstreamer-plugins-base1.0-dev
 RUN ./configure -opensource -confirm-license -release -shared -accessibility -prefix /usr/local/Qt-5.9.8/gcc_64 -qt-zlib -qt-libpng -qt-libjpeg -qt-xcb -qt-pcre -no-sql-sqlite -no-qml-debug -gstreamer 1.0 -nomake examples -nomake tests -skip qtenginio -skip qtlocation -skip qtserialport -skip qtsensors -skip qtxmlpatterns -skip qt3d -skip qtwebview -skip qtwebengine
 RUN make

@@ -5,6 +5,7 @@ sudo apt-get -y install apt-transport-https \
                         build-essential \
                         ca-certificates \
                         cmake \
+                        curl \
                         git \
                         glib-2.0-dev \
                         libglu1-mesa-dev \

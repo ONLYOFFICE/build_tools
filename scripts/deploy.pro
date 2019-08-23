@@ -203,7 +203,7 @@ desktop {
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/code, $$CUR_ROOT/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/photoeditor, $$CUR_ROOT/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/macros, $$CUR_ROOT/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B})
-	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/clipart, $$CUR_ROOT/editors/sdkjs-plugins/{F5BACB61-64C5-4711-AC8A-D01EC3B2B6F1})
+	# copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/clipart, $$CUR_ROOT/editors/sdkjs-plugins/{F5BACB61-64C5-4711-AC8A-D01EC3B2B6F1})
 
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}, $$CUR_ROOT/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8})
 

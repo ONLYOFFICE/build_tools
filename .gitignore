@@ -1,4 +1,4 @@
 out/
 makefiles/
 .qmake.stash
-config.json
+config

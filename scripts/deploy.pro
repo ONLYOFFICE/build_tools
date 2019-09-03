@@ -203,7 +203,7 @@ desktop {
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/code, $$CUR_ROOT/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/photoeditor, $$CUR_ROOT/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/macros, $$CUR_ROOT/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B})
-	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/clipart, $$CUR_ROOT/editors/sdkjs-plugins/{F5BACB61-64C5-4711-AC8A-D01EC3B2B6F1})
+	# copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/clipart, $$CUR_ROOT/editors/sdkjs-plugins/{F5BACB61-64C5-4711-AC8A-D01EC3B2B6F1})
 
 	copyDirectory($$ROOT_GIT_DIR/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}, $$CUR_ROOT/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8})
 
@@ -225,6 +225,23 @@ desktop {
 		removeFile($$CUR_ROOT/libcef.lib)
 	}
 
+	# all themes generate ----
+	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allfontsgen$$EXE_EXT, $$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
+	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allthemesgen$$EXE_EXT, $$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
+
+	core_mac {
+		system(DYLD_LIBRARY_PATH=$$CUR_ROOT/converter $$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
+		system(DYLD_LIBRARY_PATH=$$CUR_ROOT/converter $$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js")
+	} else {
+		system($$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
+		system($$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js")
+	}
+
+	removeFile($$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
+	removeFile($$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
+	removeFile($$CUR_ROOT/converter/AllFonts.js)
+	removeFile($$CUR_ROOT/converter/font_selection.bin)
+	# ----
 }
 
 builder {
@@ -263,11 +280,13 @@ builder {
 
 	build_xp {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp, $$CUR_ROOT, doctrenderer)
+		copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/xp/doctrenderer.lib, $$CUR_ROOT/doctrenderer.lib)
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8_xp/$$OS_CURRENT/release/icudt*.dll, $$CUR_ROOT/)
 	} else {
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, doctrenderer)
 
 		core_windows {
+			copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/doctrenderer.lib, $$CUR_ROOT/doctrenderer.lib)
 			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/release/icudt*.dat, $$CUR_ROOT/)
 		} else {
 			copyFile($$ROOT_GIT_DIR/core/Common/3dParty/v8/v8/out.gn/$$OS_CURRENT/icudtl.dat, $$CUR_ROOT/)
@@ -301,5 +320,14 @@ builder {
 
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/empty, $$CUR_ROOT/empty)
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/samples, $$CUR_ROOT/samples)
+
+	copyDirectory($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/include, $$CUR_ROOT/include)
+
+	core_win_32 {
+		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)
+	}
+	core_win_64 {
+		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/x64/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)
+	}
 
 }

@@ -1,25 +1,28 @@
 #!/bin/bash
 
-sudo apt-get install build-essential -y
-sudo apt-get install cmake -y
-sudo apt-get install glib-2.0-dev -y
-sudo apt-get install libgtk2.0-dev -y
-sudo apt-get install libtool -y
-sudo apt-get install subversion -y
-sudo apt-get install git -y
-sudo apt-get install autoconf2.13 -y
-sudo apt-get install p7zip-full -y
-sudo apt-get install libglu1-mesa-dev -y
-sudo apt-get install libpulse-dev -y
-sudo apt-get install -yq curl apt-transport-https ca-certificates
+sudo apt-get -y install apt-transport-https \
+                        autoconf2.13 \
+                        build-essential \
+                        ca-certificates \
+                        cmake \
+                        curl \
+                        git \
+                        glib-2.0-dev \
+                        libglu1-mesa-dev \
+                        libgtk2.0-dev \
+                        libpulse-dev \
+                        libtool \
+                        p7zip-full \
+                        subversion
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
 sudo npm install -g npm
 sudo npm install -g grunt-cli
 
 # Ubuntu 14
-#sudo add-apt-repository ppa:openjdk-r/ppa
-#sudo apt-get update
-#sudo apt-get install openjdk-8-jdk
-#sudo update-alternatives --config java
-#sudo update-alternatives --config javac
+sudo apt-get -y install software-properties-common
+sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt-get update
+sudo apt-get -y install openjdk-8-jdk
+sudo update-alternatives --config java
+sudo update-alternatives --config javac

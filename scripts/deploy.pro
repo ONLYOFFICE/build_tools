@@ -3,7 +3,7 @@ TEMPLATE=aux
 include($$PWD/../../core/Common/base.pri)
 include($$PWD/common.pri)
 
-MAKEFILE=$$PWD/../makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
+MAKEFILE=$$PWD/../makefiles/deploy.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
 build_xp {
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
 }
@@ -32,8 +32,6 @@ isEmpty(PUBLISHER_NAME) {
 		PUBLISHER_NAME=onlyoffice
 	}
 }
-
-THEMES_PARAMS = $$(OO_THEMES_PARAMS)
 
 createDirectory($$DEPLOY_DIR)
 createDirectory($$DEPLOY_DIR/$$OS_CURRENT_DEPLOY)
@@ -132,9 +130,7 @@ desktop {
 		copyQtLib(Qt5OpenGL, $$CUR_ROOT)
 
 		core_linux {
-			system(cp -f -av "$$QT_CURRENT/../lib/libicui18n*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
-			system(cp -f -av "$$QT_CURRENT/../lib/libicuuc*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
-			system(cp -f -av "$$QT_CURRENT/../lib/libicudata*" $$shell_quote($$CUR_ROOT/) $$escape_expand(\\n\\t))
+			copyQtICU($$QT_CURRENT/../lib, $$CUR_ROOT)
 		}
 
 		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, hunspell)
@@ -231,21 +227,21 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allfontsgen$$EXE_EXT, $$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allthemesgen$$EXE_EXT, $$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
 
-	LIB_CONVERTER=
+	LIBCONVERTER=
 	core_linux {
-		LIB_CONVERTER="LD_LIBRARY_PATH=$$CUR_ROOT/converter"
+		LIBCONVERTER="LD_LIBRARY_PATH=$$CUR_ROOT/converter"
 	}
 	core_mac {
-		LIB_CONVERTER="DYLD_LIBRARY_PATH=$$CUR_ROOT/converter"
+		LIBCONVERTER="DYLD_LIBRARY_PATH=$$CUR_ROOT/converter"
 	}
 
-	system($$LIB_CONVERTER $$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
-	system($$LIB_CONVERTER $$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js" --params="$$THEMES_PARAMS")	
+	system($$LIBCONVERTER $$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
+	system($$LIBCONVERTER $$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js")
 
-	removeFile($$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
-	removeFile($$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
-	removeFile($$CUR_ROOT/converter/AllFonts.js)
-	removeFile($$CUR_ROOT/converter/font_selection.bin)
+	#removeFile($$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
+	#removeFile($$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
+	#removeFile($$CUR_ROOT/converter/AllFonts.js)
+	#removeFile($$CUR_ROOT/converter/font_selection.bin)
 	# ----
 }
 

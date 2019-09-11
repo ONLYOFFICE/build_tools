@@ -181,3 +181,67 @@ defineTest(replaceInFile) {
 		system(sed -i -e $$shell_quote(s|$$2|$$3|g) $$shell_quote($$file))
 	}
 }
+
+defineTest(checkICU_common) {
+	testDir = $$1
+	outputDir = $$2
+
+	exists($$testDir/libicu*) {
+		system(cp -f -av "$$testDir/libicui18n*" $$shell_quote($$outputDir/) $$escape_expand(\\n\\t))
+		system(cp -f -av "$$testDir/libicuuc*" $$shell_quote($$outputDir/) $$escape_expand(\\n\\t))
+		system(cp -f -av "$$testDir/libicudata*" $$shell_quote($$outputDir/) $$escape_expand(\\n\\t))
+		return(true)
+	}
+	return(false)
+}
+
+defineTest(copyQtICU) {
+	testDir = $$1
+	outputDir = $$2
+
+	checkICU_common($$testDir, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/lib, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/lib/x86_64-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/lib64, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/lib64/x86_64-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/usr/lib, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/usr/lib/x86_64-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/usr/lib64, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/usr/lib64/x86_64-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/lib/i386-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	checkICU_common(/usr/lib/i386-linux-gnu, $$outputDir) {
+		return(true)
+	}
+
+	return(false)
+}

@@ -6,15 +6,16 @@ if defined ProgramFiles(x86) (
 	SET "OO_VS_DIR=%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC"
 )
 
-call %~dp0scripts\config_value.bat module    OO_MODULE     "desktop builder"
-call %~dp0scripts\config_value.bat update    OO_UPDATE     1
-call %~dp0scripts\config_value.bat clean     OO_CLEAN      0
-call %~dp0scripts\config_value.bat platform  OO_PLATFORM   native
-call %~dp0scripts\config_value.bat config    OO_CONFIG     no_vlc
-call %~dp0scripts\config_value.bat deploy    OO_DEPLOY     1
-call %~dp0scripts\config_value.bat install   OO_INSTALL    1
-call %~dp0scripts\config_value.bat qt-dir    OO_QT_DIR     "set qt path"
-call %~dp0scripts\config_value.bat qt-dir-xp OO_QT_XP_DIR  "set qt path (windows xp version)"
+call %~dp0scripts\config_value.bat module        OO_MODULE     "desktop builder"
+call %~dp0scripts\config_value.bat update        OO_UPDATE     1
+call %~dp0scripts\config_value.bat clean         OO_CLEAN      0
+call %~dp0scripts\config_value.bat platform      OO_PLATFORM   native
+call %~dp0scripts\config_value.bat config        OO_CONFIG     no_vlc
+call %~dp0scripts\config_value.bat deploy        OO_DEPLOY     1
+call %~dp0scripts\config_value.bat install       OO_INSTALL    1
+call %~dp0scripts\config_value.bat qt-dir        OO_QT_DIR     "set qt path"
+call %~dp0scripts\config_value.bat qt-dir-xp     OO_QT_XP_DIR  "set qt path (windows xp version)"
+call %~dp0scripts\config_value.bat themesparams  OO_THEMES_PARAMS ""
 
 if "%OO_UPDATE%"=="true" (
 	set "OO_UPDATE=1"

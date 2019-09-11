@@ -14,15 +14,16 @@ then
   export PATH="${SCRIPTPATH}/tools/mac:${PATH}"
 fi
 
-source ./scripts/config_value module    OO_MODULE     "desktop builder"
-source ./scripts/config_value update    OO_UPDATE     1
-source ./scripts/config_value clean     OO_CLEAN      0
-source ./scripts/config_value platform  OO_PLATFORM   native
-source ./scripts/config_value config    OO_CONFIG     no_vlc
-source ./scripts/config_value deploy    OO_DEPLOY     1
-source ./scripts/config_value qt-dir    OO_QT_DIR     "set qt path"
-source ./scripts/config_value compiler  OO_COMPILER   gcc
-source ./scripts/config_value no-apps   OO_NO_APPS    0
+source ./scripts/config_value module        OO_MODULE     "desktop builder"
+source ./scripts/config_value update        OO_UPDATE     1
+source ./scripts/config_value clean         OO_CLEAN      0
+source ./scripts/config_value platform      OO_PLATFORM   native
+source ./scripts/config_value config        OO_CONFIG     no_vlc
+source ./scripts/config_value deploy        OO_DEPLOY     1
+source ./scripts/config_value qt-dir        OO_QT_DIR     "set qt path"
+source ./scripts/config_value compiler      OO_COMPILER   gcc
+source ./scripts/config_value no-apps       OO_NO_APPS    0
+source ./scripts/config_value themesparams  OO_THEMES_PARAMS ""
 
 if [ "$OO_UPDATE" == "true" ]
 then

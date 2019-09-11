@@ -19,5 +19,5 @@ RUN make install
 ADD . /build_tools
 WORKDIR /build_tools
 RUN /build_tools/scripts/dependencies
-RUN ./configure --module "desktop builder" --platform native --update 1 --branch develop --clean 0  --qt-dir "/usr/local/Qt-5.9.8"
-RUN ./make
+RUN bash ./configure --module "desktop builder" --platform native --update 1 --branch develop --clean 0  --qt-dir "/usr/local/Qt-5.9.8"
+RUN bash ./make

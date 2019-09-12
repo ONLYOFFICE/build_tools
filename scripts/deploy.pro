@@ -3,7 +3,7 @@ TEMPLATE=aux
 include($$PWD/../../core/Common/base.pri)
 include($$PWD/common.pri)
 
-MAKEFILE=$$PWD/../makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
+MAKEFILE=$$PWD/../makefiles/deploy.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
 build_xp {
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
 }

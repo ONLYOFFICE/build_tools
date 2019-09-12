@@ -33,6 +33,8 @@ isEmpty(PUBLISHER_NAME) {
 	}
 }
 
+THEMES_PARAMS = $$(OO_THEMES_PARAMS)
+
 createDirectory($$DEPLOY_DIR)
 createDirectory($$DEPLOY_DIR/$$OS_CURRENT_DEPLOY)
 createDirectory($$DEPLOY_DIR/$$OS_CURRENT_DEPLOY/$$PUBLISHER_NAME)

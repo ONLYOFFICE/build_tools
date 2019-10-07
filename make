@@ -9,13 +9,52 @@ case "$OO_OS" in
   *)        exit ;;
 esac
 
+source ./scripts/config_value update        OO_UPDATE 1
+source ./scripts/config_value branch        OO_BRANCH master
+if [ "$OO_UPDATE" == "true" ]
+then
+   OO_UPDATE=1
+fi
+############################ BRANDING #############################
+source ./scripts/config_value branding      OO_BRANDING_NAME ""
+source ./scripts/config_value branding-url  OO_BRANDING_URL ""
+
+if [ "$OO_RUNNING_BRANDING" != "1" ]
+then
+if [ "$OO_BRANDING_NAME" != "" ] && [ "$OO_BRANDING_URL" != "" ]
+then
+if [ ! -d "./../$OO_BRANDING_NAME" ]
+then
+echo "clone branding ${OO_BRANDING_NAME}..."
+git clone "$OO_BRANDING_URL" "../$OO_BRANDING_NAME"
+fi
+if [ "$OO_UPDATE" == "1" ]
+then
+echo "update branding ${OO_BRANDING_NAME}..."
+cd "./../$OO_BRANDING_NAME"
+git fetch
+git checkout -f $OO_BRANCH
+git pull
+cd ../build_tools
+fi
+# run branding tools
+if [ -f "../$OO_BRANDING_NAME/build_tools/make" ]
+then
+export OO_RUNNING_BRANDING="1"
+cd "./../$OO_BRANDING_NAME/build_tools"
+./make
+exit 0
+fi
+fi
+fi
+###################################################################
+
 if [[ "${OS_DEPLOY_64}" == "mac_64" ]]
 then
   export PATH="${SCRIPTPATH}/tools/mac:${PATH}"
 fi
 
 source ./scripts/config_value module        OO_MODULE     "desktop builder"
-source ./scripts/config_value update        OO_UPDATE     1
 source ./scripts/config_value clean         OO_CLEAN      0
 source ./scripts/config_value platform      OO_PLATFORM   native
 source ./scripts/config_value config        OO_CONFIG     no_vlc
@@ -24,11 +63,6 @@ source ./scripts/config_value qt-dir        OO_QT_DIR     "set qt path"
 source ./scripts/config_value compiler      OO_COMPILER   gcc
 source ./scripts/config_value no-apps       OO_NO_APPS    0
 source ./scripts/config_value themesparams  OO_THEMES_PARAMS ""
-
-if [ "$OO_UPDATE" == "true" ]
-then
-   OO_UPDATE=1
-fi
 
 if [ "$OO_CLEAN" == "true" ]
 then
@@ -54,10 +88,7 @@ then
 
    if [[ "$OO_MODULE" == *"desktop"* ]]
    then
-      if [ "$OO_NO_APPS" == "0" ]
-      then
-         ./scripts/git-fetch desktop-apps
-      fi
+      ./scripts/git-fetch desktop-apps
       OO_CONFIG="$OO_CONFIG desktop"
    fi
 fi

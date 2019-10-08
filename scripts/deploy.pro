@@ -325,8 +325,10 @@ builder {
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/samples, $$CUR_ROOT/samples)
 
 	createDirectory($$CUR_ROOT/include)
-	copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/app_builder/common.h, $$CUR_ROOT/include/common.h)
+	copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/common_deploy.h, $$CUR_ROOT/include/common.h)
 	copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.h, $$CUR_ROOT/include/docbuilder.h)
+
+	replaceInFile($$CUR_ROOT/include/docbuilder.h, Q_DECL_EXPORT, BUILDING_DOCBUILDER)
 
 	core_win_32 {
 		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)

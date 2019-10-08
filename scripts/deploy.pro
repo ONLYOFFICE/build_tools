@@ -302,7 +302,7 @@ builder {
 			!build_xp {
 				createDirectory($$CUR_ROOT/HtmlFileInternal)
 				copyFile($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT/HtmlFileInternal$$EXE_EXT, $$CUR_ROOT/HtmlFileInternal/HtmlFileInternal$$EXE_EXT)
-				copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build, $$CUR_ROOT/HtmlFileInternal/.)
+				copyDirectory($$ROOT_GIT_DIR/core/Common/3dParty/cef/$$OS_CURRENT/build/., $$CUR_ROOT/HtmlFileInternal/.)
 			}
 		}
 
@@ -324,7 +324,9 @@ builder {
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/empty, $$CUR_ROOT/empty)
 	copyDirectory($$ROOT_GIT_DIR/DocumentBuilder/samples, $$CUR_ROOT/samples)
 
-	copyDirectory($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/include, $$CUR_ROOT/include)
+	createDirectory($$CUR_ROOT/include)
+	copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/app_builder/common.h, $$CUR_ROOT/include/common.h)
+	copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.h, $$CUR_ROOT/include/docbuilder.h)
 
 	core_win_32 {
 		copyFile($$ROOT_GIT_DIR/core/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll, $$CUR_ROOT/docbuilder.com.dll)

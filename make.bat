@@ -22,9 +22,6 @@ if "%OO_RUNNING_BRANDING%" == "1" (
 if "%OO_BRANDING_NAME%" == "" (
 	goto :base
 )
-if "%OO_BRANDING_URL%" == "" (
-	goto :base
-)
 
 if not exist "%OO_BRANDING_NAME%" (
 	call git clone "%OO_BRANDING_URL%" "../%OO_BRANDING_NAME%"

@@ -21,7 +21,7 @@ source ./scripts/config_value branding-url  OO_BRANDING_URL ""
 
 if [ "$OO_RUNNING_BRANDING" != "1" ]
 then
-if [ "$OO_BRANDING_NAME" != "" ] && [ "$OO_BRANDING_URL" != "" ]
+if [ "$OO_BRANDING_NAME" != "" ]
 then
 if [ ! -d "./../$OO_BRANDING_NAME" ]
 then

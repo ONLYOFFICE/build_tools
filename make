@@ -41,6 +41,7 @@ fi
 if [ -f "../$OO_BRANDING_NAME/build_tools/make" ]
 then
 export OO_RUNNING_BRANDING="1"
+export BRANDING_PATH="${SCRIPTPATH}/../${OO_BRANDING_NAME}"
 cd "./../$OO_BRANDING_NAME/build_tools"
 ./make
 exit 0

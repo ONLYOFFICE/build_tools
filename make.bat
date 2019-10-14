@@ -36,6 +36,7 @@ if "%OO_UPDATE%"=="1" (
 
 if exist "..\%OO_BRANDING_NAME%\build_tools\make.bat" (
 	set "OO_RUNNING_BRANDING=1"
+	set "BRANDING_PATH=%~dp0..\%OO_BRANDING_NAME%"
 	cd "..\%OO_BRANDING_NAME%\build_tools"
 	call make.bat
 	exit /b 0

@@ -83,7 +83,7 @@ then
    ./scripts/git-fetch desktop-sdk
    ./scripts/git-fetch sdkjs
    ./scripts/git-fetch sdkjs-plugins
-   ./scripts/git-fetch web-apps-pro
+   ./scripts/git-fetch web-apps
    ./scripts/git-fetch dictionaries
    ./scripts/git-fetch DocumentBuilder
 

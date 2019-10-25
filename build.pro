@@ -30,6 +30,7 @@ build_xp {
 	CONFIG += no_use_htmlfileinternal
 }
 core_ios {
+	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
 }
 

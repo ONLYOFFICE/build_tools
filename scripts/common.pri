@@ -5,6 +5,9 @@ core_windows {
 core_mac {
 	LIB_EXT=.dylib
 }
+core_ios {
+	LIB_EXT=.dylib
+}
 
 EXE_EXT=
 core_windows {

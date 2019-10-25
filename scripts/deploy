@@ -52,16 +52,22 @@ then
 	IS_NEED_32=false
 fi
 
+if [[ "${OO_COMPILER}" == "ios" ]]
+then
+  OO_COMPILER_X64="${OO_COMPILER}"
+  OS_DEPLOY_64=ios
+fi
+
 if [[ "$IS_NEED_64" == true ]]
 then
 	export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER_X64}/bin"
 	export OS_DEPLOY=$OS_DEPLOY_64
-	"$QT_DEPLOY/qmake" -nocache "$SCRIPTPATH/deploy.pro" "CONFIG+=$OO_CONFIG $OO_MODULE"
+	"$QT_DEPLOY/qmake" -nocache "$SCRIPTPATH/deploy.pro" "CONFIG+=${OO_CONFIG} $OO_MODULE"
 fi
 
 if [[ "$IS_NEED_32" == true ]]
 then
 	export QT_DEPLOY="${OO_QT_DIR}/${OO_COMPILER}/bin"
 	export OS_DEPLOY=linux_32
-	"$QT_DEPLOY/qmake" -nocache "$SCRIPTPATH/deploy.pro" "CONFIG+=$OO_CONFIG $OO_MODULE"
+	"$QT_DEPLOY/qmake" -nocache "$SCRIPTPATH/deploy.pro" "CONFIG+=${OO_CONFIG} $OO_MODULE"
 fi

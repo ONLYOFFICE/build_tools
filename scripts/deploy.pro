@@ -64,6 +64,10 @@ desktop {
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, HtmlFile)
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT/converter, HtmlRenderer)
 
+	core_ios {
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, x2t)
+	}
+
 	core_windows {
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58.dll, $$CUR_ROOT/converter/icudt58.dll)
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icuuc58.dll, $$CUR_ROOT/converter/icuuc58.dll)
@@ -268,6 +272,10 @@ builder {
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, XpsFile)
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, HtmlFile)
 	copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, HtmlRenderer)
+
+	core_ios {
+		copyLib($$ROOT_GIT_DIR/core/build/lib/$$OS_CURRENT, $$CUR_ROOT, x2t)
+	}
 
 	core_windows {
 		copyFile($$ROOT_GIT_DIR/core/Common/3dParty/icu/$$OS_CURRENT/build/icudt58.dll, $$CUR_ROOT/icudt58.dll)

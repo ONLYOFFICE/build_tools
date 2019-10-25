@@ -17,11 +17,20 @@ build_xp {
 
 CONFIG += ordered
 
+core_windows {
+	CONFIG += core_and_multimedia
+}
+core_linux {
+	CONFIG += core_and_multimedia
+}
 core_mac {
 	CONFIG += no_use_htmlfileinternal
 }
 build_xp {
 	CONFIG += no_use_htmlfileinternal
+}
+core_ios {
+	CONFIG += no_use_common_binary
 }
 
 SUBDIRS = \
@@ -38,11 +47,6 @@ SUBDIRS = \
 	htmlfile \
 	doctrenderer \
 	\
-	allfontsgen \
-	allthemesgen \
-	\
-	docbuilder \
-	\
 	docxformat \
     pptxformat \
     docxfile \
@@ -58,6 +62,13 @@ SUBDIRS = \
 !no_use_htmlfileinternal {
 	SUBDIRS += htmlfileinternal
 }
+
+!no_use_common_binary {
+	SUBDIRS += \
+		allfontsgen \
+		allthemesgen \
+		docbuilder
+}
 	
 desktop {
 message(desktop)
@@ -70,7 +81,7 @@ core_windows {
 SUBDIRS += projicons
 }
 
-!core_mac {
+core_and_multimedia {
 
 SUBDIRS += \
 	documentscore \
@@ -122,14 +133,16 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 	htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
 }
 
-allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
-allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
+!no_use_common_binary {
+	allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
+	allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
 
-allthemesgen.file           = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/allthemesgen.pro
-allthemesgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
+	allthemesgen.file           = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/allthemesgen.pro
+	allthemesgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
 
-docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
-docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+	docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
+	docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+}
 
 docxformat.file            = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro
 docxformat.makefile        = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX
@@ -208,10 +221,12 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 	htmlfileinternal.depends  = kernel unicodeconverter graphics
 }
 
-allfontsgen.depends       = kernel unicodeconverter graphics
-allthemesgen.depends       = kernel unicodeconverter graphics
+!no_use_common_binary {
+	allfontsgen.depends       = kernel unicodeconverter graphics
+	allthemesgen.depends       = kernel unicodeconverter graphics
 
-docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
+	docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
+}
 
 desktop {
 	ooxmlsignature.depends    = kernel unicodeconverter graphics

@@ -241,6 +241,7 @@ desktop {
 	removeFile($$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
 	removeFile($$CUR_ROOT/converter/AllFonts.js)
 	removeFile($$CUR_ROOT/converter/font_selection.bin)
+	removeFile($$CUR_ROOT/editors/sdkjs/slide/sdk-all.cache)
 	# ----
 }
 

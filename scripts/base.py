@@ -5,8 +5,11 @@ import subprocess
 import sys
 import config
 
-def get_script_dir():
-  scriptPath = os.path.realpath(__file__)
+def get_script_dir(file=""):
+  test_file = file
+  if ("" == file):
+    test_file = __file__
+  scriptPath = os.path.realpath(test_file)
   scriptDir = os.path.dirname(scriptPath)
   return scriptDir
 

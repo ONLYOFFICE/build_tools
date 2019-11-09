@@ -2,3 +2,4 @@ out/
 makefiles/
 .qmake.stash
 config
+**/__pycache__

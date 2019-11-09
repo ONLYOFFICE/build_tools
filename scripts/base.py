@@ -3,6 +3,7 @@ import shutil
 import os
 import subprocess
 import sys
+import config
 
 def get_script_dir():
   scriptPath = os.path.realpath(__file__)
@@ -21,7 +22,9 @@ def is_dir(path):
   return os.path.isdir(get_path(path))
 
 def is_exist(path):
-  return is_file(path) || is_dir(path)
+  if is_file(path) or is_dir(path):
+    return True
+  return False
 
 def copy_file(src, dst):
   return shutil.copy2(get_path(src), get_path(dst))
@@ -44,14 +47,14 @@ def copy_dir(src, dst):
 def delete_dir(path):
   shutil.rmtree(get_path(path))
 
-def cmd(prog, args)
+def cmd(prog, args):
   sub_args = args[:].insert(0, prog)
   ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
   if ret != 0:
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
-def bash(path)
+def bash(path):
   command = get_path(path)
   if ("Windows" == platform.system()):
     command += ".bat"
@@ -60,28 +63,28 @@ def bash(path)
   return cmd(command, [])
 
 def host_platform():
-  ret = platform.system.lower()
+  ret = platform.system().lower()
   if (ret == "darwin"):
     return "mac"
   return ret
 
 def get_env(name):
-  return os.environ.getenv(name, "")
+  return os.getenv(name, "")
 
 def set_env(name, value):
   os.environ[name] = value
   return
 
-def git_update( repo ):
+def git_update(repo):
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
-  if config.options["git-protocol"] == "ssh":
+  if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
-  folder = base.get_script_dir() + "/../../" + repo
-  if not base.is_dir(folder):
-    base.cmd("git", ["clone", url, folder])
+  folder = get_script_dir() + "/../../" + repo
+  if not is_dir(folder):
+    cmd("git", ["clone", url, folder])
   old_cur = os.getcwd()
   os.chdir(folder)
-  base.cmd("git", ["fetch"])
-  base.cmd("git", ["checkout", "-f", config.options["branch"]])
-  base.cmd("git", ["pull"])
+  cmd("git", ["fetch"])
+  cmd("git", ["checkout", "-f", config.option("branch")])
+  cmd("git", ["pull"])
   os.chdir(old_cur)

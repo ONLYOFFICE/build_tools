@@ -1,4 +1,3 @@
-sys.path.append('scripts')
 import config
 import base
 
@@ -12,7 +11,7 @@ def clean():
       suff2.append(cur + suff_branding)
     suff += suff2
   core_dir = base.get_script_dir() + "/../"
-  for cur in suff
+  for cur in suff:
     base.delete_file(core_dir + "/core/Common/3dParty/cryptopp/project/Makefile.cryptopp" + cur)
     base.delete_file(core_dir + "/core/Common/Makefile.kernel" + cur)
     base.delete_file(core_dir + "/core/UnicodeConverter/Makefile.UnicodeConverter" + cur)
@@ -57,7 +56,7 @@ def make():
     if not platform in config.platforms:
       continue
     is_platform_32 = False
-    if (-1 != platform.find("_32"))
+    if (-1 != platform.find("_32")):
       is_platform_32 = True
 
     platform_base = platform
@@ -71,7 +70,7 @@ def make():
 
     qt_dir = config.option("qt-dir")
     if (-1 != platform.find("xp")):
-      qt-dir = config.option("qt-dir-xp")
+      qt_dir = config.option("qt-dir-xp")
 
     if is_platform_32:
       qt_dir += ("/" + config.options["compiler"])

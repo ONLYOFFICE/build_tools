@@ -1,3 +1,4 @@
+import sys
 sys.path.append('scripts')
 import config
 import base
@@ -8,7 +9,7 @@ import deploy
 config.parse()
 
 # update
-if ("1" == config.options["update"]):
+if ("1" == config.option("update")):
   base.git_update("core")
   base.git_update("sdkjs")
   base.git_update("sdkjs-plugins")
@@ -17,10 +18,10 @@ if ("1" == config.options["update"]):
   base.git_update("dictionaries")
   base.git_update("core")
 
-  if config.check_option("module", "builder")
+  if config.check_option("module", "builder"):
     base.git_update("DocumentBuilder")
 
-  if config.check_option("module", "desktop")
+  if config.check_option("module", "desktop"):
     base.git_update("desktop-apps")
 
 base_dir = base.get_script_dir()

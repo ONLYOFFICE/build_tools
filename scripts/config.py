@@ -2,7 +2,7 @@ import base
 import os
 
 def parse():
-  configfile = open(base.get_script_path() + "/../config", "r")
+  configfile = open(base.get_script_dir() + "/../config", "r")
   configOptions = {}
   for line in configfile:
     name, value = line.partition("=")[::2]

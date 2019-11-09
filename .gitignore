@@ -3,3 +3,4 @@ makefiles/
 .qmake.stash
 config
 **/__pycache__
+*.pyc

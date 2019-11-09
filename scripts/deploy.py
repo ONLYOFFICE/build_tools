@@ -1,4 +1,3 @@
-sys.path.append('scripts')
 import config
 import base
 

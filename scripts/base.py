@@ -48,7 +48,8 @@ def delete_dir(path):
   shutil.rmtree(get_path(path))
 
 def cmd(prog, args):
-  sub_args = args[:].insert(0, prog)
+  sub_args = args[:]
+  sub_args.insert(0, prog)
   ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
   if ret != 0:
     sys.exit("Error (" + prog + "): " + str(ret))

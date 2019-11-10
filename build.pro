@@ -14,6 +14,10 @@ build_xp {
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
 	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_xp")
 }
+OO_BRANDING_SUFFIX = $$(OO_BRANDING)
+!isEmpty(OO_BRANDING_SUFFIX) {
+	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "$$OO_BRANDING_SUFFIX")
+}
 
 CONFIG += ordered
 
@@ -93,7 +97,56 @@ SUBDIRS += \
 
 }
 
-CONFIG += ordered
+ordered {
+	# remove all makefiles
+
+	defineTest(removeFile) {
+		file = $$1			
+		win32:file ~= s,/,\\,g
+		core_windows {
+			system(if exist $$shell_quote($$file) $$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+		} else {
+			system($$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+		}	
+	}
+
+	$$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/Makefile.cryptopp$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/Common/Makefile.kernel$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/UnicodeConverter/Makefile.UnicodeConverter$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DesktopEditor/graphics/pro/Makefile.graphics$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/PdfWriter/Makefile.PdfWriter$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DjVuFile/Makefile.DjVuFile$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
+
+	$$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+
+	$$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro
+
+	$$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX
+	$$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+	$$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
+}
 
 # PROJECTS
 cryptopp.file              = $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro

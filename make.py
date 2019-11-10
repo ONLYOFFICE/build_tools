@@ -28,7 +28,7 @@ base_dir = base.get_script_dir(__file__)
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
 # core 3rdParty
-base.bash(base_dir + "/../../core/Common/3dParty/make")
+base.bash(base_dir + "/../core/Common/3dParty/make")
 
 # build updmodule for desktop (only for windows version)
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):

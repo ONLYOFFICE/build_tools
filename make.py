@@ -28,7 +28,7 @@ base_dir = base.get_script_dir(__file__)
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
 # core 3rdParty
-base.bash(base_dir + "/../core/Common/3dParty/make")
+#base.bash(base_dir + "/../core/Common/3dParty/make")
 
 # build updmodule for desktop (only for windows version)
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):
@@ -36,10 +36,10 @@ if ("windows" == base.host_platform()) and (config.check_option("module", "deskt
   config.extend_option("config", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
 
   if not base.is_file(base_dir + "/tools/WinSparkle-0.7.0.zip"):
-  	base.cmd(base_dir + "/tools/win/curl/curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "tools/WinSparkle-0.7.0.zip"])
+  	base.cmd(base_dir + "/tools/win/curl/curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "/tools/WinSparkle-0.7.0.zip"])
  
   if not base.is_dir(base_dir + "/tools/WinSparkle-0.7.0"):
-  	base.cmd(base_dir + "/toolswin/7z/7z.exe", ["x", base_dir + "tools/WinSparkle-0.7.0.zip", "-otools"])
+  	base.cmd(base_dir + "/tools/win/7z/7z.exe", ["x", base_dir + "/tools/WinSparkle-0.7.0.zip", "-otools"])
 
   base.create_dir(base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle")
   base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/include", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/include")

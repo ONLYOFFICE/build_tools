@@ -42,6 +42,8 @@ def create_dir(path):
   return
 
 def copy_dir(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
   try:
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
@@ -52,7 +54,7 @@ def delete_dir(path):
 
 def cmd(prog, args):
   sub_args = args[:]
-  sub_args.insert(0, prog)
+  sub_args.insert(0, get_path(prog))
   ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
   if ret != 0:
     sys.exit("Error (" + prog + "): " + str(ret))

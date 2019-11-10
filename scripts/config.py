@@ -49,7 +49,7 @@ def parse():
   if ("" == option("compiler")):
     if ("windows" == host_platform):
       options["compiler"] = "msvc2015"
-      options["compiler_64"] = "msvc2015"
+      options["compiler_64"] = "msvc2015_64"
     elif ("linux" == host_platform):
       options["compiler"] = "gcc"
       options["compiler_64"] = "gcc_64"

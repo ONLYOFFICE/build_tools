@@ -52,20 +52,24 @@ def copy_dir(src, dst):
 def delete_dir(path):
   shutil.rmtree(get_path(path))
 
-def cmd(prog, args):
-  sub_args = args[:]
-  sub_args.insert(0, get_path(prog))
-  ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
+def cmd(prog, args):  
+  ret = 0
+  if ("windows" == host_platform()):
+    sub_args = args[:]
+    sub_args.insert(0, get_path(prog))
+    ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
+  else:
+    command = prog
+    for arg in args:
+      command += (" \"" + arg + "\"")
+    ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
   if ret != 0:
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
 def bash(path):
   command = get_path(path)
-  if ("Windows" == platform.system()):
-    command += ".bat"
-  else:
-    command += ".sh"
+  command += (".bat" if "windows" == host_platform() else ".sh")
   return cmd(command, [])
 
 def host_platform():

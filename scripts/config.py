@@ -1,5 +1,6 @@
 import base
 import os
+import platform
 
 def parse():
   configfile = open(base.get_script_dir() + "/../config", "r")

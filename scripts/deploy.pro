@@ -199,7 +199,6 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/plugins.css, $$CUR_ROOT/editors/sdkjs-plugins/plugins.css)
 	copyFile($$ROOT_GIT_DIR/sdkjs-plugins/pluginBase.js, $$CUR_ROOT/editors/sdkjs-plugins/pluginBase.js)
 
-	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/symboltable, $$CUR_ROOT/editors/sdkjs-plugins/{03C18A8D-8E01-444A-86EB-EDDFA7773157})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/youtube, $$CUR_ROOT/editors/sdkjs-plugins/{38E022EA-AD92-45FC-B22B-49DF39746DB4})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/ocr, $$CUR_ROOT/editors/sdkjs-plugins/{440EBF13-9B19-4BD8-8621-05200E58140B})
 	copyDirectory($$ROOT_GIT_DIR/sdkjs-plugins/translate, $$CUR_ROOT/editors/sdkjs-plugins/{7327FC95-16DA-41D9-9AF2-0E7F449F687D})

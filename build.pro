@@ -5,7 +5,6 @@ DEPLOY_DIR=$$PWD/deploy
 CORE_ROOT_DIR=$$ROOT_DIR/core
 
 include($$CORE_ROOT_DIR/Common/base.pri)
-include($$PWD/scripts/common.pri)
 
 MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
 

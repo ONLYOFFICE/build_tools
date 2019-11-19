@@ -1,4 +1,5 @@
 import platform
+import glob
 import shutil
 import os
 import subprocess
@@ -30,7 +31,13 @@ def is_exist(path):
   return False
 
 def copy_file(src, dst):
+  if is_file(dst):
+    delete_file(dst)
   return shutil.copy2(get_path(src), get_path(dst))
+
+def copy_files(src, dst):
+  for file in glob.glob(src):
+    copy_file(file, dst)
 
 def delete_file(path):
   return os.remove(get_path(path))
@@ -51,6 +58,22 @@ def copy_dir(src, dst):
 
 def delete_dir(path):
   shutil.rmtree(get_path(path))
+
+def copy_lib(src, dst, name):
+  lib_ext = ".so"
+  if ("windows" == host_platform()):
+    lib_ext = ".dll"
+  elif ("mac" == host_platform()):
+    lib_ext = ".dylib"
+  copy_file(src + "/" + name + lib_ext, dst + "/" + name + lib_ext)
+  return
+
+def copy_exe(src, dst, name):
+  exe_ext = ""
+  if ("windows" == host_platform()):
+    exe_ext = ".exe"
+  copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
+  return
 
 def cmd(prog, args):  
   ret = 0
@@ -98,3 +121,57 @@ def git_update(repo):
   cmd("git", ["checkout", "-f", config.option("branch")])
   cmd("git", ["pull"])
   os.chdir(old_cur)
+
+def get_qt_version:
+  qtDir = get_env("QT_DEPLOY")
+  return qtDir.split("/")[-2]
+
+def get_qt_major_version:
+  qtDir = get_env("QT_DEPLOY")
+  return qtDir.split("/")[-2].split(".")[0]
+
+def copy_qt_lib(lib, dir):
+  qtDir = get_env("QT_DEPLOY")
+  if ("windows" == host_platform()):
+    copy_lib(qtDir, dir, lib)
+  else:
+    copy_file(qtDir + "/lib" + lib + ".so." + get_qt_version(), dir + "/lib" + lib + ".so." + get_qt_major_version())
+  return
+
+def _checkICU_common(dir, out):
+  isExist = False
+  for file in glob.glob(dir + "/libicu*"):
+    isExist = True
+    break
+
+  if isExist:
+    copy_files(dir + "/libicui18n*", out)
+    copy_files(dir + "/libicuuc*", out)
+    copy_files(dir + "/libicudata*", out)
+
+  return isExist
+
+def copy_qt_icu(out):
+  tests = [get_env("QT_DEPLOY") + "/../lib", "/lib", "/lib/x86_64-linux-gnu", "/lib64", "/lib64/x86_64-linux-gnu"]
+  tests += ["/usr/lib", "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib64/x86_64-linux-gnu"]
+  tests += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
+
+  for test in tests:
+    if (_checkICU_common(test, out)):
+      return True
+
+  return False
+
+def copy_qt_plugin(name, out):
+  src = get_env("QT_DEPLOY") + "/../plugins/" + name
+  if not is_dir(src):
+    return
+    
+  copy_dir(src, out + "/plugins")
+
+  for file in glob.glob(out + "/plugins/*d.dll"):
+    fileCheck = file[0:-5] + ".dll"
+    if is_file(fileCheck):
+      delete_file(file)
+    
+  return

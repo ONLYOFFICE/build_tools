@@ -25,6 +25,7 @@ def make_desktop():
     if isWindowsXP:
       apps_postfix += "_xp"
 
+    # x2t
     base.create_dir(root_dir + "/converter")
     base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "UnicodeConverter")
     base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "graphics")
@@ -40,6 +41,7 @@ def make_desktop():
     else:
       base.copy_exe(core_dir + "/build/bin/" + platform, root_dir + "/converter", "x2t")
 
+    # icu
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/converter/icuuc58.dll")
@@ -52,6 +54,7 @@ def make_desktop():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/converter/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/converter/libicuuc.58.dylib")
 
+    # doctrenderer
     if isWindowsXP:
       base.copy_lib(core_dir + "/core/build/lib/" + platform + "/xp", root_dir + "/converter", "doctrenderer")
       base.copy_files(core_dir + "/Common/3dParty/v8/v8_xp/" + platform + "/release/icudt*.dll", root_dir + "/converter/")
@@ -68,12 +71,14 @@ def make_desktop():
     if (!isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
       base.copy_exe(core_dir + "/build/lib/" + platform, root_dir, "HtmlFileInternal")
 
+    # dictionaries
     base.copy_dir(git_dir + "/dictionaries", root_dir + "/dictionaries")
     base.delete_dir(root_dir + "/dictionaries/.git")
 
     base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
+    # cef
     if not isWindowsXP:
       base.copy_files(core_dir + "core/Common/3dParty/cef/" + platform + "/build/*", root_dir + "/")
     elif (native_platform == "win_64_xp"):
@@ -85,10 +90,12 @@ def make_desktop():
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
       isUseQt = False
 
-    if (0 == platform.find("mac")):
-      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "hunspell")
-      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ooxmlsignature")
-      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ascdocumentscore")
+    # libraries
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "hunspell")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ooxmlsignature")
+    base.copy_lib(core_dir + "/build/lib/" + platform + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
+    
+    if (0 == platform.find("mac")):      
       base.copy_dir(core_dir + "/build/lib/" + platform + "/ONLYOFFICE Helper.app", root_dir + "/ONLYOFFICE Helper.app")
 
     if isUseQt:
@@ -101,16 +108,6 @@ def make_desktop():
       base.copy_qt_lib("Qt5MultimediaWidgets", root_dir)
       base.copy_qt_lib("Qt5Network", root_dir)
       base.copy_qt_lib("Qt5OpenGL", root_dir)
-
-      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "hunspell")
-      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ooxmlsignature")
-
-      if isWindowsXP:
-        base.copy_lib(core_dir + "/build/lib/" + platform + "/xp", root_dir, "ascdocumentscore")
-        base.copy_lib(core_dir + "/build/lib/" + platform + "/xp", root_dir, "videoplayer")
-      else:
-        base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ascdocumentscore")
-        base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "videoplayer")
 
       base.copy_qt_plugin("bearer", root_dir)
       base.copy_qt_plugin("iconengines", root_dir)
@@ -127,18 +124,20 @@ def make_desktop():
       base.copy_qt_plugin("styles", root_dir)
 
       if (0 == platform.find("linux")):
-        base.copy_qt_icu(root_dir)
         base.copy_qt_lib("Qt5DBus", root_dir)
         base.copy_qt_lib("Qt5X11Extras", root_dir)
         base.copy_qt_lib("Qt5XcbQpa", root_dir)
+        base.copy_qt_icu(root_dir)
         base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
       if (0 == platform.find("win")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/projicons_" + apps_postfix + ".exe", root_dir + "/DesktopEditors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/DesktopEditors_" + apps_postfix + ".exe", root_dir + "/editors.exe")
-        base.copy_file(git_dir + "desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
+        base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/DesktopEditors_" + apps_postfix, root_dir + "/DesktopEditors")
+
+      base.copy_lib(core_dir + "/build/lib/" + platform + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
       base.create_dir(root_dir + "/editors")
       base.copy_dir(base_dir + "/js/desktop/sdkjs", root_dir + "/editors/sdkjs")

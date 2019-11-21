@@ -3,13 +3,9 @@ import base
 
 def make_desktop():
   base_dir = base.get_script_dir() + "/../out"
-  core_dir = base.get_script_dir() + "/../../core"
   git_dir = base.get_script_dir() + "/../.."
-  branding = config.option("branding-name")
-  if ("" == branding):
-    branding = "onlyoffice"
-
-  is_windows = True if "windows" == base.host_platform() else False  
+  core_dir = git_dir + "/core"
+  branding = config.branding()
 
   platforms = config.option("platform").split()
   for native_platform in platforms:
@@ -19,14 +15,14 @@ def make_desktop():
     root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DesktopEditors" if is_windows else "/desktopeditors"))
     base.create_dir(root_dir)
 
+    qt_dir = base.qt_setup(native_platform)
+
     # check platform on xp
-    platform = native_platform
-    checkWindowsXP = platform.find("_xp")
-    if (-1 != checkWindowsXP):
-      platform = platform[0:checkWindowsXP]
+    isWindowsXP = False if (-1 == native_platform.find("_xp")) else True
+    platform = native_platform[0:-3] if isWindowsXP else native_platform
 
     apps_postfix = platform
-    if (-1 != checkWindowsXP):
+    if isWindowsXP:
       apps_postfix += "_xp"
 
     base.create_dir(root_dir + "/converter")
@@ -56,7 +52,7 @@ def make_desktop():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/converter/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/converter/libicuuc.58.dylib")
 
-    if (-1 != checkWindowsXP):
+    if isWindowsXP:
       base.copy_lib(core_dir + "/core/build/lib/" + platform + "/xp", root_dir + "/converter", "doctrenderer")
       base.copy_files(core_dir + "/Common/3dParty/v8/v8_xp/" + platform + "/release/icudt*.dll", root_dir + "/converter/")
     else:
@@ -69,7 +65,7 @@ def make_desktop():
     base.copy_file(git_dir + "/desktop-apps/common/converter/DoctRenderer.config", root_dir + "/converter/DoctRenderer.config")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
 
-    if (-1 == checkWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
+    if (!isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
       base.copy_exe(core_dir + "/build/lib/" + platform, root_dir, "HtmlFileInternal")
 
     base.copy_dir(git_dir + "/dictionaries", root_dir + "/dictionaries")
@@ -78,7 +74,7 @@ def make_desktop():
     base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
-    if (-1 == checkWindowsXP):
+    if not isWindowsXP:
       base.copy_files(core_dir + "core/Common/3dParty/cef/" + platform + "/build/*", root_dir + "/")
     elif (native_platform == "win_64_xp"):
       base.copy_files(core_dir + "core/Common/3dParty/cef/winxp_64/build/*", root_dir + "/")
@@ -109,7 +105,7 @@ def make_desktop():
       base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "hunspell")
       base.copy_lib(core_dir + "/build/lib/" + platform, root_dir, "ooxmlsignature")
 
-      if (-1 != checkWindowsXP):
+      if isWindowsXP:
         base.copy_lib(core_dir + "/build/lib/" + platform + "/xp", root_dir, "ascdocumentscore")
         base.copy_lib(core_dir + "/build/lib/" + platform + "/xp", root_dir, "videoplayer")
       else:

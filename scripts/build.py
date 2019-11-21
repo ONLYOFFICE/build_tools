@@ -7,33 +7,23 @@ def make():
   for platform in platforms:
     if not platform in config.platforms:
       continue
-    is_platform_32 = False
-    if (-1 != platform.find("_32")):
-      is_platform_32 = True
 
-    suff = platform + config.option("branding")
-
-    make_app = "make" if (0 != platform.find("win")) else "nmake"
+    file_suff = platform + config.option("branding")
  
-    if ("windows" == base.host_platform()):
-      base.cmd(config.option("vs-path") + "/vcvarsall.bat", ["x86" if is_platform_32 else "x64"])
+    if base.is_windows():
+      base.cmd(config.option("vs-path") + "/vcvarsall.bat", ["x86" if base.platform_is_32() else "x64"])
 
     if ("1" == config.option("clean")):
-      base.cmd(make_app, ["clean", "all", "-f", "makefiles/build.makefile_" + suff])
-      base.cmd(make_app, ["distclean", "-f", "makefiles/build.makefile_" + suff])
+      base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff])
+      base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff])
 
-    qt_dir = config.option("qt-dir") if (-1 == platform.find("xp")) else config.option("qt-dir-xp")
-    qt_dir = (qt_dir + "/" + config.options["compiler"]) if is_platform_32 else (qt_dir + "/" + config.options["compiler_64"])
+    qt_dir = base.qt_setup(platform)
+    config_param = base.qt_config(platform)
 
-    config_param = config.option("module") + " " + config.option("config")
-    if (-1 != platform.find("xp")):
-      config_param += " build_xp"
-
-    base.set_env("QT_DEPLOY", qt_dir + "/bin")
     base.set_env("OS_DEPLOY", platform)
     base.cmd(qt_dir + "/bin/qmake", ["-nocache", "build.pro", "CONFIG+=" + config_param])
     
-    base.cmd(make_app, ["-f", "makefiles/build.makefile_" + platform])
+    base.cmd(base.app_make(), ["-f", "makefiles/build.makefile_" + file_suff])
     base.delete_file(".qmake.stash")
 
   return

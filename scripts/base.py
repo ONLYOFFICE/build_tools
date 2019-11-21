@@ -6,6 +6,7 @@ import subprocess
 import sys
 import config
 
+# common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
   if ("" == file):
@@ -14,11 +15,25 @@ def get_script_dir(file=""):
   scriptDir = os.path.dirname(scriptPath)
   return scriptDir
 
+def host_platform():
+  ret = platform.system().lower()
+  if (ret == "darwin"):
+    return "mac"
+  return ret
+
 def get_path(path):
-  if "Windows" == platform.system():
+  if "Windows" == host_platform():
     return path.replace("/", "\\")
   return path
 
+def get_env(name):
+  return os.getenv(name, "")
+
+def set_env(name, value):
+  os.environ[name] = value
+  return
+
+# file system -------------------------------------------
 def is_file(path):
   return os.path.isfile(get_path(path))
 
@@ -77,6 +92,7 @@ def copy_exe(src, dst, name):
   copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
   return
 
+# system cmd methods ------------------------------------
 def cmd(prog, args):  
   ret = 0
   if ("windows" == host_platform()):
@@ -97,19 +113,7 @@ def bash(path):
   command += (".bat" if "windows" == host_platform() else ".sh")
   return cmd(command, [])
 
-def host_platform():
-  ret = platform.system().lower()
-  if (ret == "darwin"):
-    return "mac"
-  return ret
-
-def get_env(name):
-  return os.getenv(name, "")
-
-def set_env(name, value):
-  os.environ[name] = value
-  return
-
+# git ---------------------------------------------------
 def git_update(repo):
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
@@ -124,23 +128,36 @@ def git_update(repo):
   cmd("git", ["pull"])
   os.chdir(old_cur)
 
-def get_qt_version():
-  qtDir = get_env("QT_DEPLOY")
-  return qtDir.split("/")[-2]
+# qmake -------------------------------------------------
+def qt_setup(platform):
+  qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
+  qt_dir = (qt_dir + "/" + config.options["compiler"]) if is_platform_32 else (qt_dir + "/" + config.options["compiler_64"])
+  set_env("QT_DEPLOY", qt_dir + "/bin")
+  return qt_dir  
 
-def get_qt_major_version():
-  qtDir = get_env("QT_DEPLOY")
-  return qtDir.split("/")[-2].split(".")[0]
+def qt_version():
+  qt_dir = get_env("QT_DEPLOY")
+  return qt_dir.split("/")[-2]
 
-def copy_qt_lib(lib, dir):
-  qtDir = get_env("QT_DEPLOY")
+def qt_config(platform):
+  config_param = config.option("module") + " " + config.option("config")
+  if (-1 != platform.find("xp")):
+      config_param += " build_xp"
+  return config_param
+
+def qt_major_version():
+  qt_dir = get_env("QT_DEPLOY")
+  return qt_dir.split("/")[-2].split(".")[0]
+
+def qt_copy_lib(lib, dir):
+  qt_dir = get_env("QT_DEPLOY")
   if ("windows" == host_platform()):
-    copy_lib(qtDir, dir, lib)
+    copy_lib(qt_dir, dir, lib)
   else:
-    copy_file(qtDir + "/lib" + lib + ".so." + get_qt_version(), dir + "/lib" + lib + ".so." + get_qt_major_version())
+    copy_file(qt_dir + "/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
   return
 
-def _checkICU_common(dir, out):
+def _check_icu_common(dir, out):
   isExist = False
   for file in glob.glob(dir + "/libicu*"):
     isExist = True
@@ -153,27 +170,44 @@ def _checkICU_common(dir, out):
 
   return isExist
 
-def copy_qt_icu(out):
+def qt_copy_icu(out):
   tests = [get_env("QT_DEPLOY") + "/../lib", "/lib", "/lib/x86_64-linux-gnu", "/lib64", "/lib64/x86_64-linux-gnu"]
   tests += ["/usr/lib", "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib64/x86_64-linux-gnu"]
   tests += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
 
   for test in tests:
-    if (_checkICU_common(test, out)):
+    if (_check_icu_common(test, out)):
       return True
 
   return False
 
-def copy_qt_plugin(name, out):
+def qt_copy_plugin(name, out):
   src = get_env("QT_DEPLOY") + "/../plugins/" + name
   if not is_dir(src):
     return
     
   copy_dir(src, out + "/plugins")
 
-  for file in glob.glob(out + "/plugins/*d.dll"):
-    fileCheck = file[0:-5] + ".dll"
-    if is_file(fileCheck):
-      delete_file(file)
+  if ("windows" == host_platform()):
+    for file in glob.glob(out + "/plugins/*d.dll"):
+      fileCheck = file[0:-5] + ".dll"
+      if is_file(fileCheck):
+        delete_file(file)
     
   return
+
+# common ------------------------------------------------
+def is_windows():
+  if "windows" == base.host_platform():
+    return True
+  return False
+
+def platform_is_32(platform):
+  if (-1 != platform.find("_32")):
+    return True
+
+# apps
+def app_make():
+  if is_windows():
+    return "nmake"
+  return "make"

@@ -95,3 +95,9 @@ def extend_option(name, value):
     options[name] = options[name] + " " + value
   else:
     options[name] = value
+
+def branding():
+  branding = option("branding-name")
+  if ("" == branding):
+    branding = "onlyoffice"
+  return branding

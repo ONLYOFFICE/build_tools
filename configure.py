@@ -15,6 +15,10 @@ parser.add_option("--qt-dir", action="store", type="string", dest="qt-dir", defa
 parser.add_option("--compiler", action="store", type="string", dest="compiler", default="", help="compiler name")
 parser.add_option("--no-apps", action="store", type="string", dest="no-apps", default="0", help="disable build desktop apps (qt)")
 parser.add_option("--themesparams", action="store", type="string", dest="themesparams", default="", help="presentation themes thumbnails additions")
+parser.add_option("--git-protocol", action="store", type="string", dest="git-protocol", default="https", help="presentation themes thumbnails additions")
+parser.add_option("--branding", action="store", type="string", dest="branding", default="", help="branding path")
+parser.add_option("--branding-name", action="store", type="string", dest="branding", default="", help="branding name")
+parser.add_option("--branding-url", action="store", type="string", dest="branding-url", default="", help="branding url")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

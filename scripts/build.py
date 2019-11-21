@@ -34,7 +34,7 @@ def make():
     base.cmd(qt_dir + "/bin/qmake", ["-nocache", "build.pro", "CONFIG+=" + config_param])
     
     base.cmd(make_app, ["-f", "makefiles/build.makefile_" + platform])
-    base.remove_file(".qmake.stash")
+    base.delete_file(".qmake.stash")
 
   return
 

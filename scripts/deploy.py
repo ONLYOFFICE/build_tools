@@ -5,7 +5,7 @@ def make_desktop():
   base_dir = base.get_script_dir() + "/../out"
   core_dir = base.get_script_dir() + "/../../core"
   git_dir = base.get_script_dir() + "/../.."
-  branding = base.get_env("PUBLISHER_NAME")
+  branding = config.option("branding-name")
   if ("" == branding):
     branding = "onlyoffice"
 
@@ -16,7 +16,7 @@ def make_desktop():
     if not native_platform in config.platforms:
       continue
 
-    root_dir += ("/" + native_platform + "/" + branding + ("/DesktopEditors" if is_windows else "/desktopeditors")
+    root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DesktopEditors" if is_windows else "/desktopeditors"))
     base.create_dir(root_dir)
 
     # check platform on xp
@@ -29,17 +29,17 @@ def make_desktop():
     if (-1 != checkWindowsXP):
       apps_postfix += "_xp"
 
-    base.create_dir(root_dir + "/converter")	  
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "UnicodeConverter")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "graphics")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "PdfWriter")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "PdfReader")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "DjVuFile")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "XpsFile")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "HtmlFile")
-	  base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "HtmlRenderer")
+    base.create_dir(root_dir + "/converter")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "UnicodeConverter")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "graphics")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "PdfWriter")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "PdfReader")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "DjVuFile")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "XpsFile")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "HtmlFile")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "HtmlRenderer")
 
-	  if ("ios" == platform):
+    if ("ios" == platform):
       base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "x2t")
     else:
       base.copy_exe(core_dir + "/build/bin/" + platform, root_dir + "/converter", "x2t")
@@ -72,7 +72,7 @@ def make_desktop():
     if (-1 == checkWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
       base.copy_exe(core_dir + "/build/lib/" + platform, root_dir, "HtmlFileInternal")
 
-	  base.copy_dir(git_dir + "/dictionaries", root_dir + "/dictionaries")
+    base.copy_dir(git_dir + "/dictionaries", root_dir + "/dictionaries")
     base.delete_dir(root_dir + "/dictionaries/.git")
 
     base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")

@@ -33,6 +33,8 @@ def is_exist(path):
 def copy_file(src, dst):
   if is_file(dst):
     delete_file(dst)
+  if not is_file(src):
+    return
   return shutil.copy2(get_path(src), get_path(dst))
 
 def copy_files(src, dst):
@@ -65,7 +67,7 @@ def copy_lib(src, dst, name):
     lib_ext = ".dll"
   elif ("mac" == host_platform()):
     lib_ext = ".dylib"
-  copy_file(src + "/" + name + lib_ext, dst + "/" + name + lib_ext)
+  copy_file(src + "/lib" + name + lib_ext, dst + "/lib" + name + lib_ext)
   return
 
 def copy_exe(src, dst, name):
@@ -122,11 +124,11 @@ def git_update(repo):
   cmd("git", ["pull"])
   os.chdir(old_cur)
 
-def get_qt_version:
+def get_qt_version():
   qtDir = get_env("QT_DEPLOY")
   return qtDir.split("/")[-2]
 
-def get_qt_major_version:
+def get_qt_major_version():
   qtDir = get_env("QT_DEPLOY")
   return qtDir.split("/")[-2].split(".")[0]
 

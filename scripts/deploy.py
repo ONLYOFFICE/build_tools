@@ -27,6 +27,7 @@ def make_desktop():
 
     # x2t
     base.create_dir(root_dir + "/converter")
+    base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "kernel")
     base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "UnicodeConverter")
     base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "graphics")
     base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "PdfWriter")
@@ -56,14 +57,14 @@ def make_desktop():
 
     # doctrenderer
     if isWindowsXP:
-      base.copy_lib(core_dir + "/core/build/lib/" + platform + "/xp", root_dir + "/converter", "doctrenderer")
+      base.copy_lib(core_dir + "/build/lib/" + platform + "/xp", root_dir + "/converter", "doctrenderer")
       base.copy_files(core_dir + "/Common/3dParty/v8/v8_xp/" + platform + "/release/icudt*.dll", root_dir + "/converter/")
     else:
-      base.copy_lib(core_dir + "/core/build/lib/" + platform, root_dir + "/converter", "doctrenderer")
+      base.copy_lib(core_dir + "/build/lib/" + platform, root_dir + "/converter", "doctrenderer")
       if (0 == platform.find("win")):
         base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", root_dir + "/converter/")
       else:
-        base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudtl.dat", root_dir + "/converter/icudtl.dat")
+        base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/converter/icudtl.dat")
 
     base.copy_file(git_dir + "/desktop-apps/common/converter/DoctRenderer.config", root_dir + "/converter/DoctRenderer.config")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
@@ -80,11 +81,11 @@ def make_desktop():
   
     # cef
     if not isWindowsXP:
-      base.copy_files(core_dir + "core/Common/3dParty/cef/" + platform + "/build/*", root_dir + "/")
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir)
     elif (native_platform == "win_64_xp"):
-      base.copy_files(core_dir + "core/Common/3dParty/cef/winxp_64/build/*", root_dir + "/")
+      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_64/build/*", root_dir)
     else:
-      base.copy_files(core_dir + "core/Common/3dParty/cef/winxp_32/build/*", root_dir + "/")
+      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_32/build/*", root_dir)
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
@@ -140,12 +141,12 @@ def make_desktop():
       base.copy_lib(core_dir + "/build/lib/" + platform + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
       base.create_dir(root_dir + "/editors")
-      base.copy_dir(base_dir + "/js/desktop/sdkjs", root_dir + "/editors/sdkjs")
-      base.copy_dir(base_dir + "/js/desktop/web-apps", root_dir + "/editors/web-apps")
+      base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
+      base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
 
       base.create_dir(root_dir + "/editors/sdkjs-plugins")
       base.copy_file(git_dir + "/sdkjs-plugins/LICENSE.txt", root_dir + "/editors/sdkjs-plugins/LICENSE.txt")
-      base.copy_file(git_dir + "/sdkjs-plugins/README.md", root_dir + "editors/sdkjs-plugins/README.md")
+      base.copy_file(git_dir + "/sdkjs-plugins/README.md", root_dir + "/editors/sdkjs-plugins/README.md")
       base.copy_file(git_dir + "/sdkjs-plugins/plugins.css", root_dir + "/editors/sdkjs-plugins/plugins.css")
       base.copy_file(git_dir + "/sdkjs-plugins/pluginBase.js", root_dir + "/editors/sdkjs-plugins/pluginBase.js")
 
@@ -178,18 +179,11 @@ def make_desktop():
       base.copy_exe(core_dir + "/build/bin/" + platform, root_dir + "/converter", "allfontsgen")
       base.copy_exe(core_dir + "/build/bin/" + platform, root_dir + "/converter", "allthemesgen")
 
-      env_cmd = ""
-      if (0 == platform.find("linux")):
-        env_cmd = "LD_LIBRARY_PATH=" + root_dir + "/converter"
-      elif (0 == platform.find("mac")):
-        env_cmd = "DYLD_LIBRARY_PATH=" + root_dir + "/converter"
+      base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts" + "\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js" + "\"", "--selection=\"" + root_dir + "/converter/font_selection.bin" + "\""])
+      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""])
 
-      exe_ext = ".exe" if (0 == platform.find("win")) else ""
-      base.cmd(env_cmd + " " + root_dir + "/converter/allfontsgen" + exe_ext, ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts" + "\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js" + "\"", "--selection=\"" + root_dir + "/converter/font_selection.bin" + "\""])
-      base.cmd(env_cmd + " " + root_dir + "/converter/allthemesgen" + exe_ext, ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""])
-
-      base.delete_file(root_dir + "/converter/allfontsgen" + exe_ext)
-      base.delete_file(root_dir + "/converter/allthemesgen" + exe_ext)
+      base.delete_exe(root_dir + "/converter/allfontsgen")
+      base.delete_exe(root_dir + "/converter/allthemesgen")
       base.delete_file(root_dir + "/converter/AllFonts.js")
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")

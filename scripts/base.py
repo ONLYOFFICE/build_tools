@@ -54,10 +54,17 @@ def copy_file(src, dst):
 
 def copy_files(src, dst):
   for file in glob.glob(src):
-    copy_file(file, dst)
+    if is_file(file):
+      copy_file(file, dst)
+    elif is_dir(file):
+      copy_dir(file, dst + "/" + os.path.basename(file))
+  return
 
 def delete_file(path):
   return os.remove(get_path(path))
+
+def delete_exe(path):
+  return os.remove(get_path(path) + (".exe" if "windows" == host_platform() else ""))
 
 def create_dir(path):
   path2 = get_path(path)
@@ -104,6 +111,32 @@ def cmd(prog, args):
     for arg in args:
       command += (" \"" + arg + "\"")
     ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
+  if ret != 0:
+    sys.exit("Error (" + prog + "): " + str(ret))
+  return ret
+
+def cmd_exe(prog, args):
+  prog_dir = os.path.dirname(prog)
+  env_dir = os.environ
+  if ("linux" == host_platform()):
+    old = os.getenv("LD_LIBRARY_PATH", "")
+    env_dir["LD_LIBRARY_PATH"] = prog_dir + ("" if "" == old else (":" + old))
+  elif ("mac" == host_platform()):
+    old = os.getenv("DYLD_LIBRARY_PATH", "")
+    env_dir["DYLD_LIBRARY_PATH"] = prog_dir + ("" if "" == old else (":" + old))
+
+  ret = 0
+  if ("windows" == host_platform()):
+    sub_args = args[:]
+    sub_args.insert(0, get_path(prog + ".exe"))
+    process = subprocess.Popen(sub_args, stderr=subprocess.STDOUT, shell=True, env=env_dir)
+    ret = process.wait()
+  else:
+    command = prog
+    for arg in args:
+      command += (" \"" + arg + "\"")
+    process = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True, env=env_dir)
+    ret = process.wait()
   if ret != 0:
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
@@ -186,7 +219,7 @@ def qt_copy_plugin(name, out):
   if not is_dir(src):
     return
     
-  copy_dir(src, out + "/plugins")
+  copy_dir(src, out + "/" + name)
 
   if ("windows" == host_platform()):
     for file in glob.glob(out + "/plugins/*d.dll"):

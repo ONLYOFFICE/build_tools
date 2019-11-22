@@ -229,13 +229,16 @@ desktop {
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allfontsgen$$EXE_EXT, $$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
 	copyFile($$ROOT_GIT_DIR/core/build/bin/$$OS_CURRENT/allthemesgen$$EXE_EXT, $$CUR_ROOT/converter/allthemesgen$$EXE_EXT)
 
-	core_mac {
-		system(DYLD_LIBRARY_PATH=$$CUR_ROOT/converter $$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
-		system(DYLD_LIBRARY_PATH=$$CUR_ROOT/converter $$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js")
-	} else {
-		system($$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
-		system($$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js")
+	LIB_CONVERTER=
+	core_linux {
+		LIB_CONVERTER="LD_LIBRARY_PATH=$$CUR_ROOT/converter"
 	}
+	core_mac {
+		LIB_CONVERTER="DYLD_LIBRARY_PATH=$$CUR_ROOT/converter"
+	}
+
+	system($$LIB_CONVERTER $$CUR_ROOT/converter/allfontsgen$$EXE_EXT --use-system="1" --input="$$CUR_ROOT/fonts" --allfonts="$$CUR_ROOT/converter/AllFonts.js" --selection="$$CUR_ROOT/converter/font_selection.bin")
+	system($$LIB_CONVERTER $$CUR_ROOT/converter/allthemesgen$$EXE_EXT --converter-dir="$$CUR_ROOT/converter" --src="$$CUR_ROOT/editors/sdkjs/slide/themes" --output="$$CUR_ROOT/editors/sdkjs/common/Images" --allfonts="AllFonts.js" --params="$$THEMES_PARAMS")
 
 	removeFile($$CUR_ROOT/converter/allfontsgen$$EXE_EXT)
 	removeFile($$CUR_ROOT/converter/allthemesgen$$EXE_EXT)

@@ -12,7 +12,7 @@ def make_desktop():
     if not native_platform in config.platforms:
       continue
 
-    root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DesktopEditors" if is_windows else "/desktopeditors"))
+    root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DesktopEditors" if base.is_windows() else "/desktopeditors"))
     base.create_dir(root_dir)
 
     qt_dir = base.qt_setup(native_platform)
@@ -68,7 +68,7 @@ def make_desktop():
     base.copy_file(git_dir + "/desktop-apps/common/converter/DoctRenderer.config", root_dir + "/converter/DoctRenderer.config")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
 
-    if (!isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
+    if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
       base.copy_exe(core_dir + "/build/lib/" + platform, root_dir, "HtmlFileInternal")
 
     # dictionaries
@@ -99,35 +99,35 @@ def make_desktop():
       base.copy_dir(core_dir + "/build/lib/" + platform + "/ONLYOFFICE Helper.app", root_dir + "/ONLYOFFICE Helper.app")
 
     if isUseQt:
-      base.copy_qt_lib("Qt5Core", root_dir)
-      base.copy_qt_lib("Qt5Gui", root_dir)
-      base.copy_qt_lib("Qt5PrintSupport", root_dir)
-      base.copy_qt_lib("Qt5Svg", root_dir)
-      base.copy_qt_lib("Qt5Widgets", root_dir)
-      base.copy_qt_lib("Qt5Multimedia", root_dir)
-      base.copy_qt_lib("Qt5MultimediaWidgets", root_dir)
-      base.copy_qt_lib("Qt5Network", root_dir)
-      base.copy_qt_lib("Qt5OpenGL", root_dir)
+      base.qt_copy_lib("Qt5Core", root_dir)
+      base.qt_copy_lib("Qt5Gui", root_dir)
+      base.qt_copy_lib("Qt5PrintSupport", root_dir)
+      base.qt_copy_lib("Qt5Svg", root_dir)
+      base.qt_copy_lib("Qt5Widgets", root_dir)
+      base.qt_copy_lib("Qt5Multimedia", root_dir)
+      base.qt_copy_lib("Qt5MultimediaWidgets", root_dir)
+      base.qt_copy_lib("Qt5Network", root_dir)
+      base.qt_copy_lib("Qt5OpenGL", root_dir)
 
-      base.copy_qt_plugin("bearer", root_dir)
-      base.copy_qt_plugin("iconengines", root_dir)
-      base.copy_qt_plugin("imageformats", root_dir)
-      base.copy_qt_plugin("platforms", root_dir)
-      base.copy_qt_plugin("platforminputcontexts", root_dir)
-      base.copy_qt_plugin("printsupport", root_dir)
-      base.copy_qt_plugin("mediaservice", root_dir)
-      base.copy_qt_plugin("playlistformats", root_dir)
+      base.qt_copy_plugin("bearer", root_dir)
+      base.qt_copy_plugin("iconengines", root_dir)
+      base.qt_copy_plugin("imageformats", root_dir)
+      base.qt_copy_plugin("platforms", root_dir)
+      base.qt_copy_plugin("platforminputcontexts", root_dir)
+      base.qt_copy_plugin("printsupport", root_dir)
+      base.qt_copy_plugin("mediaservice", root_dir)
+      base.qt_copy_plugin("playlistformats", root_dir)
 
-      base.copy_qt_plugin("platformthemes", root_dir)
-      base.copy_qt_plugin("xcbglintegrations", root_dir)
+      base.qt_copy_plugin("platformthemes", root_dir)
+      base.qt_copy_plugin("xcbglintegrations", root_dir)
 
-      base.copy_qt_plugin("styles", root_dir)
+      base.qt_copy_plugin("styles", root_dir)
 
       if (0 == platform.find("linux")):
-        base.copy_qt_lib("Qt5DBus", root_dir)
-        base.copy_qt_lib("Qt5X11Extras", root_dir)
-        base.copy_qt_lib("Qt5XcbQpa", root_dir)
-        base.copy_qt_icu(root_dir)
+        base.qt_copy_lib("Qt5DBus", root_dir)
+        base.qt_copy_lib("Qt5X11Extras", root_dir)
+        base.qt_copy_lib("Qt5XcbQpa", root_dir)
+        base.qt_copy_icu(root_dir)
         base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
       if (0 == platform.find("win")):

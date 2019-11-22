@@ -4,3 +4,4 @@ makefiles/
 config
 **/__pycache__
 *.pyc
+*.*~

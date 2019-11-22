@@ -131,7 +131,7 @@ def git_update(repo):
 # qmake -------------------------------------------------
 def qt_setup(platform):
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
-  qt_dir = (qt_dir + "/" + config.options["compiler"]) if is_platform_32 else (qt_dir + "/" + config.options["compiler_64"])
+  qt_dir = (qt_dir + "/" + config.options["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + config.options["compiler_64"])
   set_env("QT_DEPLOY", qt_dir + "/bin")
   return qt_dir  
 
@@ -198,13 +198,14 @@ def qt_copy_plugin(name, out):
 
 # common ------------------------------------------------
 def is_windows():
-  if "windows" == base.host_platform():
+  if "windows" == host_platform():
     return True
   return False
 
 def platform_is_32(platform):
   if (-1 != platform.find("_32")):
     return True
+  return False
 
 # apps
 def app_make():

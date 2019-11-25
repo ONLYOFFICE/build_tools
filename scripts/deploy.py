@@ -167,7 +167,7 @@ def make_desktop():
         base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}", root_dir + "/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3}")
         base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}", root_dir + "/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}")
 
-      base.copy_file(base_dir + "/js/desktop/index.html", root_dir + "/index.html")
+      base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
       base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")
 
       if (0 == platform.find("win")):

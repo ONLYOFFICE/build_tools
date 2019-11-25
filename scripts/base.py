@@ -49,6 +49,7 @@ def copy_file(src, dst):
   if is_file(dst):
     delete_file(dst)
   if not is_file(src):
+    print("warning [file not exist]: " + src)
     return
   return shutil.copy2(get_path(src), get_path(dst))
 
@@ -170,7 +171,8 @@ def qt_setup(platform):
 
 def qt_version():
   qt_dir = get_env("QT_DEPLOY")
-  return qt_dir.split("/")[-2]
+  qt_dir = qt_dir.split("/")[-3]
+  return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
 def qt_config(platform):
   config_param = config.option("module") + " " + config.option("config")
@@ -179,15 +181,15 @@ def qt_config(platform):
   return config_param
 
 def qt_major_version():
-  qt_dir = get_env("QT_DEPLOY")
-  return qt_dir.split("/")[-2].split(".")[0]
+  qt_dir = qt_version()
+  return qt_dir.split(".")[0]
 
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
   if ("windows" == host_platform()):
     copy_lib(qt_dir, dir, lib)
   else:
-    copy_file(qt_dir + "/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
+    copy_file(qt_dir + "/../lib/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
   return
 
 def _check_icu_common(dir, out):

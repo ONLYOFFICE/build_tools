@@ -6,3 +6,4 @@ config
 *.pyc
 *.*~
 **~
+*.DS_Store

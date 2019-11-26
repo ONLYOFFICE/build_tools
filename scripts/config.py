@@ -55,11 +55,11 @@ def parse():
       options["compiler"] = "gcc"
       options["compiler_64"] = "gcc_64"
     elif ("mac" == host_platform):
-      options["compiler"] += "clang"
-      options["compiler_64"] += "clang_64"
+      options["compiler"] = "clang"
+      options["compiler_64"] = "clang_64"
     elif ("ios" == host_platform):
-      options["compiler"] += "ios"
-      options["compiler_64"] += "ios"
+      options["compiler"] = "ios"
+      options["compiler_64"] = "ios"
   elif ("windows" == host_platform):
     options["compiler_64"] = options["compiler"] + "_64"
   elif ("linux" == host_platform):

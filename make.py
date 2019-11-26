@@ -8,9 +8,6 @@ import deploy
 # parse configuration
 config.parse()
 
-deploy.make()
-sys.exit(4)
-
 # update
 if ("1" == config.option("update")):
   base.git_update("core")

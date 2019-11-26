@@ -49,7 +49,7 @@ def copy_file(src, dst):
   if is_file(dst):
     delete_file(dst)
   if not is_file(src):
-    print("warning [file not exist]: " + src)
+    print("copy warning [file not exist]: " + src)
     return
   return shutil.copy2(get_path(src), get_path(dst))
 
@@ -62,6 +62,9 @@ def copy_files(src, dst):
   return
 
 def delete_file(path):
+  if not is_file(path):
+    print("delete warning [file not exist]: " + src)
+    return
   return os.remove(get_path(path))
 
 def delete_exe(path):
@@ -98,6 +101,16 @@ def copy_exe(src, dst, name):
   if ("windows" == host_platform()):
     exe_ext = ".exe"
   copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
+  return
+
+def replaceInFile(path, text, textReplace):
+  filedata = ""
+  with open(get_path(path), "r") as file:
+    filedata = file.read()
+  filedata = filedata.replace(text, textReplace)
+  delete_file(path)
+  with open(get_path(path), "w") as file:
+    file.write(filedata)
   return
 
 # system cmd methods ------------------------------------

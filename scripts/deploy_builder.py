@@ -24,7 +24,7 @@ def make():
     platform = native_platform[0:-3] if isWindowsXP else native_platform
 
     core_build_dir = core_dir + "/build"
-    if ("" != config.option("branding"))
+    if ("" != config.option("branding")):
       core_build_dir += ("/" + config.option("branding"))
 
     # x2t

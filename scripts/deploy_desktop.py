@@ -28,7 +28,7 @@ def make():
       apps_postfix += "_xp"
 
     core_build_dir = core_dir + "/build"
-      if ("" != config.option("branding"))
+      if ("" != config.option("branding")):
         core_build_dir += ("/" + config.option("branding"))
 
     # x2t

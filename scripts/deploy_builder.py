@@ -27,21 +27,23 @@ def make():
     if ("" != config.option("branding")):
       core_build_dir += ("/" + config.option("branding"))
 
+    platform_postfix = platform + base.qt_dst_postfix()
+
     # x2t
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "UnicodeConverter")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "graphics")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "PdfWriter")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "PdfReader")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "DjVuFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "HtmlFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "HtmlRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "UnicodeConverter")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "graphics")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfWriter")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlRenderer")
 
     if ("ios" == platform):
-      base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "x2t")
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
     else:
-      base.copy_exe(core_build_dir + "/bin/" + platform, root_dir, "x2t")
+      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
 
     # icu
     if (0 == platform.find("win")):
@@ -58,17 +60,17 @@ def make():
 
     # doctrenderer
     if isWindowsXP:
-      base.copy_lib(core_build_dir + "/lib/" + platform + "/xp", root_dir, "doctrenderer")
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + "/xp", root_dir, "doctrenderer")
       base.copy_files(core_dir + "/Common/3dParty/v8/v8_xp/" + platform + "/release/icudt*.dll", root_dir + "/")
     else:
-      base.copy_lib(core_build_dir + "/lib/" + platform, root_dir, "doctrenderer")
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
       if (0 == platform.find("win")):
         base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", root_dir + "/")
       else:
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/icudtl.dat")
 
     # app
-    base.copy_exe(core_build_dir + "/bin/" + platform, root_dir, "docbuilder")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
     base.copy_file(git_dir + "/DocumentBuilder/DoctRenderer.config", root_dir + "/DoctRenderer.config")
     base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
     base.copy_dir(git_dir + "/DocumentBuilder/samples", root_dir + "/samples")
@@ -76,7 +78,7 @@ def make():
     # html
     base.create_dir(root_dir + "/HtmlFileInternal")
     if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
-      base.copy_exe(core_build_dir + "/lib/" + platform, root_dir + "/HtmlFileInternal", "HtmlFileInternal")
+      base.copy_exe(core_build_dir + "/lib/" + platform_postfix, root_dir + "/HtmlFileInternal", "HtmlFileInternal")
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir + "/HtmlFileInternal")
       if (0 == platform.find("win")):
         base.delete_file(root_dir + "/HtmlFileInternal/cef_sandbox.lib")

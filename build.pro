@@ -7,8 +7,12 @@ CORE_ROOT_DIR=$$ROOT_DIR/core
 include($$CORE_ROOT_DIR/Common/base.pri)
 
 MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
-
 PRO_SUFFIX=$$CORE_BUILDS_PLATFORM_PREFIX
+
+core_debug {
+	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_debug_")
+	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_debug_")
+}
 build_xp {
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
 	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_xp")

@@ -17,6 +17,9 @@ def make():
       base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff])
       base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff])
 
+    print("------------------------------------------")
+    print("BUILD_PLATFORM: " + platform)
+    print("------------------------------------------")
     qt_dir = base.qt_setup(platform)
     config_param = base.qt_config(platform)
 

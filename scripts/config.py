@@ -18,7 +18,11 @@ def parse():
 
   # all platforms
   global platforms
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "ios"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
+               "linux_64", "linux_32", 
+               "mac_64", 
+               "ios", 
+               "android_arm64_v8a", "android_armv7", "android_x86"]
 
   # correction
   host_platform = base.host_platform()
@@ -46,28 +50,8 @@ def parse():
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
 
-  # correct compiler
-  if ("" == option("compiler")):
-    if ("windows" == host_platform):
-      options["compiler"] = "msvc2015"
-      options["compiler_64"] = "msvc2015_64"
-    elif ("linux" == host_platform):
-      options["compiler"] = "gcc"
-      options["compiler_64"] = "gcc_64"
-    elif ("mac" == host_platform):
-      options["compiler"] = "clang"
-      options["compiler_64"] = "clang_64"
-    elif ("ios" == host_platform):
-      options["compiler"] = "ios"
-      options["compiler_64"] = "ios"
-  elif ("windows" == host_platform):
-    options["compiler_64"] = options["compiler"] + "_64"
-  elif ("linux" == host_platform):
-    options["compiler_64"] = options["compiler"] + "_64"
-  elif ("mac" == host_platform):
-    options["compiler_64"] = options["compiler"] + "_64"
-  else:
-    options["compiler_64"] = options["compiler"]
+  if check_option("platform", "android"):
+    options["platform"] += " android_arm64_v8a android_armv7 android_x86"
 
   # check vs-path
   if ("windows" == host_platform):
@@ -76,6 +60,34 @@ def parse():
       options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
 
   return
+
+def check_compiler(platform):
+  compiler = {}
+  compiler["compiler"] = option("compiler")
+  compiler["compiler_64"] = compiler["compiler"] + "_64"
+
+  if ("" != compiler["compiler"]):
+    if ("ios" == platform):
+      compiler["compiler_64"] = compiler["compiler"]
+    return compiler
+
+  if (0 == platform.find("win")):
+    compiler["compiler"] = "msvc2015"
+    compiler["compiler_64"] = "msvc2015_64"
+  elif (0 == platform.find("linux")):
+    compiler["compiler"] = "gcc"
+    compiler["compiler_64"] = "gcc_64"
+  elif (0 == platform.find("mac")):
+    compiler["compiler"] = "clang"
+    compiler["compiler_64"] = "clang_64"
+  elif ("ios" == platform):
+    compiler["compiler"] = "ios"
+    compiler["compiler_64"] = "ios"
+  elif (0 == platform.find("android")):
+    compiler["compiler"] = platform
+    compiler["compiler_64"] = platform
+
+  return compiler
 
 def check_option(name, value):
   if not name in options:

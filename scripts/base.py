@@ -184,8 +184,9 @@ def git_update(repo):
 
 # qmake -------------------------------------------------
 def qt_setup(platform):
+  compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
-  qt_dir = (qt_dir + "/" + config.options["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + config.options["compiler_64"])
+  qt_dir = (qt_dir + "/" + compiler["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + compiler["compiler_64"])
   set_env("QT_DEPLOY", qt_dir + "/bin")
   return qt_dir  
 
@@ -196,8 +197,15 @@ def qt_version():
 
 def qt_config(platform):
   config_param = config.option("module") + " " + config.option("config")
+  config_param_lower = config_param.lower()
   if (-1 != platform.find("xp")):
-      config_param += " build_xp"
+    config_param += " build_xp"
+  if ("ios" == platform):
+    config_param += " iphoneos device"
+    if (-1 == config_param_lower.find("debug")):
+      config_param += " release"
+
+  print("CONFIG: " + config_param)
   return config_param
 
 def qt_major_version():
@@ -250,6 +258,12 @@ def qt_copy_plugin(name, out):
         delete_file(file)
     
   return
+
+def qt_dst_postfix():
+  config_param = config.option("config").lower()
+  if (-1 != config_param.find("debug")):
+    return "/debug"
+  return ""
 
 # common ------------------------------------------------
 def is_windows():

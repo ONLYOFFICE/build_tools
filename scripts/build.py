@@ -26,6 +26,21 @@ def make():
     base.cmd(base.app_make(), ["-f", "makefiles/build.makefile_" + file_suff])
     base.delete_file(".qmake.stash")
 
+    if ("mac_64" == platform):
+      configuration = "Release" if (-1 == config_param.lower().find("debug")) else "Debug"
+      base.cmd("xcodebuild", ["-project", 
+        "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore/ascdocumentscore.xcodeproj", 
+        "-target", 
+        "ascdocumentscore",
+        "-configuration",
+        configuration])
+      base.cmd("xcodebuild", ["-project", 
+        "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore Helper/ONLYOFFICE Helper.xcodeproj", 
+        "-target", 
+        "ONLYOFFICE Helper",
+        "-configuration",
+        configuration])
+
   return
 
 # JS build

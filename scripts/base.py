@@ -33,6 +33,13 @@ def set_env(name, value):
   os.environ[name] = value
   return
 
+def configure_common_apps():
+  if ("windows" == host_platform()):
+    os.environ["PATH"] = get_script_dir() + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
+  elif ("mac" == host_platform()):
+    os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
+  return
+
 # file system -------------------------------------------
 def is_file(path):
   return os.path.isfile(get_path(path))

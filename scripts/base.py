@@ -201,11 +201,12 @@ def qt_config(platform):
   if (-1 != platform.find("xp")):
     config_param += " build_xp"
   if ("ios" == platform):
+    set_env("BITCODE_GENERATION_MODE", "bitcode")
+    set_env("ENABLE_BITCODE", "YES")
+    config_param = config_param.replace("desktop", "")
     config_param += " iphoneos device"
     if (-1 == config_param_lower.find("debug")):
       config_param += " release"
-
-  print("CONFIG: " + config_param)
   return config_param
 
 def qt_major_version():

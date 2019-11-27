@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import config
+import codecs
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -100,7 +101,14 @@ def copy_lib(src, dst, name):
     lib_ext = ".dll"
   elif ("mac" == host_platform()):
     lib_ext = ".dylib"
-  copy_file(src + "/lib" + name + lib_ext, dst + "/lib" + name + lib_ext)
+  file_src = src + "/lib" + name
+  if not is_file(file_src + lib_ext):
+    if is_file(file_src + ".a"):
+      lib_ext = ".a"
+    elif is_file(file_src + ".lib"):
+      lib_ext = ".lib"
+
+  copy_file(file_src + lib_ext, dst + "/lib" + name + lib_ext)
   return
 
 def copy_exe(src, dst, name):
@@ -282,3 +290,42 @@ def app_make():
   if is_windows():
     return "nmake"
   return "make"
+
+# doctrenderer.config
+def generate_doctrenderer_config(path, root, product):
+  content = "<Settings>"
+
+  content += ("<file>" + root + "sdkjs/common/Native/native.js</file>")
+  content += ("<file>" + root + "sdkjs/common/Native/jquery_native.js</file>")
+  content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>")
+
+  vendor_dir = "sdkjs" if (product == "builder") else "web-apps"
+  content += ("<file>" + root + vendor_dir + "/vendor/xregexp/xregexp-all-min.js</file>")
+  content += ("<htmlfile>" + root + vendor_dir + "/vendor/jquery/jquery.min.js</htmlfile>")
+
+  content += "<DoctSdk>"
+  content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
+  content += ("<file>" + root + "sdkjs/word/sdk-all.js</file>")
+  content += "</DoctSdk>"
+  content += "<PpttSdk>"
+  content += ("<file>" + root + "sdkjs/slide/sdk-all-min.js</file>")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
+  content += ("<file>" + root + "sdkjs/slide/sdk-all.js</file>")
+  content += "</PpttSdk>"
+  content += "<XlstSdk>"
+  content += ("<file>" + root + "sdkjs/cell/sdk-all-min.js</file>")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
+  content += ("<file>" + root + "sdkjs/cell/sdk-all.js</file>")
+  content += "</XlstSdk>"
+
+  if ("desktop" == product):
+    content += "<htmlnoxvfb/>"
+
+  content = "</Settings>"
+
+  file = codecs.open(path, "w", "utf-8")
+  file.write(content)
+  file.close()
+  return
+

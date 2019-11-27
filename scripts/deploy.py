@@ -8,4 +8,6 @@ def make():
     deploy_desktop.make()
   if config.check_option("module", "builder"):
     deploy_builder.make()
+  if config.check_option("module", "server"):
+    deploy_server.make()
   return

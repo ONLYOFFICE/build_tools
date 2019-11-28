@@ -191,9 +191,9 @@ def make():
 
       themes_params = []
       if ("" != config.option("themesparams")):
-        themesparams = ["--params=\"" + config.option("themesparams") + "\""]
+        themes_params = ["--params=\"" + config.option("themesparams") + "\""]
       base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts" + "\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js" + "\"", "--selection=\"" + root_dir + "/converter/font_selection.bin" + "\""])
-      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""] + themesparams)
+      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""] + themes_params)
 
       base.delete_exe(root_dir + "/converter/allfontsgen")
       base.delete_exe(root_dir + "/converter/allthemesgen")

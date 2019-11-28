@@ -19,7 +19,7 @@ parser.add_option("--no-apps", action="store", type="string", dest="no-apps", de
 parser.add_option("--themesparams", action="store", type="string", dest="themesparams", default="", help="presentation themes thumbnails additions")
 parser.add_option("--git-protocol", action="store", type="string", dest="git-protocol", default="https", help="presentation themes thumbnails additions")
 parser.add_option("--branding", action="store", type="string", dest="branding", default="", help="branding path")
-parser.add_option("--branding-name", action="store", type="string", dest="branding", default="", help="branding name")
+parser.add_option("--branding-name", action="store", type="string", dest="branding-name", default="", help="branding name")
 parser.add_option("--branding-url", action="store", type="string", dest="branding-url", default="", help="branding url")
 parser.add_option("--sdkjs-addon", action="append", type="string", dest="sdkjs-addons", default=[], help="sdkjs addons")
 
@@ -28,9 +28,13 @@ configOptions = vars(options)
 
 configStore = open(os.path.dirname(os.path.realpath(__file__)) + "/config","w+")
 for option in configOptions:
+  writeOption = ""
   if (isinstance(configOptions[option], list)):
-    configStore.write(option + "=\"" + ", ".join(configOptions[option]) + "\"\n")
+  	writeOption = ", ".join(configOptions[option])
   else:
-    configStore.write(option + "=\"" + configOptions[option] + "\"\n")
+  	writeOption = configOptions[option]
+
+  if ("" != writeOption):
+    configStore.write(option + "=\"" + writeOption + "\"\n")
 
 configStore.close()

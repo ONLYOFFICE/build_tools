@@ -349,3 +349,11 @@ def sdkjs_addons_param():
     if name in config.sdkjs_addons:
       params.append("--addon=" + config.sdkjs_addons[name])
   return params
+
+# common apps
+def download(url, dst):
+  cmd_exe("curl", ["-L", "-o", dst, url])
+
+def extract(src, dst):
+  app = "7za" if ("mac" == host_platform()) else "7z"
+  cmd_exe(app, ["x", "-y", src, "-o", dst])

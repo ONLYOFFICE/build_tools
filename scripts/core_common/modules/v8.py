@@ -1,0 +1,175 @@
+#!/usr/bin/env python
+
+import sys
+sys.path.append('../..')
+import config
+import base
+import os
+
+def make():
+  print("[fetch & build]: v8")
+
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
+  old_cur = os.getcwd()
+  os.chdir(base_dir)
+
+  if ("windows" == base.host_platform()):
+    base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
+    base.set_env("GYP_MSVS_VERSION", "2015")
+
+  if not base.is_dir("depot_tools"):
+    base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+
+  os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
+
+  base.cmd("glient", [])
+
+  # --------------------------------------------------------------------------
+  # fetch
+  if not base.is_dir("v8"):
+    base.cmd("./depot_tools/fetch", ["v8"])
+    os.chdir(base_dir + "/v8")
+    base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"])
+    os.chdir(base_dir)
+
+  base.cmd("gclient", ["sync"])
+
+  if ("linux" == base.host_platform()):
+    if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):
+      base.delete_dir("v8/third_party/binutils/Linux_x64/Release")
+    if base.is_dir("v8/third_party/binutils/Linux_ia32/Release"):
+      base.delete_dir("v8/third_party/binutils/Linux_ia32/Release")
+
+    base.cmd("gclient", ["sync", "--no-history"])
+
+    if base.is_dir("v8/third_party/binutils/Linux_x64/Release/bin"):
+      for file in os.listdir("v8/third_party/binutils/Linux_x64/Release/bin"):
+        name = file.split("/")[-1]
+        if ("ld.gold" != name):
+          base.cmd("mv", ["v8/third_party/binutils/Linux_x64/Release/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/old_" + name])
+          base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/" + name])
+
+    if base.is_dir("v8/third_party/binutils/Linux_ia32/Release/bin"):
+      for file in os.listdir("v8/third_party/binutils/Linux_ia32/Release/bin"):
+        name = file.split("/")[-1]
+        if ("ld.gold" != name):
+          base.cmd("mv", ["v8/third_party/binutils/Linux_ia32/Release/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/old_" + name])
+          base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/" + name])
+
+  # --------------------------------------------------------------------------
+  # build
+  base_args64 = "target_cpu=\"x64\" v8_target_cpu=\"x64\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  base_args32 = "target_cpu=\"x86\" v8_target_cpu=\"x86\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+
+  if config.check_option("platform", "linux_64"):
+    base.cmd("gn", ["gen", "out.gn/linux_64", "--args='is_debug=false " + base_args64 + " is_clang=false use_sysroot=false'"])
+    base.cmd("ninja", ["-C", "out.gn/linux_64"])
+
+  if config.check_option("platform", "linux_32"):
+    base.cmd("gn", ["gen", "out.gn/linux_32", "--args='is_debug=false " + base_args32 + " is_clang=false use_sysroot=false'"])
+    base.cmd("ninja", ["-C", "out.gn/linux_32"])
+
+  if config.check_option("platform", "mac_64"):
+    base.replaceInFile("build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
+    base.cmd("gn", ["gen", "out.gn/mac_64", "--args='is_debug=false " + base_args64 + "'"])
+    base.cmd("ninja", ["-C", "out.gn/mac_64"])
+
+  if ("windows" == base.host_platform()):
+    base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")    
+
+  if config.check_option("platform", "win_64"):
+    if (-1 != config.option("config").lower().find("debug")):
+      base.cmd("gn", ["gen", "out.gn/win_64/debug", "--args='is_debug=true " + base_args64 + " is_clang=false'"])
+      base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
+
+    base.cmd("gn", ["gen", "out.gn/win_64/release", "--args='is_debug=false " + base_args64 + " is_clang=false'"])
+    base.cmd("ninja", ["-C", "out.gn/win_64/release"])
+
+  if config.check_option("platform", "win_32"):
+    if (-1 != config.option("config").lower().find("debug")):
+      base.cmd("gn", ["gen", "out.gn/win_32/debug", "--args='is_debug=true " + base_args32 + " is_clang=false'"])
+      base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
+
+    base.cmd("gn", ["gen", "out.gn/win_32/release", "--args='is_debug=false " + base_args32 + " is_clang=false'"])
+    base.cmd("ninja", ["-C", "out.gn/win_32/release"])
+
+  os.chdir(old_cur)
+
+  if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
+    make_xp()
+
+  return
+
+def make_xp():
+  print("[fetch & build]: v8_xp")
+
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"
+  old_cur = os.getcwd()
+  os.chdir(base_dir)
+
+  if ("windows" == base.host_platform()):
+    base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
+    base.set_env("GYP_MSVS_VERSION", "2015")
+
+  if not base.is_dir("depot_tools"):
+    base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+
+  os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + base_dir + "depot_tools/win_tools-2_7_13_chromium7_bin/python/bin" + os.pathsep + os.environ["PATH"]
+
+  # --------------------------------------------------------------------------
+  # fetch
+  if not base.is_dir("v8"):
+    base.cmd("./depot_tools/fetch", ["v8"])
+    base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"])
+
+  # fix projects
+  projects = ["v8/tools/gyp/v8_base_0.vcxproj",
+              "v8/tools/gyp/v8_base_1.vcxproj",
+              "v8/tools/gyp/v8_base_2.vcxproj",
+              "v8/tools/gyp/v8_base_3.vcxproj",
+              "v8/tools/gyp/v8_libbase.vcxproj",
+              "v8/tools/gyp/v8_libplatform.vcxproj",
+              "v8/tools/gyp/v8_nosnapshot.vcxproj",
+              "v8/tools/gyp/mksnapshot.vcxproj",
+              "v8/third_party/icu/icui18n.vcxproj",
+              "v8/third_party/icu/icuuc.vcxproj"]
+
+  base.cmd("python", ["v8/build/gyp_v8", "-Dtarget_arch=x64"])
+
+  for file in projects:
+    base.replaceInFile(file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
+    base.replaceInFile(file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+
+  if config.check_option("platform", "win_64_xp"):
+    base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Release"])
+    base.create_dir("win_64_xp/release")
+    base.copy_files("v8/build/Release/lib/*", "win_64_xp/release/")
+    base.copy_file("v8/build/Release/icudt.dll", "win_64_xp/release/icudt.dll")
+   
+    if (-1 != config.option("config").lower().find("debug")):
+      base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Debug"])
+      base.create_dir("win_64_xp/debug")
+      base.copy_files("v8/build/Debug/lib/*", "win_64_xp/debug/")
+      base.copy_file("v8/build/Debug/icudt.dll", "win_64_xp/debug/icudt.dll")
+
+  base.cmd("python", ["v8/build/gyp_v8"])
+
+  for file in projects:
+    base.replaceInFile(file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
+    base.replaceInFile(file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+
+  if config.check_option("platform", "win_32_xp"):
+    base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Release"])
+    base.create_dir("win_32_xp/release")
+    base.copy_files("v8/build/Release/lib/*", "win_32_xp/release/")
+    base.copy_file("v8/build/Release/icudt.dll", "win_32_xp/release/icudt.dll")
+   
+    if (-1 != config.option("config").lower().find("debug")):
+      base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Debug"])
+      base.create_dir("win_32_xp/debug")
+      base.copy_files("v8/build/Debug/lib/*", "win_32_xp/debug/")
+      base.copy_file("v8/build/Debug/icudt.dll", "win_32_xp/debug/icudt.dll")
+
+
+  os.chdir(old_cur)
+  return

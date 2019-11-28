@@ -2,10 +2,12 @@
 
 import sys
 sys.path.append('scripts')
+sys.path.append('scripts/core_common')
 import config
 import base
 import build
 import deploy
+import make_3dParty
 
 # parse configuration
 config.parse()
@@ -33,7 +35,7 @@ base.set_env("BUILD_PLATFORM", config.option("platform"))
 base.configure_common_apps()
 
 # core 3rdParty
-base.bash(base_dir + "/../core/Common/3dParty/make")
+make_3dParty.make()
 
 # build updmodule for desktop (only for windows version)
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):

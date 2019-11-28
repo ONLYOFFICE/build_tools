@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import config
 import base
 import deploy_desktop

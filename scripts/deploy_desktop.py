@@ -74,7 +74,7 @@ def make():
       else:
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/converter/icudtl.dat")
 
-    base.copy_file(git_dir + "/desktop-apps/common/converter/DoctRenderer.config", root_dir + "/converter/DoctRenderer.config")
+    base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
 
     if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):

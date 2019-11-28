@@ -71,7 +71,7 @@ def make():
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
-    base.copy_file(git_dir + "/DocumentBuilder/DoctRenderer.config", root_dir + "/DoctRenderer.config")
+    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
     base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
     base.copy_dir(git_dir + "/DocumentBuilder/samples", root_dir + "/samples")
 

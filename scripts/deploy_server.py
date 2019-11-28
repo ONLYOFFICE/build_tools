@@ -32,6 +32,7 @@ def make():
     base.create_dir(root_dir)
 
     qt_dir = base.qt_setup(native_platform)
+    platform = native_platform
 
     core_build_dir = core_dir + "/build"
     if ("" != config.option("branding")):

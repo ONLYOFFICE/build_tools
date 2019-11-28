@@ -295,39 +295,57 @@ def app_make():
 
 # doctrenderer.config
 def generate_doctrenderer_config(path, root, product):
-  content = "<Settings>"
+  content = "<Settings>\n"
 
-  content += ("<file>" + root + "sdkjs/common/Native/native.js</file>")
-  content += ("<file>" + root + "sdkjs/common/Native/jquery_native.js</file>")
-  content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>")
+  content += ("<file>" + root + "sdkjs/common/Native/native.js</file>\n")
+  content += ("<file>" + root + "sdkjs/common/Native/jquery_native.js</file>\n")
+  content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>\n")
 
   vendor_dir = "sdkjs" if (product == "builder") else "web-apps"
-  content += ("<file>" + root + vendor_dir + "/vendor/xregexp/xregexp-all-min.js</file>")
-  content += ("<htmlfile>" + root + vendor_dir + "/vendor/jquery/jquery.min.js</htmlfile>")
+  content += ("<file>" + root + vendor_dir + "/vendor/xregexp/xregexp-all-min.js</file>\n")
+  content += ("<htmlfile>" + root + vendor_dir + "/vendor/jquery/jquery.min.js</htmlfile>\n")
 
-  content += "<DoctSdk>"
-  content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
-  content += ("<file>" + root + "sdkjs/word/sdk-all.js</file>")
-  content += "</DoctSdk>"
-  content += "<PpttSdk>"
-  content += ("<file>" + root + "sdkjs/slide/sdk-all-min.js</file>")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
-  content += ("<file>" + root + "sdkjs/slide/sdk-all.js</file>")
-  content += "</PpttSdk>"
-  content += "<XlstSdk>"
-  content += ("<file>" + root + "sdkjs/cell/sdk-all-min.js</file>")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>")
-  content += ("<file>" + root + "sdkjs/cell/sdk-all.js</file>")
-  content += "</XlstSdk>"
+  content += "<DoctSdk>\n"
+  content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>\n")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
+  content += ("<file>" + root + "sdkjs/word/sdk-all.js</file>\n")
+  content += "</DoctSdk>\n"
+  content += "<PpttSdk>\n"
+  content += ("<file>" + root + "sdkjs/slide/sdk-all-min.js</file>\n")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
+  content += ("<file>" + root + "sdkjs/slide/sdk-all.js</file>\n")
+  content += "</PpttSdk>\n"
+  content += "<XlstSdk>\n"
+  content += ("<file>" + root + "sdkjs/cell/sdk-all-min.js</file>\n")
+  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
+  content += ("<file>" + root + "sdkjs/cell/sdk-all.js</file>\n")
+  content += "</XlstSdk>\n"
 
   if ("desktop" == product):
-    content += "<htmlnoxvfb/>"
+    content += "<htmlnoxvfb/>\n"
 
-  content = "</Settings>"
+  content += "</Settings>"
 
   file = codecs.open(path, "w", "utf-8")
   file.write(content)
   file.close()
   return
 
+def sdkjs_addons_checkout():
+  if ("" == config.option("sdkjs-addons")):
+    return
+  addons_list = config.option("sdkjs-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.sdkjs_addons:
+      git_update(config.sdkjs_addons[name])
+  return
+
+def sdkjs_addons_param():
+  if ("" == config.option("sdkjs-addons")):
+    return ""
+  params = []
+  addons_list = config.option("sdkjs-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.sdkjs_addons:
+      params.append("--addon=" + config.sdkjs_addons[name])
+  return params

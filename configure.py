@@ -21,12 +21,16 @@ parser.add_option("--git-protocol", action="store", type="string", dest="git-pro
 parser.add_option("--branding", action="store", type="string", dest="branding", default="", help="branding path")
 parser.add_option("--branding-name", action="store", type="string", dest="branding", default="", help="branding name")
 parser.add_option("--branding-url", action="store", type="string", dest="branding-url", default="", help="branding url")
+parser.add_option("--sdkjs-addon", action="append", type="string", dest="sdkjs-addons", default=[], help="sdkjs addons")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)
 
 configStore = open(os.path.dirname(os.path.realpath(__file__)) + "/config","w+")
 for option in configOptions:
-	configStore.write(option + "=\"" + configOptions[option] + "\"\n")
+  if (isinstance(configOptions[option], list)):
+    configStore.write(option + "=\"" + ", ".join(configOptions[option]) + "\"\n")
+  else:
+    configStore.write(option + "=\"" + configOptions[option] + "\"\n")
 
 configStore.close()

@@ -4,6 +4,7 @@ import config
 import base
 import deploy_desktop
 import deploy_builder
+import deploy_server
 
 def make():
   if config.check_option("module", "desktop"):

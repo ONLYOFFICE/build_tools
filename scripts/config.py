@@ -61,6 +61,10 @@ def parse():
     if ("" != base.get_env("ProgramFiles(x86)")):
       options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
 
+  global sdkjs_addons
+  sdkjs_addons = {}
+  sdkjs_addons["comparison"] = "sdkjs-comparison"
+
   return
 
 def check_compiler(platform):

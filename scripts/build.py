@@ -63,11 +63,11 @@ def build_interface( directory ):
   return
 
 def build_sdk_desktop( directory ):
-  _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"])
+  _run_npm(directory)  
+  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param())
   return
 
 def build_sdk_builder( directory ):
   _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED"])
+  _run_grunt(directory, ["--level=ADVANCED"] + base.sdkjs_addons_param())
   return

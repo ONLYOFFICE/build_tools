@@ -361,21 +361,22 @@ def extract(src, dst):
 # windows vcvarsall
 def _query_vcvarsall(arch):
   vcvarsall = config.option("vs-path") + "/vcvarsall.bat"
-  interesting = set(("include", "lib", "libpath", "path"))
+  interesting = set(("INCLUDE", "LIB", "LIBPATH", "PATH"))
   result = {}
 
+  keys = ""
   popen = subprocess.Popen('"%s" %s & set' % (vcvarsall, arch), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   try:
     stdout, stderr = popen.communicate()
     popen.wait()
 
-    stdout = stdout.decode("mbcs")
-    for line in stdout.split("\n"):
+    lines = stdout.split("\n")
+    for line in lines:
       if '=' not in line:
         continue
       line = line.strip()
       key, value = line.split('=', 1)
-      key = key.lower()
+      key = key.upper()
       if key in interesting:
         if value.endswith(os.pathsep):
           value = value[:-1]
@@ -389,7 +390,9 @@ def _query_vcvarsall(arch):
 
 def call_vcvarsall(arch):
   vc_env = _query_vcvarsall(arch)
-  os.environ['path'] = vc_env['path'].encode('mbcs')
-  os.environ['libpath'] = vc_env['libpath'].encode('mbcs')
-  os.environ['lib'] = vc_env['lib'].encode('mbcs')
-  os.environ['include'] = vc_env['include'].encode('mbcs')
+  #print(vc_env)
+  os.environ['PATH'] = vc_env['PATH']
+  os.environ['LIB'] = vc_env['LIB']
+  os.environ['LIBPATH'] = vc_env['LIBPATH']
+  os.environ['INCLUDE'] = vc_env['INCLUDE']
+  return

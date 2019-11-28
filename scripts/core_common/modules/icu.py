@@ -26,7 +26,7 @@ def make():
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)
         base.call_vcvarsall("x64" if ("win_64" == platform) else "x86")
-        base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=\"" + ("X64" if ("win_64" == platform) else "Win32") + "\""])
+        base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
         bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
         base.create_dir(platform + "/build")
         base.copy_file(bin_dir + "icudt" + icu_major + ".dll", platform + "/build/")

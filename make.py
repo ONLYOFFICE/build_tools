@@ -3,11 +3,12 @@
 import sys
 sys.path.append('scripts')
 sys.path.append('scripts/core_common')
+sys.path.append('scripts/core_common/modules')
 import config
 import base
 import build
 import deploy
-import make_3dParty
+import make_common
 
 # parse configuration
 config.parse()

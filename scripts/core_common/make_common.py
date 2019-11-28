@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append('modules')
-sys.path.append('../')
+sys.path.append('..')
 
 import config
 import base

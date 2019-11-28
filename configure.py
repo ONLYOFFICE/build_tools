@@ -14,6 +14,7 @@ parser.add_option("--module", action="store", type="string", dest="module", defa
 parser.add_option("--platform", action="store", type="string", dest="platform", default="native", help="destination platform build [all: windows(win_64, win_32, win_64_xp, win_32_xp), linux(linux_64, linux_32), mac(mac_64); combination: native | win_64 | win_32 | win_64_xp | win_32_xp | linux_64 | mac_64 | ios | android")
 parser.add_option("--config", action="store", type="string", dest="config", default="", help="qmake CONFIG addition")
 parser.add_option("--qt-dir", action="store", type="string", dest="qt-dir", default="", help="qt (qmake) directory")
+parser.add_option("--qt-dir-xp", action="store", type="string", dest="qt-dir", default="", help="qt for Windows XP (qmake) directory")
 parser.add_option("--compiler", action="store", type="string", dest="compiler", default="", help="compiler name")
 parser.add_option("--no-apps", action="store", type="string", dest="no-apps", default="0", help="disable build desktop apps (qt)")
 parser.add_option("--themesparams", action="store", type="string", dest="themesparams", default="", help="presentation themes thumbnails additions")

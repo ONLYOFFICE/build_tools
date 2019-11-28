@@ -36,7 +36,7 @@ base.set_env("BUILD_PLATFORM", config.option("platform"))
 base.configure_common_apps()
 
 # core 3rdParty
-make_3dParty.make()
+make_common.make()
 
 # build updmodule for desktop (only for windows version)
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):

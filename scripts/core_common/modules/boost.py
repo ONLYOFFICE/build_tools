@@ -21,34 +21,42 @@ def make():
 
   if not base.is_dir("boost_1_58_0"):
     base.extract("boost_1_58_0.7z", "./")
-  
+
+  os.chdir("boost_1_58_0")
+
   # build
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
-    if (-1 != config.option("platform").find("win_64")):
+    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("build/win_64/static"):      
+      base.cmd("bootstrap.bat")
       base.create_dir("build/win_64")
       base.cmd("b2.exe", ["--clean"])
       base.cmd("bjam.exe", ["link=static", "--with-regex", "--toolset=" + win_toolset, "address-model=64"])
+      base.create_dir("build/win_64/static")
       base.copy_files("stage/lib/*", "build/win_64/static/")
-    if (-1 != config.option("platform").find("win_32")):
-      base.create_dir("build/win_64")
+    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("build/win_32/static"):
+      base.cmd("bootstrap.bat")
+      base.create_dir("build/win_32")
       base.cmd("b2.exe", ["--clean"])
       base.cmd("bjam.exe", ["link=static", "--with-regex", "--toolset=" + win_toolset])
-      base.copy_files("stage/lib/*", "build/win_64/static/")
+      base.create_dir("build/win_32/static")
+      base.copy_files("stage/lib/*", "build/win_32/static/")
 
-  if (-1 != config.option("platform").find("linux")):
+  if (-1 != config.option("platform").find("linux")) and not base.is_dir("build/linux_64/static"):
     base.cmd("./bootstrap.sh", ["--with-libraries=regex"])
     base.create_dir("build/linux_64")
     base.cmd("b2", ["--clean"])
     base.cmd("bjam", ["link=static"])
+    base.create_dir("build/linux_64/static")
     base.copy_files("stage/lib/*", "build/linux_64/static/")
     # TODO: support x86
 
-  if (-1 != config.option("platform").find("mac")):
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("build/mac_64/static"):
     base.cmd("./bootstrap.sh", ["--with-libraries=regex"])
     base.create_dir("build/mac_64")
     base.cmd("b2", ["--clean"])
     base.cmd("bjam", ["link=static"])
+    base.create_dir("build/mac_64/static")
     base.copy_files("stage/lib/*", "build/mac_64/static/")
 
   if (-1 != config.option("platform").find("ios")):

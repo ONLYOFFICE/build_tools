@@ -25,7 +25,7 @@ def host_platform():
   return ret
 
 def get_path(path):
-  if "Windows" == host_platform():
+  if "windows" == host_platform():
     return path.replace("/", "\\")
   return path
 
@@ -131,7 +131,7 @@ def replaceInFile(path, text, textReplace):
   return
 
 # system cmd methods ------------------------------------
-def cmd(prog, args):  
+def cmd(prog, args=[]):  
   ret = 0
   if ("windows" == host_platform()):
     sub_args = args[:]
@@ -356,4 +356,40 @@ def download(url, dst):
 
 def extract(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
-  cmd_exe(app, ["x", "-y", src, "-o", dst])
+  cmd_exe(app, ["x", "-y", src, "-o" + dst])
+
+# windows vcvarsall
+def _query_vcvarsall(arch):
+  vcvarsall = config.option("vs-path") + "/vcvarsall.bat"
+  interesting = set(("include", "lib", "libpath", "path"))
+  result = {}
+
+  popen = subprocess.Popen('"%s" %s & set' % (vcvarsall, arch), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+
+    stdout = stdout.decode("mbcs")
+    for line in stdout.split("\n"):
+      if '=' not in line:
+        continue
+      line = line.strip()
+      key, value = line.split('=', 1)
+      key = key.lower()
+      if key in interesting:
+        if value.endswith(os.pathsep):
+          value = value[:-1]
+        result[key] = value
+
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+
+  return result
+
+def call_vcvarsall(arch):
+  vc_env = _query_vcvarsall(arch)
+  os.environ['path'] = vc_env['path'].encode('mbcs')
+  os.environ['libpath'] = vc_env['libpath'].encode('mbcs')
+  os.environ['lib'] = vc_env['lib'].encode('mbcs')
+  os.environ['include'] = vc_env['include'].encode('mbcs')

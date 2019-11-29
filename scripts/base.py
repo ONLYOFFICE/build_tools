@@ -9,6 +9,8 @@ import sys
 import config
 import codecs
 
+
+
 # common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
@@ -131,7 +133,7 @@ def replaceInFile(path, text, textReplace):
   return
 
 # system cmd methods ------------------------------------
-def cmd(prog, args=[]):  
+def cmd(prog, args=[], is_no_errors=False):  
   ret = 0
   if ("windows" == host_platform()):
     sub_args = args[:]
@@ -142,7 +144,18 @@ def cmd(prog, args=[]):
     for arg in args:
       command += (" \"" + arg + "\"")
     ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
-  if ret != 0:
+  if ret != 0 and True != is_no_errors:
+    sys.exit("Error (" + prog + "): " + str(ret))
+  return ret
+
+def cmd2(prog, args=[], is_no_errors=False):  
+  ret = 0
+  command = prog if ("windows" != host_platform()) else get_path(prog)
+  for arg in args:
+    command += (" " + arg)
+  print(command)
+  ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
+  if ret != 0 and True != is_no_errors:
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
@@ -359,7 +372,7 @@ def extract(src, dst):
   cmd_exe(app, ["x", "-y", src, "-o" + dst])
 
 # windows vcvarsall
-def _query_vcvarsall(arch):
+def _call_vcvarsall_and_return_env(arch):
   vcvarsall = config.option("vs-path") + "/vcvarsall.bat"
   interesting = set(("INCLUDE", "LIB", "LIBPATH", "PATH"))
   result = {}
@@ -388,11 +401,18 @@ def _query_vcvarsall(arch):
 
   return result
 
-def call_vcvarsall(arch):
-  vc_env = _query_vcvarsall(arch)
-  #print(vc_env)
+global _old_environment
+_old_environment = os.environ.copy()
+
+def vcvarsall_start(arch):
+  _old_environment = os.environ.copy()
+  vc_env = _call_vcvarsall_and_return_env(arch)
   os.environ['PATH'] = vc_env['PATH']
   os.environ['LIB'] = vc_env['LIB']
   os.environ['LIBPATH'] = vc_env['LIBPATH']
   os.environ['INCLUDE'] = vc_env['INCLUDE']
+  return
+
+def vcvarsall_end():
+  os.environ = _old_environment.copy()
   return

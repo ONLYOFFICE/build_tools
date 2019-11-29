@@ -13,7 +13,7 @@ def make():
     file_suff = platform + config.option("branding")
  
     if base.is_windows():
-      base.cmd(config.option("vs-path") + "/vcvarsall.bat", ["x86" if base.platform_is_32() else "x64"])
+      base.vcvarsall_start("x86" if base.platform_is_32(platform) else "x64")
 
     if ("1" == config.option("clean")):
       base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff])
@@ -30,6 +30,9 @@ def make():
     
     base.cmd(base.app_make(), ["-f", "makefiles/build.makefile_" + file_suff])
     base.delete_file(".qmake.stash")
+
+    if base.is_windows():
+      base.vcvarsall_end()
 
     if ("mac_64" == platform):
       configuration = "Release" if (-1 == config_param.lower().find("debug")) else "Debug"

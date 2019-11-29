@@ -22,75 +22,81 @@ def make():
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
-  base.cmd("glient", [])
+  if not base.is_dir("v8/out.gn"):
+    base.cmd("gclient")
 
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.cmd("./depot_tools/fetch", ["v8"])
+    base.cmd("fetch", ["v8"])
     os.chdir(base_dir + "/v8")
-    base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"])
+    base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"], True)
     os.chdir(base_dir)
 
-  base.cmd("gclient", ["sync"])
+  # --------------------------------------------------------------------------
+  # correct
+  if not base.is_dir("v8/out.gn"):
+    base.cmd("gclient", ["sync"], True)
 
-  if ("linux" == base.host_platform()):
-    if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):
-      base.delete_dir("v8/third_party/binutils/Linux_x64/Release")
-    if base.is_dir("v8/third_party/binutils/Linux_ia32/Release"):
-      base.delete_dir("v8/third_party/binutils/Linux_ia32/Release")
+    if ("linux" == base.host_platform()):
+      if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):
+        base.delete_dir("v8/third_party/binutils/Linux_x64/Release")
+      if base.is_dir("v8/third_party/binutils/Linux_ia32/Release"):
+        base.delete_dir("v8/third_party/binutils/Linux_ia32/Release")
 
-    base.cmd("gclient", ["sync", "--no-history"])
+      base.cmd("gclient", ["sync", "--no-history"])
 
-    if base.is_dir("v8/third_party/binutils/Linux_x64/Release/bin"):
-      for file in os.listdir("v8/third_party/binutils/Linux_x64/Release/bin"):
-        name = file.split("/")[-1]
-        if ("ld.gold" != name):
-          base.cmd("mv", ["v8/third_party/binutils/Linux_x64/Release/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/old_" + name])
-          base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/" + name])
+      if base.is_dir("v8/third_party/binutils/Linux_x64/Release/bin"):
+        for file in os.listdir("v8/third_party/binutils/Linux_x64/Release/bin"):
+          name = file.split("/")[-1]
+          if ("ld.gold" != name):
+            base.cmd("mv", ["v8/third_party/binutils/Linux_x64/Release/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/old_" + name])
+            base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/" + name])
 
-    if base.is_dir("v8/third_party/binutils/Linux_ia32/Release/bin"):
-      for file in os.listdir("v8/third_party/binutils/Linux_ia32/Release/bin"):
-        name = file.split("/")[-1]
-        if ("ld.gold" != name):
-          base.cmd("mv", ["v8/third_party/binutils/Linux_ia32/Release/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/old_" + name])
-          base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/" + name])
+      if base.is_dir("v8/third_party/binutils/Linux_ia32/Release/bin"):
+        for file in os.listdir("v8/third_party/binutils/Linux_ia32/Release/bin"):
+          name = file.split("/")[-1]
+          if ("ld.gold" != name):
+            base.cmd("mv", ["v8/third_party/binutils/Linux_ia32/Release/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/old_" + name])
+            base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_ia32/Release/bin/" + name])
+
+    if ("windows" == base.host_platform()):
+      base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
 
   # --------------------------------------------------------------------------
   # build
-  base_args64 = "target_cpu=\"x64\" v8_target_cpu=\"x64\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
-  base_args32 = "target_cpu=\"x86\" v8_target_cpu=\"x86\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  os.chdir("v8")
+
+  base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
   if config.check_option("platform", "linux_64"):
-    base.cmd("gn", ["gen", "out.gn/linux_64", "--args='is_debug=false " + base_args64 + " is_clang=false use_sysroot=false'"])
+    base.cmd("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=false use_sysroot=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):
-    base.cmd("gn", ["gen", "out.gn/linux_32", "--args='is_debug=false " + base_args32 + " is_clang=false use_sysroot=false'"])
+    base.cmd("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=false use_sysroot=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   if config.check_option("platform", "mac_64"):
     base.replaceInFile("build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
-    base.cmd("gn", ["gen", "out.gn/mac_64", "--args='is_debug=false " + base_args64 + "'"])
+    base.cmd("gn", ["gen", "out.gn/mac_64", "--args=\"is_debug=false " + base_args64 + "\""])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
-
-  if ("windows" == base.host_platform()):
-    base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")    
 
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd("gn", ["gen", "out.gn/win_64/debug", "--args='is_debug=true " + base_args64 + " is_clang=false'"])
+      base.cmd("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
 
-    base.cmd("gn", ["gen", "out.gn/win_64/release", "--args='is_debug=false " + base_args64 + " is_clang=false'"])
+    base.cmd2("gn", ["gen", "out.gn/win_64/release", "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
     base.cmd("ninja", ["-C", "out.gn/win_64/release"])
 
   if config.check_option("platform", "win_32"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd("gn", ["gen", "out.gn/win_32/debug", "--args='is_debug=true " + base_args32 + " is_clang=false'"])
+      base.cmd2("gn", ["gen", "out.gn/win_32/debug", "--args=\"is_debug=true " + base_args32 + " is_clang=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
 
-    base.cmd("gn", ["gen", "out.gn/win_32/release", "--args='is_debug=false " + base_args32 + " is_clang=false'"])
+    base.cmd2("gn", ["gen", "out.gn/win_32/release", "--args=\"is_debug=false " + base_args32 + " is_clang=false\""])
     base.cmd("ninja", ["-C", "out.gn/win_32/release"])
 
   os.chdir(old_cur)

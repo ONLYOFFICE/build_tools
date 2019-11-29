@@ -20,19 +20,26 @@ def make():
     base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu"])
 
   if ("windows" == base.host_platform()):
-    for platform in ["win_64", "win_32"]:
+    need_platforms = []
+    if (-1 != config.option("platform").find("win_64")):
+      need_platforms.append("win_64")
+    if (-1 != config.option("platform").find("win_32")):
+      need_platforms.append("win_32")
+    for platform in need_platforms:
       if not config.check_option("platform", platform):
         continue
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)
-        base.call_vcvarsall("x64" if ("win_64" == platform) else "x86")
+        base.vcvarsall_start("x64" if ("win_64" == platform) else "x86")
         base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
+        base.vcvarsall_end()
         bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
+        lib_dir = "icu/lib64/" if ("win_64" == platform) else "icu/lib/"
         base.create_dir(platform + "/build")
         base.copy_file(bin_dir + "icudt" + icu_major + ".dll", platform + "/build/")
         base.copy_file(bin_dir + "icuuc" + icu_major + ".dll", platform + "/build/")
-        base.copy_file(bin_dir + "icudt.lib", platform + "/build/")
-        base.copy_file(bin_dir + "icuuc.lib", platform + "/build/")
+        base.copy_file(lib_dir + "icudt.lib", platform + "/build/")
+        base.copy_file(lib_dir + "icuuc.lib", platform + "/build/")
 
   platform = ""
   if ("linux" == base.host_platform()):

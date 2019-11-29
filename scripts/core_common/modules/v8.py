@@ -28,7 +28,7 @@ def make():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.cmd("fetch", ["v8"])
+    base.cmd("fetch", ["v8"], True)
     os.chdir(base_dir + "/v8")
     base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"], True)
     os.chdir(base_dir)
@@ -62,6 +62,8 @@ def make():
 
     if ("windows" == base.host_platform()):
       base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
+    if ("mac" == base.host_platform()):
+      base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")  
 
   # --------------------------------------------------------------------------
   # build
@@ -71,21 +73,20 @@ def make():
   base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
   if config.check_option("platform", "linux_64"):
-    base.cmd("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=false use_sysroot=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=false use_sysroot=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):
-    base.cmd("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=false use_sysroot=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=false use_sysroot=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   if config.check_option("platform", "mac_64"):
-    base.replaceInFile("build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
-    base.cmd("gn", ["gen", "out.gn/mac_64", "--args=\"is_debug=false " + base_args64 + "\""])
+    base.cmd2("gn", ["gen", "out.gn/mac_64", "--args=\"is_debug=false " + base_args64 + "\""])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
+      base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
 
     base.cmd2("gn", ["gen", "out.gn/win_64/release", "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
@@ -125,57 +126,56 @@ def make_xp():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.cmd("./depot_tools/fetch", ["v8"])
-    base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"])
+    base.cmd("./depot_tools/fetch", ["v8"], True)
+    base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
 
-  # fix projects
-  projects = ["v8/tools/gyp/v8_base_0.vcxproj",
-              "v8/tools/gyp/v8_base_1.vcxproj",
-              "v8/tools/gyp/v8_base_2.vcxproj",
-              "v8/tools/gyp/v8_base_3.vcxproj",
-              "v8/tools/gyp/v8_libbase.vcxproj",
-              "v8/tools/gyp/v8_libplatform.vcxproj",
-              "v8/tools/gyp/v8_nosnapshot.vcxproj",
-              "v8/tools/gyp/mksnapshot.vcxproj",
-              "v8/third_party/icu/icui18n.vcxproj",
-              "v8/third_party/icu/icuuc.vcxproj"]
-
-  base.cmd("python", ["v8/build/gyp_v8", "-Dtarget_arch=x64"])
-
-  for file in projects:
-    base.replaceInFile(file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
-    base.replaceInFile(file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+  # save common py script
+  base.save_as_script("v8/build/common_xp.py", [
+    "import os",
+    "def replaceInFile(path, text, textReplace):",
+    "  filedata = '';",
+    "  with open(path, 'r') as file:",
+    "    filedata = file.read()",
+    "  filedata = filedata.replace(text, textReplace)",
+    "  os.remove(path)",
+    "  with open(path, 'w') as file:",
+    "    file.write(filedata)",
+    "  return",
+    "",
+    "projects = ['v8/tools/gyp/v8_base_0.vcxproj', 'v8/tools/gyp/v8_base_1.vcxproj', 'v8/tools/gyp/v8_base_2.vcxproj', 'v8/tools/gyp/v8_base_3.vcxproj',",
+    "'v8/tools/gyp/v8_libbase.vcxproj', 'v8/tools/gyp/v8_libplatform.vcxproj', 'v8/tools/gyp/v8_nosnapshot.vcxproj', 'v8/tools/gyp/mksnapshot.vcxproj',",
+    "'v8/third_party/icu/icui18n.vcxproj', 'v8/third_party/icu/icuuc.vcxproj']",
+    "",
+    "for file in projects:",
+    "  replaceInFile(file, '<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>')",
+    "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
+    ]);
 
   if config.check_option("platform", "win_64_xp"):
-    base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Release"])
-    base.create_dir("win_64_xp/release")
-    base.copy_files("v8/build/Release/lib/*", "win_64_xp/release/")
-    base.copy_file("v8/build/Release/icudt.dll", "win_64_xp/release/icudt.dll")
+    if not base.is_dir("win_32_xp/release") and not base.is_dir("win_64_xp/release"):
+      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Release"])
+      base.create_dir("win_64_xp/release")
+      base.copy_files("v8/build/Release/lib/*", "win_64_xp/release/")
+      base.copy_file("v8/build/Release/icudt.dll", "win_64_xp/release/icudt.dll")
    
-    if (-1 != config.option("config").lower().find("debug")):
-      base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Debug"])
+    if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_64_xp/debug"):
+      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Debug"])
       base.create_dir("win_64_xp/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_64_xp/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_64_xp/debug/icudt.dll")
 
-  base.cmd("python", ["v8/build/gyp_v8"])
-
-  for file in projects:
-    base.replaceInFile(file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>")
-    base.replaceInFile(file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
-
   if config.check_option("platform", "win_32_xp"):
-    base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Release"])
-    base.create_dir("win_32_xp/release")
-    base.copy_files("v8/build/Release/lib/*", "win_32_xp/release/")
-    base.copy_file("v8/build/Release/icudt.dll", "win_32_xp/release/icudt.dll")
+    if not base.is_dir("win_32_xp/release"):
+      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Release"])
+      base.create_dir("win_32_xp/release")
+      base.copy_files("v8/build/Release/lib/*", "win_32_xp/release/")
+      base.copy_file("v8/build/Release/icudt.dll", "win_32_xp/release/icudt.dll")
    
-    if (-1 != config.option("config").lower().find("debug")):
-      base.cmd("devenv", ["v8/tools/gyp/v8.sln", "/Rebuild", "Debug"])
+    if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_32_xp/debug"):
+      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Debug"])
       base.create_dir("win_32_xp/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_32_xp/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32_xp/debug/icudt.dll")
-
 
   os.chdir(old_cur)
   return

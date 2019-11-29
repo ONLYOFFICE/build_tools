@@ -9,8 +9,6 @@ import sys
 import config
 import codecs
 
-
-
 # common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
@@ -415,4 +413,24 @@ def vcvarsall_start(arch):
 
 def vcvarsall_end():
   os.environ = _old_environment.copy()
+  return
+
+def run_as_bat(lines):
+  name = "tmp.bat"
+  content = "\n".join(lines)
+
+  file = codecs.open(name, "w", "utf-8")
+  file.write(content)
+  file.close()
+
+  cmd(name)
+  #delete_file(name)
+  return
+
+def save_as_script(path, lines):
+  content = "\n".join(lines)
+
+  file = codecs.open(path, "w", "utf-8")
+  file.write(content)
+  file.close()
   return

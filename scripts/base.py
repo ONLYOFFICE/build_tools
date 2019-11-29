@@ -353,7 +353,7 @@ def sdkjs_addons_checkout():
 
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
-    return ""
+    return []
   params = []
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:

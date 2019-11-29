@@ -19,7 +19,7 @@ def make():
   if not base.is_dir("openssl"):
     base.cmd("git", ["clone", "--depth=1", "https://github.com/openssl/openssl.git"])
 
-  os.chdir(base_dir + "openssl")
+  os.chdir(base_dir + "/openssl")
   if not base.is_file("Makefile"):
     base.cmd("./config", ["no-shared", "no-asm"])
 

@@ -52,13 +52,15 @@ def make():
     if not base.is_dir(platform + "/build"):
       base.replaceInFile("./icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
 
-  if ("" != platform):
+  if ("" != platform) and not base.is_dir(platform + "/build"):
     base.create_dir(platform)
-    base.cmd("icu/source/runConfigureICU", [platform])
+    os.chdir("icu/source")
+    base.cmd("./runConfigureICU", ["Linux" if "linux" == base.host_platform() else "MacOSX"])
     old_dest_dir = base.get_env("DESTDIR")
     base.set_env("DESTDIR", platform)
     base.cmd("make", ["install"])
     base.set_env("DESTDIR", old_dest_dir)
+    os.chdir("../..")
     base.create_dir(platform + "/build")
     if ("linux_64" == platform):
       base.copy_file("icu/source/lib/libicudata.so." + icu_major + "." + icu_minor, platform + "/build/libicudata.so." + icu_major)

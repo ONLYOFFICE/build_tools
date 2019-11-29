@@ -121,7 +121,11 @@ def make_xp():
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
 
-  os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + base_dir + "depot_tools/win_tools-2_7_13_chromium7_bin/python/bin" + os.pathsep + os.environ["PATH"]
+  old_path = os.environ["PATH"]
+  os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
+    base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
+    config.option("vs-path") + "/../Common7/IDE",
+    os.environ["PATH"]])
 
   # --------------------------------------------------------------------------
   # fetch
@@ -153,29 +157,30 @@ def make_xp():
 
   if config.check_option("platform", "win_64_xp"):
     if not base.is_dir("win_32_xp/release") and not base.is_dir("win_64_xp/release"):
-      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Release"])
+      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Release"])
       base.create_dir("win_64_xp/release")
       base.copy_files("v8/build/Release/lib/*", "win_64_xp/release/")
       base.copy_file("v8/build/Release/icudt.dll", "win_64_xp/release/icudt.dll")
    
     if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_64_xp/debug"):
-      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Debug"])
+      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
       base.create_dir("win_64_xp/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_64_xp/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_64_xp/debug/icudt.dll")
 
   if config.check_option("platform", "win_32_xp"):
     if not base.is_dir("win_32_xp/release"):
-      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Release"])
+      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Release"])
       base.create_dir("win_32_xp/release")
       base.copy_files("v8/build/Release/lib/*", "win_32_xp/release/")
       base.copy_file("v8/build/Release/icudt.dll", "win_32_xp/release/icudt.dll")
    
     if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_32_xp/debug"):
-      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8.sln /Rebuild Debug"])
+      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
       base.create_dir("win_32_xp/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_32_xp/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32_xp/debug/icudt.dll")
 
+  os.environ["PATH"] = old_path
   os.chdir(old_cur)
   return

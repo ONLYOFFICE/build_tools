@@ -40,7 +40,7 @@ def make():
       base.copy_files(platform + "/cef_binary/Resources/*", platform + "/build/")
 
     if (0 == platform.find("linux")):
-      base.cmd("chmod", ["a+xr", platform + "build/locales"])
+      base.cmd("chmod", ["a+xr", platform + "/build/locales"])
 
     if ("mac_64" == platform):
       base.cmd("mv", [platform + "/cef_binary", platform + "/build/Chromium Embedded Framework.framework"])

@@ -45,8 +45,8 @@ def make():
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("build/linux_64/static"):
     base.cmd("./bootstrap.sh", ["--with-libraries=regex"])
     base.create_dir("build/linux_64")
-    base.cmd("b2", ["--clean"])
-    base.cmd("bjam", ["link=static"])
+    base.cmd("./b2", ["--clean"])
+    base.cmd("./bjam", ["link=static"])
     base.create_dir("build/linux_64/static")
     base.copy_files("stage/lib/*", "build/linux_64/static/")
     # TODO: support x86
@@ -54,8 +54,8 @@ def make():
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("build/mac_64/static"):
     base.cmd("./bootstrap.sh", ["--with-libraries=regex"])
     base.create_dir("build/mac_64")
-    base.cmd("b2", ["--clean"])
-    base.cmd("bjam", ["link=static"])
+    base.cmd("./b2", ["--clean"])
+    base.cmd("./bjam", ["link=static"])
     base.create_dir("build/mac_64/static")
     base.copy_files("stage/lib/*", "build/mac_64/static/")
 

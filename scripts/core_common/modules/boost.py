@@ -60,7 +60,8 @@ def make():
     base.copy_files("stage/lib/*", "build/mac_64/static/")
 
   if (-1 != config.option("platform").find("ios")):
-    base.bash("boost_ios")
+    os.chdir("../")
+    base.bash("./boost_ios")
 
   os.chdir(old_cur)
   return

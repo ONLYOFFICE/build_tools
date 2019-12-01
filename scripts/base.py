@@ -434,3 +434,28 @@ def save_as_script(path, lines):
   file.write(content)
   file.close()
   return
+
+def get_file_last_modified_url(url):
+  curl_command = 'curl --head %s' % (url)
+  print(curl_command)
+  popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  retvalue = ""
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+
+    lines = stdout.split("\n")
+    for line in lines:
+      if ':' not in line:
+        continue
+      line = line.strip()
+      key, value = line.split(':', 1)
+      key = key.upper()
+      if key == "Last-Modified":
+        retvalue = value
+
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+
+  return retvalue

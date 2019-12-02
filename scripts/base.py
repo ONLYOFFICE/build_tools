@@ -211,6 +211,7 @@ def bash(path):
 
 # git ---------------------------------------------------
 def git_update(repo):
+  print("[git] update: " + repo)
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
@@ -221,7 +222,7 @@ def git_update(repo):
     is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)
-  cmd("git", ["fetch"])
+  cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
     cmd("git", ["checkout", "-f", config.option("branch")])
   cmd("git", ["pull"])

@@ -22,7 +22,6 @@ if ("1" == config.option("update")):
   base.git_update("web-apps")
   base.git_update("desktop-sdk")
   base.git_update("dictionaries")
-  base.git_update("core")
 
   if config.check_option("module", "builder"):
     base.git_update("DocumentBuilder")

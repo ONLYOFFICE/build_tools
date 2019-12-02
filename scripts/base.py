@@ -215,12 +215,15 @@ def git_update(repo):
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
+  is_not_exit = False
   if not is_dir(folder):
     cmd("git", ["clone", url, folder])
+    is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)
   cmd("git", ["fetch"])
-  cmd("git", ["checkout", "-f", config.option("branch")])
+  if is_not_exit or ("1" != config.option("update-light")):
+    cmd("git", ["checkout", "-f", config.option("branch")])
   cmd("git", ["pull"])
   os.chdir(old_cur)
 

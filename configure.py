@@ -8,6 +8,7 @@ arguments = sys.argv[1:]
 
 parser = optparse.OptionParser()
 parser.add_option("--update", action="store", type="string", dest="update", default="1", help="is need update")
+parser.add_option("--update-light", action="store", type="string", dest="update-light", default="", help="is need light update (if not exist: clone & go to branch, else: pull)")
 parser.add_option("--branch", action="store", type="string", dest="branch", default="master", help="branch all repo [used only if update==1]")
 parser.add_option("--clean", action="store", type="string", dest="clean", default="1", help="clean build")
 parser.add_option("--module", action="store", type="string", dest="module", default="builder", help="list build modules [desktop | builder]")

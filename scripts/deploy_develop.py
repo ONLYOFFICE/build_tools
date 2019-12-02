@@ -7,7 +7,12 @@ import os
 def make():
   git_dir = base.get_script_dir() + "/../.."
   old_cur = os.getcwd()
-  os.chdir(git_dir + "/server/FileConverter/bin")
+
+  work_dir = git_dir + "/server/FileConverter/bin"
+  if not base.is_dir(work_dir):
+    base.create_dir(work_dir)
+
+  os.chdir(work_dir)
 
   arch = "x64"
   arch2 = "_64"

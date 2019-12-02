@@ -74,3 +74,11 @@ def build_sdk_builder( directory ):
   _run_npm(directory)
   _run_grunt(directory, ["--level=ADVANCED"] + base.sdkjs_addons_param())
   return
+
+def build_js_develop( root_dir ):
+  _run_npm(root_dir + "/sdkjs/build")
+  _run_grunt(root_dir + "/sdkjs/build", ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"] + base.sdkjs_addons_param())
+  _run_npm(root_dir + "/web-apps/build")
+  _run_npm(root_dir + "/web-apps/build/sprites")
+  _run_grunt(root_dir + "/web-apps/build/sprites", [])
+  return

@@ -30,10 +30,21 @@ if ("1" == config.option("update")):
   if config.check_option("module", "desktop"):
     base.git_update("desktop-apps")
 
+  if config.check_option("module", "develop"):
+    base.git_update("server")
+    base.git_update("document-server-integration")
+    base.git_update("core-fonts")
+
 base_dir = base.get_script_dir(__file__)
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
 base.configure_common_apps()
+
+# developing...
+if ("develop" == config.option("module")):
+  build.build_js_develop(base_dir + "/..")
+  deploy.make()
+  exit(0)
 
 # core 3rdParty
 make_common.make()

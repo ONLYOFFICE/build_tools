@@ -103,14 +103,20 @@ def copy_lib(src, dst, name):
     lib_ext = ".dll"
   elif ("mac" == host_platform()):
     lib_ext = ".dylib"
-  file_src = src + "/lib" + name
+  file_src = src + "/"
+  if not ("windows" == host_platform()):
+    file_src += "lib"
+  file_src += name
   if not is_file(file_src + lib_ext):
     if is_file(file_src + ".a"):
       lib_ext = ".a"
     elif is_file(file_src + ".lib"):
       lib_ext = ".lib"
 
-  copy_file(file_src + lib_ext, dst + "/lib" + name + lib_ext)
+  lib_dst = dst + "/"
+  if not ("windows" == host_platform()):
+    lib_dst += "lib"
+  copy_file(file_src + lib_ext, lib_dst + name + lib_ext)
   return
 
 def copy_exe(src, dst, name):
@@ -128,6 +134,21 @@ def replaceInFile(path, text, textReplace):
   delete_file(path)
   with open(get_path(path), "w") as file:
     file.write(filedata)
+  return
+
+def readFile(path):
+  if not is_file(path):
+    return ""
+  filedata = ""
+  with open(get_path(path), "r") as file:
+    filedata = file.read()
+  return filedata
+
+def writeFile(path, data):
+  if is_file(path):
+    delete_file(path)
+  with open(get_path(path), "w") as file:
+    file.write(data)
   return
 
 # system cmd methods ------------------------------------
@@ -298,6 +319,9 @@ def platform_is_32(platform):
     return True
   return False
 
+def host_platform_is64():
+  return platform.machine().endswith("64")
+
 # apps
 def app_make():
   if is_windows():
@@ -305,16 +329,24 @@ def app_make():
   return "make"
 
 # doctrenderer.config
-def generate_doctrenderer_config(path, root, product):
+def generate_doctrenderer_config(path, root, product, vendor = ""):
   content = "<Settings>\n"
 
   content += ("<file>" + root + "sdkjs/common/Native/native.js</file>\n")
   content += ("<file>" + root + "sdkjs/common/Native/jquery_native.js</file>\n")
-  content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>\n")
 
-  vendor_dir = "sdkjs" if (product == "builder") else "web-apps"
-  content += ("<file>" + root + vendor_dir + "/vendor/xregexp/xregexp-all-min.js</file>\n")
-  content += ("<htmlfile>" + root + vendor_dir + "/vendor/jquery/jquery.min.js</htmlfile>\n")
+  if ("server" != product):
+    content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>\n")
+  else:
+    content += ("<file>./AllFonts.js</file>\n")
+
+  vendor_dir = vendor
+  if ("" == vendor_dir):
+    vendor_dir = "sdkjs" if (product == "builder") else "web-apps"
+    vendor_dir = root + vendor_dir + "/vendor/"
+
+  content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
+  content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")
 
   content += "<DoctSdk>\n"
   content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>\n")
@@ -437,7 +469,6 @@ def save_as_script(path, lines):
 
 def get_file_last_modified_url(url):
   curl_command = 'curl --head %s' % (url)
-  print(curl_command)
   popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   retvalue = ""
   try:
@@ -451,7 +482,7 @@ def get_file_last_modified_url(url):
       line = line.strip()
       key, value = line.split(':', 1)
       key = key.upper()
-      if key == "Last-Modified":
+      if key == "LAST-MODIFIED":
         retvalue = value
 
   finally:

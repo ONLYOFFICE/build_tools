@@ -2,3 +2,8 @@ out/
 makefiles/
 .qmake.stash
 config
+**/__pycache__
+*.pyc
+*.*~
+**~
+*.DS_Store

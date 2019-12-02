@@ -76,9 +76,7 @@ def make():
     base.delete_dir(git_dir + "/fonts")
   base.create_dir(git_dir + "/fonts")
 
-  if (old_data_url == data_url):
-    print("-----------------------------------------------------------")
-
+  print("-----------------------------------------------------------")
   print("All fonts generation... -----------------------------------")
   print("-----------------------------------------------------------")
   base.cmd_exe("allfontsgen", ["--input=../../../core-fonts", "--allfonts-web=../../../sdkjs/common/AllFonts.js", "--allfonts=./AllFonts.js",

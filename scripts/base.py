@@ -225,7 +225,7 @@ def git_update(repo):
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
     cmd("git", ["checkout", "-f", config.option("branch")])
-  cmd("git", ["pull"])
+  cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
   os.chdir(old_cur)
 
 # qmake -------------------------------------------------

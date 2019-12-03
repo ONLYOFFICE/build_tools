@@ -42,12 +42,12 @@ base.configure_common_apps()
 
 # developing...
 if ("develop" == config.option("module")):
-  build.build_js_develop(base_dir + "/..")
+  build_js.build_js_develop(base_dir + "/..")
   deploy.make()
   exit(0)
 
 # check only js builds
-if ("1" == base.get_env("OO_ONLY_BUILD_JS"))
+if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
   build_js.build()
   exit(0)
 

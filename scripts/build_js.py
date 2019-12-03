@@ -5,7 +5,7 @@ import base
 
 # make build.pro
 def make():
-  if ("1" == base.get_env("OO_NO_BUILD_JS"))
+  if ("1" == base.get_env("OO_NO_BUILD_JS")):
     return
 
   base_dir = base.get_script_dir() + "/.."

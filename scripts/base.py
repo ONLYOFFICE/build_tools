@@ -205,10 +205,10 @@ def cmd_exe(prog, args):
   return ret
 
 def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
-  dir = base.get_path(directory)
+  dir = get_path(directory)
   cur_dir = os.getcwd()
   os.chdir(dir)
-  ret = base.cmd(prog, args, is_no_errors)
+  ret = cmd(prog, args, is_no_errors)
   os.chdir(cur_dir)
   return ret
 

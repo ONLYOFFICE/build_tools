@@ -87,6 +87,22 @@ def make():
   print("-----------------------------------------------------------")
   base.cmd_exe("allthemesgen", ["--converter-dir=\"" + git_dir + "/server/FileConverter/bin\"", "--src=\"" + git_dir + "/sdkjs/slide/themes\"", "--output=\"" + git_dir + "/sdkjs/common/Images\""])
 
+  # add directories to open directories
+  data_local_devel = "{\n"
+  data_local_devel += "\"services\": {\n"
+  data_local_devel += "\"CoAuthoring\": {"
+  data_local_devel += "\"server\": {\n"
+  data_local_devel += "\"static_content\": {\n"
+  for addon in config.sdkjs_addons:
+    data_local_devel + "\"/" + config.sdkjs_addons[addon] + "\" : { \"path\": \"../../../" + config.sdkjs_addons[addon] + "\" },"
+  data_local_devel = data_local_devel[:-1]
+  data_local_devel += "}\n"
+  data_local_devel += "}\n"
+  data_local_devel += "}\n"
+  data_local_devel += "}\n"
+  data_local_devel += "}\n"
+  base.writeFile(git_dir + "/server/Common/config/local-development-windows.json", data_local_devel)
+
   os.chdir(old_cur)
   return
 

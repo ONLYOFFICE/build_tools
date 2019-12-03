@@ -73,7 +73,7 @@ def copy_files(src, dst):
 
 def delete_file(path):
   if not is_file(path):
-    print("delete warning [file not exist]: " + src)
+    print("delete warning [file not exist]: " + path)
     return
   return os.remove(get_path(path))
 

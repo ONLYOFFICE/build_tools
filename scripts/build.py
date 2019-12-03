@@ -49,37 +49,7 @@ def make():
         "-configuration",
         configuration])
 
-  return
+  if config.check_option("module", "builder") and base.is_windows():
+    base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
 
-# JS build
-def _run_npm( directory ):
-  dir = base.get_path(directory)
-  return base.cmd("npm", ["--prefix", dir, "install", dir])
-
-def _run_grunt( directory, params=[] ):
-  dir = base.get_path(directory)
-  return base.cmd("grunt", ["--base", dir] + params)
-
-def build_interface( directory ):
-  _run_npm(directory)
-  _run_grunt(directory, ["--force"])
-  return
-
-def build_sdk_desktop( directory ):
-  _run_npm(directory)  
-  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param())
-  return
-
-def build_sdk_builder( directory ):
-  _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED"] + base.sdkjs_addons_param())
-  return
-
-def build_js_develop( root_dir ):
-  _run_npm(root_dir + "/sdkjs/build")
-  _run_grunt(root_dir + "/sdkjs/build", ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"] + base.sdkjs_addons_param())
-  _run_grunt(root_dir + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
-  _run_npm(root_dir + "/web-apps/build")
-  _run_npm(root_dir + "/web-apps/build/sprites")
-  _run_grunt(root_dir + "/web-apps/build/sprites", [])
   return

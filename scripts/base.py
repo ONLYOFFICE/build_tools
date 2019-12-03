@@ -204,6 +204,14 @@ def cmd_exe(prog, args):
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
+def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
+  dir = base.get_path(directory)
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  ret = base.cmd(prog, args, is_no_errors)
+  os.chdir(cur_dir)
+  return ret
+
 def bash(path):
   command = get_path(path)
   command += (".bat" if "windows" == host_platform() else ".sh")

@@ -7,6 +7,7 @@ sys.path.append('scripts/core_common/modules')
 import config
 import base
 import build
+import build_js
 import deploy
 import make_common
 
@@ -45,6 +46,11 @@ if ("develop" == config.option("module")):
   deploy.make()
   exit(0)
 
+# check only js builds
+if ("1" == base.get_env("OO_ONLY_BUILD_JS"))
+  build_js.build()
+  exit(0)
+
 # core 3rdParty
 make_common.make()
 
@@ -68,39 +74,7 @@ if ("windows" == base.host_platform()) and (config.check_option("module", "deskt
 build.make()
 
 # js
-if ("1" != base.get_env("OO_NO_BUILD_JS")):
-  out_dir = base_dir + "/out/js/";
-  branding = config.option("branding-name")
-  if ("" == branding):
-    branding = "onlyoffice"
-  out_dir += branding
-  base.create_dir(out_dir)
-
-  # builder
-  build.build_interface(base_dir + "/../web-apps/build")
-  build.build_sdk_builder(base_dir + "/../sdkjs/build")
-  base.create_dir(out_dir + "/builder")
-  base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
-  base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
-
-  # desktop
-  build.build_sdk_desktop(base_dir + "/../sdkjs/build")
-  if config.check_option("module", "desktop"):
-    build.build_sdk_desktop(base_dir + "/../sdkjs/build")
-    base.create_dir(out_dir + "/desktop")
-    base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
-    base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/mobile")
-    base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
-    
-    build.build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
-    base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
+build_js.make()
 
 # deploy
-if ("0" != config.option("deploy")):
-  deploy.make()
+deploy.make()

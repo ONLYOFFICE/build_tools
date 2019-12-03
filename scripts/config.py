@@ -11,6 +11,10 @@ def parse():
     name, value = line.partition("=")[::2]
     k = name.strip()
     v = value.strip(" '\"\r\n")
+    if ("true" == v.lower()):
+      v = "1"
+    if ("false" == v.lower()):
+      v = "0"
     configOptions[k] = v
     os.environ["OO_" + k.upper().replace("-", "_")] = v
 

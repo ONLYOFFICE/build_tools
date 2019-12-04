@@ -95,10 +95,11 @@ def copy_dir(src, dst):
     print('Directory not copied. Error: %s' % e)
 
 def delete_dir(path):
-  if is_dir(path):
+  if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
   shutil.rmtree(get_path(path))
+  return
 
 def copy_lib(src, dst, name):
   lib_ext = ".so"
@@ -219,6 +220,13 @@ def bash(path):
   command = get_path(path)
   command += (".bat" if "windows" == host_platform() else ".sh")
   return cmd(command, [])
+
+def get_cwd():
+  return os.getcwd()
+
+def set_cwd(dir):
+  os.chdir(dir)
+  return
 
 # git ---------------------------------------------------
 def git_update(repo):

@@ -16,8 +16,8 @@ def make():
       base.vcvarsall_start("x86" if base.platform_is_32(platform) else "x64")
 
     if ("1" == config.option("clean")):
-      base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff])
-      base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff])
+      base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff], True)
+      base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff], True)
 
     print("------------------------------------------")
     print("BUILD_PLATFORM: " + platform)

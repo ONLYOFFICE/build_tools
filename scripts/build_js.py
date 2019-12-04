@@ -7,6 +7,8 @@ import base
 def make():
   if ("1" == base.get_env("OO_NO_BUILD_JS")):
     return
+  if ("core" == config.option("module")):
+    return
 
   base_dir = base.get_script_dir() + "/.."
   out_dir = base_dir + "/out/js/";

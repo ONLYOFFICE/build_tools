@@ -10,8 +10,8 @@ def make():
   core_dir = git_dir + "/core"
   core_build_dir = core_dir + "/build"
   branding = config.branding()
-  if ("" != branding):
-    core_build_dir += ("/" + branding)
+  if ("" != config.option("branding")):
+    core_build_dir += ("/" + config.option("branding"))
 
   platforms = config.option("platform").split()
   for native_platform in platforms:
@@ -22,6 +22,8 @@ def make():
     if (base.is_dir(archive_dir)):
       base.delete_dir(archive_dir)
     base.create_dir(archive_dir)
+
+    platform = native_platform
 
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "kernel")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "graphics")
@@ -54,9 +56,9 @@ def make():
       base.delete_file(archive_dir + "/HtmlFileInternal/cef_sandbox.lib")
       base.delete_file(archive_dir + "/HtmlFileInternal/libcef.lib")
 
-    if base.is_file(archive_dir + "/../core.7z"):
-      base.delete_file(archive_dir + "/../core.7z")
-    base.archive_folder(archive_dir, archive_dir + "/../core.7z")
+    if base.is_file(archive_dir + "/core.7z"):
+      base.delete_file(archive_dir + "/core.7z")
+    base.archive_folder(archive_dir, archive_dir + "/core.7z")
 
   return
 

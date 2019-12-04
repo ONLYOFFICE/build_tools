@@ -420,11 +420,15 @@ def sdkjs_addons_param():
 
 # common apps
 def download(url, dst):
-  cmd_exe("curl", ["-L", "-o", dst, url])
+  return cmd_exe("curl", ["-L", "-o", dst, url])
 
 def extract(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
-  cmd_exe(app, ["x", "-y", src, "-o" + dst])
+  return cmd_exe(app, ["x", "-y", src, "-o" + dst])
+
+def archive_folder(src, dst):
+  app = "7za" if ("mac" == host_platform()) else "7z"
+  return cmd_exe(app, ["a", "-r", dst, src])
 
 # windows vcvarsall
 def _call_vcvarsall_and_return_env(arch):

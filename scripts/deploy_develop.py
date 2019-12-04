@@ -65,7 +65,7 @@ def make():
       base.copy_files("./core/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", "./")
     else:
       base.copy_files("./core/Common/3dParty/icu/" + platform + "/build/*", "./")
-      base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/converter/icudtl.dat")
+      base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", "./")
 
     base.copy_exe("./core/build/bin/" + platform, "./", "allfontsgen")
     base.copy_exe("./core/build/bin/" + platform, "./", "allthemesgen")

@@ -14,6 +14,32 @@ import make_common
 # parse configuration
 config.parse()
 
+base_dir = base.get_script_dir(__file__)
+base.set_env("BUILD_PLATFORM", config.option("platform"))
+
+# branding
+if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("branding")):
+  branding_dir = base_dir + "/../" + config.option("branding")
+
+  if ("1" == config.option("update")):
+    is_exist = True
+    if not base.is_dir(branding_dir):
+      is_exist = False
+      base.cmd("git", ["clone", config.option("branding-url"), branding_dir])
+
+    base.cmd_in_dir(branding_dir, "git", ["fetch"], True)
+   
+    if not is_exist or ("1" != config.option("update-light")):
+      base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")])
+
+    base.cmd_in_dir(branding_dir, "git", ["pull"], True)
+
+  if base.is_file(branding_dir + "/build_tools/make.py"):
+    base.set_env("OO_RUNNING_BRANDING", "1")
+    base.set_env("OO_BRANDING", config.option("branding"))
+    base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make.py"])
+    exit(0)
+
 # update
 if ("1" == config.option("update")):
   base.git_update("core")
@@ -35,9 +61,6 @@ if ("1" == config.option("update")):
     base.git_update("document-server-integration")
     base.git_update("core-fonts")
 
-base_dir = base.get_script_dir(__file__)
-base.set_env("BUILD_PLATFORM", config.option("platform"))
-
 base.configure_common_apps()
 
 # developing...
@@ -48,7 +71,7 @@ if ("develop" == config.option("module")):
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
-  build_js.build()
+  build_js.make()
   exit(0)
 
 # core 3rdParty

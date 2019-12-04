@@ -17,16 +17,16 @@ def make():
   base.create_dir(out_dir)
 
   # builder
-  build.build_interface(base_dir + "/../web-apps/build")
-  build.build_sdk_builder(base_dir + "/../sdkjs/build")
+  build_interface(base_dir + "/../web-apps/build")
+  build_sdk_builder(base_dir + "/../sdkjs/build")
   base.create_dir(out_dir + "/builder")
   base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
   base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
 
   # desktop
-  build.build_sdk_desktop(base_dir + "/../sdkjs/build")
+  build_sdk_desktop(base_dir + "/../sdkjs/build")
   if config.check_option("module", "desktop"):
-    build.build_sdk_desktop(base_dir + "/../sdkjs/build")
+    build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
@@ -38,7 +38,7 @@ def make():
     base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/mobile")
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
-    build.build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
+    build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
   return
 

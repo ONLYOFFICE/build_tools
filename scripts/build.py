@@ -10,7 +10,10 @@ def make():
     if not platform in config.platforms:
       continue
 
-    file_suff = platform + config.option("branding")
+    file_suff = platform
+    if (config.check_option("config", "debug")):
+      file_suff += "_debug_"
+    file_suff += config.option("branding")
  
     if base.is_windows():
       base.vcvarsall_start("x86" if base.platform_is_32(platform) else "x64")

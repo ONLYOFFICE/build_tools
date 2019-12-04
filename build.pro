@@ -78,6 +78,9 @@ SUBDIRS = \
 		allthemesgen \
 		docbuilder
 }
+!no_tests {
+	SUBDIR += standardtester
+}
 	
 desktop {
 message(desktop)
@@ -130,6 +133,7 @@ ordered {
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX)
 
 	removeFile($$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX)
@@ -200,6 +204,11 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 
 	docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
 	docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+}
+
+!no_tests {
+	standardtester.file        = $$CORE_ROOT_DIR/Test/Applications/StandardTester/StandardTester.pro
+	standardtester.makefile    = $$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX
 }
 
 docxformat.file            = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro

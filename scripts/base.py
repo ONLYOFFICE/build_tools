@@ -93,12 +93,14 @@ def copy_dir(src, dst):
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
     print('Directory not copied. Error: %s' % e)
+  return
 
 def delete_dir(path):
   if is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
   shutil.rmtree(get_path(path))
+  return
 
 def copy_lib(src, dst, name):
   lib_ext = ".so"
@@ -238,6 +240,7 @@ def git_update(repo):
     cmd("git", ["checkout", "-f", config.option("branch")])
   cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
   os.chdir(old_cur)
+  return
 
 # qmake -------------------------------------------------
 def qt_setup(platform):

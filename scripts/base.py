@@ -95,6 +95,9 @@ def copy_dir(src, dst):
     print('Directory not copied. Error: %s' % e)
 
 def delete_dir(path):
+  if is_dir(path):
+    print("delete warning [folder not exist]: " + path)
+    return
   shutil.rmtree(get_path(path))
 
 def copy_lib(src, dst, name):
@@ -468,7 +471,7 @@ def run_as_bat(lines):
   file.close()
 
   cmd(name)
-  #delete_file(name)
+  delete_file(name)
   return
 
 def save_as_script(path, lines):

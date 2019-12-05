@@ -30,9 +30,7 @@ def make():
         continue
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)
-        base.vcvarsall_start("x64" if ("win_64" == platform) else "x86")
         base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
-        base.vcvarsall_end()
         bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
         lib_dir = "icu/lib64/" if ("win_64" == platform) else "icu/lib/"
         base.create_dir(platform + "/build")

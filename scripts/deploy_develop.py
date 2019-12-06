@@ -20,28 +20,28 @@ def make():
     arch = "x86"
     arch2 = "_32"
 
-  url = "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + config.option("branch") + "/latest/" + arch + "/core.zip"
+  url = "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + config.option("branch") + "/latest/" + arch + "/core.7z"
   data_url = base.get_file_last_modified_url(url)
-  old_data_url = base.readFile("./core.zip.data")
+  old_data_url = base.readFile("./core.7z.data")
 
   if (old_data_url != data_url):
     print("-----------------------------------------------------------")
     print("Downloading core last version... --------------------------")
     print("-----------------------------------------------------------")
-    if (base.is_file("./core.zip")):
-      base.delete_file("./core.zip")
+    if (base.is_file("./core.7z")):
+      base.delete_file("./core.7z")
     if (base.is_dir("./core")):
       base.delete_dir("./core")
     if (base.is_dir("./HtmlFileInternal")):
       base.delete_dir("./HtmlFileInternal")
-    base.download(url, "./core.zip")
+    base.download(url, "./core.7z")
 
     print("-----------------------------------------------------------")
     print("Extracting core last version... ---------------------------")
     print("-----------------------------------------------------------")
 
-    base.extract("./core.zip", "./core")
-    base.writeFile("./core.zip.data", data_url)
+    base.extract("./core.7z", "./")
+    base.writeFile("./core.7z.data", data_url)
 
     platform = ""
     if ("windows" == base.host_platform()):
@@ -49,26 +49,7 @@ def make():
     else:
       platform = base.host_platform() + arch2
 
-    base.copy_lib("./core/build/lib/" + platform, "./", "kernel")
-    base.copy_lib("./core/build/lib/" + platform, "./", "graphics")
-    base.copy_lib("./core/build/lib/" + platform, "./", "doctrenderer")
-    base.copy_lib("./core/build/lib/" + platform, "./", "HtmlRenderer")
-    base.copy_lib("./core/build/lib/" + platform, "./", "DjVuFile")
-    base.copy_lib("./core/build/lib/" + platform, "./", "XpsFile")
-    base.copy_lib("./core/build/lib/" + platform, "./", "PdfReader")
-    base.copy_lib("./core/build/lib/" + platform, "./", "PdfWriter")
-    base.copy_lib("./core/build/lib/" + platform, "./", "HtmlFile")
-    base.copy_lib("./core/build/lib/" + platform, "./", "UnicodeConverter")
-    base.copy_exe("./core/build/bin/" + platform, "./", "x2t")
-    if ("windows" == base.host_platform()):
-      base.copy_files("./core/Common/3dParty/icu/" + platform + "/build/*.dll", "./")
-      base.copy_files("./core/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", "./")
-    else:
-      base.copy_files("./core/Common/3dParty/icu/" + platform + "/build/*", "./")
-      base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", "./")
-
-    base.copy_exe("./core/build/bin/" + platform, "./", "allfontsgen")
-    base.copy_exe("./core/build/bin/" + platform, "./", "allthemesgen")
+    base.copy_files("./core/*", "./")
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
 

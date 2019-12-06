@@ -46,7 +46,7 @@ def make():
 
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allthemesgen")
-    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "StandardTester")
+    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "standardtester")
 
     base.create_dir(archive_dir + "/HtmlFileInternal")
 

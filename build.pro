@@ -81,6 +81,8 @@ SUBDIRS += \
 		allthemesgen \
 		docbuilder
 }
+
+core_ios:CONFIG += no_tests
 !no_tests {
 	SUBDIRS += standardtester
 }
@@ -210,7 +212,7 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 }
 
 !no_tests {
-	standardtester.file        = $$CORE_ROOT_DIR/Test/Applications/StandardTester/StandardTester.pro
+	standardtester.file        = $$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro
 	standardtester.makefile    = $$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX
 }
 

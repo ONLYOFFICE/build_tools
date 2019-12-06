@@ -82,7 +82,7 @@ SUBDIRS += \
 		docbuilder
 }
 !no_tests {
-	SUBDIR += standardtester
+	SUBDIRS += standardtester
 }
 	
 desktop {
@@ -148,7 +148,7 @@ ordered {
 	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX)
 
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX)

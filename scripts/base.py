@@ -103,6 +103,10 @@ def delete_dir(path):
   return
 
 def copy_lib(src, dst, name):
+  if (config.check_option("config", "bundle_dylibs")) and is_dir(src + "/" + name + ".framework"):
+    copy_dir(src + "/" + name + ".framework", dst + "/" + name + ".framework")
+    return
+
   lib_ext = ".so"
   if ("windows" == host_platform()):
     lib_ext = ".dll"
@@ -121,9 +125,6 @@ def copy_lib(src, dst, name):
   lib_dst = dst + "/"
   if not ("windows" == host_platform()):
     lib_dst += "lib"
-
-  if not is_file(file_src + lib_ext) and is_dir(src + "/" + name + ".framework"):
-    copy_dir(src + "/" + name + ".framework", dst + "/" + name + ".framework")
 
   copy_file(file_src + lib_ext, lib_dst + name + lib_ext)
   return

@@ -103,5 +103,9 @@ def make():
     elif ("win_32" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
 
+    # correct ios frameworks
+    if ("ios" == platform):
+      base.generate_plist(root_dir)
+
   return
 

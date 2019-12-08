@@ -404,6 +404,58 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
   file.close()
   return
 
+def generate_plist(path):
+  bundle_id_url = "com.onlyoffice."
+  if ("" != get_env("PUBLISHER_BUNDLE_ID")):
+    bundle_id_url = get_env("PUBLISHER_BUNDLE_ID")
+  bundle_creator = "Ascensio System SIA"
+  if ("" != get_env("PUBLISHER_NAME")):
+    bundle_creator = get_env("PUBLISHER_NAME")
+  
+  bundle_version_natural = readFile(get_script_dir() + "/../../core/Common/version.txt").split(".")
+  bundle_version = []
+  for n in bundle_version_natural:
+    bundle_version.append("255" if int(n) > 255 else n)
+
+  for file in glob.glob(path + "/*.framework"):
+    if not is_dir(file):
+      continue
+    name = os.path.basename(file)
+    name = name.replace(".framework", "")
+
+    content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    content += "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+    content += "<plist version=\"1.0\">\n"
+    content += "<dict>\n"
+    content += "<key>CFBundleExecutable</key>\n"
+    content += ("<string>" + name + "</string>\n")
+    content += "<key>CFBundleGetInfoString</key>\n"
+    content += "<string>Created by " + bundle_creator + "</string>\n"
+    content += "<key>CFBundleIdentifier</key>\n"
+    content += "<string>" + bundle_id_url + name + "</string>\n"
+    content += "<key>CFBundlePackageType</key>\n"
+    content += "<string>FMWK</string>\n"
+    content += "<key>CFBundleShortVersionString</key>\n"
+    content += "<string>" + bundle_version[0] + "." + bundle_version[1] + "</string>\n"
+    content += "<key>CFBundleSignature</key>\n"
+    content += "<string>????</string>\n"
+    content += "<key>CFBundleVersion</key>\n"
+    content += "<string>" + bundle_version[0] + "." + bundle_version[1] + "." + bundle_version[2] + "</string>\n"
+    content += "<key>LSMinimumSystemVersion</key>\n"
+    content += "<string>10.0</string>\n"
+    content += "</dict>\n"
+    content += "</plist>"
+
+    fileDst = file + "/Info.plist"
+    if is_file(fileDst):
+      delete_file(fileDst)
+
+    fileInfo = codecs.open(fileDst, "w", "utf-8")
+    fileInfo.write(content)
+    fileInfo.close()
+      
+  return
+
 def sdkjs_addons_checkout():
   if ("" == config.option("sdkjs-addons")):
     return

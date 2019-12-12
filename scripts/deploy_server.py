@@ -165,7 +165,6 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
-
     #env variables
     product_version = base.get_env('PRODUCT_VERSION')
     if(not product_version):
@@ -195,12 +194,6 @@ def make():
     branding_dir = base.get_env('BRANDING_DIR')
     if(not branding_dir):
       branding_dir = 'branding'
-
-    #build_server_dir = root_dir + '/server'
-    #server_dir = base.get_script_dir() + "/../../server"
-
-    #base.copy_dir(server_dir + '/build/server', build_server_dir)
-    #base.copy_files(server_dir + '/build/server/*', build_server_dir)
 
     #dictionaries
     spellchecker_dictionaries = build_server_dir + '/SpellChecker/dictionaries'

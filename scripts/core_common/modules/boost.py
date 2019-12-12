@@ -31,14 +31,14 @@ def make():
       base.cmd("bootstrap.bat")
       base.create_dir("build/win_64")
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["link=static", "--with-filesystem --with-system --with-date_time --with-regex", "--toolset=" + win_toolset, "address-model=64"])
+      base.cmd("bjam.exe", ["link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64"])
       base.create_dir("build/win_64/static")
       base.copy_files("stage/lib/*", "build/win_64/static/")
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("build/win_32/static"):
       base.cmd("bootstrap.bat")
       base.create_dir("build/win_32")
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["link=static", "--with-filesystem --with-system --with-date_time --with-regex", "--toolset=" + win_toolset])
+      base.cmd("bjam.exe", ["link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset])
       base.create_dir("build/win_32/static")
       base.copy_files("stage/lib/*", "build/win_32/static/")
 

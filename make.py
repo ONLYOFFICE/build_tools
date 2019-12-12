@@ -8,6 +8,7 @@ import config
 import base
 import build
 import build_js
+import build_server
 import deploy
 import make_common
 
@@ -98,6 +99,9 @@ build.make()
 
 # js
 build_js.make()
+
+#server
+build_server.make()
 
 # deploy
 deploy.make()

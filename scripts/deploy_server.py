@@ -3,6 +3,53 @@
 import config
 import base
 
+import re
+import shutil
+from tempfile import mkstemp
+
+import datetime
+
+def sed(pattern, replace, source, dest=None, count=0):
+  """Reads a source file and writes the destination file.
+  In each line, replaces pattern with replace.
+
+  Args:
+    pattern (str): pattern to match (can be re.pattern)
+    replace (str): replacement str
+    source  (str): input filename
+    count (int):   number of occurrences to replace
+    dest (str):    destination filename, if not given, source will be over written.
+  """
+
+  fin = open(source, 'r')
+  num_replaced = count
+
+  if dest:
+    fout = open(dest, 'w')
+  else:
+    fd, name = mkstemp()
+    fout = open(name, 'w')
+
+  for line in fin:
+    out = re.sub(pattern, replace, line)
+    fout.write(out)
+
+    if out != line:
+      num_replaced += 1
+    if count and num_replaced > count:
+      break
+  try:
+    fout.writelines(fin.readlines())
+  except Exception as E:
+    raise E
+
+  fin.close()
+  fout.close()
+
+  if not dest:
+    shutil.move(name, source)
+
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -31,6 +78,10 @@ def make():
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
+
+    build_server_dir = root_dir + '/server'
+    server_dir = base.get_script_dir() + "/../../server"
+    base.copy_dir(server_dir + '/build/server', build_server_dir)
 
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
@@ -113,6 +164,97 @@ def make():
     base.create_dir(tools_dir)
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
-    
+
+
+    #env variables
+    product_version = base.get_env('PRODUCT_VERSION')
+    if(not product_version):
+      product_version = "0.0.0"
+      base.set_env('PRODUCT_VERSION', product_version)
+
+    build_number = base.get_env('BUILD_NUMBER')
+    if(not build_number):
+      build_number = "0"
+      base.set_env('BUILD_NUMBER', build_number)
+
+    publisher_name = base.get_env('PUBLISHER_NAME')
+    if(not publisher_name):
+      publisher_name = "Ascensio System SIA"
+      base.set_env('PUBLISHER_NAME', publisher_name)
+
+    publisher_url = base.get_env('PUBLISHER_URL')
+    if(not publisher_url):
+      publisher_url = "https://www.onlyoffice.com/"
+      base.set_env('PUBLISHER_URL', publisher_url)
+
+    base.set_env("PRODUCT_VERSION", product_version)
+    base.set_env("BUILD_NUMBER", build_number)
+    base.set_env("PUBLISHER_NAME", publisher_name)
+    base.set_env("PUBLISHER_URL", publisher_url)
+
+    branding_dir = base.get_env('BRANDING_DIR')
+    if(not branding_dir):
+      branding_dir = 'branding'
+
+    #build_server_dir = root_dir + '/server'
+    #server_dir = base.get_script_dir() + "/../../server"
+
+    #base.copy_dir(server_dir + '/build/server', build_server_dir)
+    #base.copy_files(server_dir + '/build/server/*', build_server_dir)
+
+    #dictionaries
+    spellchecker_dictionaries = build_server_dir + '/SpellChecker/dictionaries'
+    spellchecker_dictionaries_files = server_dir + '/../dictionaries/*_*'
+    base.create_dir(spellchecker_dictionaries)
+    base.copy_files(spellchecker_dictionaries_files, spellchecker_dictionaries)
+
+    if (0 == platform.find("win")):
+      exec_ext = '.exe'
+    else:
+      exec_ext = ''
+
+    #schema
+    schema_files = server_dir + '/schema'
+    schema = build_server_dir + '/schema'
+    base.create_dir(schema)
+    base.copy_dir(schema_files, schema)
+
+    #core-fonts
+    core_fonts_files = server_dir + '/../core-fonts'
+    core_fonts = build_server_dir + '/../core-fonts'
+    base.create_dir(core_fonts)
+    base.copy_dir(core_fonts_files, core_fonts)
+
+    #license
+    license_file1 = server_dir + '/LICENSE.txt'
+    license_file2 = server_dir + '/3rd-Party.txt'
+    license_dir = server_dir + '/license'
+    license = build_server_dir + '/license'
+    base.copy_file(license_file1, build_server_dir)
+    base.copy_file(license_file2, build_server_dir)
+    base.copy_dir(license_dir, license)
+
+    #branding
+    welcome_files = server_dir + '/' + branding_dir + '/welcome'
+    welcome = build_server_dir + '/welcome'
+    base.create_dir(welcome)
+    base.copy_dir(welcome_files, welcome)
+
+    info_files = server_dir + '/' + branding_dir + '/info'
+    info = build_server_dir + '/info'
+    base.create_dir(info)
+    base.copy_dir(info_files, info)
+
+    custom_public_key = branding_dir + '/licenseKey.pem'
+
+    if(base.is_exist(custom_public_key)):
+      base.copy_file(custom_public_key, build_server_dir + '/Common/sources')
+
+    cur_date = datetime.date.today().strftime("%m/%d/%Y")
+
+    sed("const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'", build_server_dir + "/Common/sources/commondefines.js")
+    sed("const buildNumber = [0-9]*", "const buildNumber = '" + build_number + "'", build_server_dir + "/Common/sources/commondefines.js")
+    sed("const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'", build_server_dir + "/Common/sources/license.js")
+
   return
 

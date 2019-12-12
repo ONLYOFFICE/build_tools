@@ -83,8 +83,8 @@ def make():
       base.copy_exe(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFileInternal")
 
     # dictionaries
-    base.copy_dir(git_dir + "/dictionaries", root_dir + "/dictionaries")
-    base.delete_dir(root_dir + "/dictionaries/.git")
+    base.create_dir(root_dir + "/dictionaries")
+    base.copy_dir_content(git_dir + "/dictionaries", root_dir + "/dictionaries", "", ".git")
 
     base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")

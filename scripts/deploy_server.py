@@ -7,6 +7,7 @@ def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
   core_dir = git_dir + "/core"
+  plugins_dir = git_dir + "/sdkjs-plugins"
   branding = config.branding()
 
   platforms = config.option("platform").split()
@@ -91,6 +92,21 @@ def make():
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps", js_dir + "/web-apps")
+    
+    # plugins
+    base.create_dir(js_dir + "/sdkjs-plugins")
+    
+    # base.copy_dir(plugins_dir + "/clipart", js_dir + "/sdkjs-plugins/clipart")
+    base.copy_dir(plugins_dir + "/code", js_dir + "/sdkjs-plugins/code")
+    base.copy_dir(plugins_dir + "/macros", js_dir + "/sdkjs-plugins/macros")
+    base.copy_dir(plugins_dir + "/ocr", js_dir + "/sdkjs-plugins/ocr")
+    base.copy_dir(plugins_dir + "/photoeditor", js_dir + "/sdkjs-plugins/photoeditor")
+    base.copy_dir(plugins_dir + "/speech", js_dir + "/sdkjs-plugins/speech")
+    base.copy_dir(plugins_dir + "/synonim", js_dir + "/sdkjs-plugins/synonim")
+    base.copy_dir(plugins_dir + "/translate", js_dir + "/sdkjs-plugins/translate")
+    base.copy_dir(plugins_dir + "/youtube", js_dir + "/sdkjs-plugins/youtube")
+    base.copy_file(plugins_dir + "/pluginBase.js", js_dir + "/sdkjs-plugins/pluginBase.js")
+    base.copy_file(plugins_dir + "/plugins.css", js_dir + "/sdkjs-plugins/plugins.css")
     
     # tools
     tools_dir = root_dir + "/server/tools"

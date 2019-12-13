@@ -78,7 +78,6 @@ def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
   src_folder += "*"
   for file in glob.glob(src_folder):
     basename = os.path.basename(file)
-    print(file)
     if ("" != filterInclude) and (-1 == basename.find(filterInclude)):
       continue
     if ("" != filterExclude) and (-1 != basename.find(filterExclude)):
@@ -343,7 +342,7 @@ def qt_copy_plugin(name, out):
   copy_dir(src, out + "/" + name)
 
   if ("windows" == host_platform()):
-    for file in glob.glob(out + "/plugins/*d.dll"):
+    for file in glob.glob(out + "/" + name + "/*d.dll"):
       fileCheck = file[0:-5] + ".dll"
       if is_file(fileCheck):
         delete_file(file)

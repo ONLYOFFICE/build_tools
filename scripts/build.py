@@ -6,6 +6,8 @@ import os
 
 # make build.pro
 def make():
+  is_no_brandind_build = base.is_file("config")
+
   platforms = config.option("platform").split()
   for platform in platforms:
     if not platform in config.platforms:
@@ -58,7 +60,7 @@ def make():
 
     base.delete_file(".qmake.stash")
 
-    if ("mac_64" == platform):
+    if ("mac_64" == platform) and is_no_brandind_build:
       configuration = "Release" if (-1 == config_param.lower().find("debug")) else "Debug"
       base.cmd("xcodebuild", ["-project", 
         "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore/ascdocumentscore.xcodeproj", 
@@ -73,7 +75,7 @@ def make():
         "-configuration",
         configuration])
 
-  if config.check_option("module", "builder") and base.is_windows():
+  if config.check_option("module", "builder") and base.is_windows() and is_no_brandind_build:
     base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
 
   return

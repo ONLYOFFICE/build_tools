@@ -216,7 +216,7 @@ def make():
     core_fonts_files = server_dir + '/../core-fonts'
     core_fonts = build_server_dir + '/../core-fonts'
     base.create_dir(core_fonts)
-    base.copy_dir(core_fonts_files, core_fonts)
+    base.copy_dir_content(core_fonts_files, core_fonts, "", ".git")
 
     #license
     license_file1 = server_dir + '/LICENSE.txt'

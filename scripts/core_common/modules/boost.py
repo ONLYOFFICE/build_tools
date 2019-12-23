@@ -46,7 +46,7 @@ def make():
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.create_dir("build/linux_64")
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["link=static"])
+    base.cmd("./bjam", ["link=static", "cxxflags=-fPIC"])
     base.create_dir("build/linux_64/static")
     base.copy_files("stage/lib/*", "build/linux_64/static/")
     # TODO: support x86

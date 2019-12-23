@@ -44,6 +44,12 @@ def configure_common_apps():
     os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
 
+def print_info(info=""):
+  print("------------------------------------------")
+  print(info)
+  print("------------------------------------------")
+  return
+
 # file system -------------------------------------------
 def is_file(path):
   return os.path.isfile(get_path(path))

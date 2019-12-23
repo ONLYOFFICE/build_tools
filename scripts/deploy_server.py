@@ -245,9 +245,9 @@ def make():
 
     cur_date = datetime.date.today().strftime("%m/%d/%Y")
 
-    sed("const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'", build_server_dir + "/Common/sources/commondefines.js")
-    sed("const buildNumber = [0-9]*", "const buildNumber = '" + build_number + "'", build_server_dir + "/Common/sources/commondefines.js")
-    sed("const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'", build_server_dir + "/Common/sources/license.js")
+    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildNumber = [0-9]*", "const buildNumber = " + build_number)
+    base.replaceInFileRE(build_server_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
+    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
 
   return
 

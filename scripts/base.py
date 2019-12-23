@@ -8,6 +8,7 @@ import subprocess
 import sys
 import config
 import codecs
+import re
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -158,6 +159,15 @@ def replaceInFile(path, text, textReplace):
   with open(get_path(path), "r") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
+  delete_file(path)
+  with open(get_path(path), "w") as file:
+    file.write(filedata)
+  return
+def replaceInFileRE(path, pattern, textReplace):
+  filedata = ""
+  with open(get_path(path), "r") as file:
+    filedata = file.read()
+  filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
   with open(get_path(path), "w") as file:
     file.write(filedata)

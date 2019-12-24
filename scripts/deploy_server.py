@@ -9,46 +9,6 @@ from tempfile import mkstemp
 
 import datetime
 
-def sed(pattern, replace, source, dest=None, count=0):
-  """Reads a source file and writes the destination file.
-  In each line, replaces pattern with replace.
-
-  Args:
-    pattern (str): pattern to match (can be re.pattern)
-    replace (str): replacement str
-    source  (str): input filename
-    count (int):   number of occurrences to replace
-    dest (str):    destination filename, if not given, source will be over written.
-  """
-
-  fin = open(source, 'r')
-  num_replaced = count
-
-  if dest:
-    fout = open(dest, 'w')
-  else:
-    fd, name = mkstemp()
-    fout = open(name, 'w')
-
-  for line in fin:
-    out = re.sub(pattern, replace, line)
-    fout.write(out)
-
-    if out != line:
-      num_replaced += 1
-    if count and num_replaced > count:
-      break
-  try:
-    fout.writelines(fin.readlines())
-  except Exception as E:
-    raise E
-
-  fin.close()
-  fout.close()
-
-  if not dest:
-    shutil.move(name, source)
-
 
 def make():
   base_dir = base.get_script_dir() + "/../out"
@@ -169,27 +129,10 @@ def make():
     product_version = base.get_env('PRODUCT_VERSION')
     if(not product_version):
       product_version = "0.0.0"
-      base.set_env('PRODUCT_VERSION', product_version)
 
     build_number = base.get_env('BUILD_NUMBER')
     if(not build_number):
       build_number = "0"
-      base.set_env('BUILD_NUMBER', build_number)
-
-    publisher_name = base.get_env('PUBLISHER_NAME')
-    if(not publisher_name):
-      publisher_name = "Ascensio System SIA"
-      base.set_env('PUBLISHER_NAME', publisher_name)
-
-    publisher_url = base.get_env('PUBLISHER_URL')
-    if(not publisher_url):
-      publisher_url = "https://www.onlyoffice.com/"
-      base.set_env('PUBLISHER_URL', publisher_url)
-
-    base.set_env("PRODUCT_VERSION", product_version)
-    base.set_env("BUILD_NUMBER", build_number)
-    base.set_env("PUBLISHER_NAME", publisher_name)
-    base.set_env("PUBLISHER_URL", publisher_url)
 
     branding_dir = base.get_env('BRANDING_DIR')
     if(not branding_dir):

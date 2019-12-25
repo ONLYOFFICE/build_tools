@@ -255,6 +255,24 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def run_process(args=[]):
+  subprocess.Popen(args)
+
+def run_process_in_dir(directory, args=[]):
+  dir = get_path(directory)
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  run_process(args)
+  os.chdir(cur_dir)
+
+def run_nodejs(args=[]):
+  args.insert(0, 'node')
+  run_process(args)
+
+def run_nodejs_in_dir(directory, args=[]):
+  args.insert(0, 'node')
+  run_process_in_dir(directory, args)
+
 def bash(path):
   command = get_path(path)
   command += (".bat" if "windows" == host_platform() else ".sh")

@@ -4,6 +4,7 @@ import platform
 import glob
 import shutil
 import os
+import fnmatch
 import subprocess
 import sys
 import config
@@ -103,6 +104,11 @@ def delete_file(path):
 
 def delete_exe(path):
   return os.remove(get_path(path) + (".exe" if "windows" == host_platform() else ""))
+
+def find_file(path, pattern):
+  for root, dirnames, filenames in os.walk(path):
+    for filename in fnmatch.filter(filenames, pattern):
+	  return os.path.join(root, filename)
 
 def create_dir(path):
   path2 = get_path(path)
@@ -265,6 +271,7 @@ def run_process_in_dir(directory, args=[]):
   run_process(args)
   os.chdir(cur_dir)
 
+# nodejs ------------------------------------------------
 def run_nodejs(args=[]):
   args.insert(0, 'node')
   run_process(args)

@@ -54,6 +54,9 @@ if ("1" == config.option("update")):
   if config.check_option("module", "builder"):
     base.git_update("DocumentBuilder")
 
+    if config.check_option("platform", "ios"):
+      base.git_update("core-fonts")
+
   if config.check_option("module", "desktop"):
     base.git_update("desktop-apps")
 

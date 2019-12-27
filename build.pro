@@ -94,17 +94,15 @@ SUBDIRS += \
 	hunspell \
 	ooxmlsignature
 
-core_windows {
-SUBDIRS += projicons
-}
-
 core_and_multimedia {
-
 SUBDIRS += \
 	documentscore \
-	videoplayer \
-	desktopapp
+	videoplayer
+}
 
+!no_desktop_apps {
+core_windows:SUBDIRS += projicons
+SUBDIRS += desktopapp
 }
 
 }
@@ -271,13 +269,14 @@ desktop {
 	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
 	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 	
-	core_windows {
-		projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
-		projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+	!no_desktop_apps {
+		core_windows {
+			projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
+			projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+		}
+		desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
+		desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 	}
-
-	desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
-	desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 }
 
 # DEPENDS
@@ -307,8 +306,10 @@ desktop {
 	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
 	videoplayer.depends       = kernel unicodeconverter graphics
 	
-	projicons.depends 		  = documentscore videoplayer
-	desktopapp.depends        = documentscore videoplayer
+	!no_desktop_apps {
+		core_windows:projicons.depends  = documentscore videoplayer
+		desktopapp.depends              = documentscore videoplayer
+	}
 }
 
 !no_x2t {

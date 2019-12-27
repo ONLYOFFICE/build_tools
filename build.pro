@@ -94,15 +94,15 @@ SUBDIRS += \
 	hunspell \
 	ooxmlsignature
 
-!no_desktop_apps {
-core_windows:SUBDIRS += projicons
-SUBDIRS += desktopapp
-}
-
 core_and_multimedia {
 SUBDIRS += \
 	documentscore \
 	videoplayer
+}
+
+!no_desktop_apps {
+core_windows:SUBDIRS += projicons
+SUBDIRS += desktopapp
 }
 
 }
@@ -307,10 +307,8 @@ desktop {
 	videoplayer.depends       = kernel unicodeconverter graphics
 	
 	!no_desktop_apps {
-		core_windows {
-			projicons.depends 		  = documentscore videoplayer
-		}
-		desktopapp.depends        = documentscore videoplayer
+		core_windows:projicons.depends  = documentscore videoplayer
+		desktopapp.depends              = documentscore videoplayer
 	}
 }
 

@@ -14,13 +14,14 @@ def make():
   os.chdir(base_dir)
 
   # download
-  url = "https://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.7z"
-
-  if not base.is_file("boost_1_58_0.7z"):
-    base.download("https://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.7z", "boost_1_58_0.7z")
+  #url = "https://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.7z"  
+  #if not base.is_file("boost_1_58_0.7z"):
+  #  base.download("https://downloads.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.7z", "boost_1_58_0.7z")
+  #if not base.is_dir("boost_1_58_0"):
+  #  base.extract("boost_1_58_0.7z", "./")
 
   if not base.is_dir("boost_1_58_0"):
-    base.extract("boost_1_58_0.7z", "./")
+    base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_58_0", "-b" "boost-1.58.0"])
 
   os.chdir("boost_1_58_0")
 

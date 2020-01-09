@@ -54,15 +54,14 @@ if ("1" == config.option("update")):
   if config.check_option("module", "builder"):
     base.git_update("DocumentBuilder")
 
-    if config.check_option("platform", "ios"):
-      base.git_update("core-fonts")
-
   if config.check_option("module", "desktop"):
     base.git_update("desktop-apps")
 
-  if(config.check_option("module", "develop") or config.check_option("module", "server")):
+  if (config.check_option("module", "develop") or config.check_option("module", "server")):
     base.git_update("server")
     base.git_update("document-server-integration")
+    
+  if (config.check_option("module", "develop") or config.check_option("module", "server") or config.check_option("platform", "ios")):
     base.git_update("core-fonts")
 
 base.configure_common_apps()

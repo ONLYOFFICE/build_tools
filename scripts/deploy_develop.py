@@ -83,7 +83,7 @@ def make():
   data_local_devel += "}\n"
   data_local_devel += "}\n"
   data_local_devel += "}\n"
-  base.writeFile(git_dir + "/server/Common/config/local-development-windows.json", data_local_devel)
+  base.writeFile(git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json", data_local_devel)
 
   os.chdir(old_cur)
   return

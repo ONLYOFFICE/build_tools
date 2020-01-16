@@ -60,13 +60,13 @@ def make():
   print("-----------------------------------------------------------")
   print("All fonts generation... -----------------------------------")
   print("-----------------------------------------------------------")
-  base.cmd_exe("allfontsgen", ["--input=../../../core-fonts", "--allfonts-web=../../../sdkjs/common/AllFonts.js", "--allfonts=./AllFonts.js",
+  base.cmd_exe("./allfontsgen", ["--input=../../../core-fonts", "--allfonts-web=../../../sdkjs/common/AllFonts.js", "--allfonts=./AllFonts.js",
                                "--images=../../../sdkjs/common/Images", "--selection=./font_selection.bin", 
                                "--use-system=true", "--output-web=../../../fonts"])
   
   print("All presentation themes generation... ---------------------")
   print("-----------------------------------------------------------")
-  base.cmd_exe("allthemesgen", ["--converter-dir=\"" + git_dir + "/server/FileConverter/bin\"", "--src=\"" + git_dir + "/sdkjs/slide/themes\"", "--output=\"" + git_dir + "/sdkjs/common/Images\""])
+  base.cmd_exe("./allthemesgen", ["--converter-dir=\"" + git_dir + "/server/FileConverter/bin\"", "--src=\"" + git_dir + "/sdkjs/slide/themes\"", "--output=\"" + git_dir + "/sdkjs/common/Images\""])
 
   # add directories to open directories
   data_local_devel = "{\n"
@@ -83,7 +83,7 @@ def make():
   data_local_devel += "}\n"
   data_local_devel += "}\n"
   data_local_devel += "}\n"
-  base.writeFile(git_dir + "/server/Common/config/local-development-windows.json", data_local_devel)
+  base.writeFile(git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json", data_local_devel)
 
   os.chdir(old_cur)
   return

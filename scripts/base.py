@@ -4,6 +4,7 @@ import platform
 import glob
 import shutil
 import os
+import fnmatch
 import subprocess
 import sys
 import config
@@ -42,6 +43,12 @@ def configure_common_apps():
     os.environ["PATH"] = get_script_dir() + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
     os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
+  return
+
+def print_info(info=""):
+  print("------------------------------------------")
+  print(info)
+  print("------------------------------------------")
   return
 
 # file system -------------------------------------------
@@ -97,6 +104,11 @@ def delete_file(path):
 
 def delete_exe(path):
   return os.remove(get_path(path) + (".exe" if "windows" == host_platform() else ""))
+
+def find_file(path, pattern):
+  for root, dirnames, filenames in os.walk(path):
+    for filename in fnmatch.filter(filenames, pattern):
+	  return os.path.join(root, filename)
 
 def create_dir(path):
   path2 = get_path(path)
@@ -248,6 +260,25 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   ret = cmd(prog, args, is_no_errors)
   os.chdir(cur_dir)
   return ret
+
+def run_process(args=[]):
+  subprocess.Popen(args)
+
+def run_process_in_dir(directory, args=[]):
+  dir = get_path(directory)
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  run_process(args)
+  os.chdir(cur_dir)
+
+# nodejs ------------------------------------------------
+def run_nodejs(args=[]):
+  args.insert(0, 'node')
+  run_process(args)
+
+def run_nodejs_in_dir(directory, args=[]):
+  args.insert(0, 'node')
+  run_process_in_dir(directory, args)
 
 def bash(path):
   command = get_path(path)

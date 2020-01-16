@@ -25,9 +25,12 @@ def make():
     isWindowsXP = False if (-1 == native_platform.find("_xp")) else True
     platform = native_platform[0:-3] if isWindowsXP else native_platform
 
-    apps_postfix = platform
+    apps_postfix = "build" + base.qt_dst_postfix();
+    if ("" != config.option("branding")):
+      apps_postfix += ("/" + config.option("branding") + "/")
+    apps_postfix += platform
     if isWindowsXP:
-      apps_postfix += "_xp"
+      apps_postfix += "/xp"
 
     core_build_dir = core_dir + "/build"
     if ("" != config.option("branding")):
@@ -142,11 +145,11 @@ def make():
         base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
       if (0 == platform.find("win")):
-        base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/projicons_" + apps_postfix + ".exe", root_dir + "/DesktopEditors.exe")
-        base.copy_file(git_dir + "/desktop-apps/win-linux/DesktopEditors_" + apps_postfix + ".exe", root_dir + "/editors.exe")
+        base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/" + apps_postfix + "/projicons.exe", root_dir + "/DesktopEditors.exe")
+        base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors.exe", root_dir + "/editors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
       elif (0 == platform.find("linux")):
-        base.copy_file(git_dir + "/desktop-apps/win-linux/DesktopEditors_" + apps_postfix, root_dir + "/DesktopEditors")
+        base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
@@ -170,7 +173,7 @@ def make():
 
       base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}", root_dir + "/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}")
       base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/blockchain/{B17BDC61-59FC-41A7-A471-CD2C415A665E}", root_dir + "/editors/sdkjs-plugins/{B17BDC61-59FC-41A7-A471-CD2C415A665E}")
+      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
 
       if (0 != platform.find("mac")):
         base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}", root_dir + "/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}")

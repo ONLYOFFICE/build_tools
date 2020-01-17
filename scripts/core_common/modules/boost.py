@@ -71,9 +71,8 @@ def make():
   dst_dir = "boost_1_58_0/boost"
   for library in glob.glob(src_dir + "/*"):
     library_name = os.path.basename(library)
-    print(library)
     if base.is_dir(library) and base.is_dir(library + "/include/boost") and not base.is_dir(dst_dir + "/" + library_name) and not base.is_dir(library + "/src"):
-      base.copy_files(library + "/include/boost/*", dst_dir)
+      base.copy_files(library + "/include/boost/*", dst_dir, False)
 
   os.chdir(old_cur)
   return

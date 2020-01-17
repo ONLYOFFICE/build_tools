@@ -71,12 +71,19 @@ def copy_file(src, dst):
     return
   return shutil.copy2(get_path(src), get_path(dst))
 
-def copy_files(src, dst):
+def copy_files(src, dst, override=True):
   for file in glob.glob(src):
+    file_name = os.path.basename(file)
     if is_file(file):
-      copy_file(file, dst)
+      if override and is_file(dst + "/" + file_name)
+        delete_file(dst + "/" + file_name)
+      if not is_file(dst + "/" + file_name):
+        copy_file(file, dst)
     elif is_dir(file):
-      copy_dir(file, dst + "/" + os.path.basename(file))
+      if override and is_dir(dst + "/" + file_name)
+        delete_dir(dst + "/" + file_name)
+      if not is_dir(dst + "/" + file_name):
+        copy_dir(file, dst + "/" + file_name)
   return
 
 def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):

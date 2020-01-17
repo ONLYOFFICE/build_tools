@@ -82,7 +82,7 @@ def copy_files(src, dst, override=True):
     elif is_dir(file):
       if not is_dir(dst + "/" + file_name):
         create_dir(dst + "/" + file_name)
-      copy_files(file + "/*", dst + "/" + file_name)
+      copy_files(file + "/*", dst + "/" + file_name, override)
   return
 
 def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):

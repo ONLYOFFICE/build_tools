@@ -80,10 +80,9 @@ def copy_files(src, dst, override=True):
       if not is_file(dst + "/" + file_name):
         copy_file(file, dst)
     elif is_dir(file):
-      if override and is_dir(dst + "/" + file_name):
-        delete_dir(dst + "/" + file_name)
       if not is_dir(dst + "/" + file_name):
-        copy_dir(file, dst + "/" + file_name)
+        create_dir(dst + "/" + file_name)
+      copy_files(file + "/*", dst + "/" + file_name)
   return
 
 def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):

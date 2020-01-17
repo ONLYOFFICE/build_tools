@@ -5,6 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
+import glob
 
 def make():
   print("[fetch & build]: boost")
@@ -63,6 +64,16 @@ def make():
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("build/ios/static"):
     os.chdir("../")
     base.bash("./boost_ios")
+
+  # copy header-only
+  os.chdir(base_dir)
+  src_dir = "boost_1_58_0/libs"
+  dst_dir = "boost_1_58_0/boost"
+  for library in glob.glob(src_dir + "/*"):
+    library_name = os.path.basename(library)
+    print(library)
+    if base.is_dir(library) and base.is_dir(library + "/include/boost") and not base.is_dir(dst_dir + "/" + library_name) and not base.is_dir(library + "/src"):
+      base.copy_files(library + "/include/boost/*", dst_dir)
 
   os.chdir(old_cur)
   return

@@ -75,12 +75,12 @@ def copy_files(src, dst, override=True):
   for file in glob.glob(src):
     file_name = os.path.basename(file)
     if is_file(file):
-      if override and is_file(dst + "/" + file_name)
+      if override and is_file(dst + "/" + file_name):
         delete_file(dst + "/" + file_name)
       if not is_file(dst + "/" + file_name):
         copy_file(file, dst)
     elif is_dir(file):
-      if override and is_dir(dst + "/" + file_name)
+      if override and is_dir(dst + "/" + file_name):
         delete_dir(dst + "/" + file_name)
       if not is_dir(dst + "/" + file_name):
         copy_dir(file, dst + "/" + file_name)

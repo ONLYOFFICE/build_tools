@@ -29,7 +29,7 @@ def make():
   # build
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
-    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("build/win_64/static"):      
+    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
       base.cmd("bootstrap.bat")
       base.create_dir("build/win_64")
       base.cmd("b2.exe", ["headers"])
@@ -37,7 +37,7 @@ def make():
       base.cmd("bjam.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
       base.create_dir("build/win_64/static")
       base.copy_files("stage/lib/*", "build/win_64/static/")
-    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("build/win_32/static"):
+    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
       base.create_dir("build/win_32")
       base.cmd("b2.exe", ["headers"])
@@ -46,7 +46,7 @@ def make():
       base.create_dir("build/win_32/static")
       base.copy_files("stage/lib/*", "build/win_32/static/")
 
-  if (-1 != config.option("platform").find("linux")) and not base.is_dir("build/linux_64/static"):
+  if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.create_dir("build/linux_64")
     base.cmd("./b2", ["headers"])
@@ -56,7 +56,7 @@ def make():
     base.copy_files("stage/lib/*", "build/linux_64/static/")
     # TODO: support x86
 
-  if (-1 != config.option("platform").find("mac")) and not base.is_dir("build/mac_64/static"):
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.create_dir("build/mac_64")
     base.cmd("./b2", ["headers"])
@@ -65,18 +65,9 @@ def make():
     base.create_dir("build/mac_64/static")
     base.copy_files("stage/lib/*", "build/mac_64/static/")
 
-  if (-1 != config.option("platform").find("ios")) and not base.is_dir("build/ios/static"):
+  if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
     os.chdir("../")
     base.bash("./boost_ios")
-
-  # copy header-only
-  os.chdir(base_dir)
-  src_dir = "boost_1_58_0/libs"
-  dst_dir = "boost_1_58_0/boost"
-  for library in glob.glob(src_dir + "/*"):
-    library_name = os.path.basename(library)
-    if base.is_dir(library) and base.is_dir(library + "/include/boost") and not base.is_dir(dst_dir + "/" + library_name) and not base.is_dir(library + "/src"):
-      base.copy_files(library + "/include/boost/*", dst_dir, False)
 
   os.chdir(old_cur)
   return

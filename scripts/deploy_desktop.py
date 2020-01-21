@@ -27,7 +27,8 @@ def make():
 
     apps_postfix = "build" + base.qt_dst_postfix();
     if ("" != config.option("branding")):
-      apps_postfix += ("/" + config.option("branding") + "/")
+      apps_postfix += ("/" + config.option("branding"))
+    apps_postfix += "/"
     apps_postfix += platform
     if isWindowsXP:
       apps_postfix += "/xp"

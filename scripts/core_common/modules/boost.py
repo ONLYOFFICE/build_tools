@@ -6,6 +6,13 @@ import config
 import base
 import os
 
+def correct_install_includes_win(base_dir, platform):
+  build_dir = base_dir + "/build/" + platform + "/include"
+  if base.is_dir(build_dir + "/boost-1_58") and base.is_dir(build_dir + "/boost-1_58/boost"):
+    base.copy_dir(build_dir + "/boost-1_58/boost", build_dir + "/boost")
+    base.delete_dir(build_dir + "/boost-1_58")
+  return
+
 def make():
   print("[fetch & build]: boost")
 
@@ -30,39 +37,29 @@ def make():
     win_toolset = "msvc-14.0"
     if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
       base.cmd("bootstrap.bat")
-      base.create_dir("build/win_64")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
-      base.create_dir("build/win_64/static")
-      base.copy_files("stage/lib/*", "build/win_64/static/")
+      base.cmd("bjam.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])      
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
-      base.create_dir("build/win_32")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("bjam.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
-      base.create_dir("build/win_32/static")
-      base.copy_files("stage/lib/*", "build/win_32/static/")
+    correct_install_includes_win(base_dir, "win_64")
+    correct_install_includes_win(base_dir, "win_32")    
 
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
-    base.create_dir("build/linux_64")
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])
-    base.create_dir("build/linux_64/static")
-    base.copy_files("stage/lib/*", "build/linux_64/static/")
+    base.cmd("./bjam", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
-    base.create_dir("build/mac_64")
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
     base.cmd("./bjam", ["--prefix=./../build/mac_64", "link=static", "install"])
-    base.create_dir("build/mac_64/static")
-    base.copy_files("stage/lib/*", "build/mac_64/static/")
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
     os.chdir("../")

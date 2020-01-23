@@ -68,6 +68,7 @@ def parse():
   global sdkjs_addons
   sdkjs_addons = {}
   sdkjs_addons["comparison"] = "sdkjs-comparison"
+  sdkjs_addons["content-controls"] = "sdkjs-content-controls"
 
   return
 

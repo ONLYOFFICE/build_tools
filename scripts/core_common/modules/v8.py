@@ -28,6 +28,7 @@ def make():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
+    os.chdir(base_dir + "/depot_tools")
     base.cmd("fetch", ["v8"], True)
     os.chdir(base_dir + "/v8")
     base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"], True)

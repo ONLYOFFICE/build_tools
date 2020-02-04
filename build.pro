@@ -33,6 +33,7 @@ core_linux {
 }
 core_mac {
 	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_desktop_apps
 }
 build_xp {
 	CONFIG += no_use_htmlfileinternal
@@ -40,6 +41,7 @@ build_xp {
 core_ios {
 	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
+	CONFIG += no_desktop_apps
 }
 
 SUBDIRS = \
@@ -92,11 +94,12 @@ message(desktop)
 
 SUBDIRS += \
 	hunspell \
-	ooxmlsignature
+	ooxmlsignature \
+	documentscore \
+	documentscore_helper
 
 core_and_multimedia {
 SUBDIRS += \
-	documentscore \
 	videoplayer
 }
 
@@ -256,18 +259,13 @@ desktop {
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
 
-	core_windows {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
+	documentscore.file       	= $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro
+	documentscore_helper.file   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore_helper.pro
+	
+	core_and_multimedia {
+		videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
+		videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 	}
-
-	core_linux {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_linux.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX
-	}
-
-	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 	
 	!no_desktop_apps {
 		core_windows {
@@ -304,7 +302,8 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 desktop {
 	ooxmlsignature.depends    = kernel unicodeconverter graphics
 	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
-	videoplayer.depends       = kernel unicodeconverter graphics
+	documentscore_helper.depends    = documentscore
+	videoplayer.depends       		= kernel unicodeconverter graphics
 	
 	!no_desktop_apps {
 		core_windows:projicons.depends  = documentscore videoplayer

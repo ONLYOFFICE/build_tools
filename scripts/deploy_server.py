@@ -7,9 +7,6 @@ import re
 import shutil
 from tempfile import mkstemp
 
-import datetime
-
-
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -125,15 +122,6 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
-    #env variables
-    product_version = base.get_env('PRODUCT_VERSION')
-    if(not product_version):
-      product_version = "0.0.0"
-
-    build_number = base.get_env('BUILD_NUMBER')
-    if(not build_number):
-      build_number = "0"
-
     branding_dir = base.get_env('BRANDING_DIR')
     if(not branding_dir):
       branding_dir = 'branding'
@@ -185,12 +173,6 @@ def make():
 
     if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, build_server_dir + '/Common/sources')
-
-    cur_date = datetime.date.today().strftime("%m/%d/%Y")
-
-    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildNumber = [0-9]*", "const buildNumber = " + build_number)
-    base.replaceInFileRE(build_server_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
-    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
 
   return
 

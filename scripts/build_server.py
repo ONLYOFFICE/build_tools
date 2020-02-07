@@ -31,10 +31,18 @@ def make():
   base.replaceInFileRE(server_build_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
   base.replaceInFileRE(server_build_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
 
-  base.cmd_in_dir(server_build_dir + "/DocService", "pkg", [".", "-t", 'node10-linux', "-o", "docservice"])
-  base.cmd_in_dir(server_build_dir + "/FileConverter", "pkg", [".", "-t", 'node10-linux', "-o", "converter"])
-  base.cmd_in_dir(server_build_dir + "/Metrics", "pkg", [".", "-t", 'node10-linux', "-o", "metrics"])
-  base.cmd_in_dir(server_build_dir + "/SpellChecker", "pkg", [".", "-t", 'node10-linux', "-o", "spellchecker"])
+  pkg_target = "node10"
+
+  if ("linux" == base.host_platform()):
+    pkg_target += "-linux"
+
+  if ("windows" == base.host_platform()):
+    pkg_target += "-win"
+
+  base.cmd_in_dir(server_build_dir + "/DocService", "pkg", [".", "-t", pkg_target, "-o", "docservice"])
+  base.cmd_in_dir(server_build_dir + "/FileConverter", "pkg", [".", "-t", pkg_target, "-o", "converter"])
+  base.cmd_in_dir(server_build_dir + "/Metrics", "pkg", [".", "-t", pkg_target, "-o", "metrics"])
+  base.cmd_in_dir(server_build_dir + "/SpellChecker", "pkg", [".", "-t", pkg_target, "-o", "spellchecker"])
 
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.cmd_in_dir(example_dir, "npm", ["install"])

@@ -31,5 +31,10 @@ def make():
   base.replaceInFileRE(server_build_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
   base.replaceInFileRE(server_build_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
 
+  base.cmd_in_dir(server_build_dir + "/DocService", "pkg", [".", "-t", 'node10-linux', "-o", "docservice"])
+  base.cmd_in_dir(server_build_dir + "/FileConverter", "pkg", [".", "-t", 'node10-linux', "-o", "converter"])
+  base.cmd_in_dir(server_build_dir + "/Metrics", "pkg", [".", "-t", 'node10-linux', "-o", "metrics"])
+  base.cmd_in_dir(server_build_dir + "/SpellChecker", "pkg", [".", "-t", 'node10-linux', "-o", "spellchecker"])
+
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.cmd_in_dir(example_dir, "npm", ["install"])

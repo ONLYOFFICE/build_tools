@@ -195,6 +195,9 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allthemesgen")
 
+    if (0 == platform.find("mac")):
+      base.mac_correct_rpath_desktop(root_dir)
+
     themes_params = []
     if ("" != config.option("themesparams")):
       themes_params = ["--params=\"" + config.option("themesparams") + "\""]

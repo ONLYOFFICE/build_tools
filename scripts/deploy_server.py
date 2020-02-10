@@ -38,7 +38,26 @@ def make():
 
     build_server_dir = root_dir + '/server'
     server_dir = base.get_script_dir() + "/../../server"
-    base.copy_dir(server_dir + '/build/server', build_server_dir)
+    bin_server_dir = server_dir + "/build/server"
+
+    base.create_dir(build_server_dir + '/DocService')
+
+    base.copy_dir(bin_server_dir + '/Common/config', build_server_dir + '/Common/config')
+
+    base.create_dir(build_server_dir + '/DocService')
+    base.copy_exe(bin_server_dir + "/DocService", build_server_dir + '/DocService', "docservice")
+
+    base.create_dir(build_server_dir + '/FileConverter')
+    base.copy_exe(bin_server_dir + "/FileConverter", build_server_dir + '/FileConverter', "converter")
+
+    base.create_dir(build_server_dir + '/Metrics')
+    base.copy_exe(bin_server_dir + "/Metrics", build_server_dir + '/Metrics', "metrics")
+    base.copy_dir(bin_server_dir + '/Metrics/config', build_server_dir + '/Metrics/config')
+
+    base.create_dir(build_server_dir + '/SpellChecker')
+    base.copy_exe(bin_server_dir + "/SpellChecker", build_server_dir + '/SpellChecker', "spellchecker")
+    base.copy_file(bin_server_dir + "/SpellChecker/SpellChecker/node_modules/nodehun/build/Release/nodehun.node", build_server_dir + '/SpellChecker/SpellChecker/node_modules/nodehun/build/Release/nodehun.node')
+    
 
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform

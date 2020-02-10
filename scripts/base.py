@@ -662,7 +662,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
-  mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
+  mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"])
   mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile", "doctrenderer"])
@@ -683,13 +683,15 @@ def mac_correct_rpath_desktop(dir):
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
   mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
-  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ooxmlsignature"])
+  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"])
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
 
-  delete_dir("./editors_helper (GPU).app")
-  delete_dir("./editors_helper (Renderer).app")
+  if is_dir("./editors_helper (GPU).app"):
+    delete_dir("./editors_helper (GPU).app")
+  if is_dir("./editors_helper (Renderer).app"):
+    delete_dir("./editors_helper (Renderer).app")
   copy_dir("./editors_helper.app", "./editors_helper (GPU).app")
   copy_dir("./editors_helper.app", "./editors_helper (Renderer).app")
   copy_file("./editors_helper (GPU).app/Contents/MacOS/editors_helper", "./editors_helper (GPU).app/Contents/MacOS/editors_helper (GPU)")

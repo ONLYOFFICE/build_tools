@@ -53,7 +53,7 @@ def _run_grunt(directory, params=[]):
 
 def build_interface(directory):
   _run_npm(directory)
-  _run_grunt(directory, ["--force"])
+  _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
   return
 
 def build_sdk_desktop(directory):

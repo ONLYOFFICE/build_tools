@@ -664,12 +664,15 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
+  cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"])
   mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile", "doctrenderer"])
   if is_file("./allfontsgen"):
+    cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"])
     mac_correct_rpath_binary("./allfontsgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
+    cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"])
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "doctrenderer"])
   os.chdir(cur_dir)

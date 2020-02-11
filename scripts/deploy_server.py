@@ -53,6 +53,8 @@ def make():
     base.create_dir(build_server_dir + '/Metrics')
     base.copy_exe(bin_server_dir + "/Metrics", build_server_dir + '/Metrics', "metrics")
     base.copy_dir(bin_server_dir + '/Metrics/config', build_server_dir + '/Metrics/config')
+    base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
+    base.copy_file(bin_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node" + build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
 
     base.create_dir(build_server_dir + '/SpellChecker')
     base.copy_exe(bin_server_dir + "/SpellChecker", build_server_dir + '/SpellChecker', "spellchecker")

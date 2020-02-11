@@ -70,6 +70,10 @@ def parse():
   sdkjs_addons["comparison"] = "sdkjs-comparison"
   sdkjs_addons["content-controls"] = "sdkjs-content-controls"
 
+  global web_apps_addons
+  web_apps_addons = {}
+  web_apps_addons["mobile"] = "web-apps-mobile"
+
   return
 
 def check_compiler(platform):

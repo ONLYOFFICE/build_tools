@@ -46,3 +46,4 @@ def make():
 
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.cmd_in_dir(example_dir, "npm", ["install"])
+  base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])

@@ -196,5 +196,13 @@ def make():
     if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, build_server_dir + '/Common/sources')
 
+    # example
+    build_example_dir = root_dir + '-example'
+    bin_example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
+
+    base.create_dir(build_example_dir)
+    base.copy_exe(bin_example_dir, build_example_dir, "example")
+    base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
+
   return
 

@@ -109,6 +109,8 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "hunspell")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "ooxmlsignature")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
+    if (0 != platform.find("mac")):
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")
     
     if (0 == platform.find("mac")):
       base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")

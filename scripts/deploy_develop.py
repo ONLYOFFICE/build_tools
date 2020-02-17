@@ -57,7 +57,7 @@ def make():
     base.delete_dir(git_dir + "/fonts")
   base.create_dir(git_dir + "/fonts")
 
-  if (0 == platform.find("mac")):
+  if ("mac" == base.host_platform()):
     base.mac_correct_rpath_x2t("./")
 
   print("-----------------------------------------------------------")

@@ -529,6 +529,15 @@ def sdkjs_addons_checkout():
       git_update(config.sdkjs_addons[name])
   return
 
+def web_apps_addons_checkout():
+  if ("" == config.option("web-apps-addons")):
+    return
+  addons_list = config.option("web-apps-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.web_apps_addons:
+      git_update(config.web_apps_addons[name])
+  return
+
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
     return []
@@ -537,6 +546,16 @@ def sdkjs_addons_param():
   for name in addons_list:
     if name in config.sdkjs_addons:
       params.append("--addon=" + config.sdkjs_addons[name])
+  return params
+
+def web_apps_addons_param():
+  if ("" == config.option("web-apps-addons")):
+    return []
+  params = []
+  addons_list = config.option("web-apps-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.web_apps_addons:
+      params.append("--addon=" + config.web_apps_addons[name])
   return params
 
 # common apps

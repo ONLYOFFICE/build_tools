@@ -7,9 +7,6 @@ import re
 import shutil
 from tempfile import mkstemp
 
-import datetime
-
-
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -41,7 +38,29 @@ def make():
 
     build_server_dir = root_dir + '/server'
     server_dir = base.get_script_dir() + "/../../server"
-    base.copy_dir(server_dir + '/build/server', build_server_dir)
+    bin_server_dir = server_dir + "/build/server"
+
+    base.create_dir(build_server_dir + '/DocService')
+
+    base.copy_dir(bin_server_dir + '/Common/config', build_server_dir + '/Common/config')
+
+    base.create_dir(build_server_dir + '/DocService')
+    base.copy_exe(bin_server_dir + "/DocService", build_server_dir + '/DocService', "docservice")
+
+    base.create_dir(build_server_dir + '/FileConverter')
+    base.copy_exe(bin_server_dir + "/FileConverter", build_server_dir + '/FileConverter', "converter")
+
+    base.create_dir(build_server_dir + '/Metrics')
+    base.copy_exe(bin_server_dir + "/Metrics", build_server_dir + '/Metrics', "metrics")
+    base.copy_dir(bin_server_dir + '/Metrics/config', build_server_dir + '/Metrics/config')
+    base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
+    base.copy_file(bin_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node", build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
+
+    base.create_dir(build_server_dir + '/SpellChecker')
+    base.copy_exe(bin_server_dir + "/SpellChecker", build_server_dir + '/SpellChecker', "spellchecker")
+    base.create_dir(build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release')
+    base.copy_file(bin_server_dir + "/SpellChecker/node_modules/nodehun/build/Release/nodehun.node", build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release/nodehun.node')
+    
 
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
@@ -125,15 +144,6 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
-    #env variables
-    product_version = base.get_env('PRODUCT_VERSION')
-    if(not product_version):
-      product_version = "0.0.0"
-
-    build_number = base.get_env('BUILD_NUMBER')
-    if(not build_number):
-      build_number = "0"
-
     branding_dir = base.get_env('BRANDING_DIR')
     if(not branding_dir):
       branding_dir = 'branding'
@@ -186,11 +196,13 @@ def make():
     if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, build_server_dir + '/Common/sources')
 
-    cur_date = datetime.date.today().strftime("%m/%d/%Y")
+    # example
+    build_example_dir = root_dir + '-example'
+    bin_example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
 
-    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildNumber = [0-9]*", "const buildNumber = " + build_number)
-    base.replaceInFileRE(build_server_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
-    base.replaceInFileRE(build_server_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
+    base.create_dir(build_example_dir)
+    base.copy_exe(bin_example_dir, build_example_dir, "example")
+    base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
 
   return
 

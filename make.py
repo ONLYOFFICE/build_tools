@@ -48,6 +48,7 @@ if ("1" == config.option("update")):
   base.sdkjs_addons_checkout()
   base.git_update("sdkjs-plugins")
   base.git_update("web-apps")
+  base.web_apps_addons_checkout()
   base.git_update("desktop-sdk")
   base.git_update("dictionaries")
 

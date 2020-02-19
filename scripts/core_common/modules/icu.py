@@ -52,7 +52,10 @@ def make():
     if not base.is_dir(platform + "/build"):
       base.replaceInFile("./icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
 
-  if ("" != platform) and not base.is_dir(platform + "/build"):
+  if (-1 != config.option("platform").find("ios")):
+    if not base.is_dir("build"):
+      base.bash("./icu_ios")
+  elif ("" != platform) and not base.is_dir(platform + "/build"):
     base.create_dir(platform)
     os.chdir("icu/source")
     base.cmd("./runConfigureICU", ["Linux" if "linux" == base.host_platform() else "MacOSX"])

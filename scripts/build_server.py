@@ -12,7 +12,7 @@ def make():
   server_dir = base.get_script_dir() + "/../../server"
 
   base.cmd_in_dir(server_dir, "npm", ["install"])
-  base.cmd_in_dir(server_dir, "grunt", ["--no-color", "-v"])
+  base.cmd_in_dir(server_dir, "grunt", ["--no-color", "-v"] + base.server_addons_param())
 
     #env variables
   product_version = base.get_env('PRODUCT_VERSION')

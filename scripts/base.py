@@ -529,6 +529,15 @@ def sdkjs_addons_checkout():
       git_update(config.sdkjs_addons[name])
   return
 
+def server_addons_checkout():
+  if ("" == config.option("server-addons")):
+    return
+  addons_list = config.option("server-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.server_addons:
+      git_update(config.server_addons[name])
+  return
+
 def web_apps_addons_checkout():
   if ("" == config.option("web-apps-addons")):
     return
@@ -546,6 +555,16 @@ def sdkjs_addons_param():
   for name in addons_list:
     if name in config.sdkjs_addons:
       params.append("--addon=" + config.sdkjs_addons[name])
+  return params
+
+def server_addons_param():
+  if ("" == config.option("server-addons")):
+    return []
+  params = []
+  addons_list = config.option("server-addons").rsplit(", ")
+  for name in addons_list:
+    if name in config.server_addons:
+      params.append("--addon=" + config.server_addons[name])
   return params
 
 def web_apps_addons_param():

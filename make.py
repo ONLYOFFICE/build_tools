@@ -60,6 +60,7 @@ if ("1" == config.option("update")):
 
   if (config.check_option("module", "develop") or config.check_option("module", "server")):
     base.git_update("server")
+    base.server_addons_checkout()
     base.git_update("document-server-integration")
     
   if (config.check_option("module", "develop") or config.check_option("module", "server") or config.check_option("platform", "ios")):

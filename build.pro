@@ -88,6 +88,11 @@ core_ios:CONFIG += no_tests
 !no_tests {
 	SUBDIRS += standardtester
 }
+
+core_and_multimedia {
+SUBDIRS += \
+	videoplayer
+}
 	
 desktop {
 message(desktop)
@@ -100,11 +105,6 @@ SUBDIRS += \
 
 !core_mac {
 SUBDIRS += qtdocumentscore
-}
-
-core_and_multimedia {
-SUBDIRS += \
-	videoplayer
 }
 
 !no_desktop_apps {

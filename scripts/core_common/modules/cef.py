@@ -31,7 +31,7 @@ def make():
     data_url = base.get_file_last_modified_url(url)
     old_data_url = base.readFile("./cef_binary.7z.data")
 
-    if (old_cur != old_data_url):
+    if (data_url != old_data_url):
       if base.is_file("./cef_binary.7z"):
         base.delete_file("./cef_binary.7z")
       if base.is_dir("build"):
@@ -47,8 +47,8 @@ def make():
     # extract
     base.extract("./cef_binary.7z", "./")
 
-    base.delete_file("./core.7z.data")
-    base.writeFile("./core.7z.data", data_url)
+    base.delete_file("./cef_binary.7z.data")
+    base.writeFile("./cef_binary.7z.data", data_url)
 
     base.create_dir("./build")
 

@@ -13,25 +13,15 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  platforms = ["win_64", "win_32", "winxp_64", "winxp_32", "linux_64", "linux_32", "mac_64"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64"]
 
   url = "http://d2ettrnqo7v976.cloudfront.net/cef/3770/"
 
   for platform in platforms:
     if not config.check_option("platform", platform):
-      if (0 != platform.find("winxp")):
-        continue
-      if ("winxp_64" != platform) and not config.check_option("platform", "win_64_xp"):
-        continue
-      if ("winxp_32" != platform) and not config.check_option("platform", "win_32_xp"):
-        continue
+      continue
 
-    if (0 == platform.find("mac")):
-      url += "mac"
-    else:
-      url += platform
-
-    url += "/cef_binary.7z"
+    url += (platform + "/cef_binary.7z")
 
     if not base.is_dir(platform):
       base.create_dir(platform)

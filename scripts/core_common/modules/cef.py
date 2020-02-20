@@ -47,6 +47,9 @@ def make():
     # extract
     base.extract("./cef_binary.7z", "./")
 
+    base.delete_file("./core.7z.data")
+    base.writeFile("./core.7z.data", data_url)
+
     base.create_dir("./build")
 
     # deploy
@@ -58,7 +61,7 @@ def make():
       base.cmd("chmod", ["a+xr", "build/locales"])
 
     if ("mac_64" == platform):
-      base.cmd("mv", ["cef_binary", "build/Chromium Embedded Framework.framework"])
+      base.cmd("mv", ["Chromium Embedded Framework.framework", "build/Chromium Embedded Framework.framework"])
 
     os.chdir(base_dir)
 

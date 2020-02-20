@@ -8,6 +8,9 @@ import os
 def make():
   is_no_brandind_build = base.is_file("config")
 
+  if base.is_dir("makefiles"):
+    base.delete_dir("makefiles")
+
   platforms = config.option("platform").split()
   for platform in platforms:
     if not platform in config.platforms:

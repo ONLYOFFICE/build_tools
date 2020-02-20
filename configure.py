@@ -24,6 +24,8 @@ parser.add_option("--branding", action="store", type="string", dest="branding", 
 parser.add_option("--branding-name", action="store", type="string", dest="branding-name", default="", help="branding name")
 parser.add_option("--branding-url", action="store", type="string", dest="branding-url", default="", help="branding url")
 parser.add_option("--sdkjs-addon", action="append", type="string", dest="sdkjs-addons", default=[], help="sdkjs addons")
+parser.add_option("--server-addon", action="append", type="string", dest="server-addons", default=[], help="server addons")
+parser.add_option("--web-apps-addon", action="append", type="string", dest="web-apps-addons", default=[], help="web-apps addons")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

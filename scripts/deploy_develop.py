@@ -57,6 +57,9 @@ def make():
     base.delete_dir(git_dir + "/fonts")
   base.create_dir(git_dir + "/fonts")
 
+  if ("mac" == base.host_platform()):
+    base.mac_correct_rpath_x2t("./")
+
   print("-----------------------------------------------------------")
   print("All fonts generation... -----------------------------------")
   print("-----------------------------------------------------------")
@@ -74,9 +77,15 @@ def make():
   data_local_devel += "\"CoAuthoring\": {\n"
   data_local_devel += "\"server\": {\n"
   data_local_devel += "\"static_content\": {\n"
+  is_exist_addons = False
   for addon in config.sdkjs_addons:
     data_local_devel += ("\"/" + config.sdkjs_addons[addon] + "\" : { \"path\": \"../../../" + config.sdkjs_addons[addon] + "\" },\n")
-  data_local_devel = data_local_devel[:-2]
+    is_exist_addons = True
+  for addon in config.web_apps_addons:
+    data_local_devel += ("\"/" + config.web_apps_addons[addon] + "\" : { \"path\": \"../../../" + config.web_apps_addons[addon] + "\" },\n")
+    is_exist_addons = True
+  if is_exist_addons:
+    data_local_devel = data_local_devel[:-2]
   data_local_devel += "\n"
   data_local_devel += "}\n"
   data_local_devel += "}\n"

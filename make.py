@@ -48,6 +48,7 @@ if ("1" == config.option("update")):
   base.sdkjs_addons_checkout()
   base.git_update("sdkjs-plugins")
   base.git_update("web-apps")
+  base.web_apps_addons_checkout()
   base.git_update("desktop-sdk")
   base.git_update("dictionaries")
 
@@ -59,6 +60,7 @@ if ("1" == config.option("update")):
 
   if (config.check_option("module", "develop") or config.check_option("module", "server")):
     base.git_update("server")
+    base.server_addons_checkout()
     base.git_update("document-server-integration")
     
   if (config.check_option("module", "develop") or config.check_option("module", "server") or config.check_option("platform", "ios")):

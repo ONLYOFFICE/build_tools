@@ -60,21 +60,6 @@ def make():
 
     base.delete_file(".qmake.stash")
 
-    if ("mac_64" == platform) and is_no_brandind_build:
-      configuration = "Release" if (-1 == config_param.lower().find("debug")) else "Debug"
-      base.cmd("xcodebuild", ["-project", 
-        "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore/ascdocumentscore.xcodeproj", 
-        "-target", 
-        "ascdocumentscore",
-        "-configuration",
-        configuration])
-      base.cmd("xcodebuild", ["-project", 
-        "../desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore Helper/ONLYOFFICE Helper.xcodeproj", 
-        "-target", 
-        "ONLYOFFICE Helper",
-        "-configuration",
-        configuration])
-
   if config.check_option("module", "builder") and base.is_windows() and is_no_brandind_build:
     base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
 

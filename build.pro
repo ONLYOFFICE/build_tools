@@ -33,6 +33,7 @@ core_linux {
 }
 core_mac {
 	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_desktop_apps
 }
 build_xp {
 	CONFIG += no_use_htmlfileinternal
@@ -40,6 +41,7 @@ build_xp {
 core_ios {
 	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
+	CONFIG += no_desktop_apps
 }
 
 SUBDIRS = \
@@ -92,11 +94,16 @@ message(desktop)
 
 SUBDIRS += \
 	hunspell \
-	ooxmlsignature
+	ooxmlsignature \
+	documentscore \
+	documentscore_helper
+
+!core_mac {
+SUBDIRS += qtdocumentscore
+}
 
 core_and_multimedia {
 SUBDIRS += \
-	documentscore \
 	videoplayer
 }
 
@@ -152,8 +159,9 @@ ordered {
 
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore_helper$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX)
 	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX)
 	removeFile($$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX)
 	removeFile($$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX)
@@ -256,18 +264,21 @@ desktop {
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
 
-	core_windows {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
-	}
+	documentscore.file          = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro
+	documentscore.makefile     	= $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore$$PRO_SUFFIX
 
-	core_linux {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_linux.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX
-	}
+	documentscore_helper.file     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore_helper.pro
+	documentscore_helper.makefile = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore_helper$$PRO_SUFFIX
 
-	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
+	!core_mac {
+		qtdocumentscore.file     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/qtascdocumentscore.pro
+		qtdocumentscore.makefile = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX
+	}
+		
+	core_and_multimedia {
+		videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
+		videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
+	}
 	
 	!no_desktop_apps {
 		core_windows {
@@ -304,7 +315,12 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 desktop {
 	ooxmlsignature.depends    = kernel unicodeconverter graphics
 	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
-	videoplayer.depends       = kernel unicodeconverter graphics
+	documentscore_helper.depends    = documentscore
+	videoplayer.depends       		= kernel unicodeconverter graphics
+
+	!core_mac {
+		qtdocumentscore.depends 	= documentscore
+	}
 	
 	!no_desktop_apps {
 		core_windows:projicons.depends  = documentscore videoplayer

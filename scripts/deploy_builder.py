@@ -109,5 +109,8 @@ def make():
     if ("ios" == platform):
       base.generate_plist(root_dir)
 
+    if (0 == platform.find("mac")):
+      base.mac_correct_rpath_x2t(root_dir)
+
   return
 

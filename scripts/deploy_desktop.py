@@ -109,10 +109,14 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "hunspell")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "ooxmlsignature")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
+    if (0 != platform.find("mac")):
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")
     
-    if (0 == platform.find("mac")):      
-      base.copy_dir(core_build_dir + "/lib/" + platform_postfix + "/ONLYOFFICE Helper.app", root_dir + "/ONLYOFFICE Helper.app")
-
+    if (0 == platform.find("mac")):
+      base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")
+    else:
+      base.copy_exe(core_build_dir + "/bin/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "editors_helper")
+    
     if isUseQt:
       base.qt_copy_lib("Qt5Core", root_dir)
       base.qt_copy_lib("Qt5Gui", root_dir)
@@ -154,56 +158,59 @@ def make():
 
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
-      base.create_dir(root_dir + "/editors")
-      base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
-      base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
+    base.create_dir(root_dir + "/editors")
+    base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
+    base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
 
-      base.create_dir(root_dir + "/editors/sdkjs-plugins")
-      base.copy_file(git_dir + "/sdkjs-plugins/LICENSE.txt", root_dir + "/editors/sdkjs-plugins/LICENSE.txt")
-      base.copy_file(git_dir + "/sdkjs-plugins/README.md", root_dir + "/editors/sdkjs-plugins/README.md")
-      base.copy_file(git_dir + "/sdkjs-plugins/plugins.css", root_dir + "/editors/sdkjs-plugins/plugins.css")
-      base.copy_file(git_dir + "/sdkjs-plugins/pluginBase.js", root_dir + "/editors/sdkjs-plugins/pluginBase.js")
+    base.create_dir(root_dir + "/editors/sdkjs-plugins")
+    base.copy_file(git_dir + "/sdkjs-plugins/LICENSE.txt", root_dir + "/editors/sdkjs-plugins/LICENSE.txt")
+    base.copy_file(git_dir + "/sdkjs-plugins/README.md", root_dir + "/editors/sdkjs-plugins/README.md")
+    base.copy_file(git_dir + "/sdkjs-plugins/plugins.css", root_dir + "/editors/sdkjs-plugins/plugins.css")
+    base.copy_file(git_dir + "/sdkjs-plugins/pluginBase.js", root_dir + "/editors/sdkjs-plugins/pluginBase.js")
 
-      base.copy_dir(git_dir + "/sdkjs-plugins/youtube", root_dir + "/editors/sdkjs-plugins/{38E022EA-AD92-45FC-B22B-49DF39746DB4}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/ocr", root_dir + "/editors/sdkjs-plugins/{440EBF13-9B19-4BD8-8621-05200E58140B}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/translate", root_dir + "/editors/sdkjs-plugins/{7327FC95-16DA-41D9-9AF2-0E7F449F687D}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/synonim", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9840}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/code", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/photoeditor", root_dir + "/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A}")
-      base.copy_dir(git_dir + "/sdkjs-plugins/macros", root_dir + "/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/youtube", root_dir + "/editors/sdkjs-plugins/{38E022EA-AD92-45FC-B22B-49DF39746DB4}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/ocr", root_dir + "/editors/sdkjs-plugins/{440EBF13-9B19-4BD8-8621-05200E58140B}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/translate", root_dir + "/editors/sdkjs-plugins/{7327FC95-16DA-41D9-9AF2-0E7F449F687D}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/synonim", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9840}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/code", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/photoeditor", root_dir + "/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A}")
+    base.copy_dir(git_dir + "/sdkjs-plugins/macros", root_dir + "/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B}")
 
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}", root_dir + "/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}")
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
+    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}", root_dir + "/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}")
+    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
+    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
 
-      if (0 != platform.find("mac")):
-        base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}", root_dir + "/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}")
-        base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}", root_dir + "/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3}")
-        base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}", root_dir + "/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}")
+    if (0 != platform.find("mac")):
+      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}", root_dir + "/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}")
+      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}", root_dir + "/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3}")
+      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}", root_dir + "/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}")
 
-      base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
-      base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")
+    base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
+    base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")
 
-      if (0 == platform.find("win")):
-        base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")
-        base.delete_file(root_dir + "/cef_sandbox.lib")
-        base.delete_file(root_dir + "/libcef.lib")
+    if (0 == platform.find("win")):
+      base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")
+      base.delete_file(root_dir + "/cef_sandbox.lib")
+      base.delete_file(root_dir + "/libcef.lib")
 
-      # all themes generate ----
-      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
-      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allthemesgen")
+    # all themes generate ----
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allthemesgen")
 
-      themes_params = []
-      if ("" != config.option("themesparams")):
-        themes_params = ["--params=\"" + config.option("themesparams") + "\""]
-      base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts" + "\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js" + "\"", "--selection=\"" + root_dir + "/converter/font_selection.bin" + "\""])
-      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""] + themes_params)
+    if (0 == platform.find("mac")):
+      base.mac_correct_rpath_desktop(root_dir)
 
-      base.delete_exe(root_dir + "/converter/allfontsgen")
-      base.delete_exe(root_dir + "/converter/allthemesgen")
-      base.delete_file(root_dir + "/converter/AllFonts.js")
-      base.delete_file(root_dir + "/converter/font_selection.bin")
-      base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
+    themes_params = []
+    if ("" != config.option("themesparams")):
+      themes_params = ["--params=\"" + config.option("themesparams") + "\""]
+    base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts" + "\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js" + "\"", "--selection=\"" + root_dir + "/converter/font_selection.bin" + "\""])
+    base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter" + "\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes" + "\"", "--allfonts=\"AllFonts.js\""] + themes_params)
+
+    base.delete_exe(root_dir + "/converter/allfontsgen")
+    base.delete_exe(root_dir + "/converter/allthemesgen")
+    base.delete_file(root_dir + "/converter/AllFonts.js")
+    base.delete_file(root_dir + "/converter/font_selection.bin")
+    base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
 
   return
 

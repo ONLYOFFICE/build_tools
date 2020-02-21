@@ -144,9 +144,9 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
-    branding_dir = base.get_env('BRANDING_DIR')
-    if(not branding_dir):
-      branding_dir = 'branding'
+    branding_dir = server_dir + "/branding"
+    if("" != config.option("branding")):
+      branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries
     spellchecker_dictionaries = build_server_dir + '/SpellChecker/dictionaries'
@@ -181,12 +181,12 @@ def make():
     base.copy_dir(license_dir, license)
 
     #branding
-    welcome_files = server_dir + '/' + branding_dir + '/welcome'
+    welcome_files = branding_dir + '/welcome'
     welcome = build_server_dir + '/welcome'
     base.create_dir(welcome)
     base.copy_dir(welcome_files, welcome)
 
-    info_files = server_dir + '/' + branding_dir + '/info'
+    info_files = branding_dir + '/info'
     info = build_server_dir + '/info'
     base.create_dir(info)
     base.copy_dir(info_files, info)

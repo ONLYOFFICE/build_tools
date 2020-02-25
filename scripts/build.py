@@ -8,9 +8,6 @@ import os
 def make():
   is_no_brandind_build = base.is_file("config")
 
-  if base.is_dir("makefiles"):
-    base.delete_dir("makefiles")
-
   platforms = config.option("platform").split()
   for platform in platforms:
     if not platform in config.platforms:
@@ -44,6 +41,8 @@ def make():
         base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff], True)
         base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff], True)
 
+      if base.is_file("makefiles/build.makefile_" + file_suff):
+        base.delete_file("makefiles/build.makefile_" + file_suff)
       base.cmd(qt_dir + "/bin/qmake", ["-nocache", "build.pro", "CONFIG+=" + config_param] + qmake_addon)    
       base.cmd(base.app_make(), ["-f", "makefiles/build.makefile_" + file_suff])
     else:
@@ -56,6 +55,7 @@ def make():
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
         qmake_addon_string = " \"" + config.option("qmake_addon") + "\""
+      qmake_bat.append("if exist ./makefiles/build.makefile_" + file_suff + " del /F ./makefiles/build.makefile_" + file_suff)
       qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache build.pro \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
       qmake_bat.append("call nmake -f makefiles/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)

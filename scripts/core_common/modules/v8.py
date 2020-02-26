@@ -22,7 +22,6 @@ def make():
   else:
     os.chdir(base_dir + "/depot_tools")
     base.cmd("git", ["reset", "--hard"])
-    base.cmd("git", ["pull"])
     os.chdir(base_dir)
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
@@ -128,7 +127,6 @@ def make_xp():
   else:
     os.chdir(base_dir + "/depot_tools")
     base.cmd("git", ["reset", "--hard"])
-    base.cmd("git", ["pull"])
     os.chdir(base_dir)
 
   old_path = os.environ["PATH"]

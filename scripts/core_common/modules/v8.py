@@ -27,6 +27,9 @@ def make():
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
   if not base.is_dir("v8/out.gn"):
+    base.delete_file("./.gclient")
+    base.delete_file("./.gclient_entries")
+    base.delete_dir("./.cipd")
     base.cmd("gclient")
 
   # --------------------------------------------------------------------------
@@ -138,6 +141,9 @@ def make_xp():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
+    base.delete_file("./.gclient")
+    base.delete_file("./.gclient_entries")
+    base.delete_dir("./.cipd")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
 

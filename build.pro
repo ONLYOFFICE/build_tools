@@ -5,23 +5,43 @@ DEPLOY_DIR=$$PWD/deploy
 CORE_ROOT_DIR=$$ROOT_DIR/core
 
 include($$CORE_ROOT_DIR/Common/base.pri)
-include($$PWD/scripts/common.pri)
 
 MAKEFILE=makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX
-
 PRO_SUFFIX=$$CORE_BUILDS_PLATFORM_PREFIX
+
+core_debug {
+	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_debug_")
+	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_debug_")
+}
 build_xp {
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "_xp")
 	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "_xp")
 }
+OO_BRANDING_SUFFIX = $$(OO_BRANDING)
+!isEmpty(OO_BRANDING_SUFFIX) {
+	PRO_SUFFIX=$$join(PRO_SUFFIX, PRO_SUFFIX, "", "$$OO_BRANDING_SUFFIX")
+	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "$$OO_BRANDING_SUFFIX")
+}
 
 CONFIG += ordered
 
+core_windows {
+	CONFIG += core_and_multimedia
+}
+core_linux {
+	CONFIG += core_and_multimedia
+}
 core_mac {
 	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_desktop_apps
 }
 build_xp {
 	CONFIG += no_use_htmlfileinternal
+}
+core_ios {
+	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_use_common_binary
+	CONFIG += no_desktop_apps
 }
 
 SUBDIRS = \
@@ -36,13 +56,10 @@ SUBDIRS = \
 	htmlrenderer \
 	pdfreader \
 	htmlfile \
-	doctrenderer \
-	\
-	allfontsgen \
-	allthemesgen \
-	\
-	docbuilder \
-	\
+	doctrenderer
+
+!no_x2t {
+SUBDIRS += \
 	docxformat \
     pptxformat \
     docxfile \
@@ -54,9 +71,27 @@ SUBDIRS = \
     odffilewriter \
     xlsformat \
     x2t
+}
 
 !no_use_htmlfileinternal {
 	SUBDIRS += htmlfileinternal
+}
+
+!no_use_common_binary {
+	SUBDIRS += \
+		allfontsgen \
+		allthemesgen \
+		docbuilder
+}
+
+core_ios:CONFIG += no_tests
+!no_tests {
+	SUBDIRS += standardtester
+}
+
+core_and_multimedia {
+SUBDIRS += \
+	videoplayer
 }
 	
 desktop {
@@ -64,24 +99,73 @@ message(desktop)
 
 SUBDIRS += \
 	hunspell \
-	ooxmlsignature
-
-core_windows {
-SUBDIRS += projicons
-}
+	ooxmlsignature \
+	documentscore \
+	documentscore_helper
 
 !core_mac {
+SUBDIRS += qtdocumentscore
+}
 
-SUBDIRS += \
-	documentscore \
-	videoplayer \
-	desktopapp
-
+!no_desktop_apps {
+core_windows:SUBDIRS += projicons
+SUBDIRS += desktopapp
 }
 
 }
 
-CONFIG += ordered
+ordered {
+	# remove all makefiles
+
+	defineTest(removeFile) {
+		file = $$1			
+		win32:file ~= s,/,\\,g
+		core_windows {
+			system(if exist $$shell_quote($$file) $$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+		} else {
+			system($$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
+		}	
+	}
+
+	removeFile($$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/Makefile.cryptopp$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/Common/Makefile.kernel$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/UnicodeConverter/Makefile.UnicodeConverter$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/graphics/pro/Makefile.graphics$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/PdfWriter/Makefile.PdfWriter$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DjVuFile/Makefile.DjVuFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX)
+
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX)
+
+	removeFile($$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX)
+
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore_helper$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX)
+	removeFile($$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX)
+}
 
 # PROJECTS
 cryptopp.file              = $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro
@@ -122,47 +206,56 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 	htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
 }
 
-allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
-allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
+!no_use_common_binary {
+	allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
+	allfontsgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX
 
-allthemesgen.file           = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/allthemesgen.pro
-allthemesgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
+	allthemesgen.file           = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/allthemesgen.pro
+	allthemesgen.makefile       = $$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX
 
-docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
-docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+	docbuilder.file            = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro
+	docbuilder.makefile        = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX
+}
 
-docxformat.file            = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro
-docxformat.makefile        = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX
+!no_tests {
+	standardtester.file        = $$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro
+	standardtester.makefile    = $$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX
+}
 
-pptxformat.file            = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/PPTXFormatLib.pro
-pptxformat.makefile        = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX
+!no_x2t {
+	docxformat.file            = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro
+	docxformat.makefile        = $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX
 
-docxfile.file              = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/ASCOfficeDocxFile2Lib.pro
-docxfile.makefile          = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX
+	pptxformat.file            = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/PPTXFormatLib.pro
+	pptxformat.makefile        = $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX
 
-txtxmlformat.file          = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/TxtXmlFormatLib.pro
-txtxmlformat.makefile      = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX
+	docxfile.file              = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/ASCOfficeDocxFile2Lib.pro
+	docxfile.makefile          = $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX
 
-rtfformat.file             = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/RtfFormatLib.pro
-rtfformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX
+	txtxmlformat.file          = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/TxtXmlFormatLib.pro
+	txtxmlformat.makefile      = $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX
 
-pptformat.file             = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/PPTFormatLib.pro
-pptformat.makefile         = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX
+	rtfformat.file             = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/RtfFormatLib.pro
+	rtfformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX
 
-docformat.file             = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/DocFormatLib.pro
-docformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX
+	pptformat.file             = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/PPTFormatLib.pro
+	pptformat.makefile         = $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX
 
-odffilereader.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/OdfFileReaderLib.pro
-odffilereader.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX
+	docformat.file             = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/DocFormatLib.pro
+	docformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX
 
-odffilewriter.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/OdfFileWriterLib.pro
-odffilewriter.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX
+	odffilereader.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/OdfFileReaderLib.pro
+	odffilereader.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX
 
-xlsformat.file             = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro
-xlsformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX
+	odffilewriter.file         = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/OdfFileWriterLib.pro
+	odffilewriter.makefile     = $$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX
 
-x2t.file                   = $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro
-x2t.makefile               = $$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX
+	xlsformat.file             = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro
+	xlsformat.makefile         = $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX
+
+	x2t.file                   = $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro
+	x2t.makefile               = $$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX
+}
 
 desktop {
 	hunspell.file            = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
@@ -171,26 +264,30 @@ desktop {
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
 
-	core_windows {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_win.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_win$$PRO_SUFFIX
-	}
+	documentscore.file          = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro
+	documentscore.makefile     	= $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore$$PRO_SUFFIX
 
-	core_linux {
-		documentscore.file       = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/AscDocumentsCore_linux.pro
-		documentscore.makefile   = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.AscDocumentsCore_linux$$PRO_SUFFIX
-	}
+	documentscore_helper.file     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore_helper.pro
+	documentscore_helper.makefile = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore_helper$$PRO_SUFFIX
 
-	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
+	!core_mac {
+		qtdocumentscore.file     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/qtascdocumentscore.pro
+		qtdocumentscore.makefile = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX
+	}
+		
+	core_and_multimedia {
+		videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
+		videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
+	}
 	
-	core_windows {
-		projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
-		projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+	!no_desktop_apps {
+		core_windows {
+			projicons.file           = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro
+			projicons.makefile       = $$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX
+		}
+		desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
+		desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 	}
-
-	desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
-	desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 }
 
 # DEPENDS
@@ -208,28 +305,39 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 	htmlfileinternal.depends  = kernel unicodeconverter graphics
 }
 
-allfontsgen.depends       = kernel unicodeconverter graphics
-allthemesgen.depends       = kernel unicodeconverter graphics
+!no_use_common_binary {
+	allfontsgen.depends       = kernel unicodeconverter graphics
+	allthemesgen.depends       = kernel unicodeconverter graphics
 
-docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
+	docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
+}
 
 desktop {
 	ooxmlsignature.depends    = kernel unicodeconverter graphics
 	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
-	videoplayer.depends       = kernel unicodeconverter graphics
+	documentscore_helper.depends    = documentscore
+	videoplayer.depends       		= kernel unicodeconverter graphics
+
+	!core_mac {
+		qtdocumentscore.depends 	= documentscore
+	}
 	
-	projicons.depends 		  = documentscore videoplayer
-	desktopapp.depends        = documentscore videoplayer
+	!no_desktop_apps {
+		core_windows:projicons.depends  = documentscore videoplayer
+		desktopapp.depends              = documentscore videoplayer
+	}
 }
 
-x2t.depends = \
-    docxformat \
-    pptxformat \
-    docxfile \
-    txtxmlformat \
-    rtfformat \
-    pptformat \
-    docformat \
-    odffilereader \
-    odffilewriter \
-    xlsformat
+!no_x2t {
+	x2t.depends = \
+	    docxformat \
+	    pptxformat \
+	    docxfile \
+	    txtxmlformat \
+	    rtfformat \
+	    pptformat \
+	    docformat \
+	    odffilereader \
+	    odffilewriter \
+	    xlsformat
+}

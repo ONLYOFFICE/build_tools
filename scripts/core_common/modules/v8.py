@@ -19,10 +19,17 @@ def make():
 
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+  else:
+    os.chdir(base_dir + "/depot_tools")
+    base.cmd("git", ["reset", "--hard"])
+    os.chdir(base_dir)
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
   if not base.is_dir("v8/out.gn"):
+    base.delete_file("./.gclient")
+    base.delete_file("./.gclient_entries")
+    base.delete_dir("./.cipd")
     base.cmd("gclient")
 
   # --------------------------------------------------------------------------
@@ -120,6 +127,10 @@ def make_xp():
 
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+  else:
+    os.chdir(base_dir + "/depot_tools")
+    base.cmd("git", ["reset", "--hard"])
+    os.chdir(base_dir)
 
   old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
@@ -130,6 +141,9 @@ def make_xp():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
+    base.delete_file("./.gclient")
+    base.delete_file("./.gclient_entries")
+    base.delete_dir("./.cipd")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
 

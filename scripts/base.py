@@ -135,7 +135,7 @@ def delete_dir(path):
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path))
+  shutil.rmtree(get_path(path), ignore_errors=True)
   return
 
 def copy_lib(src, dst, name):
@@ -728,6 +728,8 @@ def mac_correct_rpath_desktop(dir):
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"])
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
+
+  replaceInFile("./editors_helper.app/Contents/Info.plist", "</dict>", "\t<key>LSUIElement</key>\n\t<true/>\n</dict>")
 
   if is_dir("./editors_helper (GPU).app"):
     delete_dir("./editors_helper (GPU).app")

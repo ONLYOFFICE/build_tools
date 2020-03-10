@@ -27,9 +27,12 @@ def make():
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
   if not base.is_dir("v8/out.gn"):
-    base.delete_file("./.gclient")
-    base.delete_file("./.gclient_entries")
-    base.delete_dir("./.cipd")
+    if base.is_exist("./.gclient"):
+      base.delete_file("./.gclient")
+    if base.is_exist("./.gclient_entries"):
+      base.delete_file("./.gclient_entries")
+    if base.is_exist("./.cipd"):
+      base.delete_dir("./.cipd")
     base.cmd("gclient")
 
   # --------------------------------------------------------------------------

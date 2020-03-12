@@ -10,6 +10,7 @@ import sys
 import config
 import codecs
 import re
+import stat
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -129,6 +130,18 @@ def copy_dir(src, dst):
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
     print('Directory not copied. Error: %s' % e)
+  return
+
+def delete_dir_with_access_error(path):
+  def delete_file_on_error(func, path, exc_info):
+    if not os.access(path, os.W_OK):
+      os.chmod(path, stat.S_IWUSR)
+      func(path)
+    return
+  if not is_dir(path):
+    print("delete warning [folder not exist]: " + path)
+    return
+  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):

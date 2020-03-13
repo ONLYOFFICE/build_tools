@@ -10,6 +10,7 @@ import sys
 import config
 import codecs
 import re
+import stat
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -129,6 +130,18 @@ def copy_dir(src, dst):
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
     print('Directory not copied. Error: %s' % e)
+  return
+
+def delete_dir_with_access_error(path):
+  def delete_file_on_error(func, path, exc_info):
+    if not os.access(path, os.W_OK):
+      os.chmod(path, stat.S_IWUSR)
+      func(path)
+    return
+  if not is_dir(path):
+    print("delete warning [folder not exist]: " + path)
+    return
+  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):
@@ -703,15 +716,15 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   cmd("chmod", ["-v", "+x", "./x2t"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
   mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile", "doctrenderer"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
     mac_correct_rpath_binary("./allfontsgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "doctrenderer"])
   os.chdir(cur_dir)
   return
@@ -725,8 +738,8 @@ def mac_correct_rpath_desktop(dir):
   mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
   mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
+  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
 
   replaceInFile("./editors_helper.app/Contents/Info.plist", "</dict>", "\t<key>LSUIElement</key>\n\t<true/>\n</dict>")

@@ -27,6 +27,9 @@ def make():
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
+  # hack for 32 bit system!!!
+  base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
+
   if not base.is_dir("v8/out.gn"):
     if base.is_exist("./.gclient"):
       base.delete_file("./.gclient")

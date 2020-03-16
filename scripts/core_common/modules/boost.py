@@ -6,6 +6,14 @@ import config
 import base
 import os
 
+def clean():
+  if base.is_dir("boost_1_58_0"):
+    base.delete_dir_with_access_error("boost_1_58_0");
+    base.delete_dir("boost_1_58_0")
+  if base.is_dir("build"):
+    base.delete_dir("build")
+  return
+
 def correct_install_includes_win(base_dir, platform):
   build_dir = base_dir + "/build/" + platform + "/include"
   if base.is_dir(build_dir + "/boost-1_58") and base.is_dir(build_dir + "/boost-1_58/boost"):
@@ -27,16 +35,7 @@ def make():
   #if not base.is_dir("boost_1_58_0"):
   #  base.extract("boost_1_58_0.7z", "./")
 
-  boost_version_good = "boost_version_2"
-  boost_version = base.readFile("./boost.data")
-  if (boost_version != boost_version_good):
-    base.delete_file("./boost.data")
-    base.writeFile("./boost.data", boost_version_good)
-    if base.is_dir("boost_1_58_0"):
-      base.delete_dir_with_access_error("boost_1_58_0");
-      base.delete_dir("boost_1_58_0")
-    if base.is_dir("build"):
-      base.delete_dir("build")
+  base.common_check_version("boost", "2", clean)
 
   if not base.is_dir("boost_1_58_0"):
     base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_58_0", "-b" "boost-1.58.0"])

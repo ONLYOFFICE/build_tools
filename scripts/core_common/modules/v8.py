@@ -6,6 +6,21 @@ import config
 import base
 import os
 
+def clean():
+  if base.is_dir("depot_tools"):
+    base.delete_dir_with_access_error("depot_tools");
+    base.delete_dir("depot_tools")
+  if base.is_dir("v8"):
+    base.delete_dir_with_access_error("v8");
+    base.delete_dir("v8")
+  if base.is_exist("./.gclient"):
+    base.delete_file("./.gclient")
+  if base.is_exist("./.gclient_entries"):
+    base.delete_file("./.gclient_entries")
+  if base.is_exist("./.cipd"):
+    base.delete_dir("./.cipd")
+  return
+
 def make():
   print("[fetch & build]: v8")
 
@@ -16,6 +31,8 @@ def make():
   if ("windows" == base.host_platform()):
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", "2015")
+
+  base.common_check_version("v8", "1", clean)
 
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
@@ -132,6 +149,8 @@ def make_xp():
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", "2015")
 
+  base.common_check_version("v8", "1", clean)
+
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
   else:
@@ -148,9 +167,6 @@ def make_xp():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.delete_file("./.gclient")
-    base.delete_file("./.gclient_entries")
-    base.delete_dir("./.cipd")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
 

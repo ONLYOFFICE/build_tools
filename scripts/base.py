@@ -760,3 +760,13 @@ def mac_correct_rpath_desktop(dir):
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>asc.onlyoffice.editors-helper</string>", "<string>asc.onlyoffice.editors-helper-renderer</string>")
   os.chdir(cur_dir)
   return
+
+def common_check_version(name, good_version, clean_func):
+  version_good = name + "_version_" + good_version
+  version_path = "./" + name + ".data"
+  version = base.readFile(version_path)
+  if (version != version_good):
+    base.delete_file(version_path)
+    base.writeFile(version_path, version_good)
+    clean_func()
+  return

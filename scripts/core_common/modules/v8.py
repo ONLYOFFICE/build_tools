@@ -21,7 +21,25 @@ def clean():
     base.delete_dir("./.cipd")
   return
 
+def is_main_platform():
+  if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
+    return True
+  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32")):
+    return True
+  if config.check_option("platform", "mac_64"):
+    return True
+  return False
+
+def is_xp_platform():
+  if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
+    return True
+  return False
+
 def make():
+  if not is_main_platformm():
+    make_xp()
+    return
+
   print("[fetch & build]: v8")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
@@ -125,12 +143,14 @@ def make():
 
   os.chdir(old_cur)
 
-  if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
-    make_xp()
+  make_xp()
 
   return
 
 def make_xp():
+  if not is_xp_platform():
+    return
+
   print("[fetch & build]: v8_xp")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"

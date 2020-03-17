@@ -26,7 +26,7 @@ def make():
     if (-1 != config.option("platform").find("win_32")):
       need_platforms.append("win_32")
     for platform in need_platforms:
-      if not config.check_option("platform", platform):
+      if not config.check_option("platform", platform) and not config.check_option("platform", platform + "_xp"):
         continue
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)

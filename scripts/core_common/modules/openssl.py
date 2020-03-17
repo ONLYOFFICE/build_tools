@@ -6,6 +6,11 @@ import config
 import base
 import os
 
+def clean():
+  if base.is_dir("openssl"):
+    base.delete_dir("openssl")
+  return
+
 def make():
   if ("windows" == base.host_platform()):
     return
@@ -16,13 +21,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  openssl_version_good = "openssl_version_1"
-  openssl_version = base.readFile("./openssl.data")
-  if (openssl_version != openssl_version_good):
-    base.delete_file("./openssl.data")
-    base.writeFile("./openssl.data", openssl_version_good)
-    if base.is_dir("openssl"):
-      base.delete_dir("openssl")
+  base.common_check_version("openssl", "1", clean)
 
   if not base.is_dir("openssl"):
     base.cmd("git", ["clone", "--depth=1", "https://github.com/openssl/openssl.git"])

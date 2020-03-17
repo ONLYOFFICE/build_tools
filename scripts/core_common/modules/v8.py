@@ -36,7 +36,7 @@ def is_xp_platform():
   return False
 
 def make():
-  if not is_main_platformm():
+  if not is_main_platform():
     make_xp()
     return
 

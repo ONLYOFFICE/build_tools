@@ -34,26 +34,18 @@ def make():
 
   base.common_check_version("v8", "1", clean)
 
+  if not base.is_dir("v8/out.gn"):
+    clean()
+
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-  else:
-    os.chdir(base_dir + "/depot_tools")
-    base.cmd("git", ["reset", "--hard"])
-    base.cmd("git", ["pull"])
-    os.chdir(base_dir)
+    if ("windows" == base.host_platform()):
+      # hack for 32 bit system!!!
+      base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
-  # hack for 32 bit system!!!
-  base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
-
   if not base.is_dir("v8/out.gn"):
-    if base.is_exist("./.gclient"):
-      base.delete_file("./.gclient")
-    if base.is_exist("./.gclient_entries"):
-      base.delete_file("./.gclient_entries")
-    if base.is_exist("./.cipd"):
-      base.delete_dir("./.cipd")
     base.cmd("gclient")
 
   # --------------------------------------------------------------------------
@@ -151,13 +143,12 @@ def make_xp():
 
   base.common_check_version("v8", "1", clean)
 
+  if not base.is_dir("win_64") and not base.is_dir("win_32"):
+    clean()
+
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-  else:
-    os.chdir(base_dir + "/depot_tools")
-    base.cmd("git", ["reset", "--hard"])
-    os.chdir(base_dir)
-
+  
   old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 

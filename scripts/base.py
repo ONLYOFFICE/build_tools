@@ -473,6 +473,7 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   if ("desktop" == product):
     content += "<htmlnoxvfb/>\n"
+    content += "<htmlfileinternal>./../</htmlfileinternal>\n"
 
   content += "</Settings>"
 

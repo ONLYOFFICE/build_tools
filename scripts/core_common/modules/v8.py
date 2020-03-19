@@ -40,6 +40,9 @@ def make():
     make_xp()
     return
 
+  if ("ios" == config.option("platform")):
+    return
+
   print("[fetch & build]: v8")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"

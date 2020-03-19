@@ -115,7 +115,7 @@ def delete_exe(path):
 def find_file(path, pattern):
   for root, dirnames, filenames in os.walk(path):
     for filename in fnmatch.filter(filenames, pattern):
-	  return os.path.join(root, filename)
+      return os.path.join(root, filename)
 
 def create_dir(path):
   path2 = get_path(path)
@@ -677,7 +677,7 @@ def get_file_last_modified_url(url):
     stdout, stderr = popen.communicate()
     popen.wait()
 
-    lines = stdout.split("\n")
+    lines = stdout.strip().decode("utf-8").split("\n")
     for line in lines:
       if ':' not in line:
         continue

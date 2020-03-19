@@ -320,7 +320,9 @@ def git_update(repo, is_no_errors=False):
   folder = get_script_dir() + "/../../" + repo
   is_not_exit = False
   if not is_dir(folder):
-    cmd("git", ["clone", url, folder], is_no_errors)
+    retClone = cmd("git", ["clone", url, folder], is_no_errors)
+    if retClone != 0:
+      return
     is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)

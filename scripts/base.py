@@ -115,7 +115,7 @@ def delete_exe(path):
 def find_file(path, pattern):
   for root, dirnames, filenames in os.walk(path):
     for filename in fnmatch.filter(filenames, pattern):
-	  return os.path.join(root, filename)
+      return os.path.join(root, filename)
 
 def create_dir(path):
   path2 = get_path(path)
@@ -312,7 +312,7 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
-def git_update(repo):
+def git_update(repo, is_no_errors=False):
   print("[git] update: " + repo)
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
@@ -320,7 +320,9 @@ def git_update(repo):
   folder = get_script_dir() + "/../../" + repo
   is_not_exit = False
   if not is_dir(folder):
-    cmd("git", ["clone", url, folder])
+    retClone = cmd("git", ["clone", url, folder], is_no_errors)
+    if retClone != 0:
+      return
     is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)
@@ -473,6 +475,7 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   if ("desktop" == product):
     content += "<htmlnoxvfb/>\n"
+    content += "<htmlfileinternal>./../</htmlfileinternal>\n"
 
   content += "</Settings>"
 
@@ -539,7 +542,7 @@ def sdkjs_addons_checkout():
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
     if name in config.sdkjs_addons:
-      git_update(config.sdkjs_addons[name])
+      git_update(config.sdkjs_addons[name], True)
   return
 
 def server_addons_checkout():
@@ -548,7 +551,7 @@ def server_addons_checkout():
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
     if name in config.server_addons:
-      git_update(config.server_addons[name])
+      git_update(config.server_addons[name], True)
   return
 
 def web_apps_addons_checkout():
@@ -557,7 +560,7 @@ def web_apps_addons_checkout():
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
     if name in config.web_apps_addons:
-      git_update(config.web_apps_addons[name])
+      git_update(config.web_apps_addons[name], True)
   return
 
 def sdkjs_addons_param():
@@ -676,7 +679,7 @@ def get_file_last_modified_url(url):
     stdout, stderr = popen.communicate()
     popen.wait()
 
-    lines = stdout.split("\n")
+    lines = stdout.strip().decode("utf-8").split("\n")
     for line in lines:
       if ':' not in line:
         continue

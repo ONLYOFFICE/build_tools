@@ -96,10 +96,8 @@ def make():
     # cef
     if not isWindowsXP:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir)
-    elif (native_platform == "win_64_xp"):
-      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_64/build/*", root_dir)
     else:
-      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_32/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/build/*", root_dir)
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):

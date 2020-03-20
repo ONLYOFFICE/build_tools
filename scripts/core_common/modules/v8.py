@@ -40,6 +40,9 @@ def make():
     make_xp()
     return
 
+  if ("ios" == config.option("platform")):
+    return
+
   print("[fetch & build]: v8")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
@@ -168,6 +171,9 @@ def make_xp():
 
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+    if ("windows" == base.host_platform()):
+      # hack for 32 bit system!!!
+      base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
   old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 

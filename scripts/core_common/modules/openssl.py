@@ -12,7 +12,7 @@ def clean():
   return
 
 def make():
-  if ("windows" == base.host_platform()):
+  if ("windows" == base.host_platform() or "ios" == config.option("platform")):
     return
 
   print("[fetch & build]: openssl")

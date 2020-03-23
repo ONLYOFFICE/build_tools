@@ -34,7 +34,7 @@ def install_deps():
 
   # java
   base.cmd("sudo", ["apt-get", "-y", "install", "software-properties-common"])
-  base.cmd("sudo", ["add-apt-repository", "ppa:openjdk-r/ppa"])
+  base.cmd("sudo", ["add-apt-repository", "-y", "ppa:openjdk-r/ppa"])
   base.cmd("sudo", ["apt-get", "update"])
   base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-8-jdk"])
   base.cmd("sudo", ["update-alternatives", "--config", "java"])

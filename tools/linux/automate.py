@@ -20,7 +20,20 @@ def install_deps():
               "libpulse-dev",
               "libtool",
               "p7zip-full",
-              "subversion"]
+              "subversion",
+              "gzip",
+              "libasound2-dev",
+              "libatspi2.0-dev",
+              "libcups2-dev",
+              "libdbus-1-dev",
+              "libicu-dev",
+              "libglu1-mesa-dev",
+              "libgstreamer1.0-dev",
+              "libgstreamer-plugins-base1.0-dev",
+              "libx11-xcb-dev",
+              "libxcb*",
+              "libxi-dev",
+              "libxrender-dev"]
 
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 
@@ -34,7 +47,7 @@ def install_deps():
 
   # java
   base.cmd("sudo", ["apt-get", "-y", "install", "software-properties-common"])
-  base.cmd("sudo", ["add-apt-repository", "ppa:openjdk-r/ppa"])
+  base.cmd("sudo", ["add-apt-repository", "-y", "ppa:openjdk-r/ppa"])
   base.cmd("sudo", ["apt-get", "update"])
   base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-8-jdk"])
   base.cmd("sudo", ["update-alternatives", "--config", "java"])

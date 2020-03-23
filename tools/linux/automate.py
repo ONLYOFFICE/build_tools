@@ -93,9 +93,11 @@ def install_qt():
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["install"])
   return
 
-if not base.is_dir("./qt_build"):
+if not base.is_file("./node_js_setup_8.x"):
   print("install dependencies...")
-  install_deps()
+  install_deps()  
+
+if not base.is_dir("./qt_build"):  
   print("install qt...")
   install_qt()
 

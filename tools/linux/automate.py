@@ -4,6 +4,23 @@ import sys
 sys.path.append('../../scripts')
 import base
 import os
+import subprocess
+
+def get_branch_name(directory):
+  cur_dir = os.getcwd()
+  os.chdir(directory)
+  # detect build_tools branch
+  popen = subprocess.Popen("git branch", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  current_branch = "master"
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    current_branch = stdout.strip()
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+  os.chdir(cur_dir)
+  return current_branch
 
 def install_deps():
   # dependencies
@@ -101,8 +118,21 @@ if not base.is_dir("./qt_build"):
   print("install qt...")
   install_qt()
 
-build_tools_params = ["--branch", "master", 
-                      "--module", "desktop builder server", 
+branch = get_branch_name("../..")
+print("---------------------------------------------")
+print("build branch: " + branch)
+print("---------------------------------------------")
+
+modules = " ".join(sys.argv)
+if "" == modules:
+  modules = "desktop builder server"
+
+print("---------------------------------------------")
+print("build modules: " + modules)
+print("---------------------------------------------")
+
+build_tools_params = ["--branch", branch, 
+                      "--module", modules, 
                       "--update", "1",
                       "--qt-dir", os.getcwd() + "/qt_build"]
 

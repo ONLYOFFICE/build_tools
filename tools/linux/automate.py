@@ -10,7 +10,9 @@ def get_branch_name(directory):
   cur_dir = os.getcwd()
   os.chdir(directory)
   # detect build_tools branch
-  popen = subprocess.Popen("git branch", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  #command = "git branch --show-current"
+  command = "git symbolic-ref --short -q HEAD"
+  popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   current_branch = "master"
   try:
     stdout, stderr = popen.communicate()
@@ -123,7 +125,7 @@ print("---------------------------------------------")
 print("build branch: " + branch)
 print("---------------------------------------------")
 
-modules = " ".join(sys.argv)
+modules = " ".join(sys.argv[1:])
 if "" == modules:
   modules = "desktop builder server"
 

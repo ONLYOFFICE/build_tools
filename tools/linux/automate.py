@@ -52,7 +52,8 @@ def install_deps():
               "libx11-xcb-dev",
               "libxcb*",
               "libxi-dev",
-              "libxrender-dev"]
+              "libxrender-dev",
+              "libxss1"]
 
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 

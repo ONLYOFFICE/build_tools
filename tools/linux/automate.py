@@ -17,7 +17,7 @@ def get_branch_name(directory):
   try:
     stdout, stderr = popen.communicate()
     popen.wait()
-    current_branch = stdout.strip()
+    current_branch = stdout.strip().decode("utf-8")
   finally:
     popen.stdout.close()
     popen.stderr.close()

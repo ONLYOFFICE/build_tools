@@ -63,6 +63,7 @@ def install_deps():
     base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
     base.cmd("sudo", ["npm", "install", "-g", "npm"])
     base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
+    base.cmd("sudo", ["npm", "install", "-g", "pkg"])
 
   # java
   base.cmd("sudo", ["apt-get", "-y", "install", "software-properties-common"])
@@ -87,7 +88,7 @@ def install_qt():
                "-shared",
                "-accessibility",
                "-prefix",
-               "./../qt_build/gcc_64",
+               "./../qt_build/Qt-5.9.9/gcc_64",
                "-qt-zlib",
                "-qt-libpng",
                "-qt-libjpeg",
@@ -136,7 +137,7 @@ print("---------------------------------------------")
 build_tools_params = ["--branch", branch, 
                       "--module", modules, 
                       "--update", "1",
-                      "--qt-dir", os.getcwd() + "/qt_build"]
+                      "--qt-dir", os.getcwd() + "/qt_build/Qt-5.9.9"]
 
 base.cmd_in_dir("../..", "./configure.py", build_tools_params)
 base.cmd_in_dir("../..", "./make.py")

@@ -21,6 +21,11 @@ def correct_install_includes_win(base_dir, platform):
     base.delete_dir(build_dir + "/boost-1_58")
   return
 
+def clang_correct():
+  base.replaceInFile("./tools/build/src/tools/darwin.jam", "flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;", "#flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;")
+  base.replaceInFile("./tools/build/src/tools/darwin.py", "toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])", "#toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])")
+  return
+
 def make():
   print("[fetch & build]: boost")
 
@@ -66,14 +71,14 @@ def make():
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    base.replaceInFile("./tools/build/src/tools/darwin.jam", "flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;", "#flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;")
-    base.replaceInFile("./tools/build/src/tools/darwin.py", "toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])", "#toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])")
+    clang_correct()
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
     base.cmd("./bjam", ["--prefix=./../build/mac_64", "link=static", "install"])
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
+    clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
 

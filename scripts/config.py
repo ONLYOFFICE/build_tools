@@ -73,6 +73,7 @@ def parse():
 
   global server_addons
   server_addons = {}
+  server_addons["license"] = "server-license"
   server_addons["lockstorage"] = "server-lockstorage"
 
   global web_apps_addons

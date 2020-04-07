@@ -24,7 +24,7 @@ def make():
   base.common_check_version("openssl", "1", clean)
 
   if not base.is_dir("openssl"):
-    base.cmd("git", ["clone", "--depth=1", "https://github.com/openssl/openssl.git"])
+    base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])
 
   os.chdir(base_dir + "/openssl")
   if not base.is_file("Makefile"):

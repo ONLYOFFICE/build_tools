@@ -669,7 +669,7 @@ def run_as_bat(lines):
   file.close()
 
   cmd(name)
-  #delete_file(name)
+  delete_file(name)
   return
 
 def save_as_script(path, lines):

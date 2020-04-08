@@ -116,7 +116,7 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
 
 **Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database. **RabbitMQ** is also required for **Document Server** to work correctly.
 
-####### Installing and configuring NGINX
+###### Installing and configuring NGINX
 
 1. Install NGINX:
 
@@ -184,7 +184,7 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
     sudo nginx -s reload
     ```
 
-####### Installing and configuring PostgreSQL
+###### Installing and configuring PostgreSQL
 
 1. Install PostgreSQL:
 
@@ -211,7 +211,7 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
 **Note**: Upon that, you will be asked to provide a password for the **onlyoffice**
 PostgreSQL user. Please enter the **onlyoffice** password.
 
-####### Installing RabbitMQ
+###### Installing RabbitMQ
 
 ```bash
 sudo apt-get install rabbitmq-server

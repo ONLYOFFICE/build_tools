@@ -45,45 +45,20 @@ sudo apt-get install -y python
 If you run the script without any parameters this allows to build **ONLYOFFICE
 Document Server**, **Document Builder** and **Desktop Editors**.
 
+The result will be available in the `./out` directory.
+
 To build **ONLYOFFICE** products separately run the script with the parameter
 corresponding to the necessary product.
-
-##### Building Document Server
-
-```bash
-./automate.py server
-```
-
-##### Building Document Builder
-
-```bash
-./automate.py builder
-```
-
-##### Building Desktop Editors
-
-```bash
-./automate.py desktop
-```
 
 It’s also possible to build several products at once as shown in the example
 below.
 
-##### Building Desktop Editors and Document Server
+**Example**: Building **Desktop Editors** and **Document Server**
 
 ```bash
 ./automate.py desktop server
 ```
 
-The result will be available in the `./out` directory.
-
-### Using Docker
-
-You can also build all **ONLYOFFICE products** at once using Docker.
-Build the `onlyoffice-document-editors-builder` Docker image using the
-provided `Dockerfile` and run the corresponding Docker container.
-
-```bash
 mkdir out
 docker build --tag onlyoffice-document-editors-builder .
 docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
@@ -91,11 +66,50 @@ docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
 
 The result will be available in the `./out` directory.
 
-#### Installing and configuring NGINX and PostgreSQL for Document Server on Linux
+#### Building and running ONLYOFFICE products separately
 
-**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database.
+##### Document Builder
 
-##### Installing and configuring NGINX
+###### Building Document Builder
+
+```bash
+./automate.py builder
+```
+
+###### Running Document Builder
+
+```bash
+cd ../../out/linux_64/onlyoffice/documentbuilder
+./docbuilder
+```
+##### Desktop Editors
+
+###### Building Desktop Editors
+
+```bash
+./automate.py desktop
+```
+
+###### Running Desktop Editors
+
+```bash
+cd ../../out/linux_64/onlyoffice/desktopeditors
+LD_LIBRARY_PATH=./ ./DesktopEditors
+```
+
+##### Document Server
+
+###### Building Document Server
+
+```bash
+./automate.py server
+```
+
+###### Installing and configuring Document Server dependencies
+
+**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database. **RabbitMQ** is also required for **Document Server** to work correctly.
+
+####### Installing and configuring NGINX
 
 1. Install NGINX:
 
@@ -163,7 +177,7 @@ The result will be available in the `./out` directory.
     sudo nginx -s reload
     ```
 
-##### Installing and configuring PostgreSQL
+####### Installing and configuring PostgreSQL
 
 1. Install PostgreSQL:
 
@@ -190,9 +204,13 @@ The result will be available in the `./out` directory.
 **Note**: Upon that, you will be asked to provide a password for the **onlyoffice**
 PostgreSQL user. Please enter the **onlyoffice** password.
 
-#### Running ONLYOFFICE products
+####### Installing RabbitMQ
 
-##### Running Document Server
+```bash
+sudo apt-get install rabbitmq-server
+```
+
+###### Running Document Server
 
 **Note**: All **Document Server** components run as foreground processes. Thus
 you need separate terminal consoles to run them or specific tools which will
@@ -219,16 +237,3 @@ allow to run foreground processes in background mode.
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
     ```
 
-##### Running Document Builder
-
-```bash
-cd ../../out/linux_64/onlyoffice/documentbuilder
-./docbuilder
-```
-
-##### Running Desktop Editors
-
-```bash
-cd ../../out/linux_64/onlyoffice/desktopeditors
-LD_LIBRARY_PATH=./ ./DesktopEditors
-```

@@ -66,9 +66,6 @@ Build the `onlyoffice-document-editors-builder` Docker image using the
 provided `Dockerfile` and run the corresponding Docker container.
 
 ```bash
-./automate.py desktop server
-```
-
 mkdir out
 docker build --tag onlyoffice-document-editors-builder .
 docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
@@ -246,4 +243,5 @@ allow to run foreground processes in background mode.
     cd ../../out/linux_64/onlyoffice/documentserver/server/DocService
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
     ```
+
 

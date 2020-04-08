@@ -51,7 +51,7 @@ def check_build_version(dir):
     version_number = readFile(dir + "/version")
     if ("" != version_number):
       set_env("PRODUCT_VERSION", version_number)
-  if ("" != get_env("BUILD_NUMBER")):
+  if ("" == get_env("BUILD_NUMBER")):
     set_env("BUILD_NUMBER", "0")      
   return
 

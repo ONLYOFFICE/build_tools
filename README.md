@@ -59,6 +59,16 @@ below.
 ./automate.py desktop server
 ```
 
+#### Using Docker
+
+You can also build all **ONLYOFFICE products** at once using Docker.
+Build the `onlyoffice-document-editors-builder` Docker image using the
+provided `Dockerfile` and run the corresponding Docker container.
+
+```bash
+./automate.py desktop server
+```
+
 mkdir out
 docker build --tag onlyoffice-document-editors-builder .
 docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder

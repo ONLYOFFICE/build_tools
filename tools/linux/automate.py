@@ -58,9 +58,9 @@ def install_deps():
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 
   # nodejs
-  if not base.is_file("./node_js_setup_8.x"):
-    base.download("https://deb.nodesource.com/setup_8.x", "./node_js_setup_8.x")
-    base.cmd("sudo", ["bash", "./node_js_setup_8.x"])
+  if not base.is_file("./node_js_setup_10.x"):
+    base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
+    base.cmd("sudo", ["bash", "./node_js_setup_10.x"])
     base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
     base.cmd("sudo", ["npm", "install", "-g", "npm"])
     base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])

@@ -46,6 +46,17 @@ def configure_common_apps():
     os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
 
+def check_build_version(dir):
+  if ("" == get_env("PRODUCT_VERSION")):
+    version_number = readFile(dir + "/version")
+    if ("" != version_number):
+      version_number = version_number.replace("\r", "")
+      version_number = version_number.replace("\n", "")
+      set_env("PRODUCT_VERSION", version_number)
+  if ("" == get_env("BUILD_NUMBER")):
+    set_env("BUILD_NUMBER", "0")      
+  return
+
 def print_info(info=""):
   print("------------------------------------------")
   print(info)

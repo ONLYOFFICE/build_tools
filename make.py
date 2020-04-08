@@ -18,6 +18,12 @@ config.parse()
 base_dir = base.get_script_dir(__file__)
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
+# version
+if ("" != base.get_env("PRODUCT_VERSION"))
+  base.set_env("PRODUCT_VERSION", "5.5.1")
+if ("" != base.get_env("BUILD_NUMBER"))
+  base.set_env("BUILD_NUMBER", "0") 
+
 # branding
 if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("branding")):
   branding_dir = base_dir + "/../" + config.option("branding")

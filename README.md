@@ -8,13 +8,11 @@ necessary for the compilation process, all the dependencies required for the
  correct work, as well as to get the latest version of
 **ONLYOFFICE products** source code and build all their components.
 
-## How to use
-
-### Linux
+## How to use - Linux
 
 **Note**: The solution has been tested on **Ubuntu 14.04**.
 
-#### Installing dependencies
+### Installing dependencies
 
 You might need to install **Python**, depending on your version of Ubuntu:
 
@@ -22,7 +20,7 @@ You might need to install **Python**, depending on your version of Ubuntu:
 sudo apt-get install -y python
 ```
 
-#### Building ONLYOFFICE products source code
+### Building ONLYOFFICE products source code
 
 1. Clone the build_tools repository:
 
@@ -59,7 +57,7 @@ below.
 ./automate.py desktop server
 ```
 
-#### Using Docker
+### Using Docker
 
 You can also build all **ONLYOFFICE products** at once using Docker.
 Build the `onlyoffice-document-editors-builder` Docker image using the
@@ -73,48 +71,50 @@ docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
 
 The result will be available in the `./out` directory.
 
-#### Building and running ONLYOFFICE products separately
+### Building and running ONLYOFFICE products separately
 
-##### Document Builder
+#### Document Builder
 
-###### Building Document Builder
+##### Building Document Builder
 
 ```bash
 ./automate.py builder
 ```
 
-###### Running Document Builder
+##### Running Document Builder
 
 ```bash
 cd ../../out/linux_64/onlyoffice/documentbuilder
 ./docbuilder
 ```
-##### Desktop Editors
 
-###### Building Desktop Editors
+#### Desktop Editors
+
+##### Building Desktop Editors
 
 ```bash
 ./automate.py desktop
 ```
 
-###### Running Desktop Editors
+##### Running Desktop Editors
 
 ```bash
 cd ../../out/linux_64/onlyoffice/desktopeditors
 LD_LIBRARY_PATH=./ ./DesktopEditors
 ```
 
-##### Document Server
+#### Document Server
 
-###### Building Document Server
+##### Building Document Server
 
 ```bash
 ./automate.py server
 ```
 
-###### Installing and configuring Document Server dependencies
+##### Installing and configuring Document Server dependencies
 
-**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database. **RabbitMQ** is also required for **Document Server** to work correctly.
+**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database.
+**RabbitMQ** is also required for **Document Server** to work correctly.
 
 ####### Installing and configuring NGINX
 
@@ -184,7 +184,7 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
     sudo nginx -s reload
     ```
 
-####### Installing and configuring PostgreSQL
+###### Installing and configuring PostgreSQL
 
 1. Install PostgreSQL:
 
@@ -211,13 +211,13 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
 **Note**: Upon that, you will be asked to provide a password for the **onlyoffice**
 PostgreSQL user. Please enter the **onlyoffice** password.
 
-####### Installing RabbitMQ
+###### Installing RabbitMQ
 
 ```bash
 sudo apt-get install rabbitmq-server
 ```
 
-###### Running Document Server
+##### Running Document Server
 
 **Note**: All **Document Server** components run as foreground processes. Thus
 you need separate terminal consoles to run them or specific tools which will
@@ -243,5 +243,3 @@ allow to run foreground processes in background mode.
     cd ../../out/linux_64/onlyoffice/documentserver/server/DocService
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
     ```
-
-

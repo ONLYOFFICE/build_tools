@@ -116,7 +116,7 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
 **Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database.
 **RabbitMQ** is also required for **Document Server** to work correctly.
 
-####### Installing and configuring NGINX
+###### Installing and configuring NGINX
 
 1. Install NGINX:
 

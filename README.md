@@ -8,13 +8,11 @@ necessary for the compilation process, all the dependencies required for the
  correct work, as well as to get the latest version of
 **ONLYOFFICE products** source code and build all their components.
 
-## How to use
-
-### Linux
+## How to use - Linux
 
 **Note**: The solution has been tested on **Ubuntu 14.04**.
 
-#### Installing dependencies
+### Installing dependencies
 
 You might need to install **Python**, depending on your version of Ubuntu:
 
@@ -22,7 +20,7 @@ You might need to install **Python**, depending on your version of Ubuntu:
 sudo apt-get install -y python
 ```
 
-#### Building ONLYOFFICE products source code
+### Building ONLYOFFICE products source code
 
 1. Clone the build_tools repository:
 
@@ -59,7 +57,7 @@ below.
 ./automate.py desktop server
 ```
 
-#### Using Docker
+### Using Docker
 
 You can also build all **ONLYOFFICE products** at once using Docker.
 Build the `onlyoffice-document-editors-builder` Docker image using the
@@ -73,48 +71,50 @@ docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
 
 The result will be available in the `./out` directory.
 
-#### Building and running ONLYOFFICE products separately
+### Building and running ONLYOFFICE products separately
 
-##### Document Builder
+#### Document Builder
 
-###### Building Document Builder
+##### Building Document Builder
 
 ```bash
 ./automate.py builder
 ```
 
-###### Running Document Builder
+##### Running Document Builder
 
 ```bash
 cd ../../out/linux_64/onlyoffice/documentbuilder
 ./docbuilder
 ```
-##### Desktop Editors
 
-###### Building Desktop Editors
+#### Desktop Editors
+
+##### Building Desktop Editors
 
 ```bash
 ./automate.py desktop
 ```
 
-###### Running Desktop Editors
+##### Running Desktop Editors
 
 ```bash
 cd ../../out/linux_64/onlyoffice/desktopeditors
 LD_LIBRARY_PATH=./ ./DesktopEditors
 ```
 
-##### Document Server
+#### Document Server
 
-###### Building Document Server
+##### Building Document Server
 
 ```bash
 ./automate.py server
 ```
 
-###### Installing and configuring Document Server dependencies
+##### Installing and configuring Document Server dependencies
 
-**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database. **RabbitMQ** is also required for **Document Server** to work correctly.
+**Document Server** uses **NGINX** as a web server and **PostgreSQL** as a database.
+**RabbitMQ** is also required for **Document Server** to work correctly.
 
 ###### Installing and configuring NGINX
 
@@ -217,7 +217,32 @@ PostgreSQL user. Please enter the **onlyoffice** password.
 sudo apt-get install rabbitmq-server
 ```
 
-###### Running Document Server
+###### Generate fonts data
+
+```bash
+cd out/linux_64/onlyoffice/documentserver/
+mkdir fonts
+LD_LIBRARY_PATH=${PWD}/server/FileConverter/bin server/tools/allfontsgen \
+  --input="${PWD}/core-fonts" \
+  --allfonts-web="${PWD}/sdkjs/common/AllFonts.js" \
+  --allfonts="${PWD}/server/FileConverter/bin/AllFonts.js" \
+  --images="${PWD}/sdkjs/common/Images" \
+  --selection="${PWD}/server/FileConverter/bin/font_selection.bin" \
+  --output-web='fonts' \
+  --use-system="true"
+```
+
+###### Generate presentation themes
+
+```bash
+cd out/linux_64/onlyoffice/documentserver/
+LD_LIBRARY_PATH=${PWD}/server/FileConverter/bin server/tools/allthemesgen \
+  --converter-dir="${PWD}/server/FileConverter/bin"\
+  --src="${PWD}/sdkjs/slide/themes"\
+  --output="${PWD}/sdkjs/common/Images"
+```
+
+##### Running Document Server
 
 **Note**: All **Document Server** components run as foreground processes. Thus
 you need separate terminal consoles to run them or specific tools which will
@@ -226,22 +251,20 @@ allow to run foreground processes in background mode.
 1. Start the **FileConverter** service:
 
     ```bash
-    cd ../../out/linux_64/onlyoffice/documentserver/server/FileConverter
-    NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./converter
+    cd out/linux_64/onlyoffice/documentserver/server/FileConverter
+    LD_LIBRARY_PATH=$PWD/bin NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./converter
     ```
 
 2. Start the **SpellChecker** service:
 
     ```bash
-    cd ../../out/linux_64/onlyoffice/documentserver/server/SpellChecker
+    cd out/linux_64/onlyoffice/documentserver/server/SpellChecker
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./spellchecker
     ```
 
 3. Start the **DocService** service:
 
     ```bash
-    cd ../../out/linux_64/onlyoffice/documentserver/server/DocService
+    cd out/linux_64/onlyoffice/documentserver/server/DocService
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
     ```
-
-

@@ -10,6 +10,7 @@ import sys
 import config
 import codecs
 import re
+import stat
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -43,6 +44,17 @@ def configure_common_apps():
     os.environ["PATH"] = get_script_dir() + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
     os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
+  return
+
+def check_build_version(dir):
+  if ("" == get_env("PRODUCT_VERSION")):
+    version_number = readFile(dir + "/version")
+    if ("" != version_number):
+      version_number = version_number.replace("\r", "")
+      version_number = version_number.replace("\n", "")
+      set_env("PRODUCT_VERSION", version_number)
+  if ("" == get_env("BUILD_NUMBER")):
+    set_env("BUILD_NUMBER", "0")      
   return
 
 def print_info(info=""):
@@ -114,7 +126,7 @@ def delete_exe(path):
 def find_file(path, pattern):
   for root, dirnames, filenames in os.walk(path):
     for filename in fnmatch.filter(filenames, pattern):
-	  return os.path.join(root, filename)
+      return os.path.join(root, filename)
 
 def create_dir(path):
   path2 = get_path(path)
@@ -129,6 +141,18 @@ def copy_dir(src, dst):
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
     print('Directory not copied. Error: %s' % e)
+  return
+
+def delete_dir_with_access_error(path):
+  def delete_file_on_error(func, path, exc_info):
+    if not os.access(path, os.W_OK):
+      os.chmod(path, stat.S_IWUSR)
+      func(path)
+    return
+  if not is_dir(path):
+    print("delete warning [folder not exist]: " + path)
+    return
+  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):
@@ -299,7 +323,7 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
-def git_update(repo):
+def git_update(repo, is_no_errors=False):
   print("[git] update: " + repo)
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
@@ -307,7 +331,9 @@ def git_update(repo):
   folder = get_script_dir() + "/../../" + repo
   is_not_exit = False
   if not is_dir(folder):
-    cmd("git", ["clone", url, folder])
+    retClone = cmd("git", ["clone", url, folder], is_no_errors)
+    if retClone != 0:
+      return
     is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)
@@ -460,6 +486,7 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   if ("desktop" == product):
     content += "<htmlnoxvfb/>\n"
+    content += "<htmlfileinternal>./../</htmlfileinternal>\n"
 
   content += "</Settings>"
 
@@ -526,7 +553,7 @@ def sdkjs_addons_checkout():
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
     if name in config.sdkjs_addons:
-      git_update(config.sdkjs_addons[name])
+      git_update(config.sdkjs_addons[name], True)
   return
 
 def server_addons_checkout():
@@ -535,7 +562,7 @@ def server_addons_checkout():
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
     if name in config.server_addons:
-      git_update(config.server_addons[name])
+      git_update(config.server_addons[name], True)
   return
 
 def web_apps_addons_checkout():
@@ -544,7 +571,7 @@ def web_apps_addons_checkout():
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
     if name in config.web_apps_addons:
-      git_update(config.web_apps_addons[name])
+      git_update(config.web_apps_addons[name], True)
   return
 
 def sdkjs_addons_param():
@@ -663,7 +690,7 @@ def get_file_last_modified_url(url):
     stdout, stderr = popen.communicate()
     popen.wait()
 
-    lines = stdout.split("\n")
+    lines = stdout.strip().decode("utf-8").split("\n")
     for line in lines:
       if ':' not in line:
         continue
@@ -703,15 +730,15 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   cmd("chmod", ["-v", "+x", "./x2t"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
   mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile", "doctrenderer"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
     mac_correct_rpath_binary("./allfontsgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "doctrenderer"])
   os.chdir(cur_dir)
   return
@@ -725,8 +752,8 @@ def mac_correct_rpath_desktop(dir):
   mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
   mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
+  cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
 
   replaceInFile("./editors_helper.app/Contents/Info.plist", "</dict>", "\t<key>LSUIElement</key>\n\t<true/>\n</dict>")
@@ -746,4 +773,14 @@ def mac_correct_rpath_desktop(dir):
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>editors_helper</string>", "<string>editors_helper (Renderer)</string>")
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>asc.onlyoffice.editors-helper</string>", "<string>asc.onlyoffice.editors-helper-renderer</string>")
   os.chdir(cur_dir)
+  return
+
+def common_check_version(name, good_version, clean_func):
+  version_good = name + "_version_" + good_version
+  version_path = "./" + name + ".data"
+  version = readFile(version_path)
+  if (version != version_good):
+    delete_file(version_path)
+    writeFile(version_path, version_good)
+    clean_func()
   return

@@ -1,0 +1,8 @@
+language: node_js
+
+jobs:
+  include:
+    - stage: markdownlint
+      script: 
+      - npm install -g markdownlint-cli
+      - markdownlint *.md

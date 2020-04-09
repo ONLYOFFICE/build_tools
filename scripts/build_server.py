@@ -9,7 +9,12 @@ def make():
   if(not config.check_option("module", "server")):
     return
 
+  git_dir = base.get_script_dir() + "/../.."
   server_dir = base.get_script_dir() + "/../../server"
+  branding_dir = server_dir + "/branding"
+
+  if("" != config.option("branding")):
+    branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
   base.cmd_in_dir(server_dir, "npm", ["install"])
   base.cmd_in_dir(server_dir, "grunt", ["--no-color", "-v"] + base.server_addons_param())
@@ -30,6 +35,11 @@ def make():
   base.replaceInFileRE(server_build_dir + "/Common/sources/commondefines.js", "const buildNumber = [0-9]*", "const buildNumber = " + build_number)
   base.replaceInFileRE(server_build_dir + "/Common/sources/license.js", "const buildDate = '[0-9-/]*'", "const buildDate = '" + cur_date + "'")
   base.replaceInFileRE(server_build_dir + "/Common/sources/commondefines.js", "const buildVersion = '[0-9.]*'", "const buildVersion = '" + product_version + "'")
+
+  custom_public_key = branding_dir + '/debug.js'
+
+  if(base.is_exist(custom_public_key)):
+      base.copy_file(custom_public_key, server_build_dir + '/Common/sources')
 
   pkg_target = "node10"
 

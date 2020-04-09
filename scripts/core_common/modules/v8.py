@@ -6,7 +6,43 @@ import config
 import base
 import os
 
+def clean():
+  if base.is_dir("depot_tools"):
+    base.delete_dir_with_access_error("depot_tools");
+    base.delete_dir("depot_tools")
+  if base.is_dir("v8"):
+    base.delete_dir_with_access_error("v8");
+    base.delete_dir("v8")
+  if base.is_exist("./.gclient"):
+    base.delete_file("./.gclient")
+  if base.is_exist("./.gclient_entries"):
+    base.delete_file("./.gclient_entries")
+  if base.is_exist("./.cipd"):
+    base.delete_dir("./.cipd")
+  return
+
+def is_main_platform():
+  if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
+    return True
+  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32")):
+    return True
+  if config.check_option("platform", "mac_64"):
+    return True
+  return False
+
+def is_xp_platform():
+  if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
+    return True
+  return False
+
 def make():
+  if not is_main_platform():
+    make_xp()
+    return
+
+  if ("ios" == config.option("platform")):
+    return
+
   print("[fetch & build]: v8")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
@@ -17,19 +53,20 @@ def make():
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", "2015")
 
+  base.common_check_version("v8", "1", clean)
+
+  if not base.is_dir("v8/out.gn"):
+    clean()
+
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-  else:
-    os.chdir(base_dir + "/depot_tools")
-    base.cmd("git", ["reset", "--hard"])
-    os.chdir(base_dir)
+    if ("windows" == base.host_platform()):
+      # hack for 32 bit system!!!
+      base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
   if not base.is_dir("v8/out.gn"):
-    base.delete_file("./.gclient")
-    base.delete_file("./.gclient_entries")
-    base.delete_dir("./.cipd")
     base.cmd("gclient")
 
   # --------------------------------------------------------------------------
@@ -109,12 +146,14 @@ def make():
 
   os.chdir(old_cur)
 
-  if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
-    make_xp()
+  make_xp()
 
   return
 
 def make_xp():
+  if not is_xp_platform():
+    return
+
   print("[fetch & build]: v8_xp")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"
@@ -125,13 +164,17 @@ def make_xp():
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", "2015")
 
+  base.common_check_version("v8", "1", clean)
+
+  if not base.is_dir("win_64") and not base.is_dir("win_32"):
+    clean()
+
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-  else:
-    os.chdir(base_dir + "/depot_tools")
-    base.cmd("git", ["reset", "--hard"])
-    os.chdir(base_dir)
-
+    if ("windows" == base.host_platform()):
+      # hack for 32 bit system!!!
+      base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
+  
   old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
@@ -141,9 +184,6 @@ def make_xp():
   # --------------------------------------------------------------------------
   # fetch
   if not base.is_dir("v8"):
-    base.delete_file("./.gclient")
-    base.delete_file("./.gclient_entries")
-    base.delete_dir("./.cipd")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
 

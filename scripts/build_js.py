@@ -48,6 +48,9 @@ def make():
 def _run_npm(directory):
   return base.cmd_in_dir(directory, "npm", ["install"])
 
+def _run_npm_cli(directory):
+  return base.cmd_in_dir(directory, "npm", ["install", "-g", "grunt-cli"])
+
 def _run_grunt(directory, params=[]):
   return base.cmd_in_dir(directory, "grunt", params)
 
@@ -57,16 +60,19 @@ def build_interface(directory):
   return
 
 def build_sdk_desktop(directory):
+  #_run_npm_cli(directory)
   _run_npm(directory)  
   _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param())
   return
 
 def build_sdk_builder(directory):
+  #_run_npm_cli(directory)
   _run_npm(directory)
   _run_grunt(directory, ["--level=ADVANCED"] + base.sdkjs_addons_param())
   return
 
 def build_js_develop(root_dir):
+  #_run_npm_cli(root_dir + "/sdkjs/build")
   _run_npm(root_dir + "/sdkjs/build")
   _run_grunt(root_dir + "/sdkjs/build", ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"] + base.sdkjs_addons_param())
   _run_grunt(root_dir + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())

@@ -96,10 +96,8 @@ def make():
     # cef
     if not isWindowsXP:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir)
-    elif (native_platform == "win_64_xp"):
-      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_64/build/*", root_dir)
     else:
-      base.copy_files(core_dir + "/Common/3dParty/cef/winxp_32/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/build/*", root_dir)
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
@@ -178,8 +176,8 @@ def make():
     base.copy_dir(git_dir + "/sdkjs-plugins/macros", root_dir + "/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B}")
 
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}", root_dir + "/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}")
-    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
-    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
+    #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
+    #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
 
     if (0 != platform.find("mac")):
       base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}", root_dir + "/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}")
@@ -204,7 +202,7 @@ def make():
     themes_params = []
     if ("" != config.option("themesparams")):
       themes_params = ["--params=\"" + config.option("themesparams") + "\""]
-    base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""])
+    base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""])
     base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params)
 
     base.delete_exe(root_dir + "/converter/allfontsgen")

@@ -191,11 +191,6 @@ def make():
     base.create_dir(info)
     base.copy_dir(info_files, info)
 
-    custom_public_key = branding_dir + '/licenseKey.pem'
-
-    if(base.is_exist(custom_public_key)):
-      base.copy_file(custom_public_key, build_server_dir + '/Common/sources')
-
     # example
     build_example_dir = root_dir + '-example'
     bin_example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"

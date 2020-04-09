@@ -227,9 +227,8 @@ LD_LIBRARY_PATH=${PWD}/server/FileConverter/bin server/tools/allfontsgen \
   --allfonts-web="${PWD}/sdkjs/common/AllFonts.js" \
   --allfonts="${PWD}/server/FileConverter/bin/AllFonts.js" \
   --selection="${PWD}/server/FileConverter/bin/font_selection.bin" \
-  --output-web='fonts' \
+  --output-web="${PWD}/sdkjs/common/Images" \
   --use-system="true"
-
 ```
 
 ##### Running Document Server
@@ -241,20 +240,20 @@ allow to run foreground processes in background mode.
 1. Start the **FileConverter** service:
 
     ```bash
-    cd out/server/FileConverter
-    NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./converter
+    cd out/linux_64/onlyoffice/documentserver/server/FileConverter
+    LD_LIBRARY_PATH=$PWD/bin NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./converter
     ```
 
 2. Start the **SpellChecker** service:
 
     ```bash
-    cd out/documentserver/server/SpellChecker
+    cd out/linux_64/onlyoffice/documentserver/server/SpellChecker
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./spellchecker
     ```
 
 3. Start the **DocService** service:
 
     ```bash
-    cd out/documentserver/server/DocService
+    cd out/linux_64/onlyoffice/documentserver/server/DocService
     NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
     ```

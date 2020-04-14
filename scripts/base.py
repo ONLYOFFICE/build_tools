@@ -568,11 +568,8 @@ def web_apps_addons_checkout():
 def sdkjs_plugins_checkout():
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
-    plugins_list_config = "default"
-  plugins_list_string = plugins_list_config.replace("default", "photoeditor, macros, ocr, translator, speech, thesaurus, youtube, highlightcode")
-  if ("" == plugins_list_config):
     return
-  plugins_list = plugins_list_string.rsplit(", ")
+  plugins_list = plugins_list_config.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
   if is_dir(plugins_dir + "/.git"):
     delete_dir_with_access_error(plugins_dir);
@@ -803,24 +800,31 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False):
   if not is_dir(src_dir_path):
     src_dir_path = src_dir + "/" + name
   if not is_name_as_guid:
-    base.copy_dir_content(src_dir_path, dst_dir + "/" + name, "", ".git")
+    dst_dir_path = dst_dir + "/" + name
+    if is_dir(dst_dir_path):
+      delete_dir(dst_dir_path)
+    create_dir(dst_dir_path)
+    copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
     return
   config_content = readFile(src_dir_path + "/config.json")
   index_start = config_content.find("\"asc.{")
   index_start += 5
-  index_end = config_content.find(index_start, "}")
+  index_end = config_content.find("}", index_start)
+  index_end += 1
   guid = config_content[index_start:index_end]
+  dst_dir_path = dst_dir + "/" + guid
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+  create_dir(dst_dir_path)
+  copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False):
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
-    plugins_list_config = "default"
-  plugins_list_string = plugins_list_config.replace("default", "photoeditor, macros, ocr, translator, speech, thesaurus, youtube, highlightcode")
-  if ("" == plugins_list_config):
     return
-  plugins_list = plugins_list_string.rsplit(", ")
+  plugins_list = plugins_list_config.rsplit(", ")
   for name in plugins_list:
     copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid)
   return  

@@ -164,7 +164,7 @@ def make():
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True)
     # remove some default plugins
-    if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech")
+    if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech"):
       base.delete_dir(root_dir + "/editors/sdkjs-plugins/speech")
 
     # io

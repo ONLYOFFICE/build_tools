@@ -125,18 +125,7 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
-    
-    # base.copy_dir(plugins_dir + "/clipart", js_dir + "/sdkjs-plugins/clipart")
-    base.copy_dir(plugins_dir + "/code", js_dir + "/sdkjs-plugins/code")
-    base.copy_dir(plugins_dir + "/macros", js_dir + "/sdkjs-plugins/macros")
-    base.copy_dir(plugins_dir + "/ocr", js_dir + "/sdkjs-plugins/ocr")
-    base.copy_dir(plugins_dir + "/photoeditor", js_dir + "/sdkjs-plugins/photoeditor")
-    base.copy_dir(plugins_dir + "/speech", js_dir + "/sdkjs-plugins/speech")
-    base.copy_dir(plugins_dir + "/synonim", js_dir + "/sdkjs-plugins/synonim")
-    base.copy_dir(plugins_dir + "/translate", js_dir + "/sdkjs-plugins/translate")
-    base.copy_dir(plugins_dir + "/youtube", js_dir + "/sdkjs-plugins/youtube")
-    base.copy_file(plugins_dir + "/pluginBase.js", js_dir + "/sdkjs-plugins/pluginBase.js")
-    base.copy_file(plugins_dir + "/plugins.css", js_dir + "/sdkjs-plugins/plugins.css")
+    base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins")
     
     # tools
     tools_dir = root_dir + "/server/tools"

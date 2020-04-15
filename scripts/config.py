@@ -65,6 +65,11 @@ def parse():
     if ("" != base.get_env("ProgramFiles(x86)")):
       options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
 
+  # check sdkjs-plugins
+  if (option("sdkjs-plugin") == ""):
+    options["sdkjs-plugin"] = "default"
+  options["sdkjs-plugin"] = options["sdkjs-plugin"].replace("default", "photoeditor, macros, ocr, translator, speech, thesaurus, youtube, highlightcode")
+
   global sdkjs_addons
   sdkjs_addons = {}
   sdkjs_addons["comparison"] = "sdkjs-comparison"

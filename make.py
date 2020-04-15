@@ -36,10 +36,13 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
     base.cmd_in_dir(branding_dir, "git", ["pull"], True)
 
   if base.is_file(branding_dir + "/build_tools/make.py"):
+    base.check_build_version(branding_dir + "/build_tools")
     base.set_env("OO_RUNNING_BRANDING", "1")
     base.set_env("OO_BRANDING", config.option("branding"))
     base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make.py"])
     exit(0)
+
+base.check_build_version(base_dir)
 
 # update
 if ("1" == config.option("update")):

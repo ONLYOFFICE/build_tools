@@ -8,7 +8,7 @@ necessary for the compilation process, all the dependencies required for the
  correct work, as well as to get the latest version of
 **ONLYOFFICE products** source code and build all their components.
 
-**Important!**  We can only guarantee the correct work of the products built from 
+**Important!**  We can only guarantee the correct work of the products built from
 the `master` branch.
 
 ## How to use - Linux
@@ -255,19 +255,26 @@ allow to run foreground processes in background mode.
 
     ```bash
     cd out/linux_64/onlyoffice/documentserver/server/FileConverter
-    LD_LIBRARY_PATH=$PWD/bin NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./converter
+    LD_LIBRARY_PATH=$PWD/bin \
+    NODE_ENV=development-linux \
+    NODE_CONFIG_DIR=$PWD/../Common/config \
+    ./converter
     ```
 
 2. Start the **SpellChecker** service:
 
     ```bash
     cd out/linux_64/onlyoffice/documentserver/server/SpellChecker
-    NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./spellchecker
+    NODE_ENV=development-linux \
+    NODE_CONFIG_DIR=$PWD/../Common/config \
+    ./spellchecker
     ```
 
 3. Start the **DocService** service:
 
     ```bash
     cd out/linux_64/onlyoffice/documentserver/server/DocService
-    NODE_ENV=development-linux NODE_CONFIG_DIR=$PWD/../Common/config ./docservice
+    NODE_ENV=development-linux \
+    NODE_CONFIG_DIR=$PWD/../Common/config \
+    ./docservice
     ```

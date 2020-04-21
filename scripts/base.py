@@ -341,7 +341,11 @@ def git_update(repo, is_no_errors=False, is_current_dir=False):
   os.chdir(folder)
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
-    cmd("git", ["checkout", "-f", config.option("branch")])
+    retCheckout = cmd("git", ["checkout", "-f", config.option("branch")], True)
+    if (retCheckout != 0):
+      print("branch does not exist...")
+      print("switching to master...")
+      cmd("git", ["checkout", "-f", "master"])
   if (0 != config.option("branch").find("tags/")):
     cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
   os.chdir(old_cur)

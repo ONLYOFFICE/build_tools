@@ -123,11 +123,27 @@ if not base.is_dir("./qt_build"):
   install_qt()
 
 branch = get_branch_name("../..")
+
+array_args = sys.argv[1:]
+array_modules = []
+
+config = {}
+for arg in array_args:
+  if (0 == arg.find("--")):
+    indexEq = arg.find("=")
+    if (-1 != indexEq):
+      config[arg[2:indexEq]] = arg[indexEq + 1:]
+  else:
+    array_modules.append(arg)
+
+if ("branch" in config):
+  branch = config["branch"]
+
 print("---------------------------------------------")
 print("build branch: " + branch)
 print("---------------------------------------------")
 
-modules = " ".join(sys.argv[1:])
+modules = " ".join(array_modules)
 if "" == modules:
   modules = "desktop builder server"
 

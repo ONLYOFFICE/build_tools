@@ -43,6 +43,11 @@ core_ios {
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
+core_android {
+	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_use_common_binary
+	CONFIG += no_desktop_apps
+}
 
 SUBDIRS = \
 	cryptopp \
@@ -85,6 +90,7 @@ SUBDIRS += \
 }
 
 core_ios:CONFIG += no_tests
+core_android:CONFIG += no_tests
 !no_tests {
 	SUBDIRS += standardtester
 }

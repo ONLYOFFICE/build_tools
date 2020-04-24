@@ -1,0 +1,79 @@
+
+
+if echo "$@" | tr ' ' '\n' | grep -q -x -e -c; then
+    LINKER=no
+elif echo "$@" | tr ' ' '\n' | grep -q -x -e -emit-pth; then
+    LINKER=no
+else
+    LINKER=yes
+fi
+
+#echo " .... LINKER = " $LINKER
+
+# Remove any -m32/-m64 from input parameters
+PARAMS=`echo "$@" | tr ' ' '\n' | grep -v -x -e -m32 | grep -v -x -e -m64 | tr '\n' ' '`
+
+
+
+#echo " .... PARMS (1)  = " $PARAMS
+
+if [ "x$LINKER" = "xyes" ]; then
+    # Fix SONAME for shared libraries
+    NPARAMS=""
+    NEXT_PARAM_IS_LIBNAME=no
+    for p in $PARAMS; do
+        if [ "x$NEXT_PARAM_IS_LIBNAME" = "xyes" ]; then
+            LIBNAME=`expr "x$p" : "^x.*\(lib[^\.]*\.so\)"`
+            p="-Wl,$LIBNAME"
+            NEXT_PARAM_IS_LIBNAME=no
+        else
+            case $p in
+                -Wl,-soname|-Wl,-h|-install_name)
+                    p="-Wl,-soname"
+                    NEXT_PARAM_IS_LIBNAME=yes
+                    ;;
+                -Wl,-soname,lib*|-Wl,-h,lib*)
+                    LIBNAME=`expr "x$p" : "^x.*\(lib[^\.]*\.so\)"`
+                    p="-Wl,-soname,-l$LIBNAME"
+                    ;;
+                -dynamiclib)
+                    p="-shared"
+                    ;;
+                -undefined)
+                    p="-u"
+                    ;;
+                -single_module)
+                    p=""
+                    ;;
+                -lpthread|-lutil)
+                    p=""
+                    ;;
+            esac
+        fi
+        NPARAMS="$NPARAMS $p"
+    done
+    PARAMS=$NPARAMS
+fi
+
+#echo " .... PARMS (2)  = " $PARAMS
+
+FLAGS=" -fno-integrated-as -fPIC" 
+if [ "x$LINKER" = "xyes" ]; then
+    FLAGS="$FLAGS $BFA_LINKER_FLAGS_FOR_ABI"
+else
+    FLAGS="$FLAGS $BFA_COMPILER_FLAGS_FOR_ABI -Wno-long-long"
+
+fi
+
+#echo " .... FLAGS   = " $PARAMS
+
+PARAMS="$FLAGS $PARAMS"
+
+#echo " .... PARMS (3)  = " $PARAMS
+
+run()
+{
+    exec "$@"
+}
+
+ 

@@ -5,20 +5,24 @@ sys.path.append('../..')
 import config
 import base
 import os
+import boost_android
 
 def clean():
   if base.is_dir("boost_1_58_0"):
     base.delete_dir_with_access_error("boost_1_58_0");
     base.delete_dir("boost_1_58_0")
+  if base.is_dir("boost_1_72_0"):
+    base.delete_dir_with_access_error("boost_1_72_0");
+    base.delete_dir("boost_1_72_0")
   if base.is_dir("build"):
     base.delete_dir("build")
   return
 
 def correct_install_includes_win(base_dir, platform):
   build_dir = base_dir + "/build/" + platform + "/include"
-  if base.is_dir(build_dir + "/boost-1_58") and base.is_dir(build_dir + "/boost-1_58/boost"):
-    base.copy_dir(build_dir + "/boost-1_58/boost", build_dir + "/boost")
-    base.delete_dir(build_dir + "/boost-1_58")
+  if base.is_dir(build_dir + "/boost-1_72") and base.is_dir(build_dir + "/boost-1_72/boost"):
+    base.copy_dir(build_dir + "/boost-1_72/boost", build_dir + "/boost")
+    base.delete_dir(build_dir + "/boost-1_72")
   return
 
 def clang_correct():
@@ -40,12 +44,12 @@ def make():
   #if not base.is_dir("boost_1_58_0"):
   #  base.extract("boost_1_58_0.7z", "./")
 
-  base.common_check_version("boost", "2", clean)
+  base.common_check_version("boost", "3", clean)
 
-  if not base.is_dir("boost_1_58_0"):
-    base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_58_0", "-b" "boost-1.58.0"])
+  if not base.is_dir("boost_1_72_0"):
+    base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_72_0", "-b" "boost-1.72.0"])
 
-  os.chdir("boost_1_58_0")
+  os.chdir("boost_1_72_0")
 
   # build
   if ("windows" == base.host_platform()):
@@ -81,6 +85,17 @@ def make():
     clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
+
+  if (-1 != config.option("platform").find("android")):
+    platforms = config.option("platform").split()
+    for platform in platforms:
+      if not platform in config.platforms:
+        continue
+      if (0 != platform.find("android")):
+        continue
+      if (base.is_dir("../build/" + platform)):
+        continue
+      boost_android.make(platform[8:])
 
   os.chdir(old_cur)
   return

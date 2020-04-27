@@ -28,7 +28,7 @@ def parse():
                "linux_64", "linux_32", 
                "mac_64", 
                "ios", 
-               "android_arm64_v8a", "android_armv7", "android_x86"]
+               "android_arm64_v8a", "android_armv7", "android_x86", "android_x86_64"]
 
   # correction
   host_platform = base.host_platform()

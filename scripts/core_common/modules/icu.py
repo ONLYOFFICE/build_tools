@@ -59,10 +59,10 @@ def make():
     base.create_dir(platform)
     os.chdir("icu/source")
     base.cmd("./runConfigureICU", ["Linux" if "linux" == base.host_platform() else "MacOSX"])
-    old_dest_dir = base.get_env("DESTDIR")
+    old_env = os.environ.copy()
     base.set_env("DESTDIR", base_dir + "/" + platform)
     base.cmd("make", ["install"])
-    base.set_env("DESTDIR", old_dest_dir)
+    os.environ = old_env.copy()
     os.chdir("../..")
     base.create_dir(platform + "/build")
     if ("linux_64" == platform):

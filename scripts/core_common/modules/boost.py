@@ -5,7 +5,27 @@ sys.path.append('../..')
 import config
 import base
 import os
+import glob
 import boost_android
+
+def remove_postfix_windows(dir):
+  base.create_dir(dir + "/debug")
+  for file in glob.glob(dir + "/*"):
+    file_name = os.path.basename(file)
+    if not base.is_file(file):
+      continue
+    if (0 != file_name.find("libboost_")):
+      continue
+    dst_dir = dir + "/"
+    if (-1 != file_name.find("-gd-")):
+      dst_dir += "/debug"
+    index = file_name.find("-")
+    file_name_dst = file_name[0:index]
+    file_name_dst += ".lib"
+
+    base.copy_file(file, dst_dir + "/" + file_name_dst)
+    base.delete_file(file)
+  return
 
 def clean():
   if base.is_dir("boost_1_58_0"):
@@ -58,12 +78,14 @@ def make():
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])      
+      base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
+      remove_postfix_windows("../build/win_64/lib")
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
+      base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
+      remove_postfix_windows("../build/win_32/lib")
     correct_install_includes_win(base_dir, "win_64")
     correct_install_includes_win(base_dir, "win_32")    
 
@@ -71,7 +93,7 @@ def make():
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
+    base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
@@ -79,7 +101,7 @@ def make():
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["--prefix=./../build/mac_64", "link=static", "install"])
+    base.cmd("./b2", ["--prefix=./../build/mac_64", "link=static", "install"])
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
     clang_correct()

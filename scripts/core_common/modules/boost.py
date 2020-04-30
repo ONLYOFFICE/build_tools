@@ -8,7 +8,7 @@ import os
 import glob
 import boost_android
 
-def remove_postfix_windows(dir):
+def move_debug_libs_windows(dir):
   base.create_dir(dir + "/debug")
   for file in glob.glob(dir + "/*"):
     file_name = os.path.basename(file)
@@ -16,14 +16,7 @@ def remove_postfix_windows(dir):
       continue
     if (0 != file_name.find("libboost_")):
       continue
-    dst_dir = dir + "/"
-    if (-1 != file_name.find("-gd-")):
-      dst_dir += "/debug"
-    index = file_name.find("-")
-    file_name_dst = file_name[0:index]
-    file_name_dst += ".lib"
-
-    base.copy_file(file, dst_dir + "/" + file_name_dst)
+    base.copy_file(file, dir + "/debug/" + file_name)
     base.delete_file(file)
   return
 
@@ -78,14 +71,16 @@ def make():
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
-      remove_postfix_windows("../build/win_64/lib")
+      base.cmd("b2.exe", ["--prefix=./../build/win_64", "--layout=system", "link=static", "variant=debug", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
+      move_debug_libs_windows("./../build/win_64/lib")
+      base.cmd("b2.exe", ["--prefix=./../build/win_64", "--layout=system", "link=static", "variant=release", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
-      remove_postfix_windows("../build/win_32/lib")
+      base.cmd("b2.exe", ["--prefix=./../build/win_32", "--layout=system", "link=static", "variant=debug", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
+      move_debug_libs_windows("./../build/win_32/lib")
+      base.cmd("b2.exe", ["--prefix=./../build/win_32", "--layout=system", "link=static", "variant=release", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
     correct_install_includes_win(base_dir, "win_64")
     correct_install_includes_win(base_dir, "win_32")    
 

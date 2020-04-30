@@ -57,7 +57,7 @@ def parse():
     options["platform"] += " win_64_xp win_32_xp"
 
   if check_option("platform", "android"):
-    options["platform"] += " android_arm64_v8a android_armv7 android_x86"
+    options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
   # check vs-path
   if ("windows" == host_platform):

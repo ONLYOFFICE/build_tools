@@ -57,7 +57,7 @@ def make():
   #if not base.is_dir("boost_1_58_0"):
   #  base.extract("boost_1_58_0.7z", "./")
 
-  base.common_check_version("boost", "3", clean)
+  base.common_check_version("boost", "4", clean)
 
   if not base.is_dir("boost_1_72_0"):
     base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_72_0", "-b" "boost-1.72.0"])

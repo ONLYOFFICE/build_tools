@@ -57,7 +57,7 @@ def make():
   #if not base.is_dir("boost_1_58_0"):
   #  base.extract("boost_1_58_0.7z", "./")
 
-  base.common_check_version("boost", "4", clean)
+  base.common_check_version("boost", "5", clean)
 
   if not base.is_dir("boost_1_72_0"):
     base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_72_0", "-b" "boost-1.72.0"])
@@ -71,16 +71,12 @@ def make():
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("b2.exe", ["--prefix=./../build/win_64", "--layout=system", "link=static", "variant=debug", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
-      move_debug_libs_windows("./../build/win_64/lib")
-      base.cmd("b2.exe", ["--prefix=./../build/win_64", "--layout=system", "link=static", "variant=release", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
+      base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("b2.exe", ["--prefix=./../build/win_32", "--layout=system", "link=static", "variant=debug", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
-      move_debug_libs_windows("./../build/win_32/lib")
-      base.cmd("b2.exe", ["--prefix=./../build/win_32", "--layout=system", "link=static", "variant=release", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
+      base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
     correct_install_includes_win(base_dir, "win_64")
     correct_install_includes_win(base_dir, "win_32")    
 

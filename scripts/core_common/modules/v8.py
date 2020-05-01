@@ -62,7 +62,8 @@ def make():
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
     if ("windows" == base.host_platform()):
       # hack for 32 bit system!!!
-      base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
+      if base.is_file("depot_tools/cipd.ps1"):
+        base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 

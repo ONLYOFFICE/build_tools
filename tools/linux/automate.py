@@ -4,6 +4,7 @@ import sys
 sys.path.append('../../scripts')
 import base
 import os
+import platform
 import subprocess
 
 def get_branch_name(directory):
@@ -59,7 +60,8 @@ def install_deps():
 
   # nodejs
   if not base.is_file("./node_js_setup_10.x"):
-    base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
+    if "ppc64le" not in platform.machine():
+      base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
     base.cmd("sudo", ["bash", "./node_js_setup_10.x"])
     base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
     base.cmd("sudo", ["npm", "install", "-g", "npm"])

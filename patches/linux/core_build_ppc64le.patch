@@ -1,0 +1,31 @@
+--- a/core/Common/base.pri
++++ b/core/Common/base.pri
+@@ -89,9 +89,15 @@ linux-g++:contains(QMAKE_HOST.arch, x86_64): {
+     message("linux-64")
+     CONFIG += core_linux_64
+ }
++linux-g++:contains(QMAKE_HOST.arch, ppc64le): {
++    message("linux-64")
++    CONFIG += core_linux_64
++}
+ linux-g++:!contains(QMAKE_HOST.arch, x86_64): {
+-    message("linux-32")
+-    CONFIG += core_linux_32
++    linux-g++:!contains(QMAKE_HOST.arch, ppc64le): {
++        message("linux-32")
++        CONFIG += core_linux_32
++    }
+ }
+ linux-g++:contains(DST_ARCH, arm): {
+     message("arm")
+--- a/core/ASCOfficeDocFile/DocDocxConverter/ParagraphPropertiesMapping.cpp
++++ b/core/ASCOfficeDocFile/DocDocxConverter/ParagraphPropertiesMapping.cpp
+@@ -284,7 +284,7 @@ namespace DocFileFormat
+ 				{
+ 					LineSpacingDescriptor lspd( iter->Arguments, iter->argumentsSize );
+ 
+-                    XMLTools::XMLAttribute line( L"w:line", FormatUtils::IntToWideString( abs( lspd.dyaLine ) ));
++                    XMLTools::XMLAttribute line( L"w:line", FormatUtils::IntToWideString( (int)abs( lspd.dyaLine ) ));
+ 					spacing.AppendAttribute( line );
+ 
+                     XMLTools::XMLAttribute lineRule( L"w:lineRule", L"auto" );

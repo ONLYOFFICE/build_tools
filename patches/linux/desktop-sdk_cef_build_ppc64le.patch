@@ -1,0 +1,207 @@
+diff --git a/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_atomicops.h b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_atomicops.h
+index 96aebab..05f3106 100644
+--- a/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_atomicops.h
++++ b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_atomicops.h
+@@ -184,6 +184,8 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
+ #include "include/base/internal/cef_atomicops_x86_gcc.h"
+ #elif defined(COMPILER_GCC) && defined(__ARM_ARCH)
+ #include "include/base/internal/cef_atomicops_arm_gcc.h"
++#elif defined(COMPILER_GCC) && defined(ARCH_CPU_PPC_FAMILY)
++#include "include/base/internal/cef_atomicops_ppc_gcc.h"
+ #else
+ #error "Atomic operations are not supported on your platform"
+ #endif
+diff --git a/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_build.h b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_build.h
+index 5f3a863..da62b6a 100644
+--- a/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_build.h
++++ b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/cef_build.h
+@@ -108,6 +108,15 @@
+ #define ARCH_CPU_MIPSEL 1
+ #define ARCH_CPU_32_BITS 1
+ #define ARCH_CPU_LITTLE_ENDIAN 1
++#elif defined(__ppc64__) || defined(__PPC64__) || defined(__powerpc64__)
++#define ARCH_CPU_PPC_FAMILY 1
++#define ARCH_CPU_PPC64 1
++#define ARCH_CPU_64_BITS 1
++#if defined(__BIG_ENDIAN__)
++#define ARCH_CPU_BIG_ENDIAN 1
++#else
++#define ARCH_CPU_LITTLE_ENDIAN 1
++#endif
+ #else
+ #error Please add support for your architecture in cef_build.h
+ #endif
+diff --git a/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/internal/cef_atomicops_ppc_gcc.h b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/internal/cef_atomicops_ppc_gcc.h
+new file mode 100644
+index 0000000..95f4584
+--- /dev/null
++++ b/desktop-sdk/ChromiumBasedEditors/lib/src/cef/linux/include/base/internal/cef_atomicops_ppc_gcc.h
+@@ -0,0 +1,168 @@
++// Copyright (c) 2013 - 2015 Google Inc. All rights reserved.
++// Copyright (c) 2020 Raptor Engineering, LLC.  All rights reserved.
++//
++// Redistribution and use in source and binary forms, with or without
++// modification, are permitted provided that the following conditions are
++// met:
++//
++//    * Redistributions of source code must retain the above copyright
++// notice, this list of conditions and the following disclaimer.
++//    * Redistributions in binary form must reproduce the above
++// copyright notice, this list of conditions and the following disclaimer
++// in the documentation and/or other materials provided with the
++// distribution.
++//    * Neither the name of Google Inc. nor the name Chromium Embedded
++// Framework nor the names of its contributors may be used to endorse
++// or promote products derived from this software without specific prior
++// written permission.
++//
++// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++//
++// Do not include this header file directly. Use base/cef_atomicops.h
++// instead.
++//
++// LinuxKernelCmpxchg and Barrier_AtomicIncrement are from Google Gears.
++
++#ifndef CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_PPC_GCC_H_
++#define CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_PPC_GCC_H_
++
++#if defined(OS_QNX)
++#include <sys/cpuinline.h>
++#endif
++
++namespace base {
++namespace subtle {
++
++inline void MemoryBarrier() {
++#if defined(OS_LINUX)
++    asm volatile("sync" : : : "memory");
++#else
++#error MemoryBarrier() is not implemented on this platform.
++#endif
++}
++
++inline Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32 *ptr,
++                                         Atomic32 old_value,
++                                         Atomic32 new_value) {
++  Atomic32 prev;
++
++  __asm__ __volatile__(
++      "0:                                  \n\t"
++      "lwarx %[prev],0,%[ptr]              \n\t"
++      "cmpw 0,%[prev],%[old_value]         \n\t"
++      "bne- 1f                             \n\t"
++      "stwcx. %[new_value],0,%[ptr]        \n\t"
++      "bne- 0b                             \n\t"
++      "1:                                  \n\t"
++      : [prev] "=&r"(prev), "+m"(*ptr)
++      : [ptr] "r"(ptr), [old_value] "r"(old_value), [new_value] "r"(new_value)
++      : "cc", "memory");
++
++  return prev;
++}
++
++inline Atomic32 Acquire_CompareAndSwap(volatile Atomic32* ptr,
++                                       Atomic32 old_value,
++                                       Atomic32 new_value) {
++  Atomic32 result = NoBarrier_CompareAndSwap(ptr, old_value, new_value);
++  MemoryBarrier();
++  return result;
++}
++
++inline Atomic32 Release_CompareAndSwap(volatile Atomic32* ptr,
++                                       Atomic32 old_value,
++                                       Atomic32 new_value) {
++  MemoryBarrier();
++  return NoBarrier_CompareAndSwap(ptr, old_value, new_value);
++}
++
++inline Atomic64 NoBarrier_AtomicIncrement(volatile Atomic64 *ptr,
++                                          Atomic64 increment) {
++  Atomic64 temp;
++
++  __asm__ __volatile__(
++      "ai0:                                \n\t"
++      "lwarx %[temp],0,%[ptr]              \n\t"
++      "add %[temp],%[increment],%[temp]    \n\t"
++      "stwcx. %[temp],0,%[ptr]             \n\t"
++      "bne- ai0                            \n\t"
++      : [temp] "=&r"(temp)
++      : [increment] "r"(increment), [ptr] "r"(ptr)
++      : "cc", "memory");
++
++  return temp;
++}
++
++inline Atomic32 Barrier_AtomicIncrement(volatile Atomic32* ptr,
++                                        Atomic32 increment) {
++  // TODO(digit): Investigate if it's possible to implement this with
++  // a single MemoryBarrier() operation between the LDREX and STREX.
++  // See http://crbug.com/246514
++  MemoryBarrier();
++  Atomic32 result = NoBarrier_AtomicIncrement(ptr, increment);
++  MemoryBarrier();
++  return result;
++}
++
++inline Atomic32 NoBarrier_AtomicExchange(volatile Atomic32 *ptr,
++                                         Atomic32 new_value) {
++  Atomic32 old;
++
++  __asm__ __volatile__(
++      "0:                                  \n\t"
++      "lwarx %[old],0,%[ptr]               \n\t"
++      "stwcx. %[new_value],0,%[ptr]        \n\t"
++      "bne- 0b                             \n\t"
++      : [old] "=&r"(old), "+m"(*ptr)
++      : [ptr] "r"(ptr), [new_value] "r"(new_value)
++      : "cc", "memory");
++
++  return old;
++}
++
++// NOTE: Atomicity of the following load and store operations is only
++// guaranteed in case of 32-bit alignement of |ptr| values.
++
++inline void NoBarrier_Store(volatile Atomic32* ptr, Atomic32 value) {
++  *ptr = value;
++}
++
++inline void Acquire_Store(volatile Atomic32* ptr, Atomic32 value) {
++  *ptr = value;
++  MemoryBarrier();
++}
++
++inline void Release_Store(volatile Atomic32* ptr, Atomic32 value) {
++  MemoryBarrier();
++  *ptr = value;
++}
++
++inline Atomic32 NoBarrier_Load(volatile const Atomic32* ptr) {
++  return *ptr;
++}
++
++inline Atomic32 Acquire_Load(volatile const Atomic32* ptr) {
++  Atomic32 value = *ptr;
++  MemoryBarrier();
++  return value;
++}
++
++inline Atomic32 Release_Load(volatile const Atomic32* ptr) {
++  MemoryBarrier();
++  return *ptr;
++}
++
++}  // namespace base::subtle
++}  // namespace base
++
++#endif  // CEF_INCLUDE_BASE_INTERNAL_CEF_ATOMICOPS_ARM_GCC_H_

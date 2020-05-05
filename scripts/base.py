@@ -688,7 +688,7 @@ def vcvarsall_end():
   os.environ = _old_environment.copy()
   return
 
-def run_as_bat(lines):
+def run_as_bat(lines, is_no_errors=False):
   name = "tmp.bat"
   content = "\n".join(lines)
 
@@ -696,7 +696,7 @@ def run_as_bat(lines):
   file.write(content)
   file.close()
 
-  cmd(name)
+  cmd(name, [], is_no_errors)
   delete_file(name)
   return
 

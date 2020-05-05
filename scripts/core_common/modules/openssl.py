@@ -12,7 +12,7 @@ def clean():
   return
 
 def make():
-  if ("windows" == base.host_platform() or "ios" == config.option("platform")):
+  if ("ios" == config.option("platform")):
     return
 
   print("[fetch & build]: openssl")
@@ -27,6 +27,28 @@ def make():
     base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])
 
   os.chdir(base_dir + "/openssl")
+
+  if ("windows" == base.host_platform()):
+    old_cur_dir = base_dir.replace(" ", "\\ ")
+    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):
+      base.create_dir("./../build/win_64")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64")      
+      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64 --openssldir=" + old_cur_dir + "\\build\\win_64 no-shared no-asm")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
+    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
+      base.create_dir("./../build/win_32")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x86")
+      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32 --openssldir=" + old_cur_dir + "\\build\\win_32 no-shared no-asm")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
+    os.chdir(old_cur)
+    return
+
   if not base.is_file("Makefile"):
     base.cmd("./config", ["no-shared", "no-asm"])
 

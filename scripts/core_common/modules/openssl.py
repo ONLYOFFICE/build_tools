@@ -12,7 +12,7 @@ def clean():
   return
 
 def make():
-  if ("ios" == config.option("platform")):
+  if ("android" == base.host_platform() or "ios" == config.option("platform")):
     return
 
   print("[fetch & build]: openssl")
@@ -28,6 +28,7 @@ def make():
 
   os.chdir(base_dir + "/openssl")
 
+  old_cur_dir = base_dir.replace(" ", "\\ ")
   if ("windows" == base.host_platform()):
     old_cur_dir = base_dir.replace(" ", "\\ ")
     if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):
@@ -49,18 +50,16 @@ def make():
     os.chdir(old_cur)
     return
 
-  if not base.is_file("Makefile"):
-    base.cmd("./config", ["no-shared", "no-asm"])
-
-  if base.is_file("./libssl.a") and base.is_file("./libcrypto.a"):
-    os.chdir(old_cur)
-    return    
-
-  if ("linux" == base.host_platform()):
+  if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
+    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
     base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
     base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
+    base.cmd("make", ["build_libs", "install"])
+    # TODO: support x86
 
-  base.cmd("make", ["build_libs"])
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
+    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64"])
+    base.cmd("make", ["build_libs", "install"])
 
   os.chdir(old_cur)
   return

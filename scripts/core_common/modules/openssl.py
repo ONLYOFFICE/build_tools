@@ -12,7 +12,7 @@ def clean():
   return
 
 def make():
-  if ("windows" == base.host_platform() or "ios" == config.option("platform")):
+  if ("android" == base.host_platform() or "ios" == config.option("platform")):
     return
 
   print("[fetch & build]: openssl")
@@ -27,18 +27,39 @@ def make():
     base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])
 
   os.chdir(base_dir + "/openssl")
-  if not base.is_file("Makefile"):
-    base.cmd("./config", ["no-shared", "no-asm"])
 
-  if base.is_file("./libssl.a") and base.is_file("./libcrypto.a"):
+  old_cur_dir = base_dir.replace(" ", "\\ ")
+  if ("windows" == base.host_platform()):
+    old_cur_dir = base_dir.replace(" ", "\\ ")
+    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):
+      base.create_dir("./../build/win_64")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64")      
+      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64 --openssldir=" + old_cur_dir + "\\build\\win_64 no-shared no-asm")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
+    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
+      base.create_dir("./../build/win_32")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x86")
+      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32 --openssldir=" + old_cur_dir + "\\build\\win_32 no-shared no-asm")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
     os.chdir(old_cur)
-    return    
+    return
 
-  if ("linux" == base.host_platform()):
+  if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
+    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
     base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
     base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
+    base.cmd("make", ["build_libs", "install"])
+    # TODO: support x86
 
-  base.cmd("make", ["build_libs"])
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
+    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64"])
+    base.cmd("make", ["build_libs", "install"])
 
   os.chdir(old_cur)
   return

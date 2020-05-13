@@ -12,6 +12,8 @@ import build_server
 import deploy
 import make_common
 
+base.cmd("perl", ["-v"])
+
 # parse configuration
 config.parse()
 

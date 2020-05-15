@@ -811,7 +811,7 @@ def common_check_version(name, good_version, clean_func):
     clean_func()
   return
 
-def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False):
+def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_local=False):
   src_dir_path = src_dir + "/plugin-" + name
   if not is_dir(src_dir_path):
     src_dir_path = src_dir + "/" + name
@@ -833,6 +833,9 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False):
     delete_dir(dst_dir_path)
   create_dir(dst_dir_path)
   copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
+  if is_desktop_local:
+    for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
+      base.replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")      
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False):

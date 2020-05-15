@@ -835,15 +835,15 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
   if is_desktop_local:
     for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
-      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")      
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
   return
 
-def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False):
+def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")
   for name in plugins_list:
-    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid)
+    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)
   return  

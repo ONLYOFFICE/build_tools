@@ -135,6 +135,13 @@ def make():
     base.copy_dir(plugins_dir + "/synonim", js_dir + "/sdkjs-plugins/synonim")
     base.copy_dir(plugins_dir + "/translate", js_dir + "/sdkjs-plugins/translate")
     base.copy_dir(plugins_dir + "/youtube", js_dir + "/sdkjs-plugins/youtube")
+    
+    if(base.is_dir(plugins_dir + "/plugin-zotero/src")):
+      base.copy_dir(plugins_dir + "/plugin-zotero/src", js_dir + "/sdkjs-plugins/zotero")
+
+    if(base.is_dir(plugins_dir + "/plugin-mendeley/src")):
+      base.copy_dir(plugins_dir + "/plugin-mendeley/src", js_dir + "/sdkjs-plugins/mendeley")
+
     base.copy_file(plugins_dir + "/pluginBase.js", js_dir + "/sdkjs-plugins/pluginBase.js")
     base.copy_file(plugins_dir + "/plugins.css", js_dir + "/sdkjs-plugins/plugins.css")
     

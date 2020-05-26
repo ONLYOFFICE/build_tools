@@ -43,6 +43,11 @@ core_ios {
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
+core_android {
+	CONFIG += no_use_htmlfileinternal
+	CONFIG += no_use_common_binary
+	CONFIG += no_desktop_apps
+}
 
 SUBDIRS = \
 	cryptopp \
@@ -85,6 +90,7 @@ SUBDIRS += \
 }
 
 core_ios:CONFIG += no_tests
+core_android:CONFIG += no_tests
 !no_tests {
 	SUBDIRS += standardtester
 }
@@ -274,11 +280,6 @@ desktop {
 		qtdocumentscore.file     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/qtascdocumentscore.pro
 		qtdocumentscore.makefile = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX
 	}
-		
-	core_and_multimedia {
-		videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
-		videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
-	}
 	
 	!no_desktop_apps {
 		core_windows {
@@ -288,6 +289,11 @@ desktop {
 		desktopapp.file     	 = $$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro
 		desktopapp.makefile      = $$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX
 	}
+}
+
+core_and_multimedia {
+	videoplayer.file         = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro
+	videoplayer.makefile     = $$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX
 }
 
 # DEPENDS
@@ -312,11 +318,14 @@ doctrenderer.depends      = kernel unicodeconverter graphics
 	docbuilder.depends        = kernel unicodeconverter graphics doctrenderer
 }
 
+core_and_multimedia {
+	videoplayer.depends       		= kernel unicodeconverter graphics
+}
+
 desktop {
 	ooxmlsignature.depends    = kernel unicodeconverter graphics
 	documentscore.depends     = kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile
-	documentscore_helper.depends    = documentscore
-	videoplayer.depends       		= kernel unicodeconverter graphics
+	documentscore_helper.depends    = documentscore	
 
 	!core_mac {
 		qtdocumentscore.depends 	= documentscore

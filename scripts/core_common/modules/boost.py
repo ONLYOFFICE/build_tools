@@ -5,20 +5,37 @@ sys.path.append('../..')
 import config
 import base
 import os
+import glob
+import boost_android
+
+def move_debug_libs_windows(dir):
+  base.create_dir(dir + "/debug")
+  for file in glob.glob(dir + "/*"):
+    file_name = os.path.basename(file)
+    if not base.is_file(file):
+      continue
+    if (0 != file_name.find("libboost_")):
+      continue
+    base.copy_file(file, dir + "/debug/" + file_name)
+    base.delete_file(file)
+  return
 
 def clean():
   if base.is_dir("boost_1_58_0"):
     base.delete_dir_with_access_error("boost_1_58_0");
     base.delete_dir("boost_1_58_0")
+  if base.is_dir("boost_1_72_0"):
+    base.delete_dir_with_access_error("boost_1_72_0");
+    base.delete_dir("boost_1_72_0")
   if base.is_dir("build"):
     base.delete_dir("build")
   return
 
 def correct_install_includes_win(base_dir, platform):
   build_dir = base_dir + "/build/" + platform + "/include"
-  if base.is_dir(build_dir + "/boost-1_58") and base.is_dir(build_dir + "/boost-1_58/boost"):
-    base.copy_dir(build_dir + "/boost-1_58/boost", build_dir + "/boost")
-    base.delete_dir(build_dir + "/boost-1_58")
+  if base.is_dir(build_dir + "/boost-1_72") and base.is_dir(build_dir + "/boost-1_72/boost"):
+    base.copy_dir(build_dir + "/boost-1_72/boost", build_dir + "/boost")
+    base.delete_dir(build_dir + "/boost-1_72")
   return
 
 def clang_correct():
@@ -40,12 +57,12 @@ def make():
   #if not base.is_dir("boost_1_58_0"):
   #  base.extract("boost_1_58_0.7z", "./")
 
-  base.common_check_version("boost", "2", clean)
+  base.common_check_version("boost", "5", clean)
 
-  if not base.is_dir("boost_1_58_0"):
-    base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_58_0", "-b" "boost-1.58.0"])
+  if not base.is_dir("boost_1_72_0"):
+    base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_72_0", "-b" "boost-1.72.0"])
 
-  os.chdir("boost_1_58_0")
+  os.chdir("boost_1_72_0")
 
   # build
   if ("windows" == base.host_platform()):
@@ -54,12 +71,12 @@ def make():
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])      
+      base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
       base.cmd("bootstrap.bat")
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
-      base.cmd("bjam.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "install"])
+      base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
     correct_install_includes_win(base_dir, "win_64")
     correct_install_includes_win(base_dir, "win_32")    
 
@@ -67,7 +84,7 @@ def make():
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
+    base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
@@ -75,12 +92,23 @@ def make():
     base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./bjam", ["--prefix=./../build/mac_64", "link=static", "install"])
+    base.cmd("./b2", ["--prefix=./../build/mac_64", "link=static", "install"])
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
     clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
+
+  if (-1 != config.option("platform").find("android")):
+    platforms = config.option("platform").split()
+    for platform in platforms:
+      if not platform in config.platforms:
+        continue
+      if (0 != platform.find("android")):
+        continue
+      if (base.is_dir("../build/" + platform)):
+        continue
+      boost_android.make(platform[8:])
 
   os.chdir(old_cur)
   return

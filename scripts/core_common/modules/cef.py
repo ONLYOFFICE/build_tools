@@ -21,14 +21,14 @@ def make():
     if not config.check_option("platform", platform):
       continue
 
-    url += (platform + "/cef_binary.7z")
+    url_platform = (url + platform + "/cef_binary.7z")
 
     if not base.is_dir(platform):
       base.create_dir(platform)
 
     os.chdir(platform)
 
-    data_url = base.get_file_last_modified_url(url)
+    data_url = base.get_file_last_modified_url(url_platform)
     old_data_url = base.readFile("./cef_binary.7z.data")
 
     if (data_url != old_data_url):
@@ -38,11 +38,12 @@ def make():
         base.delete_dir("build")
 
     if base.is_dir("build"):
+      os.chdir(base_dir)
       continue
 
     # download
     if not base.is_file("./cef_binary.7z"):
-      base.download(url, "./cef_binary.7z")
+      base.download(url_platform, "./cef_binary.7z")
 
     # extract
     base.extract("./cef_binary.7z", "./")

@@ -49,7 +49,7 @@ if ("1" == config.option("update")):
   base.git_update("core")
   base.git_update("sdkjs")
   base.sdkjs_addons_checkout()
-  base.git_update("sdkjs-plugins")
+  base.sdkjs_plugins_checkout()
   base.git_update("web-apps")
   base.web_apps_addons_checkout()
   base.git_update("desktop-sdk")

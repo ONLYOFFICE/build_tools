@@ -162,27 +162,26 @@ def make():
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
-    base.copy_file(git_dir + "/sdkjs-plugins/LICENSE.txt", root_dir + "/editors/sdkjs-plugins/LICENSE.txt")
-    base.copy_file(git_dir + "/sdkjs-plugins/README.md", root_dir + "/editors/sdkjs-plugins/README.md")
-    base.copy_file(git_dir + "/sdkjs-plugins/plugins.css", root_dir + "/editors/sdkjs-plugins/plugins.css")
-    base.copy_file(git_dir + "/sdkjs-plugins/pluginBase.js", root_dir + "/editors/sdkjs-plugins/pluginBase.js")
+    base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)
+    # remove some default plugins
+    if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech"):
+      base.delete_dir(root_dir + "/editors/sdkjs-plugins/speech")
 
-    base.copy_dir(git_dir + "/sdkjs-plugins/youtube", root_dir + "/editors/sdkjs-plugins/{38E022EA-AD92-45FC-B22B-49DF39746DB4}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/ocr", root_dir + "/editors/sdkjs-plugins/{440EBF13-9B19-4BD8-8621-05200E58140B}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/translate", root_dir + "/editors/sdkjs-plugins/{7327FC95-16DA-41D9-9AF2-0E7F449F687D}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/synonim", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9840}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/code", root_dir + "/editors/sdkjs-plugins/{BE5CBF95-C0AD-4842-B157-AC40FEDD9841}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/photoeditor", root_dir + "/editors/sdkjs-plugins/{07FD8DFA-DFE0-4089-AL24-0730933CC80A}")
-    base.copy_dir(git_dir + "/sdkjs-plugins/macros", root_dir + "/editors/sdkjs-plugins/{E6978D28-0441-4BD7-8346-82FAD68BCA3B}")
+    # io
+    base.create_dir(root_dir + "/editors/sdkjs-plugins/v1")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", root_dir + "/editors/sdkjs-plugins/v1/plugins.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", root_dir + "/editors/sdkjs-plugins/v1/plugins-ui.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", root_dir + "/editors/sdkjs-plugins/v1/plugins.css")
 
-    base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}", root_dir + "/editors/sdkjs-plugins/{8D67F3C5-7736-4BAE-A0F2-8C7127DC4BB8}")
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt", root_dir + "/editors/sdkjs-plugins", "advanced2", True)
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
 
     if (0 != platform.find("mac")):
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}", root_dir + "/editors/sdkjs-plugins/{060E6A7D-2766-44E8-A0EE-9A8CB9DB00D1}")
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{B509123E-6335-40BD-B965-91EB799346E3}", root_dir + "/editors/sdkjs-plugins/{B509123E-6335-40BD-B965-91EB799346E3}")
-      base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}", root_dir + "/editors/sdkjs-plugins/{F7E59EB4-317E-4E0B-AB2C-58E038A59EE2}")
+      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "audio", True)
+      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "video", True)
+      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
     base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")

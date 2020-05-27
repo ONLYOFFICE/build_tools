@@ -600,6 +600,25 @@ def sdkjs_plugins_checkout():
   os.chdir(cur_dir)
   return
 
+def sdkjs_plugins_server_checkout():
+  plugins_list_config = config.option("sdkjs-plugin-server")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  if is_dir(plugins_dir + "/.git"):
+    delete_dir_with_access_error(plugins_dir);
+    delete_dir(plugins_dir)
+  if not is_dir(plugins_dir):
+    create_dir(plugins_dir)
+
+  cur_dir = os.getcwd()
+  os.chdir(plugins_dir)
+  for name in plugins_list:
+    git_update("plugin-" + name, True, True)
+  os.chdir(cur_dir)
+  return
+
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
     return []
@@ -815,6 +834,10 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   src_dir_path = src_dir + "/plugin-" + name
   if not is_dir(src_dir_path):
     src_dir_path = src_dir + "/" + name
+  if not is_file(src_dir_path + "/config.json"):
+    # all variation subfolders
+    if is_file(src_dir_path + "/src/config.json"):
+      src_dir_path = src_dir_path + "/src"
   if not is_name_as_guid:
     dst_dir_path = dst_dir + "/" + name
     if is_dir(dst_dir_path):
@@ -845,5 +868,15 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
     return
   plugins_list = plugins_list_config.rsplit(", ")
   for name in plugins_list:
-    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)
-  return  
+    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)    
+  return
+
+def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_list_config = config.option("sdkjs-plugin-server")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  for name in plugins_list:
+    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)    
+  return

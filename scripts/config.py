@@ -144,7 +144,7 @@ def branding():
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"
   if ("" != option("branding")):
-    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/defaults"
+    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/build_tools/defaults"
     if base.is_file(defaults_path_branding):
       defaults_path = defaults_path_branding
   defaults_file = open(defaults_path, "r")

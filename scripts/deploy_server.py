@@ -126,6 +126,7 @@ def make():
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
     base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins")
+    base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins")
     
     # tools
     tools_dir = root_dir + "/server/tools"

@@ -66,9 +66,10 @@ def parse():
       options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
 
   # check sdkjs-plugins
-  if (option("sdkjs-plugin") == ""):
+  if not "sdkjs-plugin" in options:
     options["sdkjs-plugin"] = "default"
-  options["sdkjs-plugin"] = options["sdkjs-plugin"].replace("default", "photoeditor, macros, ocr, translator, speech, thesaurus, youtube, highlightcode")
+  if not "sdkjs-plugin-server" in options:
+    options["sdkjs-plugin-server"] = "default"  
 
   global sdkjs_addons
   sdkjs_addons = {}
@@ -139,3 +140,26 @@ def branding():
   if ("" == branding):
     branding = "onlyoffice"
   return branding
+
+def parse_defaults():
+  defaults_path = base.get_script_dir() + "/../defaults"
+  if ("" != option("branding")):
+    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/build_tools/defaults"
+    if base.is_file(defaults_path_branding):
+      defaults_path = defaults_path_branding
+  defaults_file = open(defaults_path, "r")
+  defaults_options = {}
+  for line in defaults_file:
+    name, value = line.partition("=")[::2]
+    k = name.strip()
+    v = value.strip(" '\"\r\n")
+    if ("true" == v.lower()):
+      v = "1"
+    if ("false" == v.lower()):
+      v = "0"
+    defaults_options[k] = v
+
+  for name in defaults_options:
+    if name in options:
+      options[name] = options[name].replace("default", defaults_options[name])
+  return

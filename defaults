@@ -1,2 +1,2 @@
-sdkjs-plugin="photoeditor, macros, ocr, translator, speech, thesaurus, youtube, highlightcode"
-sdkjs-plugin-server="zotero, mendeley"
+sdkjs-plugin="photoeditor, macros, ocr, translator, thesaurus, youtube, highlightcode"
+sdkjs-plugin-server="speech, zotero, mendeley"

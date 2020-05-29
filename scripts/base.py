@@ -880,3 +880,21 @@ def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=F
   for name in plugins_list:
     copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)    
   return
+
+def support_old_versions_plugins(out_dir):
+  if is_file(out_dir + "/pluginBase.js"):
+    return
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", out_dir + "/plugins.js")
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", out_dir + "/plugins-ui.js")
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", out_dir + "/plugins.css")
+  content_plugin_base = ""
+  with open(get_path(out_dir + "/plugins.js"), "r") as file:
+    content_plugin_base += file.read()
+  content_plugin_base += "\n\n"
+  with open(get_path(out_dir + "/plugins-ui.js"), "r") as file:
+    content_plugin_base += file.read()  
+  with open(get_path(out_dir + "/pluginBase.js"), "w") as file:
+    file.write(content_plugin_base)
+  delete_file(out_dir + "/plugins.js")
+  delete_file(out_dir + "/plugins-ui.js")  
+  return

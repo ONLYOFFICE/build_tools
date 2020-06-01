@@ -845,6 +845,8 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     create_dir(dst_dir_path)
     copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
     return
+  if not is_file(src_dir_path + "/config.json"):
+    return
   config_content = readFile(src_dir_path + "/config.json")
   index_start = config_content.find("\"asc.{")
   index_start += 5

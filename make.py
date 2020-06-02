@@ -11,6 +11,19 @@ import build_js
 import build_server
 import deploy
 import make_common
+import os
+import platform
+
+# set up environment
+if "ppc64" in platform.machine():
+  # PhantomJS has been ignoring requests to support non-Intel machines upstream,
+  # (issues #15432, #14421, #13708) so we have to use the distro version.  The
+  # distro version in turn fails if there is no X server available and this
+  # environment variable is not set, so set it here...
+  os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
+  # Debian builds libpng without VSX support for some reason (bug #959487)
+  os.environ["CFLAGS"] = "-DPNG_POWERPC_VSX_OPT=0"
 
 # parse configuration
 config.parse()

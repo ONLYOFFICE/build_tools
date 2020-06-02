@@ -7,6 +7,8 @@ sys.path.append('..')
 import config
 import base
 
+import platform
+
 import boost
 import cef
 import icu
@@ -15,7 +17,8 @@ import v8
 
 def make():
   boost.make()
-  cef.make()
+  if "ppc64" not in platform.machine():
+    cef.make()
   icu.make()
   openssl.make()
   v8.make()

@@ -105,7 +105,7 @@ def make():
 
     # libraries
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "hunspell")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "ooxmlsignature")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ooxmlsignature")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
     if (0 != platform.find("mac")):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")

@@ -77,6 +77,10 @@ def parse():
   sdkjs_addons["content-controls"] = "sdkjs-content-controls"
   sdkjs_addons["pivot-tables"] = "sdkjs-pivot-tables"
 
+  global sdkjs_addons_desktop
+  sdkjs_addons_desktop = {}
+  sdkjs_addons_desktop["disable-features"] = "sdkjs-disable-features"
+
   global server_addons
   server_addons = {}
   server_addons["license"] = "server-license"

@@ -629,6 +629,16 @@ def sdkjs_addons_param():
       params.append("--addon=" + config.sdkjs_addons[name])
   return params
 
+def sdkjs_addons_desktop_param():
+  if ("" == config.option("sdkjs-addons-desktop")):
+    return []
+  params = []
+  addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
+  for name in addons_list:
+    if name in config.sdkjs_addons_desktop:
+      params.append("--addon=" + config.sdkjs_addons_desktop[name])
+  return params
+
 def server_addons_param():
   if ("" == config.option("server-addons")):
     return []

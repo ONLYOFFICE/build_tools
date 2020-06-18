@@ -26,7 +26,6 @@ def make():
   base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
 
   # desktop
-  build_sdk_desktop(base_dir + "/../sdkjs/build")
   if config.check_option("module", "desktop"):
     build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")

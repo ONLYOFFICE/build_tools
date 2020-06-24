@@ -741,7 +741,7 @@ def join_scripts(files, path):
   files_data = []
   for file in files:
     with open(get_path(file), "r") as content:
-      files_data.append(content)
+      files_data.append(content.read())
 
   dst_content = "\n".join(files_data)
   dst_file = codecs.open(path, "w", "utf-8")

@@ -7,6 +7,7 @@ import deploy_builder
 import deploy_server
 import deploy_develop
 import deploy_core
+import deploy_mobile
 
 def make():
   if config.check_option("module", "desktop"):
@@ -19,4 +20,6 @@ def make():
     deploy_develop.make()
   if config.check_option("module", "core"):
     deploy_core.make()
+  if config.check_option("module", "mobile"):
+    deploy_mobile.make()
   return

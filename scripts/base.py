@@ -737,6 +737,18 @@ def save_as_script(path, lines):
   file.close()
   return
 
+def join_scripts(files, path):
+  files_data = []
+  for file in files:
+    with open(get_path(file), "r") as content:
+      files_data.append(content)
+
+  dst_content = "\n".join(files_data)
+  dst_file = codecs.open(path, "w", "utf-8")
+  dst_file.write(dst_content)
+  dst_file.close()
+  return
+
 def get_file_last_modified_url(url):
   curl_command = 'curl --head %s' % (url)
   popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)

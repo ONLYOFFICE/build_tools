@@ -48,6 +48,28 @@ def make():
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
     os.chdir(old_cur)
+    # xp ----------------------------------------------------------------------------------------------------
+    os.chdir(base_dir + "/openssl")
+    base.replaceInFile(base_dir + "/openssl/crypto/rand/rand_win.c", "define USE_BCRYPTGENRANDOM", "define USE_BCRYPTGENRANDOM_FIX")
+    old_cur_dir = base_dir.replace(" ", "\\ ")
+    if (-1 != config.option("platform").find("win_64_xp")) and not base.is_dir("../build/win_64_xp"):
+      base.create_dir("./../build/win_64_xp")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64")      
+      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64_xp --openssldir=" + old_cur_dir + "\\build\\win_64_xp no-shared no-asm no-async")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
+    if (-1 != config.option("platform").find("win_32_xp")) and not base.is_dir("../build/win_32_xp"):
+      base.create_dir("./../build/win_32_xp")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x86")
+      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32_xp --openssldir=" + old_cur_dir + "\\build\\win_32_xp no-shared no-asm no-async")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
+    os.chdir(old_cur)
+    # -------------------------------------------------------------------------------------------------------
     return
 
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):

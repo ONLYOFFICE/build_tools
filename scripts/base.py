@@ -629,6 +629,16 @@ def sdkjs_addons_param():
       params.append("--addon=" + config.sdkjs_addons[name])
   return params
 
+def sdkjs_addons_desktop_param():
+  if ("" == config.option("sdkjs-addons-desktop")):
+    return []
+  params = []
+  addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
+  for name in addons_list:
+    if name in config.sdkjs_addons_desktop:
+      params.append("--addon=" + config.sdkjs_addons_desktop[name])
+  return params
+
 def server_addons_param():
   if ("" == config.option("server-addons")):
     return []
@@ -844,6 +854,8 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
       delete_dir(dst_dir_path)
     create_dir(dst_dir_path)
     copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
+    return
+  if not is_file(src_dir_path + "/config.json"):
     return
   config_content = readFile(src_dir_path + "/config.json")
   index_start = config_content.find("\"asc.{")

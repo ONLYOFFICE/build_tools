@@ -14,7 +14,7 @@ def make():
     if not native_platform in config.platforms:
       continue
 
-    root_dir = base_dir + ("/" + native_platform + "/" + branding + "/mobile"
+    root_dir = base_dir + "/" + native_platform + "/" + branding + "/mobile"
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)

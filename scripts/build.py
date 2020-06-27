@@ -49,6 +49,10 @@ def make_pro_file(makefiles_dir, pro_file):
     if ("" != config.option("qmake_addon")):
       qmake_addon.append(config.option("qmake_addon"))
 
+    if not base.is_file(qt_dir + "/bin/qmake"):
+      print("THIS PLATFORM IS NOT SUPPORTED")
+      continue
+
     # non windows platform
     if not base.is_windows():
       if ("1" == config.option("clean")):
@@ -56,7 +60,7 @@ def make_pro_file(makefiles_dir, pro_file):
         base.cmd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
 
       if base.is_file(makefiles_dir + "/build.makefile_" + file_suff):
-        base.delete_file(makefiles_dir "/build.makefile_" + file_suff)
+        base.delete_file(makefiles_dir + "/build.makefile_" + file_suff)
       base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)    
       base.cmd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff])
     else:

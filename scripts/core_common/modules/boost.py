@@ -100,7 +100,7 @@ def make():
     base.bash("./boost_ios")
 
   if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
-    boost_qt.make("./", ["filesystem", "system", "date_time", "regex"])
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])
 
   os.chdir(old_cur)
   return

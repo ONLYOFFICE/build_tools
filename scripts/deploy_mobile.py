@@ -84,14 +84,15 @@ def make():
       # app
       base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
       base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
-      base.create_dir(root_dir + "/arm64-v8a")
-      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", root_dir + "/arm64-v8a")
-      base.create_dir(root_dir + "/armeabi-v7a")
-      base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.so", root_dir + "/armeabi-v7a")
-      base.create_dir(root_dir + "/x86")
-      base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.so", root_dir + "/x86")
-      base.create_dir(root_dir + "/x86_64")
-      base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.so", root_dir + "/x86_64")
+      libs_dir = root_dir + "/lib"
+      base.create_dir(libs_dir + "/arm64-v8a")
+      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")
+      base.create_dir(libs_dir + "/armeabi-v7a")
+      base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.so", libs_dir + "/armeabi-v7a")
+      base.create_dir(libs_dir + "/x86")
+      base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.so", libs_dir + "/x86")
+      base.create_dir(libs_dir + "/x86_64")
+      base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.so", libs_dir + "/x86_64")
       break
 
   return

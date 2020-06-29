@@ -6,7 +6,7 @@ import config
 import base
 import os
 import glob
-import boost_android
+import boost_qt
 
 def move_debug_libs_windows(dir):
   base.create_dir(dir + "/debug")
@@ -99,16 +99,8 @@ def make():
     os.chdir("../")
     base.bash("./boost_ios")
 
-  if (-1 != config.option("platform").find("android")):
-    platforms = config.option("platform").split()
-    for platform in platforms:
-      if not platform in config.platforms:
-        continue
-      if (0 != platform.find("android")):
-        continue
-      if (base.is_dir("../build/" + platform)):
-        continue
-      boost_android.make(platform[8:])
+  if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])
 
   os.chdir(old_cur)
   return

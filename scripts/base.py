@@ -181,6 +181,8 @@ def copy_lib(src, dst, name):
       lib_ext = ".a"
     elif is_file(file_src + ".lib"):
       lib_ext = ".lib"
+    elif is_file(file_src + ".so"):
+      lib_ext = ".so"
 
   lib_dst = dst + "/"
   if not ("windows" == host_platform()):

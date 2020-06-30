@@ -561,6 +561,12 @@ def sdkjs_addons_checkout():
   for name in addons_list:
     if name in config.sdkjs_addons:
       git_update(config.sdkjs_addons[name], True)
+
+  if ("" != config.option("sdkjs-addons-desktop")):
+    addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
+    for name in addons_list:
+      if name in config.sdkjs_addons_desktop:
+        git_update(config.sdkjs_addons_desktop[name], True)
   return
 
 def server_addons_checkout():

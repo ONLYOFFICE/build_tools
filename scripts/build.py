@@ -15,6 +15,9 @@ def make_pro_file(makefiles_dir, pro_file):
     print("------------------------------------------")
     old_env = os.environ.copy()
 
+    # if you need change output libraries path - set the env variable
+    # base.set_env("DESTDIR_BUILD_OVERRIDE", os.getcwd() + "/out/android/" + config.branding() + "/mobile")
+
     isAndroid = False if (-1 == platform.find("android")) else True
     if isAndroid:
       toolchain_platform = "linux-x86_64"

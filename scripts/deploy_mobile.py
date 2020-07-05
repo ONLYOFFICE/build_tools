@@ -15,6 +15,10 @@ def make():
       continue
 
     root_dir = base_dir + "/" + native_platform + "/" + branding + "/mobile"
+
+    if base.get_env("DESTDIR_BUILD_OVERRIDE") != "":
+      return
+      
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -39,11 +43,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
-
-    if ("ios" == platform) or (0 == platform.find("android")):
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
-    else:
-      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu
     if (0 == platform.find("win")):

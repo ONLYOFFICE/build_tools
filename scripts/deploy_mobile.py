@@ -57,10 +57,6 @@ def make():
     if (0 == platform.find("mac")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
-
-    # app
-    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
-    base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
     
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")

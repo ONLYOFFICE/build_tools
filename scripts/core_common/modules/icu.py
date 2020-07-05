@@ -9,6 +9,9 @@ import os
 def make():
   print("[fetch & build]: icu")
 
+  if config.option("module") == "mobile":
+    return
+
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"
   old_cur = os.getcwd()
   os.chdir(base_dir)

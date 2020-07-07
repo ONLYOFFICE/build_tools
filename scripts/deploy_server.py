@@ -216,6 +216,10 @@ def make():
     base.copy_dir(bin_server_dir, root_dir_snap + '/server')
     base.copy_dir(root_dir + '/server/FileConverter/bin', root_dir_snap + '/server/FileConverter/bin')
     base.copy_dir(root_dir + '/server/tools', root_dir_snap + '/server/tools')
+    base.copy_dir(root_dir + '/server/info', root_dir_snap + '/server/info')
+    base.copy_dir(root_dir + '/server/license', root_dir_snap + '/server/license')
+    base.copy_dir(root_dir + '/server/schema', root_dir_snap + '/server/schema')
+    base.copy_dir(root_dir + '/server/welcome', root_dir_snap + '/server/welcome')
 
   return
 

@@ -32,7 +32,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + "/documentserver")
-    root_dir_snap = root_dir + '-snap'
+    root_dir_snap = base_dir + ("/" + native_platform + "/" + branding + "/snap/documentserver")
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -208,13 +208,14 @@ def make():
     base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
 
     # snap
-    if config.check_option("module", "snap"):
-      base.create_dir(root_dir_snap)
-      base.copy_dir(root_dir + '/core-fonts', root_dir_snap + '/core-fonts')
-      base.copy_dir(root_dir + '/sdkjs', root_dir_snap + '/sdkjs')
-      base.copy_dir(root_dir + '/sdkjs-plugins', root_dir_snap + '/sdkjs-plugins')
-      base.copy_dir(root_dir + '/web-apps', root_dir_snap + '/web-apps')
-      base.copy_dir(bin_server_dir, root_dir_snap + '/server')
+    base.create_dir(root_dir_snap)
+    base.copy_dir(root_dir + '/core-fonts', root_dir_snap + '/core-fonts')
+    base.copy_dir(root_dir + '/sdkjs', root_dir_snap + '/sdkjs')
+    base.copy_dir(root_dir + '/sdkjs-plugins', root_dir_snap + '/sdkjs-plugins')
+    base.copy_dir(root_dir + '/web-apps', root_dir_snap + '/web-apps')
+    base.copy_dir(bin_server_dir, root_dir_snap + '/server')
+    base.copy_dir(root_dir + '/server/FileConverter/bin', root_dir_snap + '/server/FileConverter/bin')
+    base.copy_dir(root_dir + '/server/tools', root_dir_snap + '/server/tools')
 
   return
 

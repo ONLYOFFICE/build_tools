@@ -32,6 +32,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + "/documentserver")
+    root_dir_snap = root_dir + '-snap'
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -189,6 +190,24 @@ def make():
     base.create_dir(build_example_dir)
     base.copy_exe(bin_example_dir, build_example_dir, "example")
     base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
+
+    # snap
+    base.create_dir(root_dir_snap)
+    base.copy_dir(root_dir + '/core-fonts', root_dir_snap + '/core-fonts')
+    base.copy_dir(root_dir + '/sdkjs', root_dir_snap + '/sdkjs')
+    base.copy_dir(root_dir + '/sdkjs-plugins', root_dir_snap + '/sdkjs-plugins')
+    base.copy_dir(root_dir + '/web-apps', root_dir_snap + '/web-apps')
+    base.copy_dir(root_dir + '/server', root_dir_snap + '/server')
+    base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
+    base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
+    base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
+    base.delete_file(root_dir_snap + '/server/DocService/docservice')
+    base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
+    base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
+    base.delete_file(root_dir_snap + '/server/FileConverter/converter')
+    base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
+    base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
+    base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
 
   return
 

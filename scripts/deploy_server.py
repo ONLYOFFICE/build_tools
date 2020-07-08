@@ -193,11 +193,7 @@ def make():
 
     # snap
     base.create_dir(root_dir_snap)
-    base.copy_dir(root_dir + '/core-fonts', root_dir_snap + '/core-fonts')
-    base.copy_dir(root_dir + '/sdkjs', root_dir_snap + '/sdkjs')
-    base.copy_dir(root_dir + '/sdkjs-plugins', root_dir_snap + '/sdkjs-plugins')
-    base.copy_dir(root_dir + '/web-apps', root_dir_snap + '/web-apps')
-    base.copy_dir(root_dir + '/server', root_dir_snap + '/server')
+    base.copy_dir(root_dir, root_dir_snap)
     base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
     base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
     base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')

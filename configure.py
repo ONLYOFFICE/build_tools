@@ -8,7 +8,7 @@ arguments = sys.argv[1:]
 
 parser = optparse.OptionParser()
 parser.add_option("--update", action="store", type="string", dest="update", default="1", help="defines whether it's necessary to update/clone repos. If it's set to true, build_tools automatically get the necessary subrepos. If it's set to false, you should define which ones to use")
-parser.add_option("--update-light", action="store", type="string", dest="update-light", default="", help="performs pull/clone without switching branches, can be used only if  update is true.")
+parser.add_option("--update-light", action="store", type="string", dest="update-light", default="", help="performs pull/clone without switching branches, can be used only if update is true.")
 parser.add_option("--branch", action="store", type="string", dest="branch", default="master", help="branch/tag name, used only if update is true and update_light is not used. Updates/clones all the repos and switches the branch to the proper one deleting all the local changes")
 parser.add_option("--clean", action="store", type="string", dest="clean", default="1", help="defines whether to build everything anew (or changed  c/c++ sources only).")
 parser.add_option("--module", action="store", type="string", dest="module", default="builder", help="defines what modules to build. You can specify several of them, e.g. --module 'core desktop builder server develop mobile'")

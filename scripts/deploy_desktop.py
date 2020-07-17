@@ -50,6 +50,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
 
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")

@@ -52,7 +52,7 @@ def make_pro_file(makefiles_dir, pro_file):
     if ("" != config.option("qmake_addon")):
       qmake_addon.append(config.option("qmake_addon"))
 
-    if not base.is_file(qt_dir + "/bin/qmake"):
+    if not base.is_file(qt_dir + "/bin/qmake") and not base.is_file(qt_dir + "/bin/qmake.exe"):
       print("THIS PLATFORM IS NOT SUPPORTED")
       continue
 

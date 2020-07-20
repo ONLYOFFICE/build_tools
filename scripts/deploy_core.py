@@ -35,6 +35,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "PdfWriter")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlFile")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "UnicodeConverter")
+    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "Fb2File")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "x2t")
 
     if ("windows" == base.host_platform()):

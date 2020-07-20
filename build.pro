@@ -61,7 +61,8 @@ SUBDIRS = \
 	htmlrenderer \
 	pdfreader \
 	htmlfile \
-	doctrenderer
+	doctrenderer \
+	fb2file
 
 !no_x2t {
 SUBDIRS += \
@@ -143,6 +144,7 @@ ordered {
 	removeFile($$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX)
 	removeFile($$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX)
 
@@ -206,6 +208,9 @@ htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUF
 
 doctrenderer.file          = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro
 doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
+
+fb2file.file               = $$CORE_ROOT_DIR/Fb2File/Fb2File.pro
+fb2file.makefile           = $$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX
 
 !no_use_htmlfileinternal {
 	htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
@@ -306,6 +311,7 @@ htmlrenderer.depends      = kernel unicodeconverter graphics pdfwriter
 pdfreader.depends         = kernel unicodeconverter graphics pdfwriter htmlrenderer
 htmlfile.depends          = kernel unicodeconverter graphics
 doctrenderer.depends      = kernel unicodeconverter graphics
+fb2file.depends           = kernel unicodeconverter graphics
 
 !no_use_htmlfileinternal {
 	htmlfileinternal.depends  = kernel unicodeconverter graphics
@@ -348,5 +354,6 @@ desktop {
 	    docformat \
 	    odffilereader \
 	    odffilewriter \
-	    xlsformat
+	    xlsformat \
+		fb2file
 }

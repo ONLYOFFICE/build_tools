@@ -9,7 +9,7 @@ import os
 def make():
   print("[fetch & build]: icu")
 
-  if config.option("module") == "mobile":
+  if (config.option("module") == "mobile") and (-1 == config.option("platform").find("ios")):
     return
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"

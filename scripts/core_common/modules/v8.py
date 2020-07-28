@@ -5,6 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
+import subprocess
 
 def clean():
   if base.is_dir("depot_tools"):
@@ -34,6 +35,27 @@ def is_xp_platform():
   if config.check_option("platform", "win_64_xp") or config.check_option("platform", "win_32_xp"):
     return True
   return False
+
+def is_use_clang():
+  get_gcc_version = "gcc -dumpfullversion -dumpversion"
+  popen = subprocess.Popen(get_gcc_version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  gcc_version = 4
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    gcc_version_str = stdout.strip().decode("utf-8")
+    gcc_version_major = gcc_version_str.split(".")[0]
+    gcc_version = int(gcc_version_major)
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+    
+  is_clang = "false"
+  if (gcc_version >= 6):
+    is_clang = "true"
+
+  print("gcc major version: " + str(gcc_version) + ", use clang:" + is_clang)
+  return is_clang
 
 def make():
   if not is_main_platform():
@@ -118,11 +140,11 @@ def make():
   base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
   if config.check_option("platform", "linux_64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=false use_sysroot=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):
-    base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=false use_sysroot=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   if config.check_option("platform", "mac_64"):

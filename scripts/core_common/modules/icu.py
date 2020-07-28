@@ -17,7 +17,7 @@ def make():
   icu_minor = "2"
 
   if not base.is_dir("icu"):
-    base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu"])
+    base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
 
   if ("windows" == base.host_platform()):
     need_platforms = []
@@ -30,9 +30,15 @@ def make():
         continue
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)
-        base.vcvarsall_start("x64" if ("win_64" == platform) else "x86")
-        base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
-        base.vcvarsall_end()
+        compile_bat = []
+        compile_bat.append("setlocal")
+        compile_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
+        compile_bat.append("call MSBuild.exe icu/source/allinone/allinone.sln /p:Configuration=Release /p:PlatformToolset=v140 /p:Platform=" + ("Win32" if base.platform_is_32(platform) else "X64"))
+        compile_bat.append("endlocal")
+        base.run_as_bat(compile_bat)
+        #base.vcvarsall_start("x64" if ("win_64" == platform) else "x86")
+        #base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
+        #base.vcvarsall_end()
         bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
         lib_dir = "icu/lib64/" if ("win_64" == platform) else "icu/lib/"
         base.create_dir(platform + "/build")
@@ -40,6 +46,8 @@ def make():
         base.copy_file(bin_dir + "icuuc" + icu_major + ".dll", platform + "/build/")
         base.copy_file(lib_dir + "icudt.lib", platform + "/build/")
         base.copy_file(lib_dir + "icuuc.lib", platform + "/build/")
+    os.chdir(old_cur)
+    return
 
   platform = ""
   if ("linux" == base.host_platform()):

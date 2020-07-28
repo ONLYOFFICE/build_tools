@@ -16,6 +16,23 @@ def make():
     print("------------------------------------------")
     print("BUILD_PLATFORM: " + platform)
     print("------------------------------------------")
+    old_env = os.environ.copy()
+
+    isAndroid = False if (-1 == platform.find("android")) else True
+    if isAndroid:
+      toolchain_platform = "linux-x86_64"
+      if ("mac" == base.host_platform()):
+        toolchain_platform = "darwin-x86_64"
+      base.set_env("ANDROID_NDK_HOST", toolchain_platform)
+      old_path = base.get_env("PATH")
+      new_path = base.qt_setup(platform) + "/bin:"
+      new_path += (base.get_env("ANDROID_NDK_ROOT") + "/toolchains/llvm/prebuilt/" + toolchain_platform + "/bin:")
+      new_path += old_path
+      base.set_env("PATH", new_path)
+      if ("android_arm64_v8a" == platform):
+        base.set_env("ANDROID_NDK_PLATFORM", "android-21")
+      else:
+        base.set_env("ANDROID_NDK_PLATFORM", "android-16")
 
     # makefile suffix
     file_suff = platform
@@ -38,7 +55,7 @@ def make():
     # non windows platform
     if not base.is_windows():
       if ("1" == config.option("clean")):
-        base.cmd(base.app_make(), ["clean", "all", "-f", "makefiles/build.makefile_" + file_suff], True)
+        base.cmd(base.app_make(), ["clean", "-f", "makefiles/build.makefile_" + file_suff], True)
         base.cmd(base.app_make(), ["distclean", "-f", "makefiles/build.makefile_" + file_suff], True)
 
       if base.is_file("makefiles/build.makefile_" + file_suff):
@@ -46,11 +63,10 @@ def make():
       base.cmd(qt_dir + "/bin/qmake", ["-nocache", "build.pro", "CONFIG+=" + config_param] + qmake_addon)    
       base.cmd(base.app_make(), ["-f", "makefiles/build.makefile_" + file_suff])
     else:
-      old_env = os.environ.copy()
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
       if ("1" == config.option("clean")):
-        qmake_bat.append("call nmake clean all -f makefiles/build.makefile_" + file_suff)
+        qmake_bat.append("call nmake clean -f makefiles/build.makefile_" + file_suff)
         qmake_bat.append("call nmake distclean -f makefiles/build.makefile_" + file_suff)
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
@@ -59,7 +75,8 @@ def make():
       qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache build.pro \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
       qmake_bat.append("call nmake -f makefiles/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)
-      os.environ = old_env.copy()
+      
+    os.environ = old_env.copy()
 
     base.delete_file(".qmake.stash")
 

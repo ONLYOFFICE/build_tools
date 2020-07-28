@@ -26,7 +26,6 @@ def make():
   base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
 
   # desktop
-  build_sdk_desktop(base_dir + "/../sdkjs/build")
   if config.check_option("module", "desktop"):
     build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")
@@ -62,7 +61,7 @@ def build_interface(directory):
 def build_sdk_desktop(directory):
   #_run_npm_cli(directory)
   _run_npm(directory)  
-  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param())
+  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param() + base.sdkjs_addons_desktop_param())
   return
 
 def build_sdk_builder(directory):

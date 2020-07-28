@@ -52,6 +52,7 @@ def make():
     base.copy_files("./core/*", "./")
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
+  base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
 
   if base.is_dir(git_dir + "/fonts"):
     base.delete_dir(git_dir + "/fonts")

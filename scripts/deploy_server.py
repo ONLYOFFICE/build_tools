@@ -32,6 +32,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + "/documentserver")
+    root_dir_snap = root_dir + '-snap'
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -125,25 +126,9 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
-    
-    # base.copy_dir(plugins_dir + "/clipart", js_dir + "/sdkjs-plugins/clipart")
-    base.copy_dir(plugins_dir + "/code", js_dir + "/sdkjs-plugins/code")
-    base.copy_dir(plugins_dir + "/macros", js_dir + "/sdkjs-plugins/macros")
-    base.copy_dir(plugins_dir + "/ocr", js_dir + "/sdkjs-plugins/ocr")
-    base.copy_dir(plugins_dir + "/photoeditor", js_dir + "/sdkjs-plugins/photoeditor")
-    base.copy_dir(plugins_dir + "/speech", js_dir + "/sdkjs-plugins/speech")
-    base.copy_dir(plugins_dir + "/synonim", js_dir + "/sdkjs-plugins/synonim")
-    base.copy_dir(plugins_dir + "/translate", js_dir + "/sdkjs-plugins/translate")
-    base.copy_dir(plugins_dir + "/youtube", js_dir + "/sdkjs-plugins/youtube")
-    
-    if(base.is_dir(plugins_dir + "/plugin-zotero/src")):
-      base.copy_dir(plugins_dir + "/plugin-zotero/src", js_dir + "/sdkjs-plugins/zotero")
-
-    if(base.is_dir(plugins_dir + "/plugin-mendeley/src")):
-      base.copy_dir(plugins_dir + "/plugin-mendeley/src", js_dir + "/sdkjs-plugins/mendeley")
-
-    base.copy_file(plugins_dir + "/pluginBase.js", js_dir + "/sdkjs-plugins/pluginBase.js")
-    base.copy_file(plugins_dir + "/plugins.css", js_dir + "/sdkjs-plugins/plugins.css")
+    base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins")
+    base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins")
+    base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
     
     # tools
     tools_dir = root_dir + "/server/tools"
@@ -205,6 +190,22 @@ def make():
     base.create_dir(build_example_dir)
     base.copy_exe(bin_example_dir, build_example_dir, "example")
     base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
+
+    # snap
+    base.create_dir(root_dir_snap)
+    base.copy_dir(root_dir, root_dir_snap)
+    base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
+    base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
+    base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
+    base.delete_file(root_dir_snap + '/server/DocService/docservice')
+    base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
+    base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
+    base.delete_file(root_dir_snap + '/server/FileConverter/converter')
+    base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
+    base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
+    base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
+    base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
+    base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
 
   return
 

@@ -42,6 +42,9 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
     base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make.py"])
     exit(0)
 
+# correct defaults (the branding repo is already updated)
+config.parse_defaults()
+
 base.check_build_version(base_dir)
 
 # update
@@ -49,7 +52,8 @@ if ("1" == config.option("update")):
   base.git_update("core")
   base.git_update("sdkjs")
   base.sdkjs_addons_checkout()
-  base.git_update("sdkjs-plugins")
+  base.sdkjs_plugins_checkout()
+  base.sdkjs_plugins_server_checkout()
   base.git_update("web-apps")
   base.web_apps_addons_checkout()
   base.git_update("desktop-sdk")

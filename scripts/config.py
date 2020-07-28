@@ -28,7 +28,7 @@ def parse():
                "linux_64", "linux_32", 
                "mac_64", 
                "ios", 
-               "android_arm64_v8a", "android_armv7", "android_x86"]
+               "android_arm64_v8a", "android_armv7", "android_x86", "android_x86_64"]
 
   # correction
   host_platform = base.host_platform()
@@ -57,7 +57,7 @@ def parse():
     options["platform"] += " win_64_xp win_32_xp"
 
   if check_option("platform", "android"):
-    options["platform"] += " android_arm64_v8a android_armv7 android_x86"
+    options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
   # check vs-path
   if ("windows" == host_platform):
@@ -65,10 +65,21 @@ def parse():
     if ("" != base.get_env("ProgramFiles(x86)")):
       options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
 
+  # check sdkjs-plugins
+  if not "sdkjs-plugin" in options:
+    options["sdkjs-plugin"] = "default"
+  if not "sdkjs-plugin-server" in options:
+    options["sdkjs-plugin-server"] = "default"  
+
   global sdkjs_addons
   sdkjs_addons = {}
   sdkjs_addons["comparison"] = "sdkjs-comparison"
   sdkjs_addons["content-controls"] = "sdkjs-content-controls"
+  sdkjs_addons["pivot-tables"] = "sdkjs-pivot-tables"
+
+  global sdkjs_addons_desktop
+  sdkjs_addons_desktop = {}
+  sdkjs_addons_desktop["disable-features"] = "sdkjs-disable-features"
 
   global server_addons
   server_addons = {}
@@ -133,3 +144,26 @@ def branding():
   if ("" == branding):
     branding = "onlyoffice"
   return branding
+
+def parse_defaults():
+  defaults_path = base.get_script_dir() + "/../defaults"
+  if ("" != option("branding")):
+    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/build_tools/defaults"
+    if base.is_file(defaults_path_branding):
+      defaults_path = defaults_path_branding
+  defaults_file = open(defaults_path, "r")
+  defaults_options = {}
+  for line in defaults_file:
+    name, value = line.partition("=")[::2]
+    k = name.strip()
+    v = value.strip(" '\"\r\n")
+    if ("true" == v.lower()):
+      v = "1"
+    if ("false" == v.lower()):
+      v = "0"
+    defaults_options[k] = v
+
+  for name in defaults_options:
+    if name in options:
+      options[name] = options[name].replace("default", defaults_options[name])
+  return

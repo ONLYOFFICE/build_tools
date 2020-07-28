@@ -323,12 +323,14 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
-def git_update(repo, is_no_errors=False):
+def git_update(repo, is_no_errors=False, is_current_dir=False):
   print("[git] update: " + repo)
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
+  if is_current_dir:
+    folder = repo
   is_not_exit = False
   if not is_dir(folder):
     retClone = cmd("git", ["clone", url, folder], is_no_errors)
@@ -339,8 +341,13 @@ def git_update(repo, is_no_errors=False):
   os.chdir(folder)
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
-    cmd("git", ["checkout", "-f", config.option("branch")])
-  cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
+    retCheckout = cmd("git", ["checkout", "-f", config.option("branch")], True)
+    if (retCheckout != 0):
+      print("branch does not exist...")
+      print("switching to master...")
+      cmd("git", ["checkout", "-f", "master"])
+  if (0 != config.option("branch").find("tags/")):
+    cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
   os.chdir(old_cur)
   return
 
@@ -554,6 +561,12 @@ def sdkjs_addons_checkout():
   for name in addons_list:
     if name in config.sdkjs_addons:
       git_update(config.sdkjs_addons[name], True)
+
+  if ("" != config.option("sdkjs-addons-desktop")):
+    addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
+    for name in addons_list:
+      if name in config.sdkjs_addons_desktop:
+        git_update(config.sdkjs_addons_desktop[name], True)
   return
 
 def server_addons_checkout():
@@ -574,6 +587,44 @@ def web_apps_addons_checkout():
       git_update(config.web_apps_addons[name], True)
   return
 
+def sdkjs_plugins_checkout():
+  plugins_list_config = config.option("sdkjs-plugin")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  if is_dir(plugins_dir + "/.git"):
+    delete_dir_with_access_error(plugins_dir);
+    delete_dir(plugins_dir)
+  if not is_dir(plugins_dir):
+    create_dir(plugins_dir)
+
+  cur_dir = os.getcwd()
+  os.chdir(plugins_dir)
+  for name in plugins_list:
+    git_update("plugin-" + name, True, True)
+  os.chdir(cur_dir)
+  return
+
+def sdkjs_plugins_server_checkout():
+  plugins_list_config = config.option("sdkjs-plugin-server")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  if is_dir(plugins_dir + "/.git"):
+    delete_dir_with_access_error(plugins_dir);
+    delete_dir(plugins_dir)
+  if not is_dir(plugins_dir):
+    create_dir(plugins_dir)
+
+  cur_dir = os.getcwd()
+  os.chdir(plugins_dir)
+  for name in plugins_list:
+    git_update("plugin-" + name, True, True)
+  os.chdir(cur_dir)
+  return
+
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
     return []
@@ -582,6 +633,16 @@ def sdkjs_addons_param():
   for name in addons_list:
     if name in config.sdkjs_addons:
       params.append("--addon=" + config.sdkjs_addons[name])
+  return params
+
+def sdkjs_addons_desktop_param():
+  if ("" == config.option("sdkjs-addons-desktop")):
+    return []
+  params = []
+  addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
+  for name in addons_list:
+    if name in config.sdkjs_addons_desktop:
+      params.append("--addon=" + config.sdkjs_addons_desktop[name])
   return params
 
 def server_addons_param():
@@ -662,7 +723,7 @@ def vcvarsall_end():
   os.environ = _old_environment.copy()
   return
 
-def run_as_bat(lines):
+def run_as_bat(lines, is_no_errors=False):
   name = "tmp.bat"
   content = "\n".join(lines)
 
@@ -670,7 +731,7 @@ def run_as_bat(lines):
   file.write(content)
   file.close()
 
-  cmd(name)
+  cmd(name, [], is_no_errors)
   delete_file(name)
   return
 
@@ -783,4 +844,75 @@ def common_check_version(name, good_version, clean_func):
     delete_file(version_path)
     writeFile(version_path, version_good)
     clean_func()
+  return
+
+def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_local=False):
+  src_dir_path = src_dir + "/plugin-" + name
+  if not is_dir(src_dir_path):
+    src_dir_path = src_dir + "/" + name
+  if not is_file(src_dir_path + "/config.json"):
+    # all variation subfolders
+    if is_file(src_dir_path + "/src/config.json"):
+      src_dir_path = src_dir_path + "/src"
+  if not is_name_as_guid:
+    dst_dir_path = dst_dir + "/" + name
+    if is_dir(dst_dir_path):
+      delete_dir(dst_dir_path)
+    create_dir(dst_dir_path)
+    copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
+    return
+  if not is_file(src_dir_path + "/config.json"):
+    return
+  config_content = readFile(src_dir_path + "/config.json")
+  index_start = config_content.find("\"asc.{")
+  index_start += 5
+  index_end = config_content.find("}", index_start)
+  index_end += 1
+  guid = config_content[index_start:index_end]
+  dst_dir_path = dst_dir + "/" + guid
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+  create_dir(dst_dir_path)
+  copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
+  if is_desktop_local:
+    for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+  return
+
+def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_list_config = config.option("sdkjs-plugin")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  for name in plugins_list:
+    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)    
+  return
+
+def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_list_config = config.option("sdkjs-plugin-server")
+  if ("" == plugins_list_config):
+    return
+  plugins_list = plugins_list_config.rsplit(", ")
+  for name in plugins_list:
+    copy_sdkjs_plugin(plugins_dir, dst_dir, name, is_name_as_guid, is_desktop_local)    
+  return
+
+def support_old_versions_plugins(out_dir):
+  if is_file(out_dir + "/pluginBase.js"):
+    return
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", out_dir + "/plugins.js")
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", out_dir + "/plugins-ui.js")
+  download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", out_dir + "/plugins.css")
+  content_plugin_base = ""
+  with open(get_path(out_dir + "/plugins.js"), "r") as file:
+    content_plugin_base += file.read()
+  content_plugin_base += "\n\n"
+  with open(get_path(out_dir + "/plugins-ui.js"), "r") as file:
+    content_plugin_base += file.read()  
+  with open(get_path(out_dir + "/pluginBase.js"), "w") as file:
+    file.write(content_plugin_base)
+  delete_file(out_dir + "/plugins.js")
+  delete_file(out_dir + "/plugins-ui.js")  
   return

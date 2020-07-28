@@ -59,7 +59,7 @@ def make_pro_file(makefiles_dir, pro_file):
     # non windows platform
     if not base.is_windows():
       if ("1" == config.option("clean")):
-        base.cmd(base.app_make(), ["clean", "all", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
+        base.cmd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
         base.cmd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
 
       if base.is_file(makefiles_dir + "/build.makefile_" + file_suff):
@@ -70,7 +70,7 @@ def make_pro_file(makefiles_dir, pro_file):
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
       if ("1" == config.option("clean")):
-        qmake_bat.append("call nmake clean all -f " + makefiles_dir + "/build.makefile_" + file_suff)
+        qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)
         qmake_bat.append("call nmake distclean -f " + makefiles_dir + "/build.makefile_" + file_suff)
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):

@@ -66,6 +66,7 @@ def make():
     make_xp()
     return
 
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
   if ("ios" == config.option("platform")):
     return
 
@@ -76,7 +77,6 @@ def make():
 
   print("[fetch & build]: v8")
 
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
   old_cur = os.getcwd()
   os.chdir(base_dir)
 

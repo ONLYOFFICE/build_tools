@@ -70,7 +70,7 @@ def make():
     return
 
   if (-1 != config.option("platform").find("android")):
-    base.cmd_in_dir("./android", "python", ["./make.py"])
+    base.cmd_in_dir(base_dir + "/android", "python", ["./make.py"])
     if (-1 == config.option("platform").find("linux")) and (-1 == config.option("platform").find("mac")) and (-1 == config.option("platform").find("win")):
       return
 

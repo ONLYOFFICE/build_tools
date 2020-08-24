@@ -31,6 +31,8 @@ def make():
     base.create_dir(out_dir + "/desktop")
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
+    if not base.is_file(out_dir + "/desktop/sdkjs/common/AllFonts.js"):
+      base.copy_file(base_dir + "/../sdkjs/common/HtmlFileInternal/AllFonts.js", out_dir + "/desktop/sdkjs/common/AllFonts.js")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")

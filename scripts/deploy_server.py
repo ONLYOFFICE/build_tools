@@ -94,7 +94,7 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", converter_dir + "/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", converter_dir + "/icuuc58.dll")
 
-    if (0 == platform.find("linux")):
+    if (0 == platform.find("linux") and 0 != platform.find('freebsd')):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", converter_dir + "/libicudata.so.58")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", converter_dir + "/libicuuc.so.58")
 
@@ -104,14 +104,18 @@ def make():
 
     if (0 == platform.find("win")):
       base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", converter_dir + "/")
+    elif (0 == platform.find("freebsd")):
+      pass
     else:
       base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", converter_dir + "/icudtl.dat")
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
+    # XXX warning under FreeBSD
     base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
 
     # html
+    # XXX warning under FreeBSD
     base.create_dir(converter_dir + "/HtmlFileInternal")
     base.copy_exe(core_build_dir + "/lib/" + platform_postfix, converter_dir + "/HtmlFileInternal", "HtmlFileInternal")
     base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", converter_dir + "/HtmlFileInternal")

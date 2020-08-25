@@ -41,19 +41,24 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_build_dir + '/Common/sources')
 
+  pkgBin = "pkg"
   pkg_target = "node10"
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"
 
+  if ("freebsd" == base.host_platform()):
+    pkg_target += "-freebsd"
+    pkgBin = "/usr/local/bin/" + pkgBin
+
   if ("windows" == base.host_platform()):
     pkg_target += "-win"
 
-  base.cmd_in_dir(server_build_dir + "/DocService", "pkg", [".", "-t", pkg_target, "--options", "max_old_space_size=4096", "-o", "docservice"])
-  base.cmd_in_dir(server_build_dir + "/FileConverter", "pkg", [".", "-t", pkg_target, "-o", "converter"])
-  base.cmd_in_dir(server_build_dir + "/Metrics", "pkg", [".", "-t", pkg_target, "-o", "metrics"])
-  base.cmd_in_dir(server_build_dir + "/SpellChecker", "pkg", [".", "-t", pkg_target, "-o", "spellchecker"])
+  base.cmd_in_dir(server_build_dir + "/DocService", pkgBin, [".", "-t", pkg_target, "--options", "max_old_space_size=4096", "-o", "docservice"])
+  base.cmd_in_dir(server_build_dir + "/FileConverter", pkgBin, [".", "-t", pkg_target, "-o", "converter"])
+  base.cmd_in_dir(server_build_dir + "/Metrics", pkgBin, [".", "-t", pkg_target, "-o", "metrics"])
+  base.cmd_in_dir(server_build_dir + "/SpellChecker", pkgBin, [".", "-t", pkg_target, "-o", "spellchecker"])
 
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.cmd_in_dir(example_dir, "npm", ["install"])
-  base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
+  base.cmd_in_dir(example_dir, pkgBin, [".", "-t", pkg_target, "-o", "example"])

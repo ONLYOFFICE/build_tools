@@ -108,7 +108,7 @@ def make():
     if ("windows" == base.host_platform()):
       base.delete_file("v8/buildtools/win/gn.exe")
       base.cmd("gclient", ["sync", "--force"], True)
-    else
+    else:
       base.cmd("gclient", ["sync"], True) 
 
     # normal version !!!

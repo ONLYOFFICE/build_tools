@@ -103,7 +103,17 @@ def make():
   # --------------------------------------------------------------------------
   # correct
   if not base.is_dir("v8/out.gn"):
-    base.cmd("gclient", ["sync"], True)
+    
+    # windows hack (delete later) ----------------------
+    if ("windows" == base.host_platform()):
+      base.delete_file("v8/buildtools/win/gn.exe")
+      base.cmd("gclient", ["sync", "--force"], True)
+    else
+      base.cmd("gclient", ["sync"], True) 
+
+    # normal version !!!
+    #base.cmd("gclient", ["sync"], True)
+    # --------------------------------------------------
 
     if ("linux" == base.host_platform()):
       if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):

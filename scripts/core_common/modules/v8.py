@@ -106,7 +106,7 @@ def make():
     
     # windows hack (delete later) ----------------------
     if ("windows" == base.host_platform()):
-      base.delete_file("v8/buildtools/win/gn.exe")
+      base.delete_dir_with_access_error("v8/buildtools/win")
       base.cmd("gclient", ["sync", "--force"], True)
     else:
       base.cmd("gclient", ["sync"], True) 

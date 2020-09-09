@@ -40,10 +40,11 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu

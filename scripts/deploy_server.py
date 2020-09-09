@@ -82,10 +82,11 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "EpubFile")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "x2t")
 
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
@@ -111,14 +112,6 @@ def make():
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
     base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
-
-    # html
-    base.create_dir(converter_dir + "/HtmlFileInternal")
-    base.copy_exe(core_build_dir + "/lib/" + platform_postfix, converter_dir + "/HtmlFileInternal", "HtmlFileInternal")
-    base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", converter_dir + "/HtmlFileInternal")
-    if (0 == platform.find("win")):
-      base.delete_file(root_dir + "/HtmlFileInternal/cef_sandbox.lib")
-      base.delete_file(root_dir + "/HtmlFileInternal/libcef.lib")
 
     # js
     js_dir = root_dir

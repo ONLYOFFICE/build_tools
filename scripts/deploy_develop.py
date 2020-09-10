@@ -32,8 +32,6 @@ def make():
       base.delete_file("./core.7z")
     if (base.is_dir("./core")):
       base.delete_dir("./core")
-    if (base.is_dir("./HtmlFileInternal")):
-      base.delete_dir("./HtmlFileInternal")
     base.download(url, "./core.7z")
 
     print("-----------------------------------------------------------")

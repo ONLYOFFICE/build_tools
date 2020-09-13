@@ -80,8 +80,7 @@ def make():
       # js
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
       # app
-      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
-      base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
+      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
       libs_dir = root_dir + "/lib"
       base.create_dir(libs_dir + "/arm64-v8a")
       base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")

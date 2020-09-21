@@ -37,6 +37,8 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "UnicodeConverter")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "x2t")
 
+    base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", archive_dir + "/sdkjs")
+
     if ("windows" == base.host_platform()):
       base.copy_files(core_dir + "/Common/3dParty/icu/" + platform + "/build/*.dll", archive_dir + "/")
       base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", archive_dir + "/")

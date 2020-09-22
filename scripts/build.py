@@ -34,6 +34,9 @@ def make_pro_file(makefiles_dir, pro_file):
       else:
         base.set_env("ANDROID_NDK_PLATFORM", "android-16")
 
+    if (-1 != platform.find("ios")):
+      base.hack_xcode_ios()
+
     # makefile suffix
     file_suff = platform
     if (config.check_option("config", "debug")):

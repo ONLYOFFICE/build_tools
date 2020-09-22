@@ -930,3 +930,39 @@ def support_old_versions_plugins(out_dir):
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
   return
+
+def get_xcode_major_version():
+  popen = subprocess.Popen("xcodebuild -version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  version = ""
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    version = stdout.strip().decode("utf-8")
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+
+  return int(version.split('.')[0][6:])
+
+def hack_xcode_ios():
+  if (12 > get_xcode_major_version()):
+    return
+
+  qmake_spec_file = config.option("qt-dir") + "/ios/mkspecs/macx-ios-clang/qmake.conf"
+
+  filedata = ""
+  with open(get_path(qmake_spec_file), "r") as file:
+    filedata = file.read()
+
+  content_hack = "QMAKE_CXXFLAGS += -arch $$QT_ARCH"
+  if (-1 != filedata.find(content_hack)):
+    return
+
+  filedata += "\n"
+  filedata += content_hack
+  filedata += "\n\n"
+  
+  delete_file(qmake_spec_file)
+  with open(get_path(qmake_spec_file), "w") as file:
+    file.write(filedata)
+  return

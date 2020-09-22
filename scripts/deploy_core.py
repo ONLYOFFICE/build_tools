@@ -40,6 +40,9 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "x2t")
 
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", archive_dir + "/sdkjs")
+    base.create_dir(archive_dir + "/sdkjs/vendor")
+    base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps/vendor/jquery", archive_dir + "/sdkjs/vendor/jquery")
+    base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps/vendor/xregexp", archive_dir + "/sdkjs/vendor/xregexp")
 
     if ("windows" == base.host_platform()):
       base.copy_files(core_dir + "/Common/3dParty/icu/" + platform + "/build/*.dll", archive_dir + "/")

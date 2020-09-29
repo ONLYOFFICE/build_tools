@@ -63,6 +63,10 @@ def print_info(info=""):
   print("------------------------------------------")
   return
 
+def print_list(list):
+  print('[%s]' % ', '.join(map(str, list)))
+  return
+
 # file system -------------------------------------------
 def is_file(path):
   return os.path.isfile(get_path(path))

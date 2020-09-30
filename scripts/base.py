@@ -39,11 +39,11 @@ def set_env(name, value):
   os.environ[name] = value
   return
 
-def configure_common_apps():
+def configure_common_apps(file=""):
   if ("windows" == host_platform()):
-    os.environ["PATH"] = get_script_dir() + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
-    os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
 
 def check_build_version(dir):
@@ -181,6 +181,8 @@ def copy_lib(src, dst, name):
       lib_ext = ".a"
     elif is_file(file_src + ".lib"):
       lib_ext = ".lib"
+    elif is_file(file_src + ".so"):
+      lib_ext = ".so"
 
   lib_dst = dst + "/"
   if not ("windows" == host_platform()):
@@ -743,6 +745,18 @@ def save_as_script(path, lines):
   file.close()
   return
 
+def join_scripts(files, path):
+  files_data = []
+  for file in files:
+    with open(get_path(file), "r") as content:
+      files_data.append(content.read())
+
+  dst_content = "\n".join(files_data)
+  dst_file = codecs.open(path, "w", "utf-8")
+  dst_file.write(dst_content)
+  dst_file.close()
+  return
+
 def get_file_last_modified_url(url):
   curl_command = 'curl --head %s' % (url)
   popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -915,4 +929,40 @@ def support_old_versions_plugins(out_dir):
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
+  return
+
+def get_xcode_major_version():
+  popen = subprocess.Popen("xcodebuild -version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  version = ""
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    version = stdout.strip().decode("utf-8")
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+
+  return int(version.split('.')[0][6:])
+
+def hack_xcode_ios():
+  if (12 > get_xcode_major_version()):
+    return
+
+  qmake_spec_file = config.option("qt-dir") + "/ios/mkspecs/macx-ios-clang/qmake.conf"
+
+  filedata = ""
+  with open(get_path(qmake_spec_file), "r") as file:
+    filedata = file.read()
+
+  content_hack = "QMAKE_CXXFLAGS += -arch $$QT_ARCH"
+  if (-1 != filedata.find(content_hack)):
+    return
+
+  filedata += "\n"
+  filedata += content_hack
+  filedata += "\n\n"
+  
+  delete_file(qmake_spec_file)
+  with open(get_path(qmake_spec_file), "w") as file:
+    file.write(filedata)
   return

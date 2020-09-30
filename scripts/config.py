@@ -75,7 +75,7 @@ def parse():
   sdkjs_addons = {}
   sdkjs_addons["comparison"] = "sdkjs-comparison"
   sdkjs_addons["content-controls"] = "sdkjs-content-controls"
-  sdkjs_addons["pivot-tables"] = "sdkjs-pivot-tables"
+  sdkjs_addons["sheet-views"] = "sdkjs-sheet-views"
 
   global sdkjs_addons_desktop
   sdkjs_addons_desktop = {}

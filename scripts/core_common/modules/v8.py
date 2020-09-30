@@ -58,6 +58,9 @@ def is_use_clang():
   return is_clang
 
 def make():
+  if config.option("module") == "mobile":
+    return
+
   if not is_main_platform():
     make_xp()
     return

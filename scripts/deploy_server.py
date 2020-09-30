@@ -186,20 +186,21 @@ def make():
     base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
 
     # snap
-    base.create_dir(root_dir_snap)
-    base.copy_dir(root_dir, root_dir_snap)
-    base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
-    base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
-    base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
-    base.delete_file(root_dir_snap + '/server/DocService/docservice')
-    base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
-    base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
-    base.delete_file(root_dir_snap + '/server/FileConverter/converter')
-    base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
-    base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
-    base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
-    base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
-    base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
+    if (0 == platform.find("linux")):
+      base.create_dir(root_dir_snap)
+      base.copy_dir(root_dir, root_dir_snap)
+      base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
+      base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
+      base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
+      base.delete_file(root_dir_snap + '/server/DocService/docservice')
+      base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
+      base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
+      base.delete_file(root_dir_snap + '/server/FileConverter/converter')
+      base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
+      base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
+      base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
+      base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
+      base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
 
   return
 

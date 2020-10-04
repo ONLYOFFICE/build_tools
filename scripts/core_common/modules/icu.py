@@ -5,13 +5,13 @@ sys.path.append('../..')
 import config
 import base
 import os
+import icu_android
 
 def make():
   print("[fetch & build]: icu")
 
-  if (config.option("module") == "mobile") and (-1 == config.option("platform").find("ios")):
-    return
-
+  if (-1 != config.option("platform").find("android")):
+    icu_android.make()
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"
   old_cur = os.getcwd()

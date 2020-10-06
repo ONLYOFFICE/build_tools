@@ -86,7 +86,7 @@ def make():
     base.cmd("../source/runConfigureICU", ["Linux" if "linux" == base.host_platform() else "MacOSX",
       "--prefix=" + current_dir + "/icu/cross_build", "CFLAGS=-Os CXXFLAGS=--std=c++11"])
     base.cmd("make", ["-j4"])
-    base.cmd("make", ["install"])
+    base.cmd("make", ["install"], True)
 
   os.chdir(current_dir)
 

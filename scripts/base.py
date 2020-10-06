@@ -297,6 +297,20 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def run_command(sCommand):
+  popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  result = {'stdout' : '', 'stderr' : ''}
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    result['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
+    result['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+  
+  return result
+
 def run_process(args=[]):
   subprocess.Popen(args)
 

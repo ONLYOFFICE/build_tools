@@ -75,6 +75,8 @@ def make():
 
   if not base.is_dir("icu"):
     base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
+    if ("linux" == base.host_platform()):
+      base.replaceInFile(current_dir + "/icu/source/i18n/digitlst.cpp", "xlocale", "locale")
     #if ("mac" == base.host_platform()):
     #  base.replaceInFile(current_dir + "/icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
 

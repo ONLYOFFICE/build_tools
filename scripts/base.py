@@ -776,27 +776,18 @@ def join_scripts(files, path):
   return
 
 def get_file_last_modified_url(url):
-  curl_command = 'curl --head %s' % (url)
-  popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   retvalue = ""
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-
-    lines = stdout.strip().decode("utf-8").split("\n")
-    for line in lines:
-      if ':' not in line:
-        continue
-      line = line.strip()
-      key, value = line.split(':', 1)
-      key = key.upper()
-      if key == "LAST-MODIFIED":
-        retvalue = value
-
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-
+  curl_command = 'curl --head %s' % (url)
+  lines = run_command(curl_command)['stdout'].split("\n")
+  for line in lines:
+    if ':' not in line:
+      continue
+    line = line.strip()
+    key, value = line.split(':', 1)
+    key = key.upper()
+    if key == "LAST-MODIFIED":
+      retvalue = value
+  
   return retvalue
 
 def mac_correct_rpath_binary(path, libs):

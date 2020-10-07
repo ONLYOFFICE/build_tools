@@ -48,6 +48,10 @@ def make():
       platform = base.host_platform() + arch2
 
     base.copy_files("./core/*", "./")
+  else:
+    print("-----------------------------------------------------------")
+    print("Core is up to date. ---------------------------------------")
+    print("-----------------------------------------------------------")
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")

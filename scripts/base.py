@@ -941,16 +941,7 @@ def support_old_versions_plugins(out_dir):
   return
 
 def get_xcode_major_version():
-  popen = subprocess.Popen("xcodebuild -version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  version = ""
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    version = stdout.strip().decode("utf-8")
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-
+  version = run_command("xcodebuild -version")['stdout']
   return int(version.split('.')[0][6:])
 
 def hack_xcode_ios():

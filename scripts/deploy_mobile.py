@@ -61,8 +61,8 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
     
     if (0 == platform.find("android")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicudata.so.58", root_dir + "/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicuuc.so.58", root_dir + "/libicuuc.so.58")
+      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicudata.so", root_dir + "/libicudata.so")
+      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicuuc.so", root_dir + "/libicuuc.so")
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")

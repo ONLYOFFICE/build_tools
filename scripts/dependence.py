@@ -71,7 +71,7 @@ def check_erlang():
   base.print_info('Check installed Erlang')
   erlangHome = os.getenv("ERLANG_HOME")
   
-  if (erlangHome != ""):
+  if (erlangHome is not None):
     erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
     if (erlangBitness == '8'):
       print("Installed Erlang is valid")

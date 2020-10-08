@@ -104,9 +104,9 @@ def make():
   base.copy_file(current_dir + "/build_tmp/arm64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicudata.so")
   base.copy_file(current_dir + "/build_tmp/arm64/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicuuc.so")
 
-  base.create_dir(current_dir + "/build/armeabi-v7a")
-  base.copy_file(current_dir + "/build_tmp/arm/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/armeabi-v7a/libicudata.so")
-  base.copy_file(current_dir + "/build_tmp/arm/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/armeabi-v7a/libicuuc.so")
+  base.create_dir(current_dir + "/build/armv7")
+  base.copy_file(current_dir + "/build_tmp/arm/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicudata.so")
+  base.copy_file(current_dir + "/build_tmp/arm/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicuuc.so")
 
   base.create_dir(current_dir + "/build/x86_64")
   base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/x86_64/libicudata.so")
@@ -129,9 +129,9 @@ def make():
   base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../arm64_v8a/libicuuc.so"])
   base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../arm64_v8a/libicuuc.so"])
 
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../armeabi-v7a/libicudata.so"])
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../armeabi-v7a/libicuuc.so"])
-  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../armeabi-v7a/libicuuc.so"])
+  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../armv7/libicudata.so"])
+  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../armv7/libicuuc.so"])
+  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../armv7/libicuuc.so"])
 
   base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../x86_64/libicudata.so"])
   base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../x86_64/libicuuc.so"])

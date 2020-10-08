@@ -7,10 +7,18 @@ if (sys.version_info[0] >= 3):
 else:
   import _winreg as winreg
 
-def check_pythonPath():
-  path = base.get_env('PATH')
-  if (path.find(sys.exec_prefix) == -1):
-    base.set_env('PATH', sys.exec_prefix + os.pathsep + path)
+class CDependencies:
+  def __init__(self):
+    self.progsToInstall = set()
+    self.progsToUninstall = set()
+    self.pathsToRemove = set()
+    self.pathToValidMySQLServer = ''
+  
+  def append(self, oCdependencies):
+    self.progsToInstall.update(oCdependencies.progsToInstall)
+    self.progsToUninstall.update(oCdependencies.progsToUninstall)
+    self.pathsToRemove.update(oCdependencies.pathsToRemove)
+    self.pathToValidMySQLServer = oCdependencies.pathToValidMySQLServer
 
 def get_programUninstallsByFlag(sName, flag):
   info = []
@@ -33,3 +41,128 @@ def get_programUninstallsByFlag(sName, flag):
   return info
 def get_programUninstalls(sName):
   return get_programUninstallsByFlag(sName, winreg.KEY_WOW64_32KEY) + get_programUninstallsByFlag(sName, winreg.KEY_WOW64_64KEY)
+
+def check_pythonPath():
+  path = base.get_env('PATH')
+  if (path.find(sys.exec_prefix) == -1):
+    base.set_env('PATH', sys.exec_prefix + os.pathsep + path)
+
+def check_nodejs():
+  dependence = CDependencies()
+  
+  base.print_info('Check installed Node.js')
+  nodejs_version = base.run_command('node -v')['stdout']
+  if (nodejs_version == ''):
+    print('Node.js not found')
+    dependence.progsToInstall.add('Node.js')
+    return dependence
+  
+  nodejs_cur_version = int(nodejs_version.split('.')[0][1:])
+  print('Installed Node.js version: ' + str(nodejs_cur_version))
+  nodejs_min_version = 8
+  nodejs_max_version = 10
+  if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
+    print('Installed Node.js version must be 8.x to 10.x')
+    dependence.progsToUninstall.add('Node.js')
+    dependence.progsToInstall.add('Node.js')
+    return dependence
+  
+  print('Installed Node.js is valid')
+  return dependence
+
+def check_java():
+  dependence = CDependencies()
+  
+  base.print_info('Check installed Java')
+  java_version = base.run_command('java -version')['stderr']
+  
+  if (java_version.find('64-Bit') != -1):
+    print('Installed Java is valid')
+    return dependence
+  
+  if (java_version.find('32-Bit') != -1):
+    print('Installed Java must be x64')
+  else:
+    print('Java not found')
+  
+  dependence.progsToInstall.add('Java')
+  return dependence
+
+def check_erlang():
+  dependence = CDependencies()
+  base.print_info('Check installed Erlang')
+  erlangHome = os.getenv("ERLANG_HOME")
+  
+  if (erlangHome != ""):
+    erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+    if (erlangBitness == '8'):
+      print("Installed Erlang is valid")
+      return dependence
+  
+  print('Need Erlang with bitness x64')
+  dependence.progsToUninstall.add('Erlang')
+  dependence.progsToUninstall.add('RabbitMQ')
+  dependence.progsToInstall.add('Erlang')
+  dependence.progsToInstall.add('RabbitMQ')
+  return dependence
+
+def check_rabbitmq():
+  dependence = CDependencies()
+  base.print_info('Check installed RabbitMQ')
+  result = base.run_command('sc query RabbitMQ')['stdout']
+  
+  if (result.find('RabbitMQ') != -1):
+    print('Installed RabbitMQ is valid')
+    return dependence
+  
+  print('RabbitMQ not found')
+  dependence.progsToUninstall.add('RabbitMQ')
+  dependence.progsToUninstall.add('Erlang')
+  dependence.progsToInstall.add('Erlang')
+  dependence.progsToInstall.add('RabbitMQ')
+  return dependence
+
+def check_gruntcli():
+  dependence = CDependencies()
+  
+  base.print_info('Check installed Grunt-Cli')
+  result = base.run_command('npm list -g --depth=0')['stdout']
+  
+  if (result.find('grunt-cli') == -1):
+    print('Grunt-Cli not found')
+    dependence.progsToInstall.add('GruntCli')
+    return dependence
+  
+  print('Installed Grunt-Cli is valid')
+  return dependence
+
+def check_buildTools():
+  dependence = CDependencies()
+  
+  base.print_info('Check installed Build Tools')
+  result = base.run_command(os.path.split(os.getcwd())[0] + '\\build_tools\\tools\\win\\vswhere\\vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property DisplayName')['stdout']
+  if (result == ''):
+    print('Build Tools not found')
+    dependence.progsToInstall.add('BuildTools')
+  else:
+    print('Installed Build Tools is valid')
+  
+  return dependence
+
+def check_mysqlInstaller():
+  dependence = CDependencies()
+  aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+  aKey= winreg.OpenKey(aReg, "SOFTWARE\\", 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY)
+  
+  try:
+    asubkey = winreg.OpenKey(aKey, 'MySQL')
+    count_subkey = winreg.QueryInfoKey(asubkey)[0]
+    
+    for i in range(count_subkey):
+      MySQLsubkey_name = winreg.EnumKey(asubkey, i)
+      if (MySQLsubkey_name.find('MySQL Installer') != - 1):
+        return dependence
+  except:
+    pass
+  dependence.progsToInstall.add('MySQLInstaller')
+  return dependence

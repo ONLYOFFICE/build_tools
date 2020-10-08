@@ -118,7 +118,7 @@ def check_buildTools():
   dependence = CDependencies()
   
   base.print_info('Check installed Build Tools')
-  result = base.run_command(os.path.split(os.getcwd())[0] + '\\build_tools\\tools\\win\\vswhere\\vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property DisplayName')['stdout']
+  result = base.run_command('vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property DisplayName')['stdout']
   if (result == ''):
     print('Build Tools not found')
     dependence.progsToInstall.add('BuildTools')

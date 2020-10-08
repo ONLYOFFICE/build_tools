@@ -41,7 +41,7 @@ def set_env(name, value):
 
 def configure_common_apps(file=""):
   if ("windows" == host_platform()):
-    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
     os.environ["PATH"] = get_script_dir(file) + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return

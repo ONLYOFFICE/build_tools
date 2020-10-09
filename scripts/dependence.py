@@ -204,16 +204,17 @@ def get_programUninstalls(sName):
   return get_programUninstallsByFlag(sName, winreg.KEY_WOW64_32KEY) + get_programUninstallsByFlag(sName, winreg.KEY_WOW64_64KEY)
 
 def uninstallProgram(sName):
-  print("Uninstalling " + sName + "...")
+  base.print_info("Uninstalling all versions " + sName + "...")
   
   unInfo = get_programUninstalls(sName)
   for info in unInfo:
     if (base.is_file(info) == False):
-      info = info.replace('/I', '/x').replace('/i', '/x')
+      info = info.replace('/I', '/x').replace('/i', '/x') + ' /qn'
     else:
       info = '"' + info + '" /S'
-      
-    print(info)  
+    
+    print("Uninstalling " + sName + "...")
+    print(info)
     if (os.system(info) != 0):
       print("Uninstalling was failed!")
       return False

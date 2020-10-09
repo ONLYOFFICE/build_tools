@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import platform
+import struct
 import glob
 import shutil
 import os
@@ -26,6 +27,12 @@ def host_platform():
   if (ret == "darwin"):
     return "mac"
   return ret
+
+def is_os_64bit():
+  return platform.machine().endswith('64')
+
+def is_python_64bit():
+  return (struct.calcsize("P") == 8)
 
 def get_path(path):
   if "windows" == host_platform():

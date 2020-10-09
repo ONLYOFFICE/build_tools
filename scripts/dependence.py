@@ -7,6 +7,15 @@ if (sys.version_info[0] >= 3):
 else:
   import _winreg as winreg
 
+downloads_list = {
+  'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
+  'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
+  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
+  'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
+  'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
+  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
+}
+
 class CDependencies:
   def __init__(self):
     self.install = []
@@ -219,6 +228,36 @@ def uninstallProgram(sName):
       print("Uninstalling was failed!")
       return False
       
+  return True
+
+def installProgram(sName):
+  base.print_info("Installing " + sName + "...")
+  download_url = downloads_list[sName]
+  if (download_url is None):
+    print("Url for install not found!")
+    return False
+  file_name = "install."
+  is_msi = download_url.endswith('msi')
+  if is_msi:
+    file_name += "msi"
+  else:
+    file_name += "exe"
+  base.download(download_url, file_name)
+  
+  base.print_info("Install " + sName + "...")
+  if is_msi:
+    install_command = "msiexec.exe /i " + file_name + " /qn"
+  else:
+    install_command = file_name + " /S"
+  
+  print(install_command)
+  code = os.system(install_command)
+  base.delete_file(file_name)
+  
+  if (code != 0):
+    print("Installing was failed!")
+    return False
+  
   return True
 
 def install_module(path):

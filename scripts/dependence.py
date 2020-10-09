@@ -9,18 +9,36 @@ else:
 
 class CDependencies:
   def __init__(self):
-    self.progsToInstall = []
-    self.progsToUninstall = []
-    self.pathsToRemove = []
-    self.pathToValidMySQLServer = ''
+    self.install = []
+    self.uninstall = []
+    self.removePath = []
+    self.mysqlPath = ''
   
   def append(self, oCdependencies):
-    self.progsToInstall += oCdependencies.progsToInstall
-    self.progsToUninstall += oCdependencies.progsToUninstall
-    self.pathsToRemove += oCdependencies.pathsToRemove
-    self.pathToValidMySQLServer = oCdependencies.pathToValidMySQLServer
-    self.progsToInstall = list(set(self.progsToInstall))
-    self.progsToUninstall = list(set(self.progsToUninstall))
+    self.install += oCdependencies.install
+    self.uninstall += oCdependencies.uninstall
+    self.removePath += oCdependencies.removePath
+    self.mysqlPath = oCdependencies.mysqlPath
+    self.install = list(set(self.install))
+    self.uninstall = list(set(self.uninstall))
+  
+  def get_install(self):
+    res = [];
+    for item in self.install:
+      res += ['--install', item]
+    return res
+    
+  def get_uninstall(self):
+    res = [];
+    for item in self.uninstall:
+      res += ['--uninstall', item]
+    return res
+  
+  def get_removepath(self):
+    res = [];
+    for item in self.removePath:
+      res += ['--remove-path', item]
+    return res
     
 def check_pythonPath():
   path = base.get_env('PATH')
@@ -34,7 +52,7 @@ def check_nodejs():
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
     print('Node.js not found')
-    dependence.progsToInstall.append('Node.js')
+    dependence.install.append('Node.js')
     return dependence
   
   nodejs_cur_version = int(nodejs_version.split('.')[0][1:])
@@ -43,8 +61,8 @@ def check_nodejs():
   nodejs_max_version = 10
   if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
     print('Installed Node.js version must be 8.x to 10.x')
-    dependence.progsToUninstall.append('Node.js')
-    dependence.progsToInstall.append('Node.js')
+    dependence.uninstall.append('Node.js')
+    dependence.install.append('Node.js')
     return dependence
   
   print('Installed Node.js is valid')
@@ -65,7 +83,7 @@ def check_java():
   else:
     print('Java not found')
   
-  dependence.progsToInstall.append('Java')
+  dependence.install.append('Java')
   return dependence
 
 def check_erlang():
@@ -81,10 +99,10 @@ def check_erlang():
   
   print('Need Erlang with bitness x64')
   
-  dependence.progsToUninstall.append('Erlang')
-  dependence.progsToUninstall.append('RabbitMQ')
-  dependence.progsToInstall.append('Erlang')
-  dependence.progsToInstall.append('RabbitMQ')
+  dependence.uninstall.append('Erlang')
+  dependence.uninstall.append('RabbitMQ')
+  dependence.install.append('Erlang')
+  dependence.install.append('RabbitMQ')
   
   return dependence
 
@@ -98,10 +116,10 @@ def check_rabbitmq():
     return dependence
   
   print('RabbitMQ not found')
-  dependence.progsToUninstall.append('Erlang')
-  dependence.progsToUninstall.append('RabbitMQ')
-  dependence.progsToInstall.append('Erlang')
-  dependence.progsToInstall.append('RabbitMQ')
+  dependence.uninstall.append('Erlang')
+  dependence.uninstall.append('RabbitMQ')
+  dependence.install.append('Erlang')
+  dependence.install.append('RabbitMQ')
   
   return dependence
 
@@ -113,7 +131,7 @@ def check_gruntcli():
   
   if (result.find('grunt-cli') == -1):
     print('Grunt-Cli not found')
-    dependence.progsToInstall.append('GruntCli')
+    dependence.install.append('GruntCli')
     return dependence
   
   print('Installed Grunt-Cli is valid')
@@ -126,7 +144,7 @@ def check_buildTools():
   result = base.run_command('vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property DisplayName')['stdout']
   if (result == ''):
     print('Build Tools not found')
-    dependence.progsToInstall.append('BuildTools')
+    dependence.install.append('BuildTools')
   else:
     print('Installed Build Tools is valid')
   
@@ -147,7 +165,7 @@ def check_mysqlInstaller():
         return dependence
   except:
     pass
-  dependence.progsToInstall.append('MySQLInstaller')
+  dependence.install.append('MySQLInstaller')
   return dependence
 
 def get_programUninstallsByFlag(sName, flag):

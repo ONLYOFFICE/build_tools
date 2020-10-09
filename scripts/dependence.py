@@ -9,17 +9,19 @@ else:
 
 class CDependencies:
   def __init__(self):
-    self.progsToInstall = set()
-    self.progsToUninstall = set()
-    self.pathsToRemove = set()
+    self.progsToInstall = []
+    self.progsToUninstall = []
+    self.pathsToRemove = []
     self.pathToValidMySQLServer = ''
   
   def append(self, oCdependencies):
-    self.progsToInstall.update(oCdependencies.progsToInstall)
-    self.progsToUninstall.update(oCdependencies.progsToUninstall)
-    self.pathsToRemove.update(oCdependencies.pathsToRemove)
+    self.progsToInstall += oCdependencies.progsToInstall
+    self.progsToUninstall += oCdependencies.progsToUninstall
+    self.pathsToRemove += oCdependencies.pathsToRemove
     self.pathToValidMySQLServer = oCdependencies.pathToValidMySQLServer
-
+    self.progsToInstall = list(set(self.progsToInstall))
+    self.progsToUninstall = list(set(self.progsToUninstall))
+    
 def check_pythonPath():
   path = base.get_env('PATH')
   if (path.find(sys.exec_prefix) == -1):
@@ -32,7 +34,7 @@ def check_nodejs():
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
     print('Node.js not found')
-    dependence.progsToInstall.add('Node.js')
+    dependence.progsToInstall.append('Node.js')
     return dependence
   
   nodejs_cur_version = int(nodejs_version.split('.')[0][1:])
@@ -41,8 +43,8 @@ def check_nodejs():
   nodejs_max_version = 10
   if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
     print('Installed Node.js version must be 8.x to 10.x')
-    dependence.progsToUninstall.add('Node.js')
-    dependence.progsToInstall.add('Node.js')
+    dependence.progsToUninstall.append('Node.js')
+    dependence.progsToInstall.append('Node.js')
     return dependence
   
   print('Installed Node.js is valid')
@@ -63,7 +65,7 @@ def check_java():
   else:
     print('Java not found')
   
-  dependence.progsToInstall.add('Java')
+  dependence.progsToInstall.append('Java')
   return dependence
 
 def check_erlang():
@@ -78,10 +80,12 @@ def check_erlang():
       return dependence
   
   print('Need Erlang with bitness x64')
-  dependence.progsToUninstall.add('Erlang')
-  dependence.progsToUninstall.add('RabbitMQ')
-  dependence.progsToInstall.add('Erlang')
-  dependence.progsToInstall.add('RabbitMQ')
+  
+  dependence.progsToUninstall.append('Erlang')
+  dependence.progsToUninstall.append('RabbitMQ')
+  dependence.progsToInstall.append('Erlang')
+  dependence.progsToInstall.append('RabbitMQ')
+  
   return dependence
 
 def check_rabbitmq():
@@ -94,10 +98,11 @@ def check_rabbitmq():
     return dependence
   
   print('RabbitMQ not found')
-  dependence.progsToUninstall.add('RabbitMQ')
-  dependence.progsToUninstall.add('Erlang')
-  dependence.progsToInstall.add('Erlang')
-  dependence.progsToInstall.add('RabbitMQ')
+  dependence.progsToUninstall.append('Erlang')
+  dependence.progsToUninstall.append('RabbitMQ')
+  dependence.progsToInstall.append('Erlang')
+  dependence.progsToInstall.append('RabbitMQ')
+  
   return dependence
 
 def check_gruntcli():
@@ -108,7 +113,7 @@ def check_gruntcli():
   
   if (result.find('grunt-cli') == -1):
     print('Grunt-Cli not found')
-    dependence.progsToInstall.add('GruntCli')
+    dependence.progsToInstall.append('GruntCli')
     return dependence
   
   print('Installed Grunt-Cli is valid')
@@ -121,7 +126,7 @@ def check_buildTools():
   result = base.run_command('vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property DisplayName')['stdout']
   if (result == ''):
     print('Build Tools not found')
-    dependence.progsToInstall.add('BuildTools')
+    dependence.progsToInstall.append('BuildTools')
   else:
     print('Installed Build Tools is valid')
   
@@ -142,7 +147,7 @@ def check_mysqlInstaller():
         return dependence
   except:
     pass
-  dependence.progsToInstall.add('MySQLInstaller')
+  dependence.progsToInstall.append('MySQLInstaller')
   return dependence
 
 def get_programUninstallsByFlag(sName, flag):

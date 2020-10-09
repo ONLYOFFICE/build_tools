@@ -12,6 +12,7 @@ if not base.is_dir(current_dir):
 toolshains_dir = current_dir + "/toolchains"
 icu_major = "58"
 icu_minor = "2"
+icu_is_shared = False
 
 current_path = base.get_env("PATH")
 
@@ -52,6 +53,8 @@ def build_arch(arch, api_version):
   base.set_env("PATH", current_dir + "/toolchain/" + arch + "/bin:" + current_path)
 
   command_args = "--prefix=" + current_dir + "/build_tmp/" + arch + " --host=!!!MASK!!! --with-cross-build=" + current_dir + "/icu/cross_build CFLAGS=-Os CXXFLAGS=--std=c++11 CC=!!!MASK!!!-clang CXX=!!!MASK!!!-clang++ AR=!!!MASK!!!-ar RANLIB=!!!MASK!!!-ranlib"
+  if not icu_is_shared:
+    command_args += " --enable-static --enable-shared=no --with-data-packaging=archive CFLAGS=-fPIC CXXFLAGS=-fPIC"
   command_args = command_args.replace("!!!MASK!!!", platforms[arch]["bin"])
 
   base.cmd("../source/configure", command_args.split())
@@ -100,48 +103,70 @@ def make():
   base.create_dir(current_dir + "/build")
   base.copy_dir(current_dir + "/build_tmp/arm64/include", current_dir + "/build/include")
 
-  base.create_dir(current_dir + "/build/arm64_v8a")
-  base.copy_file(current_dir + "/build_tmp/arm64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicudata.so")
-  base.copy_file(current_dir + "/build_tmp/arm64/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicuuc.so")
+  if icu_is_shared:
+    base.create_dir(current_dir + "/build/arm64_v8a")
+    base.copy_file(current_dir + "/build_tmp/arm64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicudata.so")
+    base.copy_file(current_dir + "/build_tmp/arm64/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/arm64_v8a/libicuuc.so")
 
-  base.create_dir(current_dir + "/build/armv7")
-  base.copy_file(current_dir + "/build_tmp/arm/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicudata.so")
-  base.copy_file(current_dir + "/build_tmp/arm/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicuuc.so")
+    base.create_dir(current_dir + "/build/armv7")
+    base.copy_file(current_dir + "/build_tmp/arm/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicudata.so")
+    base.copy_file(current_dir + "/build_tmp/arm/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/armv7/libicuuc.so")
 
-  base.create_dir(current_dir + "/build/x86_64")
-  base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/x86_64/libicudata.so")
-  base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/x86_64/libicuuc.so")
+    base.create_dir(current_dir + "/build/x86_64")
+    base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/x86_64/libicudata.so")
+    base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/x86_64/libicuuc.so")
 
-  base.create_dir(current_dir + "/build/x86")
-  base.copy_file(current_dir + "/build_tmp/x86/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/x86/libicudata.so")
-  base.copy_file(current_dir + "/build_tmp/x86/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/x86/libicuuc.so")
+    base.create_dir(current_dir + "/build/x86")
+    base.copy_file(current_dir + "/build_tmp/x86/lib/libicudata.so." + icu_major + "." + icu_minor, current_dir + "/build/x86/libicudata.so")
+    base.copy_file(current_dir + "/build_tmp/x86/lib/libicuuc.so." + icu_major + "." + icu_minor, current_dir + "/build/x86/libicuuc.so")
 
-  # patch elf information
-  os.chdir(current_dir + "/build")
-  base.cmd("git", ["clone", "https://github.com/NixOS/patchelf.git"])
-  os.chdir("./patchelf")
-  base.cmd("./bootstrap.sh")
-  base.cmd("./configure", ["--prefix=" + current_dir + "/build/patchelf/usr"])
-  base.cmd("make")
-  base.cmd("make", ["install"])
+    # patch elf information
+    os.chdir(current_dir + "/build")
+    base.cmd("git", ["clone", "https://github.com/NixOS/patchelf.git"])
+    os.chdir("./patchelf")
+    base.cmd("./bootstrap.sh")
+    base.cmd("./configure", ["--prefix=" + current_dir + "/build/patchelf/usr"])
+    base.cmd("make")
+    base.cmd("make", ["install"])
 
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../arm64_v8a/libicudata.so"])
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../arm64_v8a/libicuuc.so"])
-  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../arm64_v8a/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../arm64_v8a/libicudata.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../arm64_v8a/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../arm64_v8a/libicuuc.so"])
 
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../armv7/libicudata.so"])
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../armv7/libicuuc.so"])
-  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../armv7/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../armv7/libicudata.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../armv7/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../armv7/libicuuc.so"])
 
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../x86_64/libicudata.so"])
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../x86_64/libicuuc.so"])
-  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../x86_64/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../x86_64/libicudata.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../x86_64/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../x86_64/libicuuc.so"])
 
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../x86/libicudata.so"])
-  base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../x86/libicuuc.so"])
-  base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../x86/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicudata.so", "./../x86/libicudata.so"])
+    base.cmd("./usr/bin/patchelf", ["--set-soname", "libicuuc.so", "./../x86/libicuuc.so"])
+    base.cmd("./usr/bin/patchelf", ["--replace-needed", "libicudata.so." + icu_major, "libicudata.so", "./../x86/libicuuc.so"])
 
-  base.delete_dir(current_dir + "/build/patchelf")
+    base.delete_dir(current_dir + "/build/patchelf")
+  
+  if not icu_is_shared:
+    base.create_dir(current_dir + "/build/arm64_v8a")
+    base.copy_file(current_dir + "/build_tmp/arm64/lib/libicudata.a", current_dir + "/build/arm64_v8a/libicudata.a")
+    base.copy_file(current_dir + "/build_tmp/arm64/lib/libicuuc.a", current_dir + "/build/arm64_v8a/libicuuc.a")
+    base.copy_file(current_dir + "/icu/arm64/data/out/icudt58l.dat", current_dir + "/build/arm64_v8a/icudt58l.dat")
+
+    base.create_dir(current_dir + "/build/armv7")
+    base.copy_file(current_dir + "/build_tmp/arm/lib/libicudata.a", current_dir + "/build/armv7/libicudata.a")
+    base.copy_file(current_dir + "/build_tmp/arm/lib/libicuuc.a", current_dir + "/build/armv7/libicuuc.a")
+    base.copy_file(current_dir + "/icu/arm/data/out/icudt58l.dat", current_dir + "/build/armv7/icudt58l.dat")
+
+    base.create_dir(current_dir + "/build/x86_64")
+    base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicudata.a", current_dir + "/build/x86_64/libicudata.a")
+    base.copy_file(current_dir + "/build_tmp/x86_64/lib/libicuuc.a", current_dir + "/build/x86_64/libicuuc.a")
+    base.copy_file(current_dir + "/icu/x86_64/data/out/icudt58l.dat", current_dir + "/build/x86_64/icudt58l.dat")
+
+    base.create_dir(current_dir + "/build/x86")
+    base.copy_file(current_dir + "/build_tmp/x86/lib/libicudata.a", current_dir + "/build/x86/libicudata.a")
+    base.copy_file(current_dir + "/build_tmp/x86/lib/libicuuc.a", current_dir + "/build/x86/libicuuc.a")
+    base.copy_file(current_dir + "/icu/x86/data/out/icudt58l.dat", current_dir + "/build/x86/icudt58l.dat")
 
   os.chdir(current_dir_old)
   return

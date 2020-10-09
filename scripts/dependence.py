@@ -15,6 +15,9 @@ downloads_list = {
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
 }
+install_params = {
+  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait'
+}
 
 class CDependencies:
   def __init__(self):
@@ -232,10 +235,11 @@ def uninstallProgram(sName):
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
-  download_url = downloads_list[sName]
-  if (download_url is None):
+  if (sName not in downloads_list):
     print("Url for install not found!")
     return False
+    
+  download_url = downloads_list[sName]
   file_name = "install."
   is_msi = download_url.endswith('msi')
   if is_msi:
@@ -245,7 +249,9 @@ def installProgram(sName):
   base.download(download_url, file_name)
   
   base.print_info("Install " + sName + "...")
-  if is_msi:
+  if (sName in install_params):
+    install_command = file_name + install_params[sName]
+  elif is_msi:
     install_command = "msiexec.exe /i " + file_name + " /qn"
   else:
     install_command = file_name + " /S"

@@ -87,12 +87,21 @@ def make():
   data_local_devel += "\"server\": {\n"
   data_local_devel += "\"static_content\": {\n"
   is_exist_addons = False
-  for addon in config.sdkjs_addons:
-    data_local_devel += ("\"/" + config.sdkjs_addons[addon] + "\" : { \"path\": \"../../../" + config.sdkjs_addons[addon] + "\" },\n")
+
+  sdkjs_addons = []
+  if (config.option("sdkjs-addons") == ""):
+    sdkjs_addons = config.option("sdkjs-addons").rsplit(", ")
+  for addon in sdkjs_addons:
+    data_local_devel += ("\"/" + addon + "\" : { \"path\": \"../../../" + addon + "\" },\n")
     is_exist_addons = True
-  for addon in config.web_apps_addons:
-    data_local_devel += ("\"/" + config.web_apps_addons[addon] + "\" : { \"path\": \"../../../" + config.web_apps_addons[addon] + "\" },\n")
+
+  web_apps_addons = []
+  if (config.option("web-apps-addons") == ""):
+    sdkjs_addons = config.option("web-apps-addons").rsplit(", ")
+  for addon in web_apps_addons:
+    data_local_devel += ("\"/" + addon + "\" : { \"path\": \"../../../" + addon + "\" },\n")
     is_exist_addons = True
+
   if is_exist_addons:
     data_local_devel = data_local_devel[:-2]
   data_local_devel += "\n"

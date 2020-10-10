@@ -71,25 +71,6 @@ def parse():
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"  
 
-  global sdkjs_addons
-  sdkjs_addons = {}
-  sdkjs_addons["comparison"] = "sdkjs-comparison"
-  sdkjs_addons["content-controls"] = "sdkjs-content-controls"
-  sdkjs_addons["sheet-views"] = "sdkjs-sheet-views"
-
-  global sdkjs_addons_desktop
-  sdkjs_addons_desktop = {}
-  sdkjs_addons_desktop["disable-features"] = "sdkjs-disable-features"
-
-  global server_addons
-  server_addons = {}
-  server_addons["license"] = "server-license"
-  server_addons["lockstorage"] = "server-lockstorage"
-
-  global web_apps_addons
-  web_apps_addons = {}
-  web_apps_addons["mobile"] = "web-apps-mobile"
-
   return
 
 def check_compiler(platform):
@@ -166,4 +147,6 @@ def parse_defaults():
   for name in defaults_options:
     if name in options:
       options[name] = options[name].replace("default", defaults_options[name])
+    else:
+      options[name] = defaults_options[name]
   return

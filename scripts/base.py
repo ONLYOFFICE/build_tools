@@ -565,14 +565,12 @@ def sdkjs_addons_checkout():
     return
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons:
-      git_update(config.sdkjs_addons[name], True)
+    git_update(name, True)
 
   if ("" != config.option("sdkjs-addons-desktop")):
     addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
     for name in addons_list:
-      if name in config.sdkjs_addons_desktop:
-        git_update(config.sdkjs_addons_desktop[name], True)
+      git_update(name, True)
   return
 
 def server_addons_checkout():
@@ -580,8 +578,7 @@ def server_addons_checkout():
     return
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.server_addons:
-      git_update(config.server_addons[name], True)
+    git_update(name, True)
   return
 
 def web_apps_addons_checkout():
@@ -589,8 +586,7 @@ def web_apps_addons_checkout():
     return
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.web_apps_addons:
-      git_update(config.web_apps_addons[name], True)
+    git_update(name, True)
   return
 
 def sdkjs_plugins_checkout():
@@ -637,8 +633,7 @@ def sdkjs_addons_param():
   params = []
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons:
-      params.append("--addon=" + config.sdkjs_addons[name])
+    params.append("--addon=" + name)
   return params
 
 def sdkjs_addons_desktop_param():
@@ -647,8 +642,7 @@ def sdkjs_addons_desktop_param():
   params = []
   addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons_desktop:
-      params.append("--addon=" + config.sdkjs_addons_desktop[name])
+    params.append("--addon=" + name)
   return params
 
 def server_addons_param():
@@ -657,8 +651,7 @@ def server_addons_param():
   params = []
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.server_addons:
-      params.append("--addon=" + config.server_addons[name])
+    params.append("--addon=" + name)
   return params
 
 def web_apps_addons_param():
@@ -667,8 +660,7 @@ def web_apps_addons_param():
   params = []
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.web_apps_addons:
-      params.append("--addon=" + config.web_apps_addons[name])
+    params.append("--addon=" + name)
   return params
 
 # common apps

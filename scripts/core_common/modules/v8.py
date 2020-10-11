@@ -224,6 +224,9 @@ def make_xp():
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
+    base.delete_dir_with_access_error("v8/buildtools/win")
+    base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+    base.cmd("gclient", ["sync", "--force"], True)
 
   # save common py script
   base.save_as_script("v8/build/common_xp.py", [

@@ -223,8 +223,8 @@ def check_mysqlServer():
     version_info = base.run_command('"' + info['Location'] + 'bin\\mysql" --version')['stdout']
     if (version_info.find('for Win64') != -1):
       print('MySQL Server ' + info['Version'] + ' bitness is valid')
-      connectionResult = base.run_command('"' + info['Location'] + 'bin\\mysql" -u root -ponlyoffice -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
-      if (connectionResult.find('port') != -1 and connectionResult.find('3306') != -1):
+      connectionResult = base.run_command('"' + info['Location'] + 'bin\\mysql" -u ' + install_params['MySQLServer']['user'] + ' -p' + install_params['MySQLServer']['pass'] + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+      if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
         print('MySQL Server ' + info['Version'] + ' configuration is valid')
         dependence.mysqlPath = info['Location']
         return dependence
@@ -326,7 +326,7 @@ def install_gruntcli():
   return subprocess.call('npm install -g grunt-cli',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_mysqlserver():
-  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;8.0.21;x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=3306;enable_tcpip=true;port=3306;rootpasswd=onlyoffice -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + 'enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_module(path):
   base.print_info('Install: ' + path)

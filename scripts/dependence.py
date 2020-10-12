@@ -220,7 +220,7 @@ def check_mysqlServer():
     if (base.is_dir(info['Location']) == False):
       continue
     
-	mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
+    mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
     version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     if (version_info.find('for Win64') != -1):

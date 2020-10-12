@@ -351,7 +351,7 @@ install_params = {
   'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
   'MySQLServer': {
     'port': '3306',
-	'user': 'root'
+	'user': 'root',
 	'pass': 'onlyoffice',
 	'version': '8.0.21'
   }

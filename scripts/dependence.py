@@ -289,7 +289,7 @@ def installProgram(sName):
   base.print_info("Installing " + sName + "...")
   if (sName in install_special):
     code = install_special[sName]()
-  else
+  else:
     if (sName not in downloads_list):
       print("Url for install not found!")
       return False

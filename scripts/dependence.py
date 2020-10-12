@@ -332,6 +332,9 @@ def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])
 
+def get_mysql_install_path():
+  return os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
@@ -345,5 +348,11 @@ install_special = {
   'MySQLServer': install_mysqlserver
 }
 install_params = {
-  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait'
+  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'MySQLServer': {
+    'port': '3306',
+	'user': 'root'
+	'pass': 'onlyoffice',
+	'version': '8.0.21'
+  }
 }

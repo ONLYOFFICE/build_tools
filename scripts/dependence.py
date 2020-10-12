@@ -288,32 +288,32 @@ def uninstallProgram(sName):
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
   if (sName in install_special):
-    return install_special[sName]()
-  
-  if (sName not in downloads_list):
-    print("Url for install not found!")
-    return False
+    code = install_special[sName]()
+  else
+    if (sName not in downloads_list):
+      print("Url for install not found!")
+      return False
+      
+    download_url = downloads_list[sName]
+    file_name = "install."
+    is_msi = download_url.endswith('msi')
+    if is_msi:
+      file_name += "msi"
+    else:
+      file_name += "exe"
+    base.download(download_url, file_name)
     
-  download_url = downloads_list[sName]
-  file_name = "install."
-  is_msi = download_url.endswith('msi')
-  if is_msi:
-    file_name += "msi"
-  else:
-    file_name += "exe"
-  base.download(download_url, file_name)
-  
-  base.print_info("Install " + sName + "...")
-  if (sName in install_params):
-    install_command = file_name + install_params[sName]
-  elif is_msi:
-    install_command = "msiexec.exe /i " + file_name + " /qn"
-  else:
-    install_command = file_name + " /S"
-  
-  print(install_command)
-  code = os.system(install_command)
-  base.delete_file(file_name)
+    base.print_info("Install " + sName + "...")
+    if (sName in install_params):
+      install_command = file_name + install_params[sName]
+    elif is_msi:
+      install_command = "msiexec.exe /i " + file_name + " /qn"
+    else:
+      install_command = file_name + " /S"
+    
+    print(install_command)
+    code = os.system(install_command)
+    base.delete_file(file_name)
   
   if (code != 0):
     print("Installing was failed!")
@@ -322,10 +322,11 @@ def installProgram(sName):
   return True
 
 def install_gruntcli():
-  return False
+  check_npmPath()
+  return subprocess.call('npm install -g grunt-cli',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_mysqlserver():
-  return False
+  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;8.0.21;x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=3306;enable_tcpip=true;port=3306;rootpasswd=onlyoffice -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_module(path):
   base.print_info('Install: ' + path)

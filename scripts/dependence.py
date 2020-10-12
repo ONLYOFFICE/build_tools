@@ -7,18 +7,6 @@ if (sys.version_info[0] >= 3):
 else:
   import _winreg as winreg
 
-downloads_list = {
-  'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
-  'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
-  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
-  'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
-  'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
-  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
-}
-install_params = {
-  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait'
-}
-
 class CDependencies:
   def __init__(self):
     self.install = []
@@ -235,6 +223,9 @@ def uninstallProgram(sName):
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
+  if (sName in install_special):
+    return install_special[sName]()
+  
   if (sName not in downloads_list):
     print("Url for install not found!")
     return False
@@ -266,6 +257,28 @@ def installProgram(sName):
   
   return True
 
+def install_gruntcli():
+  return False
+
+def install_mysqlserver():
+  return False
+
 def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])
+
+downloads_list = {
+  'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
+  'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
+  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
+  'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
+  'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
+  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
+}
+install_special = {
+  'GruntCli': install_gruntcli,
+  'MySQLServer': install_mysqlserver
+}
+install_params = {
+  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait'
+}

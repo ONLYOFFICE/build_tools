@@ -219,18 +219,20 @@ def check_mysqlServer():
   for info in arrInfo:
     if (base.is_dir(info['Location']) == False):
       continue
-      
-    version_info = base.run_command('"' + info['Location'] + 'bin\\mysql" --version')['stdout']
+    
+    mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
+    mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
+    version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     if (version_info.find('for Win64') != -1):
-      print('MySQL Server ' + info['Version'] + ' bitness is valid')
-      connectionResult = base.run_command('"' + info['Location'] + 'bin\\mysql" -u root -ponlyoffice -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
-      if (connectionResult.find('port') != -1 and connectionResult.find('3306') != -1):
-        print('MySQL Server ' + info['Version'] + ' configuration is valid')
+      print(mysql_full_name + 'bitness is valid')
+      connectionResult = base.run_command(mysql_path_to_bin + ' -u ' + install_params['MySQLServer']['user'] + ' -p' + install_params['MySQLServer']['pass'] + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+      if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
+        print(mysql_full_name + 'configuration is valid')
         dependence.mysqlPath = info['Location']
         return dependence
-      print('MySQL Server ' + info['Version'] + ' configuration is not valid')
+      print(mysql_full_name + 'configuration is not valid')
     else:
-      print('MySQL Server ' + info['Version'] + ' bitness is not valid')
+      print(mysql_full_name + 'bitness is not valid')
       
   print('Valid MySQL Server not found')
   
@@ -326,14 +328,16 @@ def install_gruntcli():
   return subprocess.call('npm install -g grunt-cli',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_mysqlserver():
-  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;8.0.21;x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=3306;enable_tcpip=true;port=3306;rootpasswd=onlyoffice -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + 'enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])
 
-def get_mysql_install_path():
-  return os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+def get_mysql_path_to_bin(mysqlPath):
+  if (mysqlPath == ''):
+    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+  return '"'+ mysqlPath + 'bin\\mysql"'
 
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',

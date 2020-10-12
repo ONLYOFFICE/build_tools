@@ -58,6 +58,12 @@ def check_pythonPath():
   if (path.find(sys.exec_prefix) == -1):
     base.set_env('PATH', sys.exec_prefix + os.pathsep + path)
 
+def check_npmPath():
+  path = base.get_env('PATH')
+  npmPath = os.environ['AppData'] + '\\npm'
+  if (path.find(npmPath) == -1):
+    base.set_env('PATH', npmPath + os.pathsep + path)
+
 def check_nodejs():
   dependence = CDependencies()
   

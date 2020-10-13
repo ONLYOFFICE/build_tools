@@ -229,21 +229,15 @@ def check_mysqlServer():
     if (base.is_dir(info['Location']) == False):
       continue
     
-    mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
     mysqlLoginSrt = get_mysqlLoginSrting(info['Location'])
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
-    version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     
-    if (version_info.find('for Win64') != -1):
-      print(mysql_full_name + 'bitness is valid')
-      connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
-      if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
-        print(mysql_full_name + 'configuration is valid')
-        dependence.mysqlPath = info['Location']
-        return dependence
-      print(mysql_full_name + 'configuration is not valid')
-    else:
-      print(mysql_full_name + 'bitness is not valid')
+    connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+    if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
+      print(mysql_full_name + 'configuration is valid')
+      dependence.mysqlPath = info['Location']
+      return dependence
+    print(mysql_full_name + 'configuration is not valid')
       
   print('Valid MySQL Server not found')
   

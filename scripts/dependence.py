@@ -230,7 +230,7 @@ def check_mysqlServer():
       continue
     
     mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
-    mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
+    mysqlLoginSrt = get_mysqlLoginSrting(info['Location'])
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
     version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     

@@ -1,6 +1,7 @@
 import sys
 import os
 import base
+import subprocess
 
 if (sys.version_info[0] >= 3):
   import winreg

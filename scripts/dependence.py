@@ -170,10 +170,13 @@ def check_buildTools():
   
   return dependence
 
-def get_mysqlLoginSrting(mysql_path_to_bin = ''):
-  if (mysql_path_to_bin == ''):
-    mysql_path_to_bin = get_mysql_path_to_bin(mysql_path_to_bin)
-  return mysql_path_to_bin + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
+def get_mysql_path_to_bin(mysqlPath = ''):
+  if (mysqlPath == ''):
+    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+  return '"'+ mysqlPath + 'bin\\mysql"'
+
+def get_mysqlLoginSrting(mysqlPath = ''):
+  return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
   
 def check_mysqlInstaller():
   dependence = CDependencies()
@@ -227,7 +230,7 @@ def check_mysqlServer():
       continue
     
     mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
-    mysqlLoginSrt = get_mysqlLoginSrting(mysql_path_to_bin)
+    mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
     version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     
@@ -341,11 +344,6 @@ def install_mysqlserver():
 def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])
-
-def get_mysql_path_to_bin(mysqlPath):
-  if (mysqlPath == ''):
-    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
-  return '"'+ mysqlPath + 'bin\\mysql"'
 
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',

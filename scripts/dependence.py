@@ -274,8 +274,8 @@ def check_MySQLConfig(mysqlPath = ''):
 def execMySQLScript(mysqlPath, scriptPath):
   print('Execution ' + scriptPath)
   mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
-   
-  code = subprocess.call(mysqlLoginSrt + ' -e "source ' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  
+  code = subprocess.call(mysqlLoginSrt + ' < "' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if (code != 0):
     print('Execution failed!')
     return False

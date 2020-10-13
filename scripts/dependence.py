@@ -258,6 +258,41 @@ def check_mysqlServer():
   
   return dependence
 
+def check_MySQLConfig(mysqlPath = ''):
+  result = True
+  mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
+  
+  if (base.run_command(mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find('onlyoffice') == -1):
+    print('Database onlyoffice not found')
+    creatdb_path = base.get_script_dir() + "\\..\\..\\server\\schema\\mysql\\createdb.sql"
+    result = execMySQLScript(mysqlPath, creatdb_path) and result
+  if (base.run_command(mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';")['stdout'].find('mysql_native_password') == -1):
+    print('Password encryption is not valid')
+    result = set_MySQLEncrypt(mysqlPath, 'mysql_native_password') and result
+  
+  return result
+def execMySQLScript(mysqlPath, scriptPath):
+  print('Execution ' + scriptPath)
+  mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
+   
+  code = subprocess.call(mysqlLoginSrt + ' -e "source ' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  if (code != 0):
+    print('Execution failed!')
+    return False
+  print('Execution completed')
+  return True
+def set_MySQLEncrypt(mysqlPath, sEncrypt):
+  print('Setting MySQL password encrypting...')
+  mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
+  
+  code = subprocess.call(mysqlLoginSrt + ' -e "' + "ALTER USER '" + install_params['MySQLServer']['user'] + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + install_params['MySQLServer']['pass'] + "';" + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  if (code != 0):
+    print('Setting password encryption failed!')
+    return False
+  
+  print('Setting password encryption completed')
+  return True
+
 def get_programUninstallsByFlag(sName, flag):
   info = []
   aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)

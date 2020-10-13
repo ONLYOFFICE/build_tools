@@ -170,8 +170,10 @@ def check_buildTools():
   
   return dependence
 
-def get_mysqlLoginSrting(mysqlPath = ''):
-  return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
+def get_mysqlLoginSrting(mysql_path_to_bin = ''):
+  if (mysql_path_to_bin == ''):
+    mysql_path_to_bin = get_mysql_path_to_bin(mysql_path_to_bin)
+  return mysql_path_to_bin + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
   
 def check_mysqlInstaller():
   dependence = CDependencies()

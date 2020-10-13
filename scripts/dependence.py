@@ -170,10 +170,8 @@ def check_buildTools():
   
   return dependence
 
-def get_mysqlLoginSrting(mysql_path_to_bin = ''):
-  if (mysql_path_to_bin == ''):
-    mysql_path_to_bin = get_mysql_path_to_bin(mysql_path_to_bin)
-  return mysql_path_to_bin + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
+def get_mysqlLoginSrting():
+  return ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
   
 def check_mysqlInstaller():
   dependence = CDependencies()
@@ -227,13 +225,13 @@ def check_mysqlServer():
       continue
     
     mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
-    mysqlLoginSrt = get_mysqlLoginSrting(mysql_path_to_bin)
+    mysqlLoginSrt = get_mysqlLoginSrting()
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
     version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
     
     if (version_info.find('for Win64') != -1):
       print(mysql_full_name + 'bitness is valid')
-      connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+      connectionResult = base.run_command(mysql_path_to_bin + mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
       if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
         print(mysql_full_name + 'configuration is valid')
         dependence.mysqlPath = info['Location']

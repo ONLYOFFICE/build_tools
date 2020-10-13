@@ -1,6 +1,7 @@
 import sys
 import os
 import base
+import subprocess
 
 if (sys.version_info[0] >= 3):
   import winreg
@@ -169,6 +170,14 @@ def check_buildTools():
   
   return dependence
 
+def get_mysql_path_to_bin(mysqlPath = ''):
+  if (mysqlPath == ''):
+    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+  return '"'+ mysqlPath + 'bin\\mysql"'
+
+def get_mysqlLoginSrting(mysqlPath = ''):
+  return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
+  
 def check_mysqlInstaller():
   dependence = CDependencies()
   aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
@@ -221,11 +230,13 @@ def check_mysqlServer():
       continue
     
     mysql_path_to_bin = get_mysql_path_to_bin(info['Location'])
+    mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
     version_info = base.run_command(mysql_path_to_bin + ' --version')['stdout']
+    
     if (version_info.find('for Win64') != -1):
       print(mysql_full_name + 'bitness is valid')
-      connectionResult = base.run_command(mysql_path_to_bin + ' -u ' + install_params['MySQLServer']['user'] + ' -p' + install_params['MySQLServer']['pass'] + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+      connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
       if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
         print(mysql_full_name + 'configuration is valid')
         dependence.mysqlPath = info['Location']
@@ -333,11 +344,6 @@ def install_mysqlserver():
 def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])
-
-def get_mysql_path_to_bin(mysqlPath):
-  if (mysqlPath == ''):
-    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
-  return '"'+ mysqlPath + 'bin\\mysql"'
 
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',

@@ -143,6 +143,18 @@ def check_rabbitmq():
   
   return dependence
 
+def check_vc_components():
+  base.print_info('Check Visual C++ components')
+  result = True
+  if (is_prog_installed('Microsoft Visual C++ 2015-2019 Redistributable (x64)') == False):
+    result = installProgram('VC2019x64') and result
+  if (is_prog_installed('Microsoft Visual C++ 2013 Redistributable (x86)') == False):
+    result = installProgram('VC2013x86') and result
+  if (is_prog_installed('Microsoft Visual C++ 2013 Redistributable (x64)') == False):
+    result = installProgram('VC2013x64') and result
+ 
+  return result
+ 
 def check_gruntcli():
   dependence = CDependencies()
   

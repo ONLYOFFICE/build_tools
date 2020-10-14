@@ -51,7 +51,7 @@ def check_dependencies():
   checksResult.append(dependence.check_mysqlServer())
   
   if (len(checksResult.install) > 0):
-    install_args = ['../build_tools/scripts/install.py']
+    install_args = ['install.py']
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()

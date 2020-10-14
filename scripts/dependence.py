@@ -245,10 +245,11 @@ def check_mysqlServer():
   dependence.append_install('MySQLServer')
   
   MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
-  dir = os.listdir(MySQLData)
-  for path in dir:
-    if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
-      dependence.append_removepath(MySQLData + path)
+  if (base.is_dir(MySQLData)):
+    dir = os.listdir(MySQLData)
+    for path in dir:
+      if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
+        dependence.append_removepath(MySQLData + path)
   
   return dependence
 

@@ -178,24 +178,6 @@ def get_mysql_path_to_bin(mysqlPath = ''):
 def get_mysqlLoginSrting(mysqlPath = ''):
   return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
   
-def check_mysqlInstaller():
-  dependence = CDependencies()
-  aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-  aKey= winreg.OpenKey(aReg, "SOFTWARE\\", 0, winreg.KEY_READ | winreg.KEY_WOW64_32KEY)
-  
-  try:
-    asubkey = winreg.OpenKey(aKey, 'MySQL')
-    count_subkey = winreg.QueryInfoKey(asubkey)[0]
-    
-    for i in range(count_subkey):
-      MySQLsubkey_name = winreg.EnumKey(asubkey, i)
-      if (MySQLsubkey_name.find('MySQL Installer') != - 1):
-        return dependence
-  except:
-    pass
-  dependence.append_install('MySQLInstaller')
-  return dependence
-
 def get_mysqlServersInfo():
   arrInfo = []
   
@@ -241,15 +223,15 @@ def check_mysqlServer():
       
   print('Valid MySQL Server not found')
   
+  dependence.append_uninstall('MySQL Installer')
   dependence.append_uninstall('MySQL Server')
+  dependence.append_install('MySQLInstaller')
   dependence.append_install('MySQLServer')
+  
   
   MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
   if (base.is_dir(MySQLData)):
-    dir = os.listdir(MySQLData)
-    for path in dir:
-      if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
-        dependence.append_removepath(MySQLData + path)
+    dependence.append_removepath(MySQLData)
   
   return dependence
 
@@ -366,11 +348,10 @@ def installProgram(sName):
 
 def install_gruntcli():
   check_npmPath()
-  return subprocess.call('npm install -g grunt-cli',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  return os.system('npm install -g grunt-cli')
 
 def install_mysqlserver():
-  return subprocess.call('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent',  stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
+  return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
 def install_module(path):
   base.print_info('Install: ' + path)
   base.cmd_in_dir(path, 'npm', ['install'])

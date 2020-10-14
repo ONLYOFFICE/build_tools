@@ -31,7 +31,7 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
     base.cmd_in_dir(branding_dir, "git", ["fetch"], True)
    
     if not is_exist or ("1" != config.option("update-light")):
-      base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")])
+      base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")], True)
 
     base.cmd_in_dir(branding_dir, "git", ["pull"], True)
 

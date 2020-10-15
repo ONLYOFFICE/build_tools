@@ -143,6 +143,14 @@ def check_rabbitmq():
   
   return dependence
 
+def check_vc_components():
+  base.print_info('Check Visual C++ components')
+  result = True
+  if (len(get_programUninstalls('Microsoft Visual C++ 2015-2019 Redistributable (x64)')) == 0):
+    result = installProgram('VC2019x64') and result
+  
+  return result
+ 
 def check_gruntcli():
   dependence = CDependencies()
   
@@ -174,10 +182,8 @@ def get_mysql_path_to_bin(mysqlPath = ''):
   if (mysqlPath == ''):
     mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
   return '"'+ mysqlPath + 'bin\\mysql"'
-
 def get_mysqlLoginSrting(mysqlPath = ''):
   return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
-  
 def get_mysqlServersInfo():
   arrInfo = []
   
@@ -231,7 +237,6 @@ def check_mysqlServer():
   dependence.append_removepath(os.environ['ProgramData'] + '\\MySQL\\')
   
   return dependence
-
 def check_MySQLConfig(mysqlPath = ''):
   result = True
   mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
@@ -270,7 +275,7 @@ def set_MySQLEncrypt(mysqlPath, sEncrypt):
 def get_programUninstallsByFlag(sName, flag):
   info = []
   aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-  aKey= winreg.OpenKey(aReg, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", 0, winreg.KEY_READ | flag)
+  aKey = winreg.OpenKey(aReg, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", 0, winreg.KEY_READ | flag)
   count_subkey = winreg.QueryInfoKey(aKey)[0]
 
   for i in range(count_subkey):
@@ -327,7 +332,7 @@ def installProgram(sName):
     
     base.print_info("Install " + sName + "...")
     if (sName in install_params):
-      install_command = file_name + install_params[sName]
+      install_command = file_name + " " + install_params[sName]
     elif is_msi:
       install_command = "msiexec.exe /i " + file_name + " /qn"
     else:
@@ -342,7 +347,7 @@ def installProgram(sName):
     return False
   
   return True
-
+  
 def install_gruntcli():
   check_npmPath()
   return os.system('npm install -g grunt-cli')
@@ -355,6 +360,7 @@ downloads_list = {
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
   'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
   'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
+  'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
 }
@@ -363,7 +369,8 @@ install_special = {
   'MySQLServer': install_mysqlserver
 }
 install_params = {
-  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'Java': '/s',
   'MySQLServer': {
     'port': '3306',
 	'user': 'root',

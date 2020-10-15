@@ -51,7 +51,7 @@ def check_dependencies():
   checksResult.append(dependence.check_mysqlServer())
   
   if (len(checksResult.install) > 0):
-    install_args = ['../build_tools/scripts/install.py']
+    install_args = ['install.py']
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
@@ -64,6 +64,8 @@ try:
   base.configure_common_apps()
   dependence.check_pythonPath()
   
+  if not dependence.check_vc_components():
+    sys.exit()
   if not check_dependencies():
     sys.exit()
   

@@ -332,7 +332,7 @@ def installProgram(sName):
     
     base.print_info("Install " + sName + "...")
     if (sName in install_params):
-      install_command = file_name + install_params[sName]
+      install_command = file_name + " " + install_params[sName]
     elif is_msi:
       install_command = "msiexec.exe /i " + file_name + " /qn"
     else:
@@ -347,17 +347,6 @@ def installProgram(sName):
     return False
   
   return True
-
-def install_java():
-  download_url = downloads_list['Java']
-  file_name = "install.exe"
-  base.download(download_url, file_name)
-  base.print_info("Install Java...")
-  install_command = file_name + " /s"
-  print(install_command)
-  code = os.system(install_command)
-  base.delete_file(file_name)
-  return code
   
 def install_gruntcli():
   check_npmPath()
@@ -376,12 +365,12 @@ downloads_list = {
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
 }
 install_special = {
-  'Java': install_java,
   'GruntCli': install_gruntcli,
   'MySQLServer': install_mysqlserver
 }
 install_params = {
-  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'Java': '/s',
   'MySQLServer': {
     'port': '3306',
 	'user': 'root',

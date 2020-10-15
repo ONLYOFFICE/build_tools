@@ -146,13 +146,9 @@ def check_rabbitmq():
 def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
-  if (is_prog_installed('Microsoft Visual C++ 2015-2019 Redistributable (x64)') == False):
+  if (len(get_programUninstalls('Microsoft Visual C++ 2015-2019 Redistributable (x64)')) == 0):
     result = installProgram('VC2019x64') and result
-  if (is_prog_installed('Microsoft Visual C++ 2013 Redistributable (x86)') == False):
-    result = installProgram('VC2013x86') and result
-  if (is_prog_installed('Microsoft Visual C++ 2013 Redistributable (x64)') == False):
-    result = installProgram('VC2013x64') and result
- 
+  
   return result
  
 def check_gruntcli():
@@ -181,27 +177,6 @@ def check_buildTools():
     print('Installed Build Tools is valid')
   
   return dependence
-
-def is_prog_installed_by_flag(sName, flag):
-  aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-  aKey = winreg.OpenKey(aReg, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", 0, winreg.KEY_READ | flag)
-  count_subkey = winreg.QueryInfoKey(aKey)[0]
-
-  for i in range(count_subkey):
-    try:
-      asubkey_name = winreg.EnumKey(aKey, i)
-      asubkey = winreg.OpenKey(aKey, asubkey_name)
-      progName = winreg.QueryValueEx(asubkey, 'DisplayName')[0]
-    
-      if (progName.find(sName) != -1):
-        return True
-      
-    except:
-      pass
-      
-  return False
-def is_prog_installed(sName):
-  return is_prog_installed_by_flag(sName, winreg.KEY_WOW64_32KEY) or is_prog_installed_by_flag(sName, winreg.KEY_WOW64_64KEY)
 
 def get_mysql_path_to_bin(mysqlPath = ''):
   if (mysqlPath == ''):
@@ -397,8 +372,6 @@ downloads_list = {
   'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
   'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
-  'VC2013x86': 'https://aka.ms/highdpimfc2013x86rus',
-  'VC2013x64': 'https://aka.ms/highdpimfc2013x64rus',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
 }

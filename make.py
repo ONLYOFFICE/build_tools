@@ -65,18 +65,18 @@ if ("1" == config.option("update")):
   if config.check_option("module", "desktop"):
     base.git_update("desktop-apps")
 
-  if (config.check_option("module", "develop") or config.check_option("module", "server")):
+  if (config.check_option("module", "server")):
     base.git_update("server")
     base.server_addons_checkout()
     base.git_update("document-server-integration")
     
-  if (config.check_option("module", "develop") or config.check_option("module", "server") or config.check_option("platform", "ios")):
+  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
     base.git_update("core-fonts")
 
 base.configure_common_apps()
 
 # developing...
-if ("develop" == config.option("module")):
+if ("1" == config.option("develop")):
   build_js.build_js_develop(base_dir + "/..")
   deploy.make()
   exit(0)

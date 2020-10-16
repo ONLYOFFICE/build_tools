@@ -7,7 +7,13 @@ import re
 import shutil
 from tempfile import mkstemp
 
+import develop.deploy_server
+
 def make():
+  if ("1" == config.option("develop")):
+    develop.deploy_server.make()
+    return
+  
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
   core_dir = git_dir + "/core"

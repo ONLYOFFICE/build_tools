@@ -1,4 +1,5 @@
 import sys
+sys.path.append('../')
 sys.path.append('vendor')
 import os
 import base
@@ -37,7 +38,7 @@ def start_mac_services():
   base.run_process(['redis-server'])
 
 def run_integration_example():
-  base.cmd_in_dir('../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])
+  base.cmd_in_dir('../../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])
 
 def check_dependencies():
   checksResult = dependence.CDependencies()
@@ -76,17 +77,17 @@ try:
     start_mac_services()
 
   base.print_info('Build modules')
-  base.cmd_in_dir('../', 'python', ['configure.py', '--branch', 'develop', '--module', 'develop', '--update', '1', '--update-light', '1', '--clean', '0', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git'])
-  base.cmd_in_dir('../', 'python', ['make.py'])
+  base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--module', 'develop', '--update', '1', '--update-light', '1', '--clean', '0', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git'])
+  base.cmd_in_dir('../../', 'python', ['make.py'])
   
   run_integration_example()
   
-  base.create_dir('../../server/App_Data')
+  base.create_dir('../../../server/App_Data')
 
-  install_module('../../server/DocService')
-  install_module('../../server/Common')
-  install_module('../../server/FileConverter')
-  install_module('../../server/SpellChecker')
+  install_module('../../../server/DocService')
+  install_module('../../../server/Common')
+  install_module('../../../server/FileConverter')
+  install_module('../../../server/SpellChecker')
 
   base.set_env('NODE_ENV', 'development-' + platform)
   base.set_env('NODE_CONFIG_DIR', '../../Common/config')
@@ -96,10 +97,10 @@ try:
   elif ("linux" == platform):
     base.set_env('LD_LIBRARY_PATH', '../../FileConverter/bin/')
 
-  run_module('../../server/DocService/sources', ['server.js'])
-  run_module('../../server/DocService/sources', ['gc.js'])
-  run_module('../../server/FileConverter/sources', ['convertermaster.js'])
-  run_module('../../server/SpellChecker/sources', ['server.js'])
+  run_module('../../../server/DocService/sources', ['server.js'])
+  run_module('../../../server/DocService/sources', ['gc.js'])
+  run_module('../../../server/FileConverter/sources', ['convertermaster.js'])
+  run_module('../../../server/SpellChecker/sources', ['server.js'])
 except SystemExit:
   input("Ignoring SystemExit. Press Enter to continue...")
 except KeyboardInterrupt:

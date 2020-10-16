@@ -1,4 +1,5 @@
 import sys
+sys.path.append('../')
 import base
 import dependence
 import shutil

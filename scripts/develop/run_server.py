@@ -77,7 +77,7 @@ try:
     start_mac_services()
 
   base.print_info('Build modules')
-  base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git'])
+  base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '0', '--update-light', '0', '--clean', '0', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git'])
   base.cmd_in_dir('../../', 'python', ['make.py'])
   
   run_integration_example()

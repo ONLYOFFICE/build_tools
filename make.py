@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append('scripts')
+sys.path.append('scripts/develop')
 sys.path.append('scripts/core_common')
 sys.path.append('scripts/core_common/modules')
 import config
@@ -11,6 +12,7 @@ import build_js
 import build_server
 import deploy
 import make_common
+import config_server as develop_config_server
 
 # parse configuration
 config.parse()
@@ -78,7 +80,7 @@ base.configure_common_apps()
 # developing...
 if ("1" == config.option("develop")):
   build_js.build_js_develop(base_dir + "/..")
-  deploy.make()
+  develop_config_server.make()
   exit(0)
 
 # check only js builds

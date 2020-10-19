@@ -4,10 +4,12 @@ import os
 import base
 import subprocess
 
-if (sys.version_info[0] >= 3):
-  import winreg
-else:
-  import _winreg as winreg
+host_platform = base.host_platform()
+if (host_platform == 'windows'):
+  if (sys.version_info[0] >= 3):
+    import winreg
+  else:
+    import _winreg as winreg
 
 class CDependencies:
   def __init__(self):
@@ -82,7 +84,10 @@ def check_nodejs():
   nodejs_max_version = 10
   if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
     print('Installed Node.js version must be 8.x to 10.x')
-    dependence.append_uninstall('Node.js')
+    if (host_platform == 'windows'):
+      dependence.append_uninstall('Node.js')
+    else:
+      dependence.append_uninstall('nodejs')
     dependence.append_install('Node.js')
     return dependence
   
@@ -110,18 +115,27 @@ def check_java():
 def check_erlang():
   dependence = CDependencies()
   base.print_info('Check installed Erlang')
-  erlangHome = os.getenv("ERLANG_HOME")
-  
-  if (erlangHome is not None):
-    erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-    if (erlangBitness == '8'):
-      print("Installed Erlang is valid")
-      return dependence
-  
+  erlangBitness = ''
+
+  if (host_platform == 'windows'):
+    erlangHome = os.getenv("ERLANG_HOME")
+    if (erlangHome is not None):
+      erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+  else:
+    erlangBitness = base.run_command('erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+
+  if (erlangBitness == '8'):
+    print("Installed Erlang is valid")
+    return dependence
+
   print('Need Erlang with bitness x64')
-  
-  dependence.append_uninstall('Erlang')
-  dependence.append_uninstall('RabbitMQ')
+
+  if (host_platform == 'windows'):
+    dependence.append_uninstall('Erlang')
+    dependence.append_uninstall('RabbitMQ')
+  else:
+    dependence.append_uninstall('erlang')
+    dependence.append_uninstall('rabbitmq-server')
   dependence.append_install('Erlang')
   dependence.append_install('RabbitMQ')
   
@@ -130,18 +144,43 @@ def check_erlang():
 def check_rabbitmq():
   dependence = CDependencies()
   base.print_info('Check installed RabbitMQ')
-  result = base.run_command('sc query RabbitMQ')['stdout']
-  
-  if (result.find('RabbitMQ') != -1):
-    print('Installed RabbitMQ is valid')
-    return dependence
-  
+
+  if (host_platform == 'windows'):
+    result = base.run_command('sc query RabbitMQ')['stdout']
+    if (result.find('RabbitMQ') != -1):
+      print('RabbitMQ is installed')
+      return dependence
+  else:
+    result = base.run_command('rabbitmqctl')['stdout']
+    if (result != ''):
+      print('RabbitMQ is installed')
+      return dependence
+
   print('RabbitMQ not found')
-  dependence.append_uninstall('Erlang')
-  dependence.append_uninstall('RabbitMQ')
+
+  if (host_platform == 'windows'):
+    dependence.append_uninstall('Erlang')
+    dependence.append_uninstall('RabbitMQ')
+  else:
+    dependence.append_uninstall('erlang')
+    dependence.append_uninstall('rabbitmq-server')
   dependence.append_install('Erlang')
   dependence.append_install('RabbitMQ')
-  
+
+  return dependence
+
+def check_npm():
+  dependence = CDependencies()
+  base.print_info('Check installed Npm')
+
+  result = base.run_command('npm')['stdout']
+  if (result != ''):
+    print('Npm is installed')
+    return dependence
+
+  print('Npm not found')
+  dependence.append_install('Npm')
+
   return dependence
 
 def check_vc_components():
@@ -179,10 +218,31 @@ def check_buildTools():
   
   return dependence
 
+def check_curl():
+  dependence = CDependencies()
+  base.print_info('Check installed Curl')
+
+  if (base.run_command('curl -V')['stdout'] == ''):
+    dependence.append_install('Curl')
+
+  return dependence
+
+def check_7z():
+  dependence = CDependencies()
+  base.print_info('Check installed 7z')
+
+  if (base.run_command('7z')['stdout'] == ''):
+    dependence.append_install('7z')
+
+  return dependence
+
 def get_mysql_path_to_bin(mysqlPath = ''):
-  if (mysqlPath == ''):
-    mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
-  return '"'+ mysqlPath + 'bin\\mysql"'
+  if (host_platform == 'windows'):
+    if (mysqlPath == ''):
+      mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
+    return '"'+ mysqlPath + 'bin\\mysql"'
+  else:
+    return 'mysql'
 def get_mysqlLoginSrting(mysqlPath = ''):
   return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
 def get_mysqlServersInfo():
@@ -210,43 +270,53 @@ def get_mysqlServersInfo():
   return arrInfo
 def check_mysqlServer():
   base.print_info('Check MySQL Server')
-  
   dependence = CDependencies()
+
+  if (host_platform == 'linux'):
+    mysqlLoginSrt = get_mysqlLoginSrting()
+    result = os.system(mysqlLoginSrt + ' -e "exit"')
+    if (result != 0):
+      dependence.append_install('MySQLServer')
+      dependence.append_uninstall('mysql-server')
+    else:
+      dependence.mysqlPath = 'mysql'
+    return dependence
+
   arrInfo = get_mysqlServersInfo()
-  
   for info in arrInfo:
     if (base.is_dir(info['Location']) == False):
       continue
-    
+
     mysqlLoginSrt = get_mysqlLoginSrting(info['Location'])
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
-    
+
     connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
     if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
       print(mysql_full_name + 'configuration is valid')
       dependence.mysqlPath = info['Location']
       return dependence
     print(mysql_full_name + 'configuration is not valid')
-      
+
   print('Valid MySQL Server not found')
-  
-  dependence.append_uninstall('MySQL Installer')
   dependence.append_uninstall('MySQL Server')
-  dependence.append_install('MySQLInstaller')
   dependence.append_install('MySQLServer')
-  
-  dependence.append_removepath(os.environ['ProgramData'] + '\\MySQL\\')
+
+  MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
+  dir = os.listdir(MySQLData)
+  for path in dir:
+    if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
+      dependence.append_removepath(MySQLData + path)
   
   return dependence
 def check_MySQLConfig(mysqlPath = ''):
   result = True
   mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
-  
+
   if (base.run_command(mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find('onlyoffice') == -1):
     print('Database onlyoffice not found')
     creatdb_path = base.get_script_dir() + "/../../server/schema/mysql/createdb.sql"
-    result = execMySQLScript(mysqlPath, creatdb_path) and result
-  if (base.run_command(mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';")['stdout'].find('mysql_native_password') == -1):
+    result = execMySQLScript(mysqlPath, creatdb_path)
+  if (base.run_command(mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';" + '"')['stdout'].find('mysql_native_password') == -1):
     print('Password encryption is not valid')
     result = set_MySQLEncrypt(mysqlPath, 'mysql_native_password') and result
   
@@ -254,7 +324,6 @@ def check_MySQLConfig(mysqlPath = ''):
 def execMySQLScript(mysqlPath, scriptPath):
   print('Execution ' + scriptPath)
   mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
-  
   code = subprocess.call(mysqlLoginSrt + ' < "' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if (code != 0):
     print('Execution failed!')
@@ -272,6 +341,16 @@ def set_MySQLEncrypt(mysqlPath, sEncrypt):
   
   print('Setting password encryption completed')
   return True
+def uninstall_mysqlserver():
+  code = os.system('yes | sudo systemctl stop mysqld')
+  code = os.system('sudo apt-get remove --purge mysql* -y') and code
+  code = os.system('sudo rm -Rf /var/lib/mysql/') and code
+  code = os.system('sudo rm -Rf /etc/mysql/') and code
+  code = os.system('sudo rm -rf /var/log/mysql') and code
+  code = os.system('sudo deluser --remove-home mysql') and code
+  code = os.system('sudo delgroup mysql') and code
+
+  return  code
 
 def get_programUninstallsByFlag(sName, flag):
   info = []
@@ -297,52 +376,69 @@ def get_programUninstalls(sName):
 
 def uninstallProgram(sName):
   base.print_info("Uninstalling all versions " + sName + "...")
-  
-  unInfo = get_programUninstalls(sName)
-  for info in unInfo:
-    if (base.is_file(info) == False):
-      info = info.replace('/I', '/x').replace('/i', '/x') + ' /qn'
-    else:
-      info = '"' + info + '" /S'
-    
-    print("Uninstalling " + sName + "...")
-    print(info)
-    if (os.system(info) != 0):
-      print("Uninstalling was failed!")
-      return False
+
+  if (host_platform == 'windows'):
+    unInfo = get_programUninstalls(sName)
+    for info in unInfo:
+      if (base.is_file(info) == False):
+        info = info.replace('/I', '/x').replace('/i', '/x') + ' /qn'
+      else:
+        info = '"' + info + '" /S'
+  if (host_platform == 'linux'):
+    info = 'sudo apt-get remove --purge ' + sName + ' -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
+
+  print("Uninstalling " + sName + "...")
+  print(info)
+  if (os.system(info) != 0):
+    print("Uninstalling was failed!")
+    return False
       
   return True
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
-  if (sName in install_special):
-    code = install_special[sName]()
+
+  if (host_platform == 'windows'):
+    if (sName in install_special):
+      code = install_special[sName]()
+    else:
+      if (sName not in downloads_list['Windows']):
+        print("Url for install not found!")
+        return False
+
+      download_url = downloads_list['Windows'][sName]
+      file_name = "install."
+      is_msi = download_url.endswith('msi')
+      if is_msi:
+        file_name += "msi"
+      else:
+        file_name += "exe"
+      base.download(download_url, file_name)
+
+      base.print_info("Install " + sName + "...")
+      if (sName in install_params):
+        install_command = file_name + install_params[sName]
+      elif is_msi:
+        install_command = "msiexec.exe /i " + file_name + " /qn"
+      else:
+        install_command = file_name + " /S"
+
+      print(install_command)
+      code = os.system(install_command)
+      base.delete_file(file_name)
   else:
-    if (sName not in downloads_list):
-      print("Url for install not found!")
-      return False
-      
-    download_url = downloads_list[sName]
-    file_name = "install."
-    is_msi = download_url.endswith('msi')
-    if is_msi:
-      file_name += "msi"
+    if (sName in install_special):
+      code = install_special[sName]()
     else:
-      file_name += "exe"
-    base.download(download_url, file_name)
-    
-    base.print_info("Install " + sName + "...")
-    if (sName in install_params):
-      install_command = file_name + " " + install_params[sName]
-    elif is_msi:
-      install_command = "msiexec.exe /i " + file_name + " /qn"
-    else:
-      install_command = file_name + " /S"
-    
-    print(install_command)
-    code = os.system(install_command)
-    base.delete_file(file_name)
-  
+      if (sName not in downloads_list['Linux']):
+        print("Program for install not found!")
+        return False
+
+      base.print_info("Install " + sName + "...")
+      install_command = 'yes | sudo apt install ' + downloads_list['Linux'][sName]
+      print(install_command)
+      code = os.system(install_command)
+
   if (code != 0):
     print("Installing was failed!")
     return False
@@ -350,28 +446,56 @@ def installProgram(sName):
   return True
   
 def install_gruntcli():
-  check_npmPath()
-  return os.system('npm install -g grunt-cli')
+  if (host_platform == 'windows'):
+    check_npmPath()
+    install_command = 'npm install -g grunt-cli'
+  else:
+    install_command = 'sudo npm install -g grunt-cli'
+
+  return os.system(install_command)
 
 def install_mysqlserver():
-  return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
+  if (host_platform == 'windows'):
+    return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + 'enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
+  elif (host_platform == 'linux'):
+    code = os.system('sudo ufw enable && sudo ufw allow 22 && sudo ufw allow 3306')
+    code = os.system('sudo apt-get -y install zsh htop') and code
+    code = os.system('echo "mysql-server mysql-server/root_password password ' + install_params['MySQLServer']['pass'] + '" | sudo debconf-set-selections') and code
+    code = os.system('echo "mysql-server mysql-server/root_password_again password ' + install_params['MySQLServer']['pass'] + '" | sudo debconf-set-selections') and code
+    return os.system('yes | sudo apt install mysql-server') and code
+  return 1
+
+def install_updates():
+  return os.system('yes | sudo apt update && yes | sudo apt upgrade')
 
 downloads_list = {
-  'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
-  'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
-  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
-  'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
-  'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
-  'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
-  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
+  'Windows': {
+    'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
+    'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
+    'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
+    'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
+    'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
+    'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
+  },
+  'Linux': {
+    'Node.js': 'nodejs',
+    'Npm': 'npm',
+    'Java': 'openjdk-11-jdk',
+    'RabbitMQ': 'rabbitmq-server',
+    'Erlang': 'erlang',
+    'Curl': 'curl',
+    '7z': 'p7zip-full'
+  }
 }
 install_special = {
   'GruntCli': install_gruntcli,
   'MySQLServer': install_mysqlserver
 }
+uninstall_special = {
+  'MySQLServer': uninstall_mysqlserver
+}
 install_params = {
-  'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
-  'Java': '/s',
+  'BuildTools': ' --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
   'MySQLServer': {
     'port': '3306',
 	'user': 'root',

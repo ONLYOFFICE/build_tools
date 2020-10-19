@@ -120,6 +120,7 @@ def check_erlang():
   
   print('Need Erlang with bitness x64')
   
+  dependence.append_removepath(os.environ['AppData'] + '\\RabbitMQ\\db')
   dependence.append_uninstall('Erlang')
   dependence.append_uninstall('RabbitMQ')
   dependence.append_install('Erlang')
@@ -137,6 +138,7 @@ def check_rabbitmq():
     return dependence
   
   print('RabbitMQ not found')
+  dependence.append_removepath(os.environ['AppData'] + '\\RabbitMQ\\db')
   dependence.append_uninstall('Erlang')
   dependence.append_uninstall('RabbitMQ')
   dependence.append_install('Erlang')
@@ -379,3 +381,6 @@ install_params = {
 	'version': '8.0.21'
   }
 }
+
+input(os.environ['AppData'] + '\\RabbitMQ\\db')
+

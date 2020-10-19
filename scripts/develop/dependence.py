@@ -385,7 +385,7 @@ def uninstallProgram(sName):
       else:
         info = '"' + info + '" /S'
   if (host_platform == 'linux'):
-    info = 'sudo apt-get remove --purge ' + sName + ' -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
+    info = 'sudo apt-get remove --purge ' + sName + '* -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
 
   print("Uninstalling " + sName + "...")
   print(info)

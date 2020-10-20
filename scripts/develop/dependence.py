@@ -382,5 +382,5 @@ install_params = {
   }
 }
 
-input(os.environ['AppData'] + '\\RabbitMQ\\db')
+
 

@@ -29,10 +29,7 @@ def make_pro_file(makefiles_dir, pro_file):
       new_path += (base.get_env("ANDROID_NDK_ROOT") + "/toolchains/llvm/prebuilt/" + toolchain_platform + "/bin:")
       new_path += old_path
       base.set_env("PATH", new_path)
-      if ("android_arm64_v8a" == platform):
-        base.set_env("ANDROID_NDK_PLATFORM", "android-21")
-      else:
-        base.set_env("ANDROID_NDK_PLATFORM", "android-16")
+      base.set_env("ANDROID_NDK_PLATFORM", "android-21")
 
     if (-1 != platform.find("ios")):
       base.hack_xcode_ios()

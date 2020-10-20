@@ -41,18 +41,10 @@ def is_xp_platform():
   return False
 
 def is_use_clang():
-  get_gcc_version = "gcc -dumpfullversion -dumpversion"
-  popen = subprocess.Popen(get_gcc_version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   gcc_version = 4
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    gcc_version_str = stdout.strip().decode("utf-8")
-    gcc_version_major = gcc_version_str.split(".")[0]
-    gcc_version = int(gcc_version_major)
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  if (gcc_version_str != ""):
+    gcc_version = int(gcc_version_str.split(".")[0])
     
   is_clang = "false"
   if (gcc_version >= 6):

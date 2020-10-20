@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import platform
+import struct
 import glob
 import shutil
 import os
@@ -27,6 +28,12 @@ def host_platform():
     return "mac"
   return ret
 
+def is_os_64bit():
+  return platform.machine().endswith('64')
+
+def is_python_64bit():
+  return (struct.calcsize("P") == 8)
+
 def get_path(path):
   if "windows" == host_platform():
     return path.replace("/", "\\")
@@ -41,7 +48,7 @@ def set_env(name, value):
 
 def configure_common_apps(file=""):
   if ("windows" == host_platform()):
-    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
     os.environ["PATH"] = get_script_dir(file) + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
@@ -296,6 +303,20 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   ret = cmd(prog, args, is_no_errors)
   os.chdir(cur_dir)
   return ret
+
+def run_command(sCommand):
+  popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  result = {'stdout' : '', 'stderr' : ''}
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    result['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
+    result['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+  
+  return result
 
 def run_process(args=[]):
   subprocess.Popen(args)
@@ -754,27 +775,18 @@ def join_scripts(files, path):
   return
 
 def get_file_last_modified_url(url):
-  curl_command = 'curl --head %s' % (url)
-  popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   retvalue = ""
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-
-    lines = stdout.strip().decode("utf-8").split("\n")
-    for line in lines:
-      if ':' not in line:
-        continue
-      line = line.strip()
-      key, value = line.split(':', 1)
-      key = key.upper()
-      if key == "LAST-MODIFIED":
-        retvalue = value
-
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-
+  curl_command = 'curl --head %s' % (url)
+  lines = run_command(curl_command)['stdout'].split("\n")
+  for line in lines:
+    if ':' not in line:
+      continue
+    line = line.strip()
+    key, value = line.split(':', 1)
+    key = key.upper()
+    if key == "LAST-MODIFIED":
+      retvalue = value
+  
   return retvalue
 
 def mac_correct_rpath_binary(path, libs):
@@ -928,16 +940,7 @@ def support_old_versions_plugins(out_dir):
   return
 
 def get_xcode_major_version():
-  popen = subprocess.Popen("xcodebuild -version", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  version = ""
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    version = stdout.strip().decode("utf-8")
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-
+  version = run_command("xcodebuild -version")['stdout']
   return int(version.split('.')[0][6:])
 
 def hack_xcode_ios():

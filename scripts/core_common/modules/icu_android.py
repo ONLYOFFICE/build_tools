@@ -6,8 +6,6 @@ import base
 import os
 
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu/android"
-if not base.is_dir(current_dir):
-  base.create_dir(current_dir)
 
 toolshains_dir = current_dir + "/toolchains"
 icu_major = "58"
@@ -67,6 +65,8 @@ def build_arch(arch, api_version):
   return
 
 def make():
+  if not base.is_dir(current_dir):
+    base.create_dir(current_dir)
 
   if base.is_dir(current_dir + "/build"):
     return

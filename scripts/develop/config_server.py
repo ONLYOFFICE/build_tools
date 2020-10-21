@@ -24,7 +24,7 @@ def make():
   data_url = base.get_file_last_modified_url(url)
   old_data_url = base.readFile("./core.7z.data")
 
-  if (old_data_url != data_url):
+  if (data_url != "" and old_data_url != data_url):
     print("-----------------------------------------------------------")
     print("Downloading core last version... --------------------------")
     print("-----------------------------------------------------------")

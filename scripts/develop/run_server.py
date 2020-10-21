@@ -3,10 +3,12 @@ sys.path.append('../')
 sys.path.append('vendor')
 import os
 import base
-import libwindows
 import dependence
 import traceback
 
+platform = base.host_platform()
+if ('windows' == platform):
+  import libwindows
 if (sys.version_info[0] >= 3):
   unicode = str
   
@@ -44,20 +46,29 @@ def check_dependencies():
   checksResult = dependence.CDependencies()
   
   checksResult.append(dependence.check_nodejs())
+  if (platform == 'linux'):
+    checksResult.append(dependence.check_npm())
+    checksResult.append(dependence.check_curl())
+    checksResult.append(dependence.check_7z())
   checksResult.append(dependence.check_java())
   checksResult.append(dependence.check_erlang())
   checksResult.append(dependence.check_rabbitmq())
   checksResult.append(dependence.check_gruntcli())
-  checksResult.append(dependence.check_buildTools())
+  if (platform == 'windows'):
+    checksResult.append(dependence.check_buildTools())
   checksResult.append(dependence.check_mysqlServer())
-  
+
   if (len(checksResult.install) > 0):
     install_args = ['install.py']
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
     install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
-    code = libwindows.sudo(unicode(sys.executable), install_args)
+    if (platform == 'windows'):
+      code = libwindows.sudo(unicode(sys.executable), install_args)
+    else:
+      dependence.install_updates()
+      base.cmd_in_dir('./', 'python', ['install.py'] + install_args[1:])
   
   return dependence.check_MySQLConfig(checksResult.mysqlPath)
   
@@ -67,14 +78,18 @@ try:
   
   platform = base.host_platform()
   
-  if ("windows" == platform):
-    if not dependence.check_vc_components():
-      sys.exit()
-    if not check_dependencies():
-      sys.exit()
-    restart_win_rabbit()
-  elif ("mac" == platform):
+  if ("mac" == platform):
     start_mac_services()
+  else:
+    if ("windows" == platform):
+      if not dependence.check_vc_components():
+        sys.exit()
+      if not check_dependencies():
+        sys.exit()
+      restart_win_rabbit()
+    else:
+      if not check_dependencies():
+        sys.exit()
 
   base.print_info('Build modules')
   base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git'])
@@ -90,12 +105,12 @@ try:
   install_module('../../../server/SpellChecker')
 
   base.set_env('NODE_ENV', 'development-' + platform)
-  base.set_env('NODE_CONFIG_DIR', '../../Common/config')
+  base.set_env('NODE_CONFIG_DIR', '../../../server/Common/config')
 
   if ("mac" == platform):
-    base.set_env('DYLD_LIBRARY_PATH', '../../FileConverter/bin/')
+    base.set_env('DYLD_LIBRARY_PATH', '../../../FileConverter/bin/')
   elif ("linux" == platform):
-    base.set_env('LD_LIBRARY_PATH', '../../FileConverter/bin/')
+    base.set_env('LD_LIBRARY_PATH', '../../../server/FileConverter/bin/')
 
   run_module('../../../server/DocService/sources', ['server.js'])
   run_module('../../../server/DocService/sources', ['gc.js'])

@@ -97,7 +97,7 @@ def make():
 
   web_apps_addons = []
   if (config.option("web-apps-addons") != ""):
-    sdkjs_addons = config.option("web-apps-addons").rsplit(", ")
+    web_apps_addons = config.option("web-apps-addons").rsplit(", ")
   for addon in web_apps_addons:
     data_local_devel += ("\"/" + addon + "\" : { \"path\": \"../../../" + addon + "\" },\n")
     is_exist_addons = True

@@ -79,7 +79,8 @@ base.configure_common_apps()
 
 # developing...
 if ("1" == config.option("develop")):
-  build_js.build_js_develop(base_dir + "/..")
+  build_server.build_server_develop()
+  #build_js.build_js_develop(base_dir + "/..")
   develop_config_server.make()
   exit(0)
 

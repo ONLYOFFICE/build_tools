@@ -68,14 +68,14 @@ def make(args = []):
   
     platform = base.host_platform()
   
-    #if ("windows" == platform):
-    #  if not dependence.check_vc_components():
-    #    sys.exit()
-    #  if not check_dependencies():
-    #    sys.exit()
-    #  restart_win_rabbit()
-    #elif ("mac" == platform):
-    #  start_mac_services()
+    if ("windows" == platform):
+      if not dependence.check_vc_components():
+        sys.exit()
+      if not check_dependencies():
+        sys.exit()
+      restart_win_rabbit()
+    elif ("mac" == platform):
+      start_mac_services()
 
     base.print_info('Build modules')
     base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
@@ -83,12 +83,12 @@ def make(args = []):
   
     run_integration_example()
   
-    #base.create_dir('../../../server/App_Data')
+    base.create_dir('../../../server/App_Data')
 
-    #install_module('../../../server/DocService')
-    #install_module('../../../server/Common')
-    #install_module('../../../server/FileConverter')
-    #install_module('../../../server/SpellChecker')
+    install_module('../../../server/DocService')
+    install_module('../../../server/Common')
+    install_module('../../../server/FileConverter')
+    install_module('../../../server/SpellChecker')
 
     base.set_env('NODE_ENV', 'development-' + platform)
     base.set_env('NODE_CONFIG_DIR', '../../Common/config')

@@ -89,8 +89,8 @@ def make():
   server_addons = []
   if (config.option("server-addons") != ""):
     server_addons = config.option("server-addons").rsplit(", ")
-#  if ("server-lockstorage" in server_addons):
-#    server_config["editorDataStorage"] = "editorDataRedis"
+  if ("server-lockstorage" in server_addons):
+    server_config["editorDataStorage"] = "editorDataRedis"
   
   sdkjs_addons = []
   if (config.option("sdkjs-addons") != ""):

@@ -37,6 +37,10 @@ def start_mac_services():
   base.print_info('Start Redis')
   base.run_process(['redis-server'])
 
+def restart_redis():
+  base.print_info('Restart the Redis...')
+  code = libwindows.sudo(unicode(sys.executable), ['restartRedis.py'])
+  
 def run_integration_example():
   base.cmd_in_dir('../../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])
 

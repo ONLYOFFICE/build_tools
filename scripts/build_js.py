@@ -80,22 +80,27 @@ def build_interface(directory):
   _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
   return
 
+def get_build_param():
+  if config.option("js-minimize") == "0":
+    return ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"]
+  return ["--level=ADVANCED"]
+
 def build_sdk_desktop(directory):
   #_run_npm_cli(directory)
-  _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED", "--desktop=true"] + base.sdkjs_addons_param() + base.sdkjs_addons_desktop_param())
+  _run_npm(directory)  
+  _run_grunt(directory, get_build_param() + ["--desktop=true"] + base.sdkjs_addons_param() + base.sdkjs_addons_desktop_param())
   return
 
 def build_sdk_builder(directory):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED"] + base.sdkjs_addons_param())
+  _run_grunt(directory, get_build_param() + base.sdkjs_addons_param())
   return
 
 def build_sdk_native(directory):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, ["--level=ADVANCED", "--mobile=true"] + base.sdkjs_addons_param())
+  _run_grunt(directory, get_build_param() + ["--mobile=true"] + base.sdkjs_addons_param())
   return
 
 def build_js_develop(root_dir):

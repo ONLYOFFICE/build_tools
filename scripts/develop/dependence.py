@@ -66,10 +66,24 @@ def check_npmPath():
   if (path.find(npmPath) == -1):
     base.set_env('PATH', npmPath + os.pathsep + path)
 
+def check_git():
+  dependence = CDependencies()
+  base.print_info('Check installed Git')
+  
+  result = base.run_command('git')['stderr']
+  
+  if (result != ''):
+    print('Git not found')
+    dependence.append_install('Git')
+    return dependence
+  
+  print('Git is installed')
+  return dependence
+  
 def check_nodejs():
   dependence = CDependencies()
-  
   base.print_info('Check installed Node.js')
+  
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
     print('Node.js not found')
@@ -359,6 +373,7 @@ def install_mysqlserver():
   return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
 
 downloads_list = {
+  'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
   'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
@@ -373,6 +388,7 @@ install_special = {
 }
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
+  'Git': '/VERYSILENT /NORESTART',
   'Java': '/s',
   'MySQLServer': {
     'port': '3306',

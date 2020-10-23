@@ -171,6 +171,60 @@ def check_rabbitmq():
 
   return dependence
 
+def find_redis(base_path):
+  return base.find_file(os.path.join(base_path, 'Redis'), 'redis-cli.exe')
+
+def check_redis():
+  dependence = CDependencies()
+  base.print_info('Check Redis server')
+
+  if (host_platform == 'windows'):
+    if (len(get_programUninstalls('Redis on Windows')) == 0):
+      print('Redis not found')
+      dependence.append_install('Redis')
+      return dependence
+    redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
+  else:
+    redis_cli = 'redis-cli'
+
+  if (redis_cli == None):
+    print('Redis not found in default folder')
+    if (host_platform == 'windows'):
+      dependence.append_uninstall('Redis on Windows')
+    else:
+      dependence.append_uninstall('redis-server')
+    dependence.append_install('Redis')
+    return dependence
+
+  result = base.run_command('"' + redis_cli + '"' + ' info server')['stdout']
+  if (result == ''):
+    print('Redis client is invalid')
+    if (host_platform == 'windows'):
+      dependence.append_uninstall('Redis on Windows')
+    else:
+      dependence.append_uninstall('redis-server')
+    dependence.append_install('Redis')
+    return dependence
+
+  info = result.split('tcp_port:')[1]
+  i = 0
+  char = info[i]
+  while (char != '\r'):
+    i += 1
+    char = info[i]
+  tcp_port = info[0 : i]
+
+  if (tcp_port != '6379'):
+    print('Invalid Redis port, need reinstall')
+    if (host_platform == 'windows'):
+      dependence.append_uninstall('Redis on Windows')
+    else:
+      dependence.append_uninstall('redis-server')
+    dependence.append_install('Redis')
+    return dependence
+
+  return dependence
+
 def check_npm():
   dependence = CDependencies()
   base.print_info('Check installed Npm')
@@ -484,6 +538,7 @@ downloads_list = {
     'Npm': 'npm',
     'Java': 'openjdk-11-jdk',
     'RabbitMQ': 'rabbitmq-server',
+    'Redis': 'redis-server',
     'Erlang': 'erlang',
     'Curl': 'curl',
     '7z': 'p7zip-full'

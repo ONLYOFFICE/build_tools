@@ -146,6 +146,9 @@ def check_rabbitmq():
   
   return dependence
 
+def find_redis(base_path):
+  return base.find_file(os.path.join(base_path, 'Redis'), 'redis-cli.exe')
+
 def check_redis():
   dependence = CDependencies()
   base.print_info('Check Redis server')
@@ -154,6 +157,35 @@ def check_redis():
     print('Redis not found')
     dependence.append_install('Redis')
     return dependence
+  else:
+    redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
+    if (redis_cli == None):
+      print('Redis not found in default folder')
+      dependence.append_uninstall('Redis on Windows')
+      dependence.append_install('Redis')
+      return dependence
+      
+    result = base.run_command('"' + redis_cli + '"' + ' info server')['stdout']
+    if (result == ''):
+      print('Redis client is invalid')
+      dependence.append_uninstall('Redis on Windows')
+      dependence.append_install('Redis')
+      return dependence
+      
+    info = result.split('\r\r\ntcp_port:')[1]
+    i = 0
+    char = info[i]
+    while (char != '\r'):
+      i += 1
+      char = info[i]
+    tcp_port = info[0 : i]
+    
+    if (tcp_port != '6379'):
+      print('Invalid Redis port, need reinstall')
+      dependence.append_uninstall('Redis on Windows')
+      dependence.append_install('Redis')
+      return dependence
+    
     
   print('Redis is installed')
   return dependence
@@ -394,6 +426,3 @@ install_params = {
 	'version': '8.0.21'
   }
 }
-
-
-

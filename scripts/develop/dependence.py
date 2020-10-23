@@ -68,6 +68,19 @@ def check_npmPath():
   if (path.find(npmPath) == -1):
     base.set_env('PATH', npmPath + os.pathsep + path)
 
+def check_git():
+  dependence = CDependencies()
+  base.print_info('Check installed Git')
+
+  result = base.run_command('git')['stderr']
+  if (result != ''):
+    print('Git not found')
+    dependence.append_install('Git')
+    return dependence
+
+  print('Git is installed')
+  return dependence
+
 def check_nodejs():
   dependence = CDependencies()
 
@@ -534,6 +547,7 @@ downloads_list = {
     'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
   },
   'Linux': {
+    'Git': 'git',
     'Node.js': 'nodejs',
     'Npm': 'npm',
     'Java': 'openjdk-11-jdk',

@@ -52,6 +52,7 @@ def make():
     # banners
     base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
                        vendor_dir_src + "underscore/underscore-min.js",
+                       base_dir + "/../sdkjs/common/externs/jszip-utils.js",
                        sdk_dir_src + "common/Native/native.js",
                        sdk_dir_src + "../../common/Native/Wrappers/common.js",
                        sdk_dir_src + "common/Native/jquery_native.js"], 

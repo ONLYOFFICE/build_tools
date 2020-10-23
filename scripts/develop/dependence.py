@@ -235,7 +235,8 @@ def check_redis():
       dependence.append_uninstall('redis-server')
     dependence.append_install('Redis')
     return dependence
-
+  
+  print('Redis is installed')
   return dependence
 
 def check_npm():

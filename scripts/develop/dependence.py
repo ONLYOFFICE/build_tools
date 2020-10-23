@@ -120,6 +120,7 @@ def check_erlang():
   
   print('Need Erlang with bitness x64')
   
+  dependence.append_removepath(os.environ['AppData'] + '\\RabbitMQ\\db')
   dependence.append_uninstall('Erlang')
   dependence.append_uninstall('RabbitMQ')
   dependence.append_install('Erlang')
@@ -137,6 +138,7 @@ def check_rabbitmq():
     return dependence
   
   print('RabbitMQ not found')
+  dependence.append_removepath(os.environ['AppData'] + '\\RabbitMQ\\db')
   dependence.append_uninstall('Erlang')
   dependence.append_uninstall('RabbitMQ')
   dependence.append_install('Erlang')
@@ -359,8 +361,8 @@ def install_mysqlserver():
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
-  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.8/rabbitmq-server-3.8.8.exe',
-  'Erlang': 'http://erlang.org/download/otp_win64_23.0.exe',
+  'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
+  'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
@@ -379,3 +381,6 @@ install_params = {
 	'version': '8.0.21'
   }
 }
+
+
+

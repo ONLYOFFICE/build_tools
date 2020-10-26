@@ -70,7 +70,7 @@ def check_git():
   dependence = CDependencies()
   base.print_info('Check installed Git')
   
-  result = base.run_command('git')['stderr']
+  result = base.run_command('git --version')['stderr']
   
   if (result != ''):
     print('Git not found')

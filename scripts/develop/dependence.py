@@ -66,6 +66,13 @@ def check_npmPath():
   if (path.find(npmPath) == -1):
     base.set_env('PATH', npmPath + os.pathsep + path)
 
+def check_gitPath():
+  path = base.get_env('PATH')
+  gitExecPath = base.find_file(os.path.join(os.environ['PROGRAMW6432'], 'Git\\cmd'), 'git.exe') or base.find_file(os.path.join(os.environ['ProgramFiles(x86)'], 'Git\\cmd'), 'git.exe')
+  gitDir = base.get_script_dir(gitExecPath)
+  if (path.find(gitDir) == -1):
+    base.set_env('PATH', gitDir + os.pathsep + path)
+  
 def check_git():
   dependence = CDependencies()
   base.print_info('Check installed Git')
@@ -79,7 +86,7 @@ def check_git():
   
   print('Git is installed')
   return dependence
-  
+
 def check_nodejs():
   dependence = CDependencies()
   base.print_info('Check installed Node.js')
@@ -397,6 +404,3 @@ install_params = {
 	'version': '8.0.21'
   }
 }
-
-
-

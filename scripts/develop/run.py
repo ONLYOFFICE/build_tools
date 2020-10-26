@@ -66,7 +66,6 @@ def make(args = []):
   try:
     base.configure_common_apps()
     dependence.check_pythonPath()
-  
     platform = base.host_platform()
   
     if ("windows" == platform):
@@ -77,7 +76,8 @@ def make(args = []):
       restart_win_rabbit()
     elif ("mac" == platform):
       start_mac_services()
-
+    
+    dependence.check_gitPath()
     base.print_info('Build modules')
     base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
     base.cmd_in_dir('../../', 'python', ['make.py'])

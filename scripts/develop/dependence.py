@@ -150,8 +150,10 @@ def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
   if (len(get_programUninstalls('Microsoft Visual C++ 2015-2019 Redistributable (x64)')) == 0):
+    print('Microsoft Visual C++ 2015-2019 Redistributable (x64) not found')
     result = installProgram('VC2019x64') and result
   
+  print('Installed Visual C++ components is valid')
   return result
  
 def check_gruntcli():

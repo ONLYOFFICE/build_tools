@@ -420,5 +420,3 @@ install_params = {
 	'version': '8.0.21'
   }
 }
-
-check_redis()

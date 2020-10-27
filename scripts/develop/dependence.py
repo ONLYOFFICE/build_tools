@@ -158,6 +158,14 @@ def check_redis():
     dependence.append_install('Redis')
     return dependence
   
+  checkService = base.run_command('sc query Redis')['stdout']
+  
+  if (checkService.find('Redis') != -1) and (checkService.find('STOPPED') != -1):
+    print('Installed Redis is not valid')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
+    
   redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
   if (redis_cli == None):
     print('Redis not found in default folder')
@@ -396,6 +404,14 @@ def install_gruntcli():
 def install_mysqlserver():
   return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
 
+def install_redis():
+  pid = base.run_command('netstat -ano | findstr 6379')['stdout'].split(' ')[-1]
+  if (pid != ''):
+    os.system('taskkill /F /PID ' + pid)
+  os.system('sc delete Redis')
+  
+  return installProgram('Redis-server')
+  
 downloads_list = {
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
@@ -404,11 +420,12 @@ downloads_list = {
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
-  'Redis': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
+  'Redis-server': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
 }
 install_special = {
   'GruntCli': install_gruntcli,
-  'MySQLServer': install_mysqlserver
+  'MySQLServer': install_mysqlserver,
+  'Redis' : install_redis 
 }
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',

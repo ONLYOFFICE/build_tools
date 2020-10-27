@@ -167,6 +167,52 @@ def check_rabbitmq():
   
   return dependence
 
+def find_redis(base_path):
+  return base.find_file(os.path.join(base_path, 'Redis'), 'redis-cli.exe')
+
+def check_redis():
+  dependence = CDependencies()
+  base.print_info('Check Redis server')
+  
+  if (len(get_programUninstalls('Redis on Windows')) == 0):
+    print('Redis not found')
+    dependence.append_install('Redis')
+    return dependence
+  
+  checkService = base.run_command('sc query Redis')['stdout']
+  
+  if (checkService.find('Redis') != -1) and (checkService.find('STOPPED') != -1):
+    print('Installed Redis is not valid')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
+    
+  redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
+  if (redis_cli == None):
+    print('Redis not found in default folder')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
+      
+  result = base.run_command('"' + redis_cli + '"' + ' info server')['stdout']
+  if (result == ''):
+    print('Redis client is invalid')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
+     
+  info = result.split('tcp_port:')[1]
+  tcp_port = info.split('\r', 1)[0]
+    
+  if (tcp_port != '6379'):
+    print('Invalid Redis port, need reinstall')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
+    
+  print('Redis is installed')
+  return dependence
+  
 def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
@@ -381,6 +427,14 @@ def install_gruntcli():
 def install_mysqlserver():
   return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
 
+def install_redis():
+  pid = base.run_command('netstat -ano | findstr 6379')['stdout'].split(' ')[-1]
+  if (pid != ''):
+    os.system('taskkill /F /PID ' + pid)
+  os.system('sc delete Redis')
+  
+  return installProgram('Redis-server')
+  
 downloads_list = {
   'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
   'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
@@ -389,11 +443,13 @@ downloads_list = {
   'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
-  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe'
+  'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
+  'Redis-server': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
 }
 install_special = {
   'GruntCli': install_gruntcli,
-  'MySQLServer': install_mysqlserver
+  'MySQLServer': install_mysqlserver,
+  'Redis' : install_redis 
 }
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',

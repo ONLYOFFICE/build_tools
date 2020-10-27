@@ -157,13 +157,13 @@ def check_redis():
     print('Redis not found')
     dependence.append_install('Redis')
     return dependence
-  else:
-    redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
-    if (redis_cli == None):
-      print('Redis not found in default folder')
-      dependence.append_uninstall('Redis on Windows')
-      dependence.append_install('Redis')
-      return dependence
+  
+  redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
+  if (redis_cli == None):
+    print('Redis not found in default folder')
+    dependence.append_uninstall('Redis on Windows')
+    dependence.append_install('Redis')
+    return dependence
       
     result = base.run_command('"' + redis_cli + '"' + ' info server')['stdout']
     if (result == ''):

@@ -204,7 +204,7 @@ def check_redis():
   info = result.split('tcp_port:')[1]
   tcp_port = info.split('\r', 1)[0]
     
-  if (tcp_port != '6379'):
+  if (tcp_port != install_params['Redis']['port']):
     print('Invalid Redis port, need reinstall')
     dependence.append_uninstall('Redis on Windows')
     dependence.append_install('Redis')
@@ -428,12 +428,27 @@ def install_mysqlserver():
   return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + ';enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
 
 def install_redis():
-  pid = base.run_command('netstat -ano | findstr 6379')['stdout'].split(' ')[-1]
+  base.print_info("Installing Redis...")
+  pid = base.run_command('netstat -ano | findstr ' + install_params['Redis']['port'])['stdout'].split(' ')[-1]
   if (pid != ''):
     os.system('taskkill /F /PID ' + pid)
   os.system('sc delete Redis')
   
-  return installProgram('Redis-server')
+  download_url = downloads_list['Redis']
+  file_name = "install.msi"
+  base.download(download_url, file_name)
+  base.print_info("Install Redis...")
+  install_command = 'msiexec /i install.msi PORT=' + install_params['Redis']['port'] + 'ADD_FIREWALL_RULE=1 /qn'
+  
+  print(install_command)
+  code = os.system(install_command)
+  base.delete_file(file_name)
+  
+  if (code != 0):
+    print("Installing was failed!")
+    return False
+  
+  return True
   
 downloads_list = {
   'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
@@ -444,7 +459,7 @@ downloads_list = {
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
-  'Redis-server': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
+  'Redis': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
 }
 install_special = {
   'GruntCli': install_gruntcli,
@@ -460,5 +475,8 @@ install_params = {
 	'user': 'root',
 	'pass': 'onlyoffice',
 	'version': '8.0.21'
+  }, 
+  'Redis': {
+    'port': '6379'
   }
 }

@@ -412,7 +412,6 @@ def installProgram(sName):
     elif sName not in install_params:
       install_command += " /S"
       
-    input(install_command)
     print(install_command)
     code = os.system(install_command)
     base.delete_file(file_name)

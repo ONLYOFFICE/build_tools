@@ -802,7 +802,7 @@ def mac_correct_rpath_x2t(dir):
   os.chdir(dir)
   mac_correct_rpath_library("icudata.58", [])
   mac_correct_rpath_library("icuuc.58", ["icudata.58"])
-  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58"])
+  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58", "kernel"])
   mac_correct_rpath_library("kernel", [])
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "graphics"])

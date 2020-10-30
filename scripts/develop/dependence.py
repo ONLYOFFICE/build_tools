@@ -176,7 +176,7 @@ def check_redis():
   
   if (len(get_programUninstalls('Redis on Windows')) == 0):
     print('Redis not found')
-    dependence.append_install('Redis')
+    dependence.append_install('RedisServer')
     return dependence
   
   checkService = base.run_command('sc query Redis')['stdout']
@@ -184,21 +184,21 @@ def check_redis():
   if (checkService.find('Redis') != -1) and (checkService.find('STOPPED') != -1):
     print('Installed Redis is not valid')
     dependence.append_uninstall('Redis on Windows')
-    dependence.append_install('Redis')
+    dependence.append_install('RedisServer')
     return dependence
     
   redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
   if (redis_cli == None):
     print('Redis not found in default folder')
     dependence.append_uninstall('Redis on Windows')
-    dependence.append_install('Redis')
+    dependence.append_install('RedisServer')
     return dependence
       
   result = base.run_command('"' + redis_cli + '"' + ' info server')['stdout']
   if (result == ''):
     print('Redis client is invalid')
     dependence.append_uninstall('Redis on Windows')
-    dependence.append_install('Redis')
+    dependence.append_install('RedisServer')
     return dependence
      
   info = result.split('tcp_port:')[1]
@@ -207,7 +207,7 @@ def check_redis():
   if (tcp_port != install_params['Redis']['port']):
     print('Invalid Redis port, need reinstall')
     dependence.append_uninstall('Redis on Windows')
-    dependence.append_install('Redis')
+    dependence.append_install('RedisServer')
     return dependence
     
   print('Redis is installed')
@@ -403,13 +403,16 @@ def installProgram(sName):
     base.download(download_url, file_name)
     
     base.print_info("Install " + sName + "...")
-    if (sName in install_params):
-      install_command = file_name + " " + install_params[sName]
-    elif is_msi:
-      install_command = "msiexec.exe /i " + file_name + " /qn"
-    else:
-      install_command = file_name + " /S"
+    install_command = ("msiexec.exe /i " + file_name) if is_msi else file_name
     
+    if (sName in install_params):
+      install_command += " " + install_params.get(sName, '')
+    if (is_msi == True):
+      install_command += " /qn "
+    elif sName not in install_params:
+      install_command += " /S"
+      
+    input(install_command)
     print(install_command)
     code = os.system(install_command)
     base.delete_file(file_name)
@@ -429,26 +432,12 @@ def install_mysqlserver():
 
 def install_redis():
   base.print_info("Installing Redis...")
-  pid = base.run_command('netstat -ano | findstr ' + install_params['Redis']['port'])['stdout'].split(' ')[-1]
+  pid = base.run_command('netstat -ano | findstr ' + install_params['Redis'].split(' ')[0].split('=')[1])['stdout'].split(' ')[-1]
   if (pid != ''):
     os.system('taskkill /F /PID ' + pid)
   os.system('sc delete Redis')
   
-  download_url = downloads_list['Redis']
-  file_name = "install.msi"
-  base.download(download_url, file_name)
-  base.print_info("Install Redis...")
-  install_command = 'msiexec /i install.msi PORT=' + install_params['Redis']['port'] + 'ADD_FIREWALL_RULE=1 /qn'
-  
-  print(install_command)
-  code = os.system(install_command)
-  base.delete_file(file_name)
-  
-  if (code != 0):
-    print("Installing was failed!")
-    return False
-  
-  return True
+  return installProgram('Redis')
   
 downloads_list = {
   'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
@@ -464,7 +453,7 @@ downloads_list = {
 install_special = {
   'GruntCli': install_gruntcli,
   'MySQLServer': install_mysqlserver,
-  'Redis' : install_redis 
+  'RedisServer' : install_redis 
 }
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
@@ -476,7 +465,5 @@ install_params = {
 	'pass': 'onlyoffice',
 	'version': '8.0.21'
   }, 
-  'Redis': {
-    'port': '6379'
-  }
+  'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1'
 }

@@ -43,6 +43,7 @@ def run_integration_example():
 def check_dependencies():
   checksResult = dependence.CDependencies()
   
+  checksResult.append(dependence.check_redis())
   checksResult.append(dependence.check_git())
   checksResult.append(dependence.check_nodejs())
   checksResult.append(dependence.check_java())

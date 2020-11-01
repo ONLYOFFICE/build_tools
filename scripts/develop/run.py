@@ -6,6 +6,7 @@ import base
 import libwindows
 import dependence
 import traceback
+import config
 
 if (sys.version_info[0] >= 3):
   unicode = str
@@ -52,6 +53,12 @@ def check_dependencies():
   checksResult.append(dependence.check_buildTools())
   checksResult.append(dependence.check_mysqlServer())
   
+  server_addons = []
+  if (config.option("server-addons") != ""):
+    server_addons = config.option("server-addons").rsplit(", ")
+  if ("server-lockstorage" in server_addons):
+    checksResult.append(dependence.check_redis())
+  
   if (len(checksResult.install) > 0):
     install_args = ['install.py']
     install_args += checksResult.get_uninstall()
@@ -64,6 +71,11 @@ def check_dependencies():
 
 def make(args = []):
   try:
+    # parse configuration
+    config.parse()
+    # correct defaults (the branding repo is already updated)
+    config.parse_defaults()
+    
     base.configure_common_apps()
     dependence.check_pythonPath()
     platform = base.host_platform()

@@ -203,14 +203,15 @@ def check_redis():
      
   info = result.split('tcp_port:')[1]
   tcp_port = info.split('\r', 1)[0]
-    
-  if (tcp_port != install_params['Redis']['port']):
+  config_port = install_params['Redis'].split('PORT=', 1)[1]
+  config_port = config_port.split(' ', 1)[0]
+  if (tcp_port != config_port):
     print('Invalid Redis port, need reinstall')
     dependence.append_uninstall('Redis on Windows')
     dependence.append_install('RedisServer')
     return dependence
     
-  print('Redis is installed')
+  print('Installed Redis is valid')
   return dependence
   
 def check_vc_components():

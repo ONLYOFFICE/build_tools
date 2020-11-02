@@ -81,10 +81,10 @@ def build_interface(directory):
   _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
   return
 
-def get_build_param():
-  if config.option("js-minimize") == "0":
-    return ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"]
-  return ["--level=ADVANCED"]
+def get_build_param(minimize=True):
+  beta = "true" if config.check_option("beta", "1") else "false"
+  params = ["--beta=" + beta]
+  return params + (["--level=ADVANCED"] if minimize else ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"])
 
 def build_sdk_desktop(directory):
   #_run_npm_cli(directory)
@@ -107,7 +107,7 @@ def build_sdk_native(directory):
 def build_js_develop(root_dir):
   #_run_npm_cli(root_dir + "/sdkjs/build")
   _run_npm(root_dir + "/sdkjs/build")
-  _run_grunt(root_dir + "/sdkjs/build", ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"] + base.sdkjs_addons_param())
+  _run_grunt(root_dir + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
   _run_grunt(root_dir + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
   _run_npm(root_dir + "/web-apps/build")
   _run_npm(root_dir + "/web-apps/build/sprites")

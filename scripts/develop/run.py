@@ -51,6 +51,7 @@ def check_dependencies():
   checksResult.append(dependence.check_rabbitmq())
   checksResult.append(dependence.check_gruntcli())
   checksResult.append(dependence.check_buildTools())
+  #checksResult.append(dependence.check_postgreSQL())
   checksResult.append(dependence.check_mysqlServer())
   
   server_addons = []
@@ -67,8 +68,9 @@ def check_dependencies():
     install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
     code = libwindows.sudo(unicode(sys.executable), install_args)
   
+  #return dependence.check_postgreConfig(checksResult.postgrePath)
   return dependence.check_MySQLConfig(checksResult.mysqlPath)
-
+  
 def make(args = []):
   try:
     # parse configuration

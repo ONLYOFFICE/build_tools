@@ -441,7 +441,7 @@ def install_redis():
   
 downloads_list = {
   'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-  'Node.js': 'https://nodejs.org/dist/latest-v10.x/node-v10.22.1-x64.msi',
+  'Node.js': 'https://nodejs.org/download/release/v10.23.0/node-v10.23.0-x64.msi',
   'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
   'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
   'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',

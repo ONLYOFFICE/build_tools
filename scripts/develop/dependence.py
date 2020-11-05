@@ -536,7 +536,7 @@ def installProgram(sName):
   return True
 
 def install_gruntcli():
-   if (host_platform == 'windows'):
+  if (host_platform == 'windows'):
     check_npmPath()
     install_command = 'npm install -g grunt-cli'
   else:

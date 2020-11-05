@@ -83,6 +83,8 @@ def check_dependencies():
 
 def make(args = []):
   try:
+    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
+
     # parse configuration
     config.parse()
     # correct defaults (the branding repo is already updated)
@@ -91,6 +93,7 @@ def make(args = []):
     base.configure_common_apps()
     if ("windows" == platform):
       dependence.check_pythonPath()
+      dependence.check_gitPath()
 
     if ("mac" == platform):
       start_mac_services()
@@ -105,10 +108,7 @@ def make(args = []):
         if not check_dependencies():
           sys.exit()
 
-    if ("windows" == platform):
-      dependence.check_gitPath()
     base.print_info('Build modules')
-    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
     base.cmd_in_dir('../../', 'python', ['make.py'])
   
     run_integration_example()

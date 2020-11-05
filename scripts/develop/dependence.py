@@ -173,7 +173,7 @@ def check_rabbitmq():
       print('RabbitMQ is installed')
       return dependence
   else:
-    result = base.run_command('rabbitmqctl')['stdout']
+    result = base.run_command('service rabbitqm-server status')['stdout']
     if (result != ''):
       print('RabbitMQ is installed')
       return dependence
@@ -214,7 +214,7 @@ def check_redis():
 
     redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
   else:
-    checkService = base.run_command('systemctl status redis')['stderr']
+    checkService = base.run_command('service redis-server status')['stderr']
     if (checkService == ''):
       print('Redis not found')
       dependence.append_install('Redis')
@@ -612,3 +612,4 @@ install_params = {
   }, 
   'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1'
 }
+

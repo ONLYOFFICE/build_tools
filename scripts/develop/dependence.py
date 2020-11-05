@@ -536,8 +536,13 @@ def installProgram(sName):
   return True
 
 def install_gruntcli():
-  check_npmPath()
-  return os.system('npm install -g grunt-cli')
+  if (host_platform == 'windows'):
+    check_npmPath()
+    install_command = 'npm install -g grunt-cli'
+  else:
+    install_command = 'sudo npm install -g grunt-cli'
+
+  return os.system(install_command)
 
 def install_mysqlserver():
   if (host_platform == 'windows'):

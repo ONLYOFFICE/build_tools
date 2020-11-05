@@ -402,7 +402,7 @@ def check_MySQLConfig(mysqlPath = ''):
 
   if (base.run_command(mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find('onlyoffice') == -1):
     print('Database onlyoffice not found')
-    creatdb_path = base.get_script_dir() + "/schema/mysql/createdb.sql"
+    creatdb_path = base.get_script_dir() + "develop/schema/mysql/createdb.sql"
     result = execMySQLScript(mysqlPath, creatdb_path)
   if (base.run_command(mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';" + '"')['stdout'].find('mysql_native_password') == -1):
     print('Password encryption is not valid')

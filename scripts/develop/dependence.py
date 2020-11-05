@@ -173,7 +173,7 @@ def check_rabbitmq():
       print('RabbitMQ is installed')
       return dependence
   else:
-    result = base.run_command('service rabbitqm-server status')['stdout']
+    result = base.run_command('service rabbitmq-server status')['stdout']
     if (result != ''):
       print('RabbitMQ is installed')
       return dependence
@@ -612,4 +612,5 @@ install_params = {
   }, 
   'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1'
 }
+
 

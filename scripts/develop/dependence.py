@@ -4,10 +4,12 @@ import os
 import base
 import subprocess
 
-if (sys.version_info[0] >= 3):
-  import winreg
-else:
-  import _winreg as winreg
+host_platform = base.host_platform()
+if (host_platform == 'windows'):
+  if (sys.version_info[0] >= 3):
+    import winreg
+  else:
+    import _winreg as winreg
 
 class CDependencies:
   def __init__(self):

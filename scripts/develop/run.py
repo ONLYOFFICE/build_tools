@@ -3,9 +3,13 @@ sys.path.append('../')
 sys.path.append('vendor')
 import os
 import base
-import libwindows
 import dependence
 import traceback
+
+platform = base.host_platform()
+
+if ("windows" == platform):
+  import libwindows
 
 if (sys.version_info[0] >= 3):
   unicode = str
@@ -65,8 +69,6 @@ def make(args = []):
   try:
     base.configure_common_apps()
     dependence.check_pythonPath()
-  
-    platform = base.host_platform()
   
     if ("windows" == platform):
       if not dependence.check_vc_components():

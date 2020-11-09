@@ -68,6 +68,7 @@ def make():
       return
 
   print("[fetch & build]: v8")
+  old_env = dict(os.environ)
 
   old_cur = os.getcwd()
   os.chdir(base_dir)
@@ -180,9 +181,10 @@ def make():
     base.cmd("ninja", ["-C", "out.gn/win_32/release"])
 
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
 
   make_xp()
-
   return
 
 def make_xp():
@@ -190,6 +192,7 @@ def make_xp():
     return
 
   print("[fetch & build]: v8_xp")
+  old_env = dict(os.environ)
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"
   old_cur = os.getcwd()
@@ -211,7 +214,6 @@ def make_xp():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
-  old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
     config.option("vs-path") + "/../Common7/IDE",
@@ -274,6 +276,7 @@ def make_xp():
       base.copy_files("v8/build/Debug/lib/*", "win_32/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32/debug/icudt.dll")
 
-  os.environ["PATH"] = old_path
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
   return

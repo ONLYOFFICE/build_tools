@@ -68,9 +68,9 @@ def check_dependencies():
 def make(args = []):
   try:
     base.configure_common_apps()
-    dependence.check_pythonPath()
   
     if ("windows" == platform):
+	  dependence.check_pythonPath()
       if not dependence.check_vc_components():
         sys.exit()
       if not check_dependencies():

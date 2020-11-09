@@ -70,7 +70,7 @@ def make(args = []):
     base.configure_common_apps()
   
     if ("windows" == platform):
-	  dependence.check_pythonPath()
+      dependence.check_pythonPath()
       if not dependence.check_vc_components():
         sys.exit()
       if not check_dependencies():

@@ -292,6 +292,7 @@ core_and_multimedia {
 
 # DEPENDS
 kernel.depends            = cryptopp
+unicodeconverter.depends  = kernel
 graphics.depends          = kernel unicodeconverter
 pdfwriter.depends         = kernel unicodeconverter graphics
 djvufile.depends          = kernel unicodeconverter graphics pdfwriter

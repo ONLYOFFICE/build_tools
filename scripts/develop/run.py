@@ -12,6 +12,11 @@ platform = base.host_platform()
 if ("windows" == platform):
   import libwindows
 
+platform = base.host_platform()
+
+if ("windows" == platform):
+  import libwindows
+
 if (sys.version_info[0] >= 3):
   unicode = str
 
@@ -83,9 +88,9 @@ def make(args = []):
     config.parse_defaults()
     
     base.configure_common_apps()
-    dependence.check_pythonPath()
   
     if ("windows" == platform):
+      dependence.check_pythonPath()
       if not dependence.check_vc_components():
         sys.exit()
       if not check_dependencies():

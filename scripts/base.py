@@ -884,6 +884,9 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
       delete_dir(dst_dir_path)
     create_dir(dst_dir_path)
     copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
+    if is_desktop_local:
+      for file in glob.glob(dst_dir_path + "/*.html"):
+        replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
     return
   if not is_file(src_dir_path + "/config.json"):
     return

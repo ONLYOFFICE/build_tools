@@ -83,7 +83,7 @@ def check_dependencies():
 
 def make(args = []):
   try:
-    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
+    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '0', '--update-light', '0', '--clean', '0'] + args)
 
     # parse configuration
     config.parse()

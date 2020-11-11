@@ -110,7 +110,6 @@ def make(args = []):
         if not check_dependencies():
           sys.exit()
     
-    dependence.check_gitPath()
     base.print_info('Build modules')
     base.cmd_in_dir('../../', 'python', ['make.py'])
   

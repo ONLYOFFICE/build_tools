@@ -12,11 +12,6 @@ platform = base.host_platform()
 if ("windows" == platform):
   import libwindows
 
-platform = base.host_platform()
-
-if ("windows" == platform):
-  import libwindows
-
 if (sys.version_info[0] >= 3):
   unicode = str
 
@@ -55,12 +50,18 @@ def check_dependencies():
   
   checksResult.append(dependence.check_git())
   checksResult.append(dependence.check_nodejs())
+  if (platform == 'linux'):
+    checksResult.append(dependence.check_npm())
+    checksResult.append(dependence.check_curl())
+    checksResult.append(dependence.check_7z())
   checksResult.append(dependence.check_java())
   checksResult.append(dependence.check_erlang())
   checksResult.append(dependence.check_rabbitmq())
   checksResult.append(dependence.check_gruntcli())
-  checksResult.append(dependence.check_buildTools())
+  if (platform == 'windows'):
+    checksResult.append(dependence.check_buildTools())
   checksResult.append(dependence.check_mysqlServer())
+  #checksResult.append(dependence.check_postgreSQL())
   
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -74,7 +75,11 @@ def check_dependencies():
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
     install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
-    code = libwindows.sudo(unicode(sys.executable), install_args)
+    if (platform == 'windows'):
+      code = libwindows.sudo(unicode(sys.executable), install_args)
+    else:
+      dependence.get_updates()
+      base.cmd_in_dir('./', 'python', ['install.py'] + install_args[1:])
   
   return dependence.check_MySQLConfig(checksResult.mysqlPath)
 
@@ -89,15 +94,20 @@ def make(args = []):
     
     base.configure_common_apps()
   
-    if ("windows" == platform):
-      dependence.check_pythonPath()
-      if not dependence.check_vc_components():
-        sys.exit()
-      if not check_dependencies():
-        sys.exit()
-      restart_win_rabbit()
-    elif ("mac" == platform):
+    if ("mac" == platform):
       start_mac_services()
+    else:
+      if ("windows" == platform):
+        dependence.check_pythonPath()
+        dependence.check_gitPath()
+        if not dependence.check_vc_components():
+          sys.exit()
+        if not check_dependencies():
+          sys.exit()
+        restart_win_rabbit()
+      else:
+        if not check_dependencies():
+          sys.exit()
     
     dependence.check_gitPath()
     base.print_info('Build modules')

@@ -46,7 +46,7 @@ def run_integration_example():
 
 def check_dependencies():
   checksResult = dependence.CDependencies()
-  
+
   checksResult.append(dependence.check_git())
   checksResult.append(dependence.check_nodejs())
   if (platform == 'linux'):
@@ -59,7 +59,9 @@ def check_dependencies():
   checksResult.append(dependence.check_gruntcli())
   if (platform == 'windows'):
     checksResult.append(dependence.check_buildTools())
-  checksResult.append(dependence.check_mysqlServer())
+  #checksResult.append(dependence.check_mysqlServer())
+  checksResult.append(dependence.check_postgreSQL())
+
   
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -76,10 +78,11 @@ def check_dependencies():
     if (platform == 'windows'):
       code = libwindows.sudo(unicode(sys.executable), install_args)
     else:
-      dependence.install_updates()
+      dependence.get_updates()
       base.cmd_in_dir('./', 'python', ['install.py'] + install_args[1:])
   
-  return dependence.check_MySQLConfig(checksResult.mysqlPath)
+  #return dependence.check_MySQLConfig(checksResult.mysqlPath)
+  return dependence.check_postgreConfig(checksResult.postgrePath)
 
 def make(args = []):
   try:

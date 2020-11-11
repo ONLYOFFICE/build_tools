@@ -82,6 +82,7 @@ def check_dependencies():
       base.cmd_in_dir('./', 'python', ['install.py'] + install_args[1:])
   
   return dependence.check_MySQLConfig(checksResult.mysqlPath)
+  #return dependence.check_postgreConfig(checksResult.postgrePath)
 
 def make(args = []):
   try:

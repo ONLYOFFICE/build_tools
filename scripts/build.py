@@ -13,7 +13,7 @@ def make_pro_file(makefiles_dir, pro_file):
     print("------------------------------------------")
     print("BUILD_PLATFORM: " + platform)
     print("------------------------------------------")
-    old_env = os.environ.copy()
+    old_env = dict(os.environ)
 
     # if you need change output libraries path - set the env variable
     # base.set_env("DESTDIR_BUILD_OVERRIDE", os.getcwd() + "/out/android/" + config.branding() + "/mobile")
@@ -80,7 +80,8 @@ def make_pro_file(makefiles_dir, pro_file):
       qmake_bat.append("call nmake -f " + makefiles_dir + "/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)
       
-    os.environ = old_env.copy()
+    os.environ.clear()
+    os.environ.update(old_env)
 
     base.delete_file(".qmake.stash")
 

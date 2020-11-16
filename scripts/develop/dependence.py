@@ -42,19 +42,19 @@ class CDependencies:
       self.removepath.append(item)
 
   def get_install(self):
-    res = [];
+    res = []
     for item in self.install:
       res += ['--install', item]
     return res
 
   def get_uninstall(self):
-    res = [];
+    res = []
     for item in self.uninstall:
       res += ['--uninstall', item]
     return res
 
   def get_removepath(self):
-    res = [];
+    res = []
     for item in self.removepath:
       res += ['--remove-path', item]
     return res
@@ -533,17 +533,6 @@ def check_postgreConfig(postrgrePath = ''):
   postgreLoginDbUser = get_postgreLoginSrting(dbUser, postrgrePath)
   creatdb_path = base.get_script_dir() + "/../../server/schema/postgresql/createdb.sql"
 
-  if (base.run_command(postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find('onlyoffice') == -1):
-    print('Database ' + dbName + ' not found')
-    base.print_info('Creating ' + dbName + ' database...')
-    result = create_postgreDb(dbName, postrgrePath) and configureDb(dbName, creatdb_path, postrgrePath)
-  else:
-    if (base.run_command(postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"')['stdout'].find('7559 kB') != -1):
-      print('Database ' + dbName + ' not configured')
-      base.print_info('Configuring ' + dbName + ' database...')
-      result = configureDb(dbName, creatdb_path, postrgrePath) and result
-    print('Database ' + dbName + ' is valid')
-
   if (base.run_command(postgreLoginRoot + ' -c "\du ' + dbUser + '"')['stdout'].find(dbUser) != -1):
     print('User ' + dbUser + ' is exist')
     if (os.system(postgreLoginDbUser + '-c "\q"') != 0):
@@ -555,10 +544,21 @@ def check_postgreConfig(postrgrePath = ''):
     base.print_info('Creating ' + dbName + ' user...')
     result = create_postgreUser(dbUser, dbPass, postrgrePath) and result
 
+  if (base.run_command(postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find('onlyoffice') == -1):
+    print('Database ' + dbName + ' not found')
+    base.print_info('Creating ' + dbName + ' database...')
+    result = create_postgreDb(dbName, postrgrePath) and configureDb(dbUser, dbName, creatdb_path, postrgrePath)
+  else:
+    if (base.run_command(postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"')['stdout'].find('7559 kB') != -1):
+      print('Database ' + dbName + ' not configured')
+      base.print_info('Configuring ' + dbName + ' database...')
+      result = configureDb(dbName, creatdb_path, postrgrePath) and result
+    print('Database ' + dbName + ' is valid')
+
   if (base.run_command(postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
     print('User ' + dbUser + ' has no database privileges!')
     base.print_info('Setting database privileges for user ' + dbUser + '...')
-    result = set_dbPrivilegesForUser(dbName, dbName, postrgrePath) and result
+    result = set_dbPrivilegesForUser(dbUser, dbName, postrgrePath) and result
   print('User ' + dbUser + ' has database privileges')
 
   return result
@@ -582,12 +582,11 @@ def change_userPass(userName, userPass, postrgrePath = ''):
   if (os.system(postgreLoginRoot + '-c "ALTER USER ' + userName + " WITH PASSWORD '" +  userPass + "';" + '"') != 0):
     return False
   return True
-def configureDb(dbName, scriptPath, postrgrePath = ''):
+def configureDb(userName, dbName, scriptPath, postrgrePath = ''):
   print('Execution ' + scriptPath)
-  rootUser = install_params['PostgreSQL']['root']
-  postgreLoginSrt = get_postgreLoginSrting(rootUser, postrgrePath)
+  postgreLoginSrt = get_postgreLoginSrting(userName, postrgrePath)
 
-  code = subprocess.call(postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  code = os.system(postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"')
   if (code != 0):
     print('Execution failed!')
     return False

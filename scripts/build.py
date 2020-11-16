@@ -96,10 +96,10 @@ def make():
     if (config.branding() != ""):
       replace_path_lib = "../../../build/" + config.branding() + "/lib/"
     # replace
-    if (replace_path_lib != "")
+    if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)
     base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
     # restore
-    if (replace_path_lib != "")
+    if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")
   return

@@ -1,11 +1,14 @@
 import sys
-sys.path.append('../')
+sys.path.append('vendor')
+sys.path.append('..')
 import os
 import base
 import subprocess
+import config
 
-host_platform = base.host_platform()
-if (host_platform == 'windows'):
+platform = base.host_platform()
+if (platform == 'windows'):
+  import libwindows
   if (sys.version_info[0] >= 3):
     import winreg
   else:
@@ -56,6 +59,40 @@ class CDependencies:
     for item in self.removepath:
       res += ['--remove-path', item]
     return res
+    
+def check_dependencies():
+  if ("windows" != platform):
+    return True
+  
+  if not check_vc_components():
+    return False
+  
+  checksResult = CDependencies()
+  
+  checksResult.append(check_git())
+  checksResult.append(check_nodejs())
+  checksResult.append(check_java())
+  checksResult.append(check_erlang())
+  checksResult.append(check_rabbitmq())
+  checksResult.append(check_gruntcli())
+  checksResult.append(check_buildTools())
+  checksResult.append(check_mysqlServer())
+  
+  server_addons = []
+  if (config.option("server-addons") != ""):
+    server_addons = config.option("server-addons").rsplit(", ")
+  if ("server-lockstorage" in server_addons):
+    checksResult.append(check_redis())
+  
+  if (len(checksResult.install) > 0):
+    install_args = ['install.py']
+    install_args += checksResult.get_uninstall()
+    install_args += checksResult.get_removepath()
+    install_args += checksResult.get_install()
+    install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
+    code = libwindows.sudo(unicode(sys.executable), install_args)
+  
+  return check_MySQLConfig(checksResult.mysqlPath)
     
 def check_pythonPath():
   path = base.get_env('PATH')

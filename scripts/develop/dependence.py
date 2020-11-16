@@ -487,7 +487,7 @@ downloads_list = {
   'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
   'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
   'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
-  'Redis': 'https://github.com/microsoftarchive/redis/releases/download/win-3.0.504/Redis-x64-3.0.504.msi'
+  'Redis': 'https://github.com/tporadowski/redis/releases/download/v5.0.9/Redis-x64-5.0.9.msi'
 }
 install_special = {
   'GruntCli': install_gruntcli,

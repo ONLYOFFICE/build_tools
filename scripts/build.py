@@ -90,5 +90,16 @@ def make():
   is_no_brandind_build = base.is_file("config")
   make_pro_file("makefiles", "build.pro")
   if config.check_option("module", "builder") and base.is_windows() and is_no_brandind_build:
+    # check replace
+    replace_path_lib = ""
+    replace_path_lib_file = os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/docbuilder.h"
+    if (config.branding() != ""):
+      replace_path_lib = "../../../build/" + config.branding() + "/lib/"
+    # replace
+    if (replace_path_lib != "")
+      base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)
     base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
+    # restore
+    if (replace_path_lib != "")
+      base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")
   return

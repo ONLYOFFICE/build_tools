@@ -24,6 +24,7 @@ class CDependencies:
     self.uninstall = []
     self.removepath = []
     self.mysqlPath = ''
+    self.postgrePath = ''
 
   def append(self, oCdependencies):
     for item in oCdependencies.install:
@@ -33,6 +34,7 @@ class CDependencies:
     for item in oCdependencies.removepath:
       self.append_removepath(item)
     self.mysqlPath = oCdependencies.mysqlPath
+    self.postgrePath = oCdependencies.postgrePath
 
   def append_install(self, item):
     if (item not in self.install):
@@ -84,7 +86,8 @@ def check_dependencies():
   checksResult.append(check_gruntcli())
   if (host_platform == 'windows'):
     checksResult.append(check_buildTools())
-  checksResult.append(check_mysqlServer())
+  #checksResult.append(dependence.check_mysqlServer())
+  checksResult.append(check_postgreSQL())
 
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -104,7 +107,8 @@ def check_dependencies():
       get_updates()
       base.cmd_in_dir('./scripts/develop/', 'python', install_args)
 
-  return check_MySQLConfig(checksResult.mysqlPath)
+  #return dependence.check_MySQLConfig(checksResult.mysqlPath)
+  return check_postgreConfig(checksResult.postgrePath)
 
 def check_pythonPath():
   path = base.get_env('PATH')
@@ -490,6 +494,166 @@ def uninstall_mysqlserver():
 
   return  code
 
+def get_postrgre_path_to_bin(postrgrePath = ''):
+  if (host_platform == 'windows'):
+    if (postrgrePath == ''):
+      postrgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13\\'
+    #return '"' + postrgrePath + '\\bin\\psql"'
+    return 'cd "' + postrgrePath + '\\bin"'
+  else:
+    return 'psql'
+def get_postgreLoginSrting(userName, postrgrePath = ''):
+  if (host_platform == 'windows'):
+    return get_postrgre_path_to_bin(postrgrePath) + ' && psql -U' + userName + ' '
+  return 'PGPASSWORD="' + install_params['PostgreSQL']['dbPass'] + '" ' + get_postrgre_path_to_bin(postrgrePath) + ' -U' + userName + ' -hlocalhost '
+def get_postgreSQLInfoByFlag(flag):
+  arrInfo = []
+
+  try:
+    aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+    aKey = winreg.OpenKey(aReg, "SOFTWARE\\PostgreSQL\\Installations", 0, winreg.KEY_READ | flag)
+
+    count_subkey = winreg.QueryInfoKey(aKey)[0]
+
+    for i in range(count_subkey):
+      PostgreSQLsubkey_name = winreg.EnumKey(aKey, i)
+      PostgreSQLsubkey = winreg.OpenKey(aKey, PostgreSQLsubkey_name)
+      dictInfo = {}
+      dictInfo['Location']  = winreg.QueryValueEx(PostgreSQLsubkey, 'Base Directory')[0]
+      dictInfo['Version'] = winreg.QueryValueEx(PostgreSQLsubkey, 'CLT_Version')[0]
+      dictInfo['DataLocation'] = winreg.QueryValueEx(PostgreSQLsubkey, 'Data Directory')[0]
+      arrInfo.append(dictInfo)
+  except:
+    pass
+
+  return arrInfo
+def get_postgreSQLInfo():
+  return get_postgreSQLInfoByFlag(winreg.KEY_WOW64_32KEY) + get_postgreSQLInfoByFlag(winreg.KEY_WOW64_64KEY)
+def check_postgreSQL():
+  base.print_info('Check PostgreSQL')
+
+  dependence = CDependencies()
+
+  if (host_platform == 'linux'):
+    postgreLoginSrt = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
+    result = os.system(postgreLoginSrt + ' -c "\q"')
+
+    if (result != 0):
+      print('Valid PostgreSQL not found!')
+      dependence.append_install('PostgreSQL')
+      dependence.append_uninstall('PostgreSQL')
+    else:
+      print('PostreSQL is installed')
+      dependence.postgrePath = 'psql'
+    return dependence
+
+  arrInfo = get_postgreSQLInfo()
+  base.set_env('PGPASSWORD', install_params['PostgreSQL']['dbPass'])
+  for info in arrInfo:
+    if (base.is_dir(info['Location']) == False):
+      continue
+
+    postgreLoginSrt = get_postgreLoginSrting(install_params['PostgreSQL']['root'], info['Location'])
+    postgre_full_name = 'PostgreSQL ' + info['Version'][:2] + ' '
+    connectionResult = base.run_command(postgreLoginSrt + ' -c "SELECT setting FROM pg_settings WHERE name = ' + "'port'" + ';"')['stdout']
+
+    if (connectionResult.find(install_params['PostgreSQL']['dbPort']) != -1):
+      print(postgre_full_name + 'configuration is valid')
+      dependence.postgrePath = info['Location']
+      return dependence
+    print(postgre_full_name + 'configuration is not valid')
+
+  print('Valid PostgreSQL not found')
+
+  dependence.append_uninstall('PostgreSQL')
+  dependence.append_install('PostgreSQL')
+
+  for info in arrInfo:
+    dependence.append_removepath(info['DataLocation'])
+
+  return dependence
+def check_postgreConfig(postrgrePath = ''):
+  result = True
+  if (host_platform == 'windows'):
+    base.set_env('PGPASSWORD', install_params['PostgreSQL']['dbPass'])
+
+  rootUser = install_params['PostgreSQL']['root']
+  dbUser = install_params['PostgreSQL']['dbUser']
+  dbName = install_params['PostgreSQL']['dbName']
+  dbPass = install_params['PostgreSQL']['dbPass']
+  postgreLoginRoot = get_postgreLoginSrting(rootUser, postrgrePath)
+  postgreLoginDbUser = get_postgreLoginSrting(dbUser, postrgrePath)
+  creatdb_path = base.get_script_dir() + "/../../server/schema/postgresql/createdb.sql"
+
+  if (base.run_command(postgreLoginRoot + ' -c "\du ' + dbUser + '"')['stdout'].find(dbUser) != -1):
+    print('User ' + dbUser + ' is exist')
+    if (os.system(postgreLoginDbUser + '-c "\q"') != 0):
+      print('Invalid user password!')
+      base.print_info('Changing password...')
+      result = change_userPass(dbUser, dbPass, postrgrePath) and result
+  else:
+    print('User ' + dbUser + ' not exist!')
+    base.print_info('Creating ' + dbName + ' user...')
+    result = create_postgreUser(dbUser, dbPass, postrgrePath) and result
+
+  if (base.run_command(postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find('onlyoffice') == -1):
+    print('Database ' + dbName + ' not found')
+    base.print_info('Creating ' + dbName + ' database...')
+    result = create_postgreDb(dbName, postrgrePath) and configureDb(dbUser, dbName, creatdb_path, postrgrePath)
+  else:
+    if (base.run_command(postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"')['stdout'].find('7559 kB') != -1):
+      print('Database ' + dbName + ' not configured')
+      base.print_info('Configuring ' + dbName + ' database...')
+      result = configureDb(dbName, creatdb_path, postrgrePath) and result
+    print('Database ' + dbName + ' is valid')
+
+  if (base.run_command(postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
+    print('User ' + dbUser + ' has no database privileges!')
+    base.print_info('Setting database privileges for user ' + dbUser + '...')
+    result = set_dbPrivilegesForUser(dbUser, dbName, postrgrePath) and result
+  print('User ' + dbUser + ' has database privileges')
+
+  return result
+def create_postgreDb(dbName, postrgrePath = ''):
+  postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'], postrgrePath)
+  if (os.system(postgreLoginUser + '-c "CREATE DATABASE ' + dbName +';"') != 0):
+    return False
+  return True
+def set_dbPrivilegesForUser(userName, dbName, postrgrePath = ''):
+  postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'], postrgrePath)
+  if (os.system(postgreLoginUser + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + userName + ';"') != 0):
+    return False
+  return True
+def create_postgreUser(userName, userPass, postrgrePath = ''):
+  postgreLoginRoot = get_postgreLoginSrting(install_params['PostgreSQL']['root'], postrgrePath)
+  if (os.system(postgreLoginRoot + '-c "CREATE USER ' + userName + ' WITH password ' + "'" + userPass + "'" + ';"') != 0):
+    return False
+  return True
+def change_userPass(userName, userPass, postrgrePath = ''):
+  postgreLoginRoot = get_postgreLoginSrting(install_params['PostgreSQL']['root'], postrgrePath)
+  if (os.system(postgreLoginRoot + '-c "ALTER USER ' + userName + " WITH PASSWORD '" +  userPass + "';" + '"') != 0):
+    return False
+  return True
+def configureDb(userName, dbName, scriptPath, postrgrePath = ''):
+  print('Execution ' + scriptPath)
+  postgreLoginSrt = get_postgreLoginSrting(userName, postrgrePath)
+
+  code = os.system(postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"')
+  if (code != 0):
+    print('Execution failed!')
+    return False
+  print('Execution completed')
+  return True
+def uninstall_postgresql():
+  code = os.system('sudo DEBIAN_FRONTEND=noninteractive apt-get purge --auto-remove postgresql* -y')
+  code = os.system('sudo rm -rf /var/lib/postgresql/') and code
+  code = os.system('sudo rm -rf /var/log/postgresql/') and code
+  code = os.system('sudo rm -rf /etc/postgresql/') and code
+  code = os.system('sudo userdel -r postgres') and code
+  code = os.system('sudo groupdel postgres') and code
+
+  return  code
+
 def get_programUninstallsByFlag(sName, flag):
   info = []
   aReg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
@@ -630,6 +794,27 @@ def install_redis():
 
   return installProgram('Redis')
 
+def install_postgresql():
+  if (host_platform == 'windows'):
+    download_url = downloads_list['PostgreSQL']
+    file_name = "install.exe"
+    base.download(download_url, file_name)
+    base.print_info("Install PostgreSQL...")
+    install_command = file_name + ' --mode unattended --unattendedmodeui none --superpassword ' + install_params['PostgreSQL']['dbPass'] + ' --serverport ' + install_params['PostgreSQL']['dbPort']
+  else:
+    base.print_info("Install PostgreSQL...")
+    install_command = 'sudo apt install postgresql -y'
+
+  print(install_command)
+  code = os.system(install_command)
+
+  if (host_platform == 'windows'):
+    base.delete_file(file_name)
+  else:
+    code = os.system('sudo -i -u postgres psql -c "ALTER USER postgres PASSWORD ' + "'" + install_params['PostgreSQL']['dbPass'] + "'" + ';"') and code
+
+  return code
+
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
@@ -640,7 +825,8 @@ downloads_list = {
     'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
     'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
     'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
-    'Redis': 'https://github.com/tporadowski/redis/releases/download/v5.0.9/Redis-x64-5.0.9.msi'
+    'Redis': 'https://github.com/tporadowski/redis/releases/download/v5.0.9/Redis-x64-5.0.9.msi',
+    'PostgreSQL': 'https://sbp.enterprisedb.com/getfile.jsp?fileid=12851'
   },
   'Linux': {
     'Git': 'git',
@@ -651,16 +837,19 @@ downloads_list = {
     'Redis': 'redis-server',
     'Erlang': 'erlang',
     'Curl': 'curl',
-    '7z': 'p7zip-full'
+    '7z': 'p7zip-full',
+    'PostgreSQL': 'postgresql'
   }
 }
 install_special = {
   'GruntCli': install_gruntcli,
   'MySQLServer': install_mysqlserver,
-  'RedisServer' : install_redis
+  'RedisServer' : install_redis,
+  'PostgreSQL': install_postgresql
 }
 uninstall_special = {
-  'MySQLServer': uninstall_mysqlserver
+  'MySQLServer': uninstall_mysqlserver,
+  'PostgreSQL' : uninstall_postgresql
 }
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
@@ -672,7 +861,15 @@ install_params = {
 	'pass': 'onlyoffice',
 	'version': '8.0.21'
   },
-  'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1'
+  'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1',
+  'PostgreSQL': {
+    'root': 'postgres',
+    'dbPort': '5432',
+    'dbName': 'onlyoffice',
+    'dbUser': 'onlyoffice',
+    'dbPass': 'onlyoffice'
+  }
 }
-uninstall_params = {}
-
+uninstall_params = {
+  'PostgreSQL': '--mode unattended --unattendedmodeui none'
+}

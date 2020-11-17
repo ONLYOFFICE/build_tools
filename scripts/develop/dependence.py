@@ -103,7 +103,7 @@ def check_dependencies():
       code = libwindows.sudo(unicode(sys.executable), install_args)
     else:
       get_updates()
-      base.cmd_in_dir('./', 'python', ['install.py'] + install_args[1:])
+      base.cmd_in_dir('./scripts/develop/', 'python', ['install.py'] + install_args[1:])
 
   #return dependence.check_MySQLConfig(checksResult.mysqlPath)
   return check_postgreConfig(checksResult.postgrePath)

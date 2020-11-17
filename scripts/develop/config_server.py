@@ -92,12 +92,7 @@ def make():
   addon_base_path = "../../../"
   server_config = {}
   static_content = {}
-  sql = {
-  "type" : "",
-  "dbPort" : "",
-  "dbUser" : "",
-  "dbPass" : ""
-  }
+  sql = {}
   
   server_addons = []
   if (config.option("server-addons") != ""):

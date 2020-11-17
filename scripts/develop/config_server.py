@@ -114,8 +114,8 @@ def make():
     
   if (config.option("external-folder") != ""):
     external_folder = config.option("external-folder")
-    static_content["/sdkjs"] = {"path": addon_base_path + plug_in_folders + "/sdkjs"}
-    static_content["/web-apps"] = {"path": addon_base_path + plug_in_folders + "/web-apps"}
+    static_content["/sdkjs"] = {"path": addon_base_path + external_folder + "/sdkjs"}
+    static_content["/web-apps"] = {"path": addon_base_path + external_folder + "/web-apps"}
     
   if (config.option("sql-type") != ""):
     sql["type"] = config.option("sql-type")

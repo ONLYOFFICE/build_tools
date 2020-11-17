@@ -5,6 +5,9 @@ import base
 import os
 import json
 
+def get_core_url(arch, branch):
+  return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + branch + "/latest/" + arch + "/core.7z"
+
 def make():
   git_dir = base.get_script_dir() + "/../.."
   old_cur = os.getcwd()
@@ -21,8 +24,12 @@ def make():
     arch = "x86"
     arch2 = "_32"
 
-  url = "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + config.option("branch") + "/latest/" + arch + "/core.7z"
+  url = get_core_url(arch, config.option("branch"))
   data_url = base.get_file_last_modified_url(url)
+  if (data_url == "" and config.option("branch") != "develop"):
+    url = get_core_url(arch, "develop")
+    data_url = base.get_file_last_modified_url(url)
+  
   old_data_url = base.readFile("./core.7z.data")
 
   if (data_url != "" and old_data_url != data_url):

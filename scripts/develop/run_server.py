@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 sys.path.append('../')
 import os
@@ -83,3 +85,7 @@ def make(args = []):
     pass
   except:
     input("Unexpected error. " + traceback.format_exc() + "Press Enter to continue...")
+
+if __name__ == "__main__":
+  make(sys.argv[1:])
+

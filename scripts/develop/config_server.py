@@ -5,9 +5,6 @@ import base
 import os
 import json
 
-def get_core_url(arch, branch):
-  return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + branch + "/latest/" + arch + "/core.7z"
-
 def make():
   git_dir = base.get_script_dir() + "/../.."
   old_cur = os.getcwd()
@@ -24,12 +21,8 @@ def make():
     arch = "x86"
     arch2 = "_32"
 
-  url = get_core_url(arch, config.option("branch"))
+  url = "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + config.option("branch") + "/latest/" + arch + "/core.7z"
   data_url = base.get_file_last_modified_url(url)
-  if (data_url == "" and config.option("branch") != "develop"):
-    url = get_core_url(arch, "develop")
-    data_url = base.get_file_last_modified_url(url)
-  
   old_data_url = base.readFile("./core.7z.data")
 
   if (data_url != "" and old_data_url != data_url):
@@ -92,6 +85,12 @@ def make():
   addon_base_path = "../../../"
   server_config = {}
   static_content = {}
+  sql = {
+  "type" : "",
+  "dbPort" : "",
+  "dbUser" : "",
+  "dbPass" : ""
+  }
   
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -111,10 +110,24 @@ def make():
   for addon in web_apps_addons:
     static_content["/" + addon] = {"path": addon_base_path + addon}
 
+  if (config.option("sql-type") != ""):
+    sql["type"] = config.option("sql-type")
+  if (config.option("db-port") != ""):
+    sql["dbPort"] = config.option("db-port")
+  if (config.option("db-user") != ""):
+    sql["dbUser"] = config.option("db-user")
+  if (config.option("db-pass") != ""):
+    sql["dbPass"] = config.option("db-pass")
+      
+  if (config.option("plug-in folders") != ""):
+    plug_in_folders = config.option("plug-in folders")
+    static_content["/sdkjs"] = {"path": addon_base_path + plug_in_folders + "/sdkjs"}
+    static_content["/web-apps"] = {"path": addon_base_path + plug_in_folders + "/web-apps"}
+    
   server_config["static_content"] = static_content
-  
+      
   json_file = git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json"
-  base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config}}}, indent=2))
+  base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config, "sql": sql}}}, indent=2))
 
   os.chdir(old_cur)
   return

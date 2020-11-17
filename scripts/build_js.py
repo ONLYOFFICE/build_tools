@@ -110,10 +110,10 @@ def build_js_develop(root_dir):
   if (plug_in_folders != ""):
     plug_in_folders = "/" + plug_in_folders
     
-  _run_npm(root_dir + "/sdkjs/build")
-  _run_grunt(root_dir + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
-  _run_grunt(root_dir + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
-  _run_npm(root_dir + "/web-apps/build")
-  _run_npm(root_dir + "/web-apps/build/sprites")
-  _run_grunt(root_dir + "/web-apps/build/sprites", [])
+  _run_npm(root_dir + plug_in_folders + "/sdkjs/build")
+  _run_grunt(root_dir + plug_in_folders + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
+  _run_grunt(root_dir + plug_in_folders + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
+  _run_npm(root_dir + plug_in_folders + "/web-apps/build")
+  _run_npm(root_dir + plug_in_folders + "/web-apps/build/sprites")
+  _run_grunt(root_dir + plug_in_folders + "/web-apps/build/sprites", [])
   return

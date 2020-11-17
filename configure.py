@@ -18,6 +18,7 @@ parser.add_option("--platform", action="store", type="string", dest="platform", 
 parser.add_option("--config", action="store", type="string", dest="config", default="", help="provides ability to specify additional parameters for qmake")
 parser.add_option("--qt-dir", action="store", type="string", dest="qt-dir", default="", help="defines qmake directory path. qmake can be found in qt-dir/compiler/bin directory")
 parser.add_option("--qt-dir-xp", action="store", type="string", dest="qt-dir-xp", default="", help="defines qmake directory path for Windows XP. qmake can be found in 'qt-dir/compiler/bin directory")
+parser.add_option("--external-folder", action="store", type="string", dest="external-folder", default="", help="defines a directory with external folder")
 parser.add_option("--sql-type", action="store", type="string", dest="sql-type", default="", help="defines the sql type wich will be used")
 parser.add_option("--db-port", action="store", type="string", dest="db-port", default="", help="defines the sql db-port wich will be used")
 parser.add_option("--db-user", action="store", type="string", dest="db-user", default="", help="defines the sql db-user wich will be used")

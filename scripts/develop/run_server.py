@@ -58,7 +58,7 @@ def make(args = []):
     branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
     
     base.print_info('Build modules')
-    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
+    base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', 'develop', '--develop', '1', '--module', 'server', '--update', '0', '--update-light', '0', '--clean', '0', '--plug-in folders', 'plug-in folders'] + args)
     base.cmd_in_dir('../../', 'python', ['make.py'])
   
     run_integration_example()

@@ -23,8 +23,7 @@ class CDependencies:
     self.install = []
     self.uninstall = []
     self.removepath = []
-    self.mysqlPath = ''
-    self.postgrePath = ''
+    self.sqlPath = ''
 
   def append(self, oCdependencies):
     for item in oCdependencies.install:
@@ -33,8 +32,7 @@ class CDependencies:
       self.append_uninstall(item)
     for item in oCdependencies.removepath:
       self.append_removepath(item)
-    self.mysqlPath = oCdependencies.mysqlPath
-    self.postgrePath = oCdependencies.postgrePath
+    self.sqlPath = oCdependencies.sqlPath
 
   def append_install(self, item):
     if (item not in self.install):
@@ -86,8 +84,10 @@ def check_dependencies():
   checksResult.append(check_gruntcli())
   if (host_platform == 'windows'):
     checksResult.append(check_buildTools())
-  #checksResult.append(dependence.check_mysqlServer())
-  checksResult.append(check_postgreSQL())
+  if (config.option("server-addons") == 'mysql'):
+    checksResult.append(dependence.check_mysqlServer())
+  else:
+    checksResult.append(check_postgreSQL())
 
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -100,15 +100,15 @@ def check_dependencies():
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
-    install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
     if (host_platform == 'windows'):
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
       get_updates()
       base.cmd_in_dir('./scripts/develop/', 'python', install_args)
 
-  #return dependence.check_MySQLConfig(checksResult.mysqlPath)
-  return check_postgreConfig(checksResult.postgrePath)
+  if (config.option("server-addons") == 'mysql'):
+    return dependence.check_MySQLConfig(checksResult.sqlPath)
+  return check_postgreConfig(checksResult.sqlPath)
 
 def check_pythonPath():
   path = base.get_env('PATH')
@@ -379,12 +379,11 @@ def check_7z():
   return dependence
 
 def get_mysql_path_to_bin(mysqlPath = ''):
-  if (host_platform == 'windows'):
+  if (host_platform != 'windows'):
     if (mysqlPath == ''):
       mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
     return '"'+ mysqlPath + 'bin\\mysql"'
-  else:
-    return 'mysql'
+  return 'mysql'
 def get_mysqlLoginSrting(mysqlPath = ''):
   return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
 def get_mysqlServersInfo():
@@ -421,7 +420,7 @@ def check_mysqlServer():
       dependence.append_install('MySQLServer')
       dependence.append_uninstall('mysql-server')
     else:
-      dependence.mysqlPath = 'mysql'
+      dependence.sqlPath = 'mysql'
     return dependence
 
   arrInfo = get_mysqlServersInfo()
@@ -435,7 +434,7 @@ def check_mysqlServer():
     connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
     if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
       print(mysql_full_name + 'configuration is valid')
-      dependence.mysqlPath = info['Location']
+      dependence.sqlPath = info['Location']
       return dependence
     print(mysql_full_name + 'configuration is not valid')
 
@@ -544,7 +543,7 @@ def check_postgreSQL():
       dependence.append_uninstall('PostgreSQL')
     else:
       print('PostreSQL is installed')
-      dependence.postgrePath = 'psql'
+      dependence.sqlPath = 'psql'
     return dependence
 
   arrInfo = get_postgreSQLInfo()
@@ -559,7 +558,7 @@ def check_postgreSQL():
 
     if (connectionResult.find(install_params['PostgreSQL']['dbPort']) != -1):
       print(postgre_full_name + 'configuration is valid')
-      dependence.postgrePath = info['Location']
+      dependence.sqlPath = info['Location']
       return dependence
     print(postgre_full_name + 'configuration is not valid')
 

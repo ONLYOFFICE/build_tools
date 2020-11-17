@@ -44,11 +44,11 @@ def make(args = []):
     platform = base.host_platform()
     if ("windows" == platform):
       dependence.check_pythonPath()
+      dependence.check_gitPath()
       restart_win_rabbit()
     elif ("mac" == platform):
       start_mac_services()
-    
-    dependence.check_gitPath()
+
     branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
     
     base.print_info('Build modules')

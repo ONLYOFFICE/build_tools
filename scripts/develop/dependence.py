@@ -98,9 +98,8 @@ def check_dependencies():
     install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
     if (host_platform == 'windows'):
       code = libwindows.sudo(unicode(sys.executable), install_args)
-    else:
+    elif (host_platform == 'linux'):
       get_updates()
-      print(os.getcwd())
       base.cmd_in_dir('./scripts/develop/', 'python', ['install.py'] + install_args[1:])
 
   return check_MySQLConfig(checksResult.mysqlPath)
@@ -155,7 +154,7 @@ def check_nodejs():
     print('Installed Node.js version must be 8.x to 10.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
-    else:
+    elif (host_platform == 'linux'):
       dependence.append_uninstall('nodejs')
     dependence.append_install('Node.js')
     return dependence
@@ -190,9 +189,10 @@ def check_erlang():
     erlangHome = os.getenv("ERLANG_HOME")
     if (erlangHome is not None):
       erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-  else:
+  elif (host_platform == 'linux'):
     erlangBitness = base.run_command('erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-
+  else:
+    return dependence
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence
@@ -220,12 +220,13 @@ def check_rabbitmq():
     if (result.find('RabbitMQ') != -1):
       print('RabbitMQ is installed')
       return dependence
-  else:
+  elif (host_platform == 'linux'):
     result = base.run_command('service rabbitmq-server status')['stdout']
     if (result != ''):
       print('RabbitMQ is installed')
       return dependence
-
+  else:
+    return dependence
   print('RabbitMQ not found')
 
   if (host_platform == 'windows'):
@@ -261,14 +262,15 @@ def check_redis():
       return dependence
 
     redis_cli = find_redis(os.environ['PROGRAMW6432']) or find_redis(os.environ['ProgramFiles(x86)'])
-  else:
+  elif (host_platform == 'linux'):
     checkService = base.run_command('service redis-server status')['stderr']
     if (checkService == ''):
       print('Redis not found')
       dependence.append_install('Redis')
       return dependence
     redis_cli = 'redis-cli'
-
+  else:
+    return dependence
   if (redis_cli == None):
     print('Redis not found in default folder')
     dependence.append_uninstall('Redis on Windows')
@@ -408,7 +410,7 @@ def check_mysqlServer():
   base.print_info('Check MySQL Server')
   dependence = CDependencies()
 
-  if (host_platform == 'linux'):
+  if (host_platform != 'windows'):
     mysqlLoginSrt = get_mysqlLoginSrting()
     result = os.system(mysqlLoginSrt + ' -e "exit"')
     if (result != 0):
@@ -524,12 +526,13 @@ def uninstallProgram(sName):
           info = '"' + info + '" ' + uninstall_params[sName]
         else:
           info = '"' + info + '" /S'
-  else:
+  elif (host_platform == 'linux'):
     if (sName in uninstall_special):
       code = uninstall_special[sName]()
     else:
       info = 'sudo apt-get remove --purge ' + sName + '* -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
-
+  else:
+    return False
   if (info != ''):
     print("Uninstalling " + sName + "...")
     print(info)
@@ -577,7 +580,7 @@ def installProgram(sName):
       print(install_command)
       code = os.system(install_command)
       base.delete_file(file_name)
-  else:
+  elif (host_platform == 'linux'):
     if (sName in install_special):
       code = install_special[sName]()
     else:
@@ -589,7 +592,8 @@ def installProgram(sName):
       install_command = 'yes | sudo apt install ' + downloads_list['Linux'][sName]
       print(install_command)
       code = os.system(install_command)
-
+  else:
+    return False
   if (code != 0):
     print("Installing was failed!")
     return False
@@ -672,4 +676,5 @@ install_params = {
   },
   'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1'
 }
+uninstall_params = {}
 

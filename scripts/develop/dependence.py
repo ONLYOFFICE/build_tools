@@ -100,7 +100,7 @@ def check_dependencies():
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
       get_updates()
-      base.cmd_in_dir('./scripts/develop/', 'python', ['install.py'] + install_args[1:])
+      base.cmd_in_dir('./scripts/develop/', 'python', install_args)
 
   return check_MySQLConfig(checksResult.mysqlPath)
 

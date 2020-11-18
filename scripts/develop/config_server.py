@@ -112,6 +112,11 @@ def make():
   for addon in web_apps_addons:
     static_content["/" + addon] = {"path": addon_base_path + addon}
     
+  if (config.option("external-folder") != ""):
+    external_folder = config.option("external-folder")
+    static_content["/sdkjs"] = {"path": addon_base_path + external_folder + "/sdkjs"}
+    static_content["/web-apps"] = {"path": addon_base_path + external_folder + "/web-apps"}
+    
   if (config.option("sql-type") != ""):
     sql["type"] = config.option("sql-type")
   if (config.option("db-port") != ""):

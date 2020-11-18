@@ -182,18 +182,19 @@ def check_java():
   dependence.append_install('Java')
   return dependence
 
-def check_erlang():
-  dependence = CDependencies()
-  base.print_info('Check installed Erlang')
-  erlangBitness = ''
-
+def get_erlang_path_to_bit():
   if (host_platform == 'windows'):
     erlangHome = os.getenv("ERLANG_HOME")
     if (erlangHome is not None):
-      erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-  elif (host_platform == 'linux'):
-    erlangBitness = base.run_command('erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+      return '"' + erlangHome + '\\bin\\erl"'
+    return ''
+  return 'erl'
+def check_erlang():
+  dependence = CDependencies()
+  base.print_info('Check installed Erlang')
 
+  erlangBitness = base.run_command(get_erlang_path_to_bit() + ' -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+  
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence

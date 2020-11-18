@@ -67,6 +67,8 @@ class CDependencies:
 def check_dependencies():
   if (host_platform == 'windows' and not check_vc_components()):
     return  False
+  if (host_platform == 'mac'):
+    return True
 
   checksResult = CDependencies()
 
@@ -191,8 +193,7 @@ def check_erlang():
       erlangBitness = base.run_command('"' + erlangHome + '\\bin\\erl" -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
   elif (host_platform == 'linux'):
     erlangBitness = base.run_command('erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-  else:
-    return dependence
+
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence
@@ -223,10 +224,9 @@ def check_rabbitmq():
   elif (host_platform == 'linux'):
     result = base.run_command('service rabbitmq-server status')['stdout']
     if (result != ''):
-      print('RabbitMQ is installed')
+      print('Installed RabbitMQ is valid')
       return dependence
-  else:
-    return dependence
+
   print('RabbitMQ not found')
 
   if (host_platform == 'windows'):
@@ -269,8 +269,7 @@ def check_redis():
       dependence.append_install('Redis')
       return dependence
     redis_cli = 'redis-cli'
-  else:
-    return dependence
+
   if (redis_cli == None):
     print('Redis not found in default folder')
     dependence.append_uninstall('Redis on Windows')
@@ -531,8 +530,7 @@ def uninstallProgram(sName):
       code = uninstall_special[sName]()
     else:
       info = 'sudo apt-get remove --purge ' + sName + '* -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
-  else:
-    return False
+
   if (info != ''):
     print("Uninstalling " + sName + "...")
     print(info)
@@ -592,8 +590,7 @@ def installProgram(sName):
       install_command = 'yes | sudo apt install ' + downloads_list['Linux'][sName]
       print(install_command)
       code = os.system(install_command)
-  else:
-    return False
+
   if (code != 0):
     print("Installing was failed!")
     return False

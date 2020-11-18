@@ -107,7 +107,7 @@ def build_sdk_native(directory):
 def build_js_develop(root_dir):
   #_run_npm_cli(root_dir + "/sdkjs/build")
   external_folder = config.option("--external-folder")
-  if (plug_in_folders != ""):
+  if (external_folder != ""):
     external_folder = "/" + external_folder
     
   _run_npm(root_dir + external_folder + "/sdkjs/build")

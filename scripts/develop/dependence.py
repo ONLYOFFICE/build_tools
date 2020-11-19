@@ -424,7 +424,13 @@ def check_mysqlServer():
       dependence.append_install('MySQLServer')
       dependence.append_uninstall('mysql-server')
     else:
-      dependence.sqlPath = 'mysql'
+      connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
+      if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
+        print('MySQL configuration is valid')
+        dependence.sqlPath = 'mysql'
+        return dependence
+      dependence.append_install('MySQLServer')
+      dependence.append_uninstall('mysql-server')
     return dependence
 
   arrInfo = get_mysqlServersInfo()
@@ -779,6 +785,7 @@ def install_mysqlserver():
   if (host_platform == 'windows'):
     return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + 'enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
   elif (host_platform == 'linux'):
+    os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp ' + install_params['MySQLServer']['port'])['stdout'])
     code = os.system('sudo ufw enable && sudo ufw allow 22 && sudo ufw allow 3306')
     code = os.system('sudo apt-get -y install zsh htop') and code
     code = os.system('echo "mysql-server mysql-server/root_password password ' + install_params['MySQLServer']['pass'] + '" | sudo debconf-set-selections') and code

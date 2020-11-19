@@ -144,7 +144,8 @@ def make():
     if ("windows" == base.host_platform()):
       base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
     if ("mac" == base.host_platform()):
-      base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")  
+      base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
+      base.replaceInFile("v8/build/mac/find_sdk.py", "^MacOSX(10\\.\\d+)\\.sdk$", "^MacOSX(1\\d\\.\\d+)\\.sdk$")
 
   # --------------------------------------------------------------------------
   # build

@@ -82,8 +82,8 @@ def check_dependencies():
   checksResult.append(check_gruntcli())
   if (host_platform == 'windows'):
     checksResult.append(check_buildTools())
-  if (config.option("server-addons") == 'mysql'):
-    checksResult.append(dependence.check_mysqlServer())
+  if (config.option("sql-type") == 'mysql'):
+    checksResult.append(check_mysqlServer())
   else:
     checksResult.append(check_postgreSQL())
 
@@ -105,8 +105,8 @@ def check_dependencies():
       print(os.getcwd())
       base.cmd_in_dir('./scripts/develop/', 'python', ['install.py'] + install_args[1:])
 
-  if (config.option("server-addons") == 'mysql'):
-    return dependence.check_MySQLConfig(checksResult.sqlPath)
+  if (config.option("sql-type") == 'mysql'):
+    return check_MySQLConfig(checksResult.sqlPath)
   return check_postgreConfig(checksResult.sqlPath)
 
 def check_pythonPath():
@@ -377,7 +377,7 @@ def check_7z():
   return dependence
 
 def get_mysql_path_to_bin(mysqlPath = ''):
-  if (host_platform != 'windows'):
+  if (host_platform == 'windows'):
     if (mysqlPath == ''):
       mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
     return '"'+ mysqlPath + 'bin\\mysql"'

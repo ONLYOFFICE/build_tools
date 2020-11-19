@@ -106,8 +106,8 @@ def check_dependencies():
       base.cmd_in_dir('./scripts/develop/', 'python', install_args)
       get_updates()
   if (config.option("sql-type") == 'mysql'):
-  return check_postgreConfig(checksResult.sqlPath)
-    return check_MySQLConfig(checksResult.sqlPath)
+    return check_postgreConfig(checksResult.sqlPath)
+  return check_MySQLConfig(checksResult.sqlPath)
 def check_pythonPath():
   path = base.get_env('PATH')
   if (path.find(sys.exec_prefix) == -1):

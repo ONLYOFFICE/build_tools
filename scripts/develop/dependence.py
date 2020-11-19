@@ -495,6 +495,7 @@ def get_postrgre_path_to_bin(postrgrePath = ''):
   if (host_platform == 'windows'):
     if (postrgrePath == ''):
       postrgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13\\'
+    #To Do: commands for pskl work only with cmd from the directory with the executable file
     #return '"' + postrgrePath + '\\bin\\psql"'
     return 'cd "' + postrgrePath + '\\bin"'
   return 'psql'

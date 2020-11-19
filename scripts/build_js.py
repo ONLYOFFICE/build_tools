@@ -106,10 +106,14 @@ def build_sdk_native(directory):
 
 def build_js_develop(root_dir):
   #_run_npm_cli(root_dir + "/sdkjs/build")
-  _run_npm(root_dir + "/sdkjs/build")
-  _run_grunt(root_dir + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
-  _run_grunt(root_dir + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
-  _run_npm(root_dir + "/web-apps/build")
-  _run_npm(root_dir + "/web-apps/build/sprites")
-  _run_grunt(root_dir + "/web-apps/build/sprites", [])
+  external_folder = config.option("--external-folder")
+  if (external_folder != ""):
+    external_folder = "/" + external_folder
+    
+  _run_npm(root_dir + external_folder + "/sdkjs/build")
+  _run_grunt(root_dir + external_folder + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
+  _run_grunt(root_dir + external_folder + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
+  _run_npm(root_dir + external_folder + "/web-apps/build")
+  _run_npm(root_dir + external_folder + "/web-apps/build/sprites")
+  _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
   return

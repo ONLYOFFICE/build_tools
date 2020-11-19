@@ -92,6 +92,7 @@ def make():
   addon_base_path = "../../../"
   server_config = {}
   static_content = {}
+  sql = {}
   
   server_addons = []
   if (config.option("server-addons") != ""):
@@ -110,11 +111,25 @@ def make():
     web_apps_addons = config.option("web-apps-addons").rsplit(", ")
   for addon in web_apps_addons:
     static_content["/" + addon] = {"path": addon_base_path + addon}
+    
+  if (config.option("external-folder") != ""):
+    external_folder = config.option("external-folder")
+    static_content["/sdkjs"] = {"path": addon_base_path + external_folder + "/sdkjs"}
+    static_content["/web-apps"] = {"path": addon_base_path + external_folder + "/web-apps"}
+    
+  if (config.option("sql-type") != ""):
+    sql["type"] = config.option("sql-type")
+  if (config.option("db-port") != ""):
+    sql["dbPort"] = config.option("db-port")
+  if (config.option("db-user") != ""):
+    sql["dbUser"] = config.option("db-user")
+  if (config.option("db-pass") != ""):
+    sql["dbPass"] = config.option("db-pass")
 
   server_config["static_content"] = static_content
   
   json_file = git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json"
-  base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config}}}, indent=2))
+  base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config, "sql": sql}}}, indent=2))
 
   os.chdir(old_cur)
   return

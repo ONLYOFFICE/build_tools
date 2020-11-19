@@ -6,12 +6,6 @@ import os
 import base
 import dependence
 import traceback
-import config
-
-platform = base.host_platform()
-
-if (sys.version_info[0] >= 3):
-  unicode = str
 
 def install_module(path):
   base.print_info('Install: ' + path)

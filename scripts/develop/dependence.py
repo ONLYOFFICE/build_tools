@@ -99,6 +99,7 @@ def check_dependencies():
     install_args += checksResult.get_install()
     install_args += ['--mysql-path', unicode(checksResult.mysqlPath)]
     if (host_platform == 'windows'):
+      install_args[0] = './scripts/develop/' + install_args[0]
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
       get_updates()
@@ -151,9 +152,9 @@ def check_nodejs():
   nodejs_cur_version = int(nodejs_version.split('.')[0][1:])
   print('Installed Node.js version: ' + str(nodejs_cur_version))
   nodejs_min_version = 8
-  nodejs_max_version = 10
+  nodejs_max_version = 14
   if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
-    print('Installed Node.js version must be 8.x to 10.x')
+    print('Installed Node.js version must be 8.x to 14.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
     elif (host_platform == 'linux'):
@@ -515,6 +516,7 @@ def get_programUninstalls(sName):
 def uninstallProgram(sName):
   base.print_info("Uninstalling all versions " + sName + "...")
   info = ''
+  code = 0
   if (host_platform == 'windows'):
     unInfo = get_programUninstalls(sName)
     for info in unInfo:
@@ -531,19 +533,19 @@ def uninstallProgram(sName):
       code = uninstall_special[sName]()
     else:
       info = 'sudo apt-get remove --purge ' + sName + '* -y && ' + 'sudo apt-get autoremove -y && ' + 'sudo apt-get autoclean'
-
+  
   if (info != ''):
     print("Uninstalling " + sName + "...")
     print(info)
-
+    
     popen = subprocess.Popen(info, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     popen.communicate()
     code = popen.wait()
-
+  
   if (code != 0):
     print("Uninstalling was failed!")
     return False
-
+  
   return True
 
 def installProgram(sName):
@@ -633,7 +635,7 @@ def install_redis():
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-    'Node.js': 'https://nodejs.org/download/release/v10.23.0/node-v10.23.0-x64.msi',
+    'Node.js': 'https://nodejs.org/download/release/v14.15.1/node-v14.15.1-x64.msi',
     'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',

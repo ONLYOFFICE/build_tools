@@ -16,12 +16,11 @@ sudo docker pull onlyoffice/documentserver
 
 All the data are stored in the specially-designated directories, data volumes, at the following location:
 
-```bash
-/var/log/onlyoffice for ONLYOFFICE Docs logs
-/var/www/onlyoffice/Data for certificates
-/var/lib/onlyoffice for file cache
-/var/lib/postgresql for database
-```
+1. /var/log/onlyoffice for ONLYOFFICE Docs logs
+2. /var/www/onlyoffice/Data for certificates
+3. /var/lib/onlyoffice for file cache
+4. /var/lib/postgresql for database
+
 **Note**: We strongly recommend that you store the data outside the Docker containers on the host machine as it allows you to easily update ONLYOFFICE Docs once the new version is released without losing your data.
 
 To get access to your data located outside the container, you need to mount the volumes. It can be done by specifying the -v option in the docker run command.

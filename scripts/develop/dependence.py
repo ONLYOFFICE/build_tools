@@ -106,15 +106,20 @@ def check_dependencies():
     elif (host_platform == 'linux'):
       base.cmd_in_dir('./scripts/develop/', 'python', install_args)
       get_updates()
+  
+  check_npmPath()
   if (config.option("sql-type") == 'mysql'):
     return check_postgreConfig(checksResult.sqlPath)
   return check_MySQLConfig(checksResult.sqlPath)
+
 def check_pythonPath():
   path = base.get_env('PATH')
   if (path.find(sys.exec_prefix) == -1):
     base.set_env('PATH', sys.exec_prefix + os.pathsep + path)
 
 def check_npmPath():
+  if (host_platform != 'windows'):
+    return None
   path = base.get_env('PATH')
   npmPath = os.environ['AppData'] + '\\npm'
   if (path.find(npmPath) == -1):
@@ -490,7 +495,7 @@ def uninstall_mysqlserver():
   code = os.system('sudo deluser --remove-home mysql') and code
   code = os.system('sudo delgroup mysql') and code
 
-  return  code
+  return code
 
 def get_postrgre_path_to_bin(postrgrePath = ''):
   if (host_platform == 'windows'):
@@ -762,11 +767,11 @@ def installProgram(sName):
   return True
 
 def install_gruntcli():
-  if (host_platform == 'windows'):
-    check_npmPath()
-    install_command = 'npm install -g grunt-cli'
-  else:
-    install_command = 'sudo npm install -g grunt-cli'
+  check_npmPath()
+  
+  install_command = 'npm install -g grunt-cli'
+  if (host_platform != 'windows'):
+    install_command = 'sudo ' + install_command
 
   return os.system(install_command)
 

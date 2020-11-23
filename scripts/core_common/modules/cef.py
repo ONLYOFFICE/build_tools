@@ -15,7 +15,7 @@ def make():
 
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64"]
 
-  url = "http://d2ettrnqo7v976.cloudfront.net/cef/4240/"
+  url = "http://d2ettrnqo7v976.cloudfront.net/cef/4280/"
 
   for platform in platforms:
     if not config.check_option("platform", platform):

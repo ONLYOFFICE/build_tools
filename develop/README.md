@@ -12,6 +12,13 @@ You might need to pull **onlyoffice/documentserver** image:
 sudo docker pull onlyoffice/documentserver
 ```
 
+### Create locale develop container
+To create a container with the ability to include external non-minified sdkjs code, use the following command from the dockerfile directory:
+```bash
+sudo docker build -t containerName .
+```
+**Note**: The dot at the end is required.
+
 ### Storing data outside containers
 
 All the data are stored in the specially-designated directories, data volumes, at the following location:

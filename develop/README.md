@@ -12,10 +12,10 @@ You might need to pull **onlyoffice/documentserver** image:
 sudo docker pull onlyoffice/documentserver
 ```
 
-### Create locale develop container
-To create a container with the ability to include external non-minified sdkjs code, use the following command from the dockerfile directory:
+### Create develop image
+To create a image with the ability to include external non-minified sdkjs code, use the following command from the dockerfile directory:
 ```bash
-sudo docker build -t containerName .
+sudo docker build -t your_imageName .
 ```
 **Note**: The dot at the end is required.
 
@@ -51,11 +51,11 @@ Normally, you do not need to store container data because the container operatio
 ### Mount sdkjs and web-apps
 To get access to your non-minufied sdkjs code outside the container, you need to mount the volumes. It can be done by specifying the -v option in the docker run command.
 
-**Note**: By default, the image uses minified sdkjs code.
+**Note**: By default, the image uses minified sdkjs code. If you need to use non-minified code, then you should create a custom image using a dockerfile from the directory. Instructions can be found at the beginning of the Readme.
 
 ```bash
 sudo docker run -i -t -d -p 80:80 --restart=always \
     -v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs  \
-    -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps onlyoffice/documentserver
+    -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps imageName
 ```
 

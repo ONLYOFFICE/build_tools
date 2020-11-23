@@ -109,8 +109,8 @@ def check_dependencies():
   
   check_npmPath()
   if (config.option("sql-type") == 'mysql'):
-    return check_postgreConfig(checksResult.sqlPath)
-  return check_MySQLConfig(checksResult.sqlPath)
+    return check_MySQLConfig(checksResult.sqlPath)
+  return check_postgreConfig(checksResult.sqlPath)
 
 def check_pythonPath():
   path = base.get_env('PATH')

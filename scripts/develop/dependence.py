@@ -420,17 +420,14 @@ def check_mysqlServer():
   if (host_platform != 'windows'):
     mysqlLoginSrt = get_mysqlLoginSrting()
     result = os.system(mysqlLoginSrt + ' -e "exit"')
-    if (result != 0):
-      dependence.append_install('MySQLServer')
-      dependence.append_uninstall('mysql-server')
-    else:
+    if (result == 0):
       connectionResult = base.run_command(mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"')['stdout']
       if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
         print('MySQL configuration is valid')
         dependence.sqlPath = 'mysql'
         return dependence
-      dependence.append_install('MySQLServer')
-      dependence.append_uninstall('mysql-server')
+    dependence.append_install('MySQLServer')
+    dependence.append_uninstall('mysql-server')
     return dependence
 
   arrInfo = get_mysqlServersInfo()

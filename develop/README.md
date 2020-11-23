@@ -43,6 +43,7 @@ Normally, you do not need to store container data because the container operatio
 
 ### Mount sdkjs and web-apps
 To get access to your non-minufied sdkjs code outside the container, you need to mount the volumes. It can be done by specifying the -v option in the docker run command.
+
 **Note**: By default, the image uses minified sdkjs code.
 
 ```bash

@@ -2,8 +2,7 @@ import sys
 sys.path.append('scripts')
 sys.path.append('scripts/develop')
 sys.path.append('scripts/develop/vendor')
-import base
-import os 
+import base 
 import shutil
 import optparse
 import dependence
@@ -18,8 +17,6 @@ parser.add_option("--mysql-path", action="store", type="string", dest="mysql-pat
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)
-
-
 
 for item in configOptions["uninstall"]:
   dependence.uninstallProgram(item)

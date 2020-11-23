@@ -82,7 +82,7 @@ base.configure_common_apps()
 # developing...
 if ("1" == config.option("develop")):
   if not dependence.check_dependencies():
-    sys.exit()
+    exit(1)
   build_server.build_server_develop()
   build_js.build_js_develop(base_dir + "/..")
   develop_config_server.make()

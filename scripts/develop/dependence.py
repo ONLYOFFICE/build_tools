@@ -66,7 +66,7 @@ class CDependencies:
 
 def check_dependencies():
   if (host_platform == 'windows' and not check_vc_components()):
-    return  False
+    return False
   if (host_platform == 'mac'):
     return True
 

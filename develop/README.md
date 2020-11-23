@@ -49,6 +49,6 @@ To get access to your non-minufied sdkjs code outside the container, you need to
 ```bash
 sudo docker run -i -t -d -p 80:80 --restart=always \
     -v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs  \
-    -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps
+    -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps onlyoffice/documentserver
 ```
 

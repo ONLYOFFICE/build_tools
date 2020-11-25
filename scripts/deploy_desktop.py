@@ -182,7 +182,7 @@ def make():
       base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
-    base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")
+    base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
 
     if (0 == platform.find("win")):
       base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")

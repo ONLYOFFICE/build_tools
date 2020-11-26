@@ -205,6 +205,8 @@ def make():
       base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
       base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
       base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
+      base.copy_dir(bin_example_dir + '/..', root_dir_snap + '/example')
+      base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return
 

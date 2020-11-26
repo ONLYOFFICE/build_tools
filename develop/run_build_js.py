@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import sys
+sys.path.append(sys.argv[1] + '/build_tools/scripts')
 import build_js
 import config
 import base
-import sys
 
 base.cmd_in_dir('../', 'python', ['configure.py'])
 config.parse()

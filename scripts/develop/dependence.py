@@ -117,6 +117,11 @@ def check_pythonPath():
   if (path.find(sys.exec_prefix) == -1):
     base.set_env('PATH', sys.exec_prefix + os.pathsep + path)
 
+def add_to_path(sPath):
+  path = base.get_env('PATH')
+  if (path.find(sPath) == -1):
+    base.set_env('PATH', sPath + os.pathsep + path)
+
 def check_npmPath():
   if (host_platform != 'windows'):
     return None
@@ -190,19 +195,21 @@ def check_java():
   dependence.append_install('Java')
   return dependence
 
-def get_erlang_path_to_bit():
+def get_erlang_path_to_bin():
   if (host_platform == 'windows'):
     erlangHome = os.getenv("ERLANG_HOME")
     if (erlangHome is not None):
-      return '"' + erlangHome + '\\bin\\erl"'
-    return ''
+      erlangHome += '\\bin'
+    else:
+      erlangHome = ''
+    add_to_path(erlangHome)
   return 'erl'
 def check_erlang():
   dependence = CDependencies()
   base.print_info('Check installed Erlang')
 
-  erlangBitness = base.run_command(get_erlang_path_to_bit() + ' -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-  
+  erlangBitness = base.run_command(get_erlang_path_to_bin() + ' -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence
@@ -386,7 +393,8 @@ def get_mysql_path_to_bin(mysqlPath = ''):
   if (host_platform == 'windows'):
     if (mysqlPath == ''):
       mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
-    return '"'+ mysqlPath + 'bin\\mysql"'
+    mysqlPath += 'bin'
+    add_to_path(mysqlPath)
   return 'mysql'
 def get_mysqlLoginSrting(mysqlPath = ''):
   return get_mysql_path_to_bin(mysqlPath) + ' -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
@@ -472,6 +480,7 @@ def check_MySQLConfig(mysqlPath = ''):
 def execMySQLScript(mysqlPath, scriptPath):
   print('Execution ' + scriptPath)
   mysqlLoginSrt = get_mysqlLoginSrting(mysqlPath)
+
   code = subprocess.call(mysqlLoginSrt + ' < "' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if (code != 0):
     print('Execution failed!')
@@ -504,13 +513,12 @@ def get_postrgre_path_to_bin(postrgrePath = ''):
   if (host_platform == 'windows'):
     if (postrgrePath == ''):
       postrgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13\\'
-    #To Do: commands for pskl work only with cmd from the directory with the executable file
-    #return '"' + postrgrePath + '\\bin\\psql"'
-    return 'cd "' + postrgrePath + '\\bin"'
+    postrgrePath += '\\bin'
+    add_to_path(postrgrePath)
   return 'psql'
 def get_postgreLoginSrting(userName, postrgrePath = ''):
   if (host_platform == 'windows'):
-    return get_postrgre_path_to_bin(postrgrePath) + ' && psql -U' + userName + ' '
+    return get_postrgre_path_to_bin(postrgrePath) + ' -U' + userName + ' '
   return 'PGPASSWORD="' + install_params['PostgreSQL']['dbPass'] + '" ' + get_postrgre_path_to_bin(postrgrePath) + ' -U' + userName + ' -hlocalhost '
 def get_postgreSQLInfoByFlag(flag):
   arrInfo = []

@@ -513,7 +513,7 @@ def get_postrgre_path_to_bin(postrgrePath = ''):
   if (host_platform == 'windows'):
     if (postrgrePath == ''):
       postrgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13\\'
-    postrgrePath += '\\bin'
+    postrgrePath += 'bin'
     add_to_path(postrgrePath)
   return 'psql'
 def get_postgreLoginSrting(userName, postrgrePath = ''):

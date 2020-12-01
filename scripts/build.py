@@ -13,7 +13,7 @@ def make_pro_file(makefiles_dir, pro_file):
     print("------------------------------------------")
     print("BUILD_PLATFORM: " + platform)
     print("------------------------------------------")
-    old_env = os.environ.copy()
+    old_env = dict(os.environ)
 
     # if you need change output libraries path - set the env variable
     # base.set_env("DESTDIR_BUILD_OVERRIDE", os.getcwd() + "/out/android/" + config.branding() + "/mobile")
@@ -29,10 +29,7 @@ def make_pro_file(makefiles_dir, pro_file):
       new_path += (base.get_env("ANDROID_NDK_ROOT") + "/toolchains/llvm/prebuilt/" + toolchain_platform + "/bin:")
       new_path += old_path
       base.set_env("PATH", new_path)
-      if ("android_arm64_v8a" == platform):
-        base.set_env("ANDROID_NDK_PLATFORM", "android-21")
-      else:
-        base.set_env("ANDROID_NDK_PLATFORM", "android-16")
+      base.set_env("ANDROID_NDK_PLATFORM", "android-21")
 
     if (-1 != platform.find("ios")):
       base.hack_xcode_ios()
@@ -83,7 +80,8 @@ def make_pro_file(makefiles_dir, pro_file):
       qmake_bat.append("call nmake -f " + makefiles_dir + "/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)
       
-    os.environ = old_env.copy()
+    os.environ.clear()
+    os.environ.update(old_env)
 
     base.delete_file(".qmake.stash")
 
@@ -92,5 +90,16 @@ def make():
   is_no_brandind_build = base.is_file("config")
   make_pro_file("makefiles", "build.pro")
   if config.check_option("module", "builder") and base.is_windows() and is_no_brandind_build:
+    # check replace
+    replace_path_lib = ""
+    replace_path_lib_file = os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/docbuilder.h"
+    if (config.branding() != ""):
+      replace_path_lib = "../../../build/" + config.branding() + "/lib/"
+    # replace
+    if (replace_path_lib != ""):
+      base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)
     base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
+    # restore
+    if (replace_path_lib != ""):
+      base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")
   return

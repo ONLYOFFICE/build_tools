@@ -48,8 +48,10 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "EpubFile")
 
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")
@@ -82,9 +84,6 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
-
-    if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
-      base.copy_exe(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFileInternal")
 
     # dictionaries
     base.create_dir(root_dir + "/dictionaries")

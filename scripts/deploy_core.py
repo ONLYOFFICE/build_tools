@@ -33,8 +33,10 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "PdfWriter")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "UnicodeConverter")
+    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "EpubFile")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "x2t")
 
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", archive_dir + "/sdkjs")
@@ -52,14 +54,6 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allthemesgen")
     base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "standardtester")
-
-    base.create_dir(archive_dir + "/HtmlFileInternal")
-
-    base.copy_exe(core_build_dir + "/lib/" + platform, archive_dir + "/HtmlFileInternal", "HtmlFileInternal")
-    base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", archive_dir + "/HtmlFileInternal")
-    if (0 == platform.find("win")):
-      base.delete_file(archive_dir + "/HtmlFileInternal/cef_sandbox.lib")
-      base.delete_file(archive_dir + "/HtmlFileInternal/libcef.lib")
 
     if base.is_file(archive_dir + "/core.7z"):
       base.delete_file(archive_dir + "/core.7z")

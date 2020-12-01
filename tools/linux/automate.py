@@ -12,15 +12,7 @@ def get_branch_name(directory):
   # detect build_tools branch
   #command = "git branch --show-current"
   command = "git symbolic-ref --short -q HEAD"
-  popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  current_branch = "master"
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    current_branch = stdout.strip().decode("utf-8")
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+  current_branch = base.run_command(command)['stdout']
   os.chdir(cur_dir)
   return current_branch
 
@@ -53,7 +45,8 @@ def install_deps():
               "libxcb*",
               "libxi-dev",
               "libxrender-dev",
-              "libxss1"]
+              "libxss1",
+              "libncurses5"]
 
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 

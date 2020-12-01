@@ -40,9 +40,11 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu
@@ -58,6 +60,11 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
     
+    if (0 == platform.find("android")):
+      #base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicudata.so", root_dir + "/libicudata.so")
+      #base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicuuc.so", root_dir + "/libicuuc.so")
+      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/icudt58l.dat", root_dir + "/icudt58l.dat")
+
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
 
@@ -78,17 +85,24 @@ def make():
       # js
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
       # app
-      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
-      base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
+      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
       libs_dir = root_dir + "/lib"
       base.create_dir(libs_dir + "/arm64-v8a")
       base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")
+      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so.*", libs_dir + "/arm64-v8a")
+      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.dat", libs_dir + "/arm64-v8a")
       base.create_dir(libs_dir + "/armeabi-v7a")
       base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.so", libs_dir + "/armeabi-v7a")
+      base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.so.*", libs_dir + "/armeabi-v7a")
+      base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.dat", libs_dir + "/armeabi-v7a")
       base.create_dir(libs_dir + "/x86")
       base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.so", libs_dir + "/x86")
+      base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.so.*", libs_dir + "/x86")
+      base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.dat", libs_dir + "/x86")
       base.create_dir(libs_dir + "/x86_64")
       base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.so", libs_dir + "/x86_64")
+      base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.so.*", libs_dir + "/x86_64")
+      base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.dat", libs_dir + "/x86_64")
       break
 
   return

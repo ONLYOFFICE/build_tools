@@ -32,19 +32,13 @@ core_linux {
 	CONFIG += core_and_multimedia
 }
 core_mac {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_desktop_apps
 }
-build_xp {
-	CONFIG += no_use_htmlfileinternal
-}
 core_ios {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
 core_android {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
@@ -60,8 +54,10 @@ SUBDIRS = \
 	xpsfile \
 	htmlrenderer \
 	pdfreader \
-	htmlfile \
-	doctrenderer
+	htmlfile2 \
+	doctrenderer \
+	fb2file \
+	epubfile
 
 !no_x2t {
 SUBDIRS += \
@@ -76,10 +72,6 @@ SUBDIRS += \
     odffilewriter \
     xlsformat \
     x2t
-}
-
-!no_use_htmlfileinternal {
-	SUBDIRS += htmlfileinternal
 }
 
 !no_use_common_binary {
@@ -142,9 +134,10 @@ ordered {
 	removeFile($$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/HtmlFile2/Makefile.HtmlFile2$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/EpubFile/Makefile.EpubFile$$PRO_SUFFIX)
+	removeFile($$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX)
 
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX)
 	removeFile($$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX)
@@ -201,16 +194,17 @@ htmlrenderer.makefile      = $$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$
 pdfreader.file             = $$CORE_ROOT_DIR/PdfReader/PdfReader.pro
 pdfreader.makefile         = $$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX
 
-htmlfile.file              = $$CORE_ROOT_DIR/HtmlFile/HtmlFile.pro
-htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX
+htmlfile2.file             = $$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro
+htmlfile2.makefile         = $$CORE_ROOT_DIR/HtmlFile2/Makefile.HtmlFile2$$PRO_SUFFIX
 
 doctrenderer.file          = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro
 doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
 
-!no_use_htmlfileinternal {
-	htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
-	htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
-}
+fb2file.file               = $$CORE_ROOT_DIR/Fb2File/Fb2File.pro
+fb2file.makefile           = $$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX
+
+epubfile.file              = $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro
+epubfile.makefile          = $$CORE_ROOT_DIR/EpubFile/Makefile.EpubFile$$PRO_SUFFIX
 
 !no_use_common_binary {
 	allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
@@ -298,18 +292,17 @@ core_and_multimedia {
 
 # DEPENDS
 kernel.depends            = cryptopp
+unicodeconverter.depends  = kernel
 graphics.depends          = kernel unicodeconverter
 pdfwriter.depends         = kernel unicodeconverter graphics
 djvufile.depends          = kernel unicodeconverter graphics pdfwriter
 xpsfile.depends           = kernel unicodeconverter graphics pdfwriter
 htmlrenderer.depends      = kernel unicodeconverter graphics pdfwriter
 pdfreader.depends         = kernel unicodeconverter graphics pdfwriter htmlrenderer
-htmlfile.depends          = kernel unicodeconverter graphics
+htmlfile2.depends         = kernel unicodeconverter graphics
 doctrenderer.depends      = kernel unicodeconverter graphics
-
-!no_use_htmlfileinternal {
-	htmlfileinternal.depends  = kernel unicodeconverter graphics
-}
+fb2file.depends           = kernel unicodeconverter graphics
+epubfile.depends          = kernel unicodeconverter graphics htmlfile2
 
 !no_use_common_binary {
 	allfontsgen.depends       = kernel unicodeconverter graphics
@@ -348,5 +341,7 @@ desktop {
 	    docformat \
 	    odffilereader \
 	    odffilewriter \
-	    xlsformat
+	    xlsformat \
+		fb2file \
+		epubfile
 }

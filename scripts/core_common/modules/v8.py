@@ -29,6 +29,10 @@ def is_main_platform():
     return True
   if config.check_option("platform", "mac_64"):
     return True
+  if config.check_option("platform", "ios"):
+    return True
+  if (-1 != config.option("platform").find("android")):
+    return True
   return False
 
 def is_xp_platform():
@@ -37,18 +41,10 @@ def is_xp_platform():
   return False
 
 def is_use_clang():
-  get_gcc_version = "gcc -dumpfullversion -dumpversion"
-  popen = subprocess.Popen(get_gcc_version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   gcc_version = 4
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    gcc_version_str = stdout.strip().decode("utf-8")
-    gcc_version_major = gcc_version_str.split(".")[0]
-    gcc_version = int(gcc_version_major)
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  if (gcc_version_str != ""):
+    gcc_version = int(gcc_version_str.split(".")[0])
     
   is_clang = "false"
   if (gcc_version >= 6):
@@ -58,19 +54,22 @@ def is_use_clang():
   return is_clang
 
 def make():
-  if config.option("module") == "mobile":
-    return
-
   if not is_main_platform():
     make_xp()
     return
 
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
   if ("ios" == config.option("platform")):
     return
 
-  print("[fetch & build]: v8")
+  if (-1 != config.option("platform").find("android")):
+    base.cmd_in_dir(base_dir + "/android", "python", ["./make.py"])
+    if (-1 == config.option("platform").find("linux")) and (-1 == config.option("platform").find("mac")) and (-1 == config.option("platform").find("win")):
+      return
 
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
+  print("[fetch & build]: v8")
+  old_env = dict(os.environ)
+
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
@@ -183,9 +182,10 @@ def make():
     base.cmd("ninja", ["-C", "out.gn/win_32/release"])
 
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
 
   make_xp()
-
   return
 
 def make_xp():
@@ -193,6 +193,7 @@ def make_xp():
     return
 
   print("[fetch & build]: v8_xp")
+  old_env = dict(os.environ)
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"
   old_cur = os.getcwd()
@@ -214,7 +215,6 @@ def make_xp():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
-  old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
     config.option("vs-path") + "/../Common7/IDE",
@@ -277,6 +277,7 @@ def make_xp():
       base.copy_files("v8/build/Debug/lib/*", "win_32/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32/debug/icudt.dll")
 
-  os.environ["PATH"] = old_path
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
   return

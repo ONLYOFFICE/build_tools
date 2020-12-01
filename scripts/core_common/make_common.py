@@ -12,6 +12,7 @@ import cef
 import icu
 import openssl
 import v8
+import html2
 
 def make():
   boost.make()
@@ -19,4 +20,5 @@ def make():
   icu.make()
   openssl.make()
   v8.make()
+  html2.make()
   return

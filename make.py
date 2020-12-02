@@ -60,13 +60,13 @@ if ("1" == config.option("update")):
   base.sdkjs_plugins_server_checkout()
   base.git_update("web-apps")
   base.web_apps_addons_checkout()
-  base.git_update("desktop-sdk")
   base.git_update("dictionaries")
 
   if config.check_option("module", "builder"):
     base.git_update("DocumentBuilder")
 
   if config.check_option("module", "desktop"):
+    base.git_update("desktop-sdk")
     base.git_update("desktop-apps")
 
   if (config.check_option("module", "server")):

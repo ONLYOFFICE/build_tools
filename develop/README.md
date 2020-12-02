@@ -1,5 +1,7 @@
 # Docker
 
+This directory containing instruction for developers, who want to change something in sdkjs or web-apps module, but don't want to compile pretty compilcated core product to make those changes.
+
 ## Installing ONLYOFFICE Docs
 
 ## How to use - Linux
@@ -8,15 +10,19 @@
 
 You might need to pull **onlyoffice/documentserver** image:
 
+**Note**: Do not prefix docker command with sudo. [This](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user) instruction show how to use docker without sudo.
+
 ```bash
-sudo docker pull onlyoffice/documentserver
+docker pull onlyoffice/documentserver
 ```
 
 ### Create develop image
 To create a image with the ability to include external non-minified sdkjs code, use the following command from the dockerfile directory:
+
 ```bash
 sudo docker build -t your_imageName .
 ```
+
 **Note**: The dot at the end is required.
 
 ### Connecting external folders

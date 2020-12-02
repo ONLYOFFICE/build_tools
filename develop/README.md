@@ -1,7 +1,7 @@
 # Docker
 
 This directory containing instruction for developers,
-who want to change something in sdkjs or web-apps module, 
+who want to change something in sdkjs or web-apps module,
 but don't want to compile pretty compilcated core product to make those changes.
 
 ## Installing ONLYOFFICE Docs
@@ -13,7 +13,7 @@ but don't want to compile pretty compilcated core product to make those changes.
 You might need to pull **onlyoffice/documentserver** image:
 
 **Note**: Do not prefix docker command with sudo.
-[This](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user) 
+[This](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
 instruction show how to use docker without sudo.
 
 ```bash
@@ -33,7 +33,7 @@ sudo docker build -t your_imageName .
 
 ### Connecting external folders
 
-To connect external folders to the container, 
+To connect external folders to the container,
 you need to pass the "-v" parameter
 along with the relative paths to the required folders.
 
@@ -41,6 +41,6 @@ along with the relative paths to the required folders.
 
 ```bash
 sudo docker run -i -t -d -p 80:80 --restart=always \
-	-v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
-	-v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps imageName
+    -v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
+    -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps imageName
 ```

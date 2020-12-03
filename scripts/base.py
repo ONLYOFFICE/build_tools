@@ -386,6 +386,50 @@ def git_update(repo, is_no_errors=False, is_current_dir=False):
   os.chdir(old_cur)
   return
 
+def get_repositories():
+  result = {}
+  result["core"] = [False, False]
+  result["sdkjs"] = [False, False]
+  result.update(get_sdkjs_addons())
+  result.update(get_sdkjs_plugins())
+  result.update(get_sdkjs_plugins_server())
+  result["web-apps"] = [False, False]
+  result.update(get_web_apps_addons())
+  result["dictionaries"] = [False, False]
+
+  if config.check_option("module", "builder"):
+    result["DocumentBuilder"] = [False, False]
+
+  if config.check_option("module", "desktop"):
+    result["desktop-sdk"] = [False, False]
+    result["desktop-apps"] = [False, False]
+
+  if (config.check_option("module", "server")):
+    result["server"] = [False, False]
+    result.update(get_server_addons())
+    result["document-server-integration"] = [False, False]
+    
+  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
+    result["core-fonts"] = [False, False]
+  return result
+
+def update_repositories(repositories):
+  for repo in repositories:
+    value = repositories[repo]
+    current_dir = value[1]
+    if current_dir == False:
+      git_update(repo, value[0], False)
+    else:
+      if is_dir(current_dir + "/.git"):
+        delete_dir_with_access_error(current_dir);
+        delete_dir(current_dir)
+      if not is_dir(current_dir):
+        create_dir(current_dir)
+      cur_dir = os.getcwd()
+      os.chdir(current_dir)
+      git_update(repo, value[0], True)
+      os.chdir(cur_dir)
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
@@ -589,72 +633,59 @@ def generate_plist(path):
       
   return
 
-def sdkjs_addons_checkout():
+def get_sdkjs_addons():
+  result = {}
   if ("" == config.option("sdkjs-addons")):
-    return
+    return result
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
+    result[name] = [True, False]
 
   if ("" != config.option("sdkjs-addons-desktop")):
     addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
     for name in addons_list:
-      git_update(name, True)
-  return
+      result[name] = [True, False]
+  return result
 
-def server_addons_checkout():
+def get_server_addons():
+  result = {}
   if ("" == config.option("server-addons")):
-    return
+    return result
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
-  return
+    result[name] = [True, False]
+  return result
 
-def web_apps_addons_checkout():
+def get_web_apps_addons():
+  result = {}
   if ("" == config.option("web-apps-addons")):
-    return
+    return result
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
-  return
+    result[name] = [True, False]
+  return result
 
-def sdkjs_plugins_checkout():
+def get_sdkjs_plugins():
+  result = {}
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
-    return
+    return result
   plugins_list = plugins_list_config.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
-
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
   for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+    result["plugin-" + name] = [True, plugins_dir]
+  return result
 
-def sdkjs_plugins_server_checkout():
+def get_sdkjs_plugins_server():
+  result = {}
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
-    return
+    return result
   plugins_list = plugins_list_config.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
-
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
   for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+    result["plugin-" + name] = [True, plugins_dir]
+  return result
 
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):

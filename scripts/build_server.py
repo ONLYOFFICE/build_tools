@@ -57,7 +57,7 @@ def make():
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.cmd_in_dir(example_dir, "npm", ["install"])
   sync_rpc_lib_dir = example_dir + "/node_modules/sync-rpc/lib"
-  base.copy_file(base.get_script_dir() + "/../tool/linux/sync-rpc.patch", sync_rpc_lib_dir)
+  base.copy_file(base.get_script_dir() + "/../tools/linux/sync-rpc.patch", sync_rpc_lib_dir)
   base.cmd_in_dir(sync_rpc_lib_dir, "patch", ["-p0", "<", "./sync-rpc.patch"])
   base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
 

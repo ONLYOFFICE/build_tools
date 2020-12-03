@@ -32,7 +32,9 @@ class CDependencies:
       self.append_uninstall(item)
     for item in oCdependencies.removepath:
       self.append_removepath(item)
-    self.sqlPath = oCdependencies.sqlPath
+    
+    if (oCdependencies.sqlPath != ''):
+      self.sqlPath = oCdependencies.sqlPath
 
   def append_install(self, item):
     if (item not in self.install):

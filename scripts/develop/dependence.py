@@ -100,11 +100,11 @@ def check_dependencies():
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
+    install_args[0] = './scripts/develop/' + install_args[0]
     if (host_platform == 'windows'):
-      install_args[0] = './scripts/develop/' + install_args[0]
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
-      base.cmd_in_dir('./scripts/develop/', 'python', install_args)
+      base.cmd('python', install_args, False)
       get_updates()
   
   check_npmPath()

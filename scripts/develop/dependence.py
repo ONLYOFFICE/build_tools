@@ -546,8 +546,9 @@ def check_postgreSQL():
 
   if (host_platform == 'linux'):
     result = os.system(postgreLoginSrt + ' -c "\q"')
+    connectionResult = base.run_command(connectionString)['stdout']
 
-    if (result != 0):
+    if (result != 0 or connectionResult.find(install_params['PostgreSQL']['dbPort']) == -1):
       print('Valid PostgreSQL not found!')
       dependence.append_install('PostgreSQL')
       dependence.append_uninstall('PostgreSQL')
@@ -660,6 +661,7 @@ def uninstall_postgresql():
   code = os.system('sudo rm -rf /etc/postgresql/') and code
   code = os.system('sudo userdel -r postgres') and code
   code = os.system('sudo groupdel postgres') and code
+  os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp 5432')['stdout'])
 
   return  code
 
@@ -884,3 +886,4 @@ install_params = {
 uninstall_params = {
   'PostgreSQL': '--mode unattended --unattendedmodeui none'
 }
+

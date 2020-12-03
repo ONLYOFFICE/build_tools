@@ -319,19 +319,29 @@ def run_command(sCommand):
   return result
 
 def run_command_in_dir(directory, sCommand):
-  dir = get_path(directory)
-  cur_dir = os.getcwd()
-  os.chdir(dir)
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
   ret = run_command(sCommand)
-  os.chdir(cur_dir)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
   return ret
   
 def exec_command_in_dir(directory, sCommand):
-  dir = get_path(directory)
-  cur_dir = os.getcwd()
-  os.chdir(dir)
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
   ret = os.system(sCommand)
-  os.chdir(cur_dir)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
   return ret
 
 def run_process(args=[]):

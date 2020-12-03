@@ -1,7 +1,7 @@
 import sys
-sys.path.append('scripts')
-sys.path.append('scripts/develop')
-sys.path.append('scripts/develop/vendor')
+sys.path.append('../../scripts')
+sys.path.append('../../scripts/develop')
+sys.path.append('../../scripts/develop/vendor')
 import base 
 import shutil
 import optparse

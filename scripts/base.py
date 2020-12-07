@@ -627,7 +627,7 @@ def generate_plist(path):
   bundle_version_natural = readFile(get_script_dir() + "/../../core/Common/version.txt").split(".")
   bundle_version = []
   for n in bundle_version_natural:
-    bundle_version.append("255" if int(n) > 255 else n)
+    bundle_version.append(n)
 
   for file in glob.glob(path + "/*.framework"):
     if not is_dir(file):

@@ -700,27 +700,21 @@ def get_web_apps_addons():
     result[name] = [True, False]
   return result
 
-def get_sdkjs_plugins():
+def get_plugins(plugins_list=""):
   result = {}
-  plugins_list_config = config.option("sdkjs-plugin")
-  if ("" == plugins_list_config):
+  if ("" == plugins_list):
     return result
-  plugins_list = plugins_list_config.rsplit(", ")
+  plugins_list = plugins_list.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
   for name in plugins_list:
     result["plugin-" + name] = [True, plugins_dir]
   return result
 
+def get_sdkjs_plugins():
+  return get_plugins(config.option("sdkjs-plugin"))
+
 def get_sdkjs_plugins_server():
-  result = {}
-  plugins_list_config = config.option("sdkjs-plugin-server")
-  if ("" == plugins_list_config):
-    return result
-  plugins_list = plugins_list_config.rsplit(", ")
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  for name in plugins_list:
-    result["plugin-" + name] = [True, plugins_dir]
-  return result
+  return get_plugins(config.option("sdkjs-plugin-server"))
 
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):

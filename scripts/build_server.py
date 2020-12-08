@@ -57,10 +57,13 @@ def make():
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.delete_dir(example_dir  + "/node_modules")
   base.cmd_in_dir(example_dir, "npm", ["install"])
-  if ("linux" == base.host_platform()):
-    sync_rpc_lib_dir = example_dir + "/node_modules/sync-rpc/lib"
-    patch_file = base.get_script_dir() + "/../tools/linux/sync-rpc.patch"
+  sync_rpc_lib_dir = example_dir + "/node_modules/sync-rpc/lib"
+  patch_file = base.get_script_dir() + "/../tools/linux/sync-rpc.patch"
+  if ("linux" == base.host_platform()):  
     base.cmd_in_dir(sync_rpc_lib_dir, "patch", ["-N", "-i", patch_file])
+  if ("windows" == base.host_platform()):
+    patch_exe_dir = "C:/Program Files/Git/usr/bin"
+    base.cmd_in_dir(patch_exe_dir, "patch.exe", ["-N", "-d", sync_rpc_lib_dir, "-i", patch_file])
   base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
 
 def build_server_develop():

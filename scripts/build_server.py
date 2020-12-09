@@ -62,7 +62,7 @@ def make():
   if ("linux" == base.host_platform()):  
     base.cmd_in_dir(sync_rpc_lib_dir, "patch", ["-N", "-i", patch_file])
   if ("windows" == base.host_platform()):
-    patch_exe_dir = base.run_command("git --exec-path")['stdout'] + "/../../../usr/bin"
+    patch_exe_dir = base.git_dir() + "/usr/bin"
     base.cmd_in_dir(patch_exe_dir, "patch.exe", ["-N", "-d", sync_rpc_lib_dir, "-i", patch_file])
   base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
 

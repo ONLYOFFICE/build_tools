@@ -465,6 +465,10 @@ def update_repositories(repositories):
       git_update(repo, value[0], True)
       os.chdir(cur_dir)
 
+def git_dir():
+  if ("windows" == base.host_platform()):
+    return base.run_command("git --info-path")['stdout'] + "/../../.."
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)

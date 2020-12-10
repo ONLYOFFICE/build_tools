@@ -195,16 +195,19 @@ def check_java():
 def get_erlang_path_to_bin():
   erlangPath = ''
   if (host_platform == 'windows'):
-    erlangPath = os.getenv("ERLANG_HOME")
-    if (erlangPath is not None):
-      erlangPath += '\\bin'
+    erlangPath = os.getenv("ERLANG_HOME", "")
+    if (erlangPath != ""):
+      erlangPath += "\\bin"
   return erlangPath
 def check_erlang():
   dependence = CDependencies()
   base.print_info('Check installed Erlang')
 
-  erlangBitness = base.run_command_in_dir(get_erlang_path_to_bin(), 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-
+  erlangBitness = ""
+  erlang_path_home = get_erlang_path_to_bin()
+  if ("" != erlang_path_home):
+    erlangBitness = base.run_command_in_dir(erlang_path_home, 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+  
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence

@@ -13,13 +13,13 @@ import build_js
 import build_server
 import deploy
 import make_common
-import config_server as develop_config_server
-import dependence
+import develop
 
 # parse configuration
 config.parse()
 
 base_dir = base.get_script_dir(__file__)
+
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
 # branding
@@ -59,13 +59,7 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-if ("1" == config.option("develop")):
-  if not dependence.check_dependencies():
-    exit(1)
-  build_server.build_server_develop()
-  build_js.build_js_develop(base_dir + "/..")
-  develop_config_server.make()
-  exit(0)
+develop.make();
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):

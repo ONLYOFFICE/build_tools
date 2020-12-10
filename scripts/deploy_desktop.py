@@ -2,6 +2,7 @@
 
 import config
 import base
+import os
 
 def make():
   base_dir = base.get_script_dir() + "/../out"
@@ -184,6 +185,16 @@ def make():
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
     base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
 
+    isUseJSC = False
+    if (0 == platform.find("mac")):
+      file_size_doctrenderer = os.path.getsize(root_dir + "/converter/libdoctrenderer.dylib")
+      print("file_size_doctrenderer: " + str(file_size_doctrenderer))
+      if (file_size_doctrenderer < 5*1024*1024):
+        isUseJSC = True
+
+    if isUseJSC:
+      base.delete_file(root_dir + "/converter/icudtl.dat")
+
     if (0 == platform.find("win")):
       base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")
       base.delete_file(root_dir + "/cef_sandbox.lib")
@@ -206,7 +217,9 @@ def make():
     base.delete_exe(root_dir + "/converter/allthemesgen")
     base.delete_file(root_dir + "/converter/AllFonts.js")
     base.delete_file(root_dir + "/converter/font_selection.bin")
-    base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
+
+    if not isUseJSC:
+      base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
 
   return
 

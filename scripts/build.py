@@ -93,8 +93,9 @@ def make():
     # check replace
     replace_path_lib = ""
     replace_path_lib_file = os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/docbuilder.h"
-    if (config.branding() != ""):
-      replace_path_lib = "../../../build/" + config.branding() + "/lib/"
+    option_branding = config.option("branding")
+    if (option_branding != ""):
+      replace_path_lib = "../../../build/" + option_branding + "/lib/"
     # replace
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)

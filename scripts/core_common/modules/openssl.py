@@ -21,7 +21,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  base.common_check_version("openssl", "1", clean)
+  base.common_check_version("openssl", "2", clean)
 
   if not base.is_dir("openssl"):
     base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])
@@ -81,7 +81,7 @@ def make():
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64"])
+    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
     base.cmd("make", ["build_libs", "install"])
 
   os.chdir(old_cur)

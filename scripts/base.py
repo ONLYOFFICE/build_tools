@@ -392,7 +392,7 @@ def qt_version():
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
 def qt_config(platform):
-  config_param = config.option("module") + " " + config.option("config")
+  config_param = config.option("module") + " " + config.option("config") + " " + config.option("features")
   config_param_lower = config_param.lower()
   if (-1 != platform.find("xp")):
     config_param += " build_xp"

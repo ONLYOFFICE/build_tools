@@ -8,7 +8,9 @@ import os
 
 def clean():
   if base.is_dir("openssl"):
-    base.delete_dir("openssl")
+    base.delete_dir_with_access_error("openssl")
+  if base.is_dir("build"):
+    base.delete_dir("build")
   return
 
 def make():
@@ -21,7 +23,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  base.common_check_version("openssl", "2", clean)
+  base.common_check_version("openssl", "3", clean)
 
   if not base.is_dir("openssl"):
     base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])

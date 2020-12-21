@@ -60,7 +60,7 @@ def make():
     base.create_dir(build_server_dir + '/SpellChecker')
     base.copy_exe(bin_server_dir + "/SpellChecker", build_server_dir + '/SpellChecker', "spellchecker")
     base.create_dir(build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release')
-    base.copy_file(bin_server_dir + "/SpellChecker/node_modules/nodehun/build/Release/nodehun.node", build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release/nodehun.node')
+    base.copy_file(bin_server_dir + "/SpellChecker/node_modules/nodehun/build/Release/Nodehun.node", build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release/Nodehun.node')
     
 
     qt_dir = base.qt_setup(native_platform)

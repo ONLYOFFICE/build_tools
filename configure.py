@@ -36,6 +36,7 @@ parser.add_option("--server-addon", action="append", type="string", dest="server
 parser.add_option("--web-apps-addon", action="append", type="string", dest="web-apps-addons", default=[], help="provides web-apps addons")
 parser.add_option("--sdkjs-plugin", action="append", type="string", dest="sdkjs-plugin", default=["default"], help="provides plugins for server-based and desktop versions of the editors")
 parser.add_option("--sdkjs-plugin-server", action="append", type="string", dest="sdkjs-plugin-server", default=["default"], help="provides plugins for server-based version of the editors")
+parser.add_option("--features", action="store", type="string", dest="features", default="", help="native features (config addon)")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

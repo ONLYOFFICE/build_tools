@@ -31,8 +31,8 @@ def start_mac_services():
   base.run_process(['mysql.server', 'restart'])
   base.print_info('Start RabbitMQ Server')
   base.run_process(['rabbitmq-server'])
-  base.print_info('Start Redis')
-  base.run_process(['redis-server'])
+#  base.print_info('Start Redis')
+#  base.run_process(['redis-server'])
 
 def run_integration_example():
   base.cmd_in_dir('../../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])

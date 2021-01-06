@@ -23,7 +23,10 @@ if not base.is_dir(current_dir + "/mac_cross_64"):
   os.chdir(current_dir)
 
 os.chdir(current_dir + "/icu/source")
-clang_params = "-target arm64-apple-macos10.15 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk"
+param1 = "-arch arm64"
+param2 = "-target arm64-apple-macos10.15"
+param3 = "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk"
+clang_params = param1 + " " + param3
 base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64", 
   "--with-cross-build=" + current_dir + "/mac_cross_64", "VERBOSE=1"])
 

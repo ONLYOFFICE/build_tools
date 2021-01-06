@@ -512,6 +512,8 @@ def qt_config(platform):
     config_param += " iphoneos device"
     if (-1 == config_param_lower.find("debug")):
       config_param += " release"
+  if ("mac_arm64" == platform):
+    config_param += " apple_silicon use_javascript_core"
   return config_param
 
 def qt_major_version():

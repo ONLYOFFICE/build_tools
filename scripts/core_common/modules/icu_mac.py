@@ -50,19 +50,17 @@ if base.is_dir(current_dir + "/mac_arm64"):
 
 base.create_dir(current_dir + "/mac_64")
 base.create_dir(current_dir + "/mac_64/build")
-base.create_dir(current_dir + "/mac_64/build/lib")
 
 base.create_dir(current_dir + "/mac_arm64")
 base.create_dir(current_dir + "/mac_arm64/build")
-base.create_dir(current_dir + "/mac_arm64/build/lib")
 
 base.copy_dir(current_dir + "/mac_cross_64/include", current_dir + "/mac_64/build/include")
-base.copy_file(current_dir + "/mac_cross_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/lib/libicudata." + icu_major + ".dylib")
-base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/lib/libicuuc." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_cross_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicudata." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicuuc." + icu_major + ".dylib")
 
 base.copy_dir(current_dir + "/mac_arm_64/include", current_dir + "/mac_arm64/build/include")
-base.copy_file(current_dir + "/mac_arm_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/lib/libicudata." + icu_major + ".dylib")
-base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/lib/libicuuc." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_arm_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicudata." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicuuc." + icu_major + ".dylib")
 
 base.delete_dir(current_dir + "/mac_cross_64")
 base.delete_dir(current_dir + "/mac_arm_64")

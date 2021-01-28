@@ -135,7 +135,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
     branding_dir = server_dir + "/branding"
-    if("" != config.option("branding")):
+    if("" != config.option("branding") and "onlyoffice" != config.option("branding")):
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries

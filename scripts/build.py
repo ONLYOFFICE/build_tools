@@ -62,9 +62,9 @@ def make_pro_file(makefiles_dir, pro_file):
         base.delete_file(makefiles_dir + "/build.makefile_" + file_suff)
       base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon) 
       if ("1" == config.option("clean")):
-        base.cmd_in_dir(makefiles_dir, base.app_make(), ["clean", "-f", "./build.makefile_" + file_suff], True)
-        base.cmd_in_dir(makefiles_dir, base.app_make(), ["distclean", "-f", "./build.makefile_" + file_suff], True)
-      base.cmd_in_dir(makefiles_dir, base.app_make(), ["-f", "./build.makefile_" + file_suff])
+        base.cmd_and_return_cwd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
+        base.cmd_and_return_cwd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
+      base.cmd_and_return_cwd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff])
     else:
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))

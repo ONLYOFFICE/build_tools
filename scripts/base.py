@@ -307,6 +307,12 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
+  cur_dir = os.getcwd()
+  ret = cmd(prog, args, is_no_errors)
+  os.chdir(cur_dir)
+  return ret
+
 def run_command(sCommand):
   popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   result = {'stdout' : '', 'stderr' : ''}

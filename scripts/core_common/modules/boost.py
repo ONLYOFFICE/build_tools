@@ -102,6 +102,13 @@ def make():
   if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])
 
+  if (-1 != config.option("platform").find("mac_arm64")) and not base.is_dir("../build/mac_arm64"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "mac_arm64")
+    directory_build = base_dir + "/build/mac_arm64/lib"
+    base.delete_file(directory_build + "/libboost_system.a")
+    base.delete_file(directory_build + "/libboost_system.dylib")
+    base.copy_files(directory_build + "/mac_arm64/*.a", directory_build)
+
   os.chdir(old_cur)
   return
 

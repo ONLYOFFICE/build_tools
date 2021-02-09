@@ -1,4 +1,4 @@
-FROM onlyoffice/documentserver
+FROM onlyoffice/documentserver:latest
 RUN apt-get update -y && \ 
 	apt-get install git -y \
 			openjdk-11-jdk -y \

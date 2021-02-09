@@ -26,7 +26,7 @@ To create a image with the ability to include external non-minified sdkjs code,
 use the following command from the dockerfile directory:
 
 ```bash
-sudo docker build -t your_imageName .
+docker build -t Dockerfile .
 ```
 
 **Note**: The dot at the end is required.
@@ -40,7 +40,7 @@ along with the relative paths to the required folders.
 **For example, let's connect the external folders "sdkjs" and "web-apps" to the container:**
 
 ```bash
-sudo docker run -i -t -d -p 80:80 --restart=always \
+docker run -i -t -d -p 80:80 --restart=always \
     -v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
     -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps imageName
 ```

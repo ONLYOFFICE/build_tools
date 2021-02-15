@@ -16,7 +16,7 @@ hasn't been reported (and potentially fixed) already.*
 
 **Steps to reproduce the problem**:
 
-*Please make sure your error is reproducable, Docker can be great help*
+*Please make sure your error can be reproduced, Docker can be great help*
 
 **build_tools base repo version**:
 

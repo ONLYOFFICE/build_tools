@@ -205,7 +205,7 @@ def check_erlang():
 
   erlangBitness = ""
   erlang_path_home = get_erlang_path_to_bin()
-  if ("" != erlang_path_home):
+  if ("" != erlang_path_home or host_platform != 'windows'):
     erlangBitness = base.run_command_in_dir(erlang_path_home, 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
   
   if (erlangBitness == '8'):

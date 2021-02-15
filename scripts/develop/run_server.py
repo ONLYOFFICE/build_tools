@@ -34,9 +34,18 @@ def start_mac_services():
 #  base.print_info('Start Redis')
 #  base.run_process(['redis-server'])
 
+def start_linux_services():
+  base.print_info('Restart MySQL Server')
+  os.system('sudo service mysql restart')
+  base.print_info('Restart RabbitMQ Server')
+  os.system('sudo service rabbitmq-server restart')
+  
 def run_integration_example():
   base.cmd_in_dir('../../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])
 
+def start_linux_services():
+  base.print_info('Restart MySQL Server')
+  
 def make(args = []):
   try:
     base.configure_common_apps()
@@ -48,6 +57,9 @@ def make(args = []):
       restart_win_rabbit()
     elif ("mac" == platform):
       start_mac_services()
+    elif ("linux" == platform):
+      start_linux_services()
+      
 
     branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
     

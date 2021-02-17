@@ -837,12 +837,15 @@ def vcvarsall_end():
   return
 
 def run_as_bat(lines, is_no_errors=False):
-  name = "tmp.bat"
+  name = "tmp.bat" if ("windows" == host_platform()) else "./tmp.sh"
   content = "\n".join(lines)
 
   file = codecs.open(name, "w", "utf-8")
   file.write(content)
   file.close()
+
+  if ("windows" != host_platform()):
+    os.system("chmod +x " + name)
 
   cmd(name, [], is_no_errors)
   delete_file(name)

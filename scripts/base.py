@@ -568,8 +568,10 @@ def qt_copy_plugin(name, out):
     for file in glob.glob(out + "/" + name + "/*d.dll"):
       fileCheck = file[0:-5] + ".dll"
       if is_file(fileCheck):
-        delete_file(file)
-    
+        if ("" == qt_dst_postfix()):
+          delete_file(file)
+        else:
+          delete_file(fileCheck)    
   return
 
 def qt_dst_postfix():

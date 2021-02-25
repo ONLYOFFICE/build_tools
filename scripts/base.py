@@ -525,7 +525,10 @@ def qt_major_version():
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
   if ("windows" == host_platform()):
-    copy_lib(qt_dir, dir, lib)
+    if ("" == qt_dst_postfix()):
+      copy_lib(qt_dir, dir, lib)
+    else:
+      copy_lib(qt_dir, dir, lib + "d")
   else:
     copy_file(qt_dir + "/../lib/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
   return

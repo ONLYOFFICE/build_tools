@@ -11,6 +11,8 @@ import boost
 import cef
 import icu
 import openssl
+import curl
+import ixwebsocket
 import v8
 import html2
 
@@ -19,6 +21,8 @@ def make():
   cef.make()
   icu.make()
   openssl.make()
+  curl.make()
+  ixwebsocket.make()
   v8.make()
   html2.make()
   return

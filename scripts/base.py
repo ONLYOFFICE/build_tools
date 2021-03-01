@@ -70,6 +70,9 @@ def print_info(info=""):
   print("------------------------------------------")
   return
 
+def print_error(error=""):
+  print("\033[91m" + error + "\033[0m")
+
 def print_list(list):
   print('[%s]' % ', '.join(map(str, list)))
   return
@@ -304,6 +307,12 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
+  cur_dir = os.getcwd()
+  ret = cmd(prog, args, is_no_errors)
+  os.chdir(cur_dir)
+  return ret
+
 def run_command(sCommand):
   popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   result = {'stdout' : '', 'stderr' : ''}
@@ -317,6 +326,14 @@ def run_command(sCommand):
     popen.stderr.close()
   
   return result
+
+def run_command_in_dir(directory, sCommand):
+  dir = get_path(directory)
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  ret = run_command(sCommand)
+  os.chdir(cur_dir)
+  return ret
 
 def run_process(args=[]):
   subprocess.Popen(args)
@@ -377,6 +394,87 @@ def git_update(repo, is_no_errors=False, is_current_dir=False):
     cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
   os.chdir(old_cur)
   return
+
+def get_repositories():
+  result = {}
+  result["core"] = [False, False]
+  result["sdkjs"] = [False, False]
+  result.update(get_sdkjs_addons())
+  result.update(get_sdkjs_plugins())
+  result.update(get_sdkjs_plugins_server())
+  result["web-apps"] = [False, False]
+  result.update(get_web_apps_addons())
+  result["dictionaries"] = [False, False]
+
+  if config.check_option("module", "builder"):
+    result["DocumentBuilder"] = [False, False]
+
+  if config.check_option("module", "desktop"):
+    result["desktop-sdk"] = [False, False]
+    result["desktop-apps"] = [False, False]
+
+  if (config.check_option("module", "server")):
+    result["server"] = [False, False]
+    result.update(get_server_addons())
+    result["document-server-integration"] = [False, False]
+    
+  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
+    result["core-fonts"] = [False, False]
+  return result
+
+def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
+  print("[git] create pull request: " + repo)
+  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  if config.option("git-protocol") == "ssh":
+    url = "git@github.com:ONLYOFFICE/" + repo + ".git"
+  folder = get_script_dir() + "/../../" + repo
+  if is_current_dir:
+    folder = repo
+  is_not_exit = False
+  if not is_dir(folder):
+    retClone = cmd("git", ["clone", url, folder], is_no_errors)
+    if retClone != 0:
+      return
+    is_not_exit = True
+  old_cur = os.getcwd()
+  os.chdir(folder)
+  branch_from = config.option("branch")
+  cmd("git", ["checkout", "-f", branch_from], is_no_errors)
+  cmd("git", ["pull"], is_no_errors)
+  for branch_to in branches_to:
+    if "" != run_command("git log origin/" + branch_to + "..origin/" + branch_from)["stdout"]:
+      cmd("git", ["checkout", "-f", branch_to], is_no_errors)
+      cmd("git", ["pull"], is_no_errors)
+      cmd("hub", ["pull-request", "--force", "--base", branch_to, "--head", branch_from, "--message", "Merge from " + branch_from + " to " + branch_to], is_no_errors)
+      if 0 != cmd("git", ["merge", "origin/" + branch_from, "--no-ff", "--no-edit"], is_no_errors):
+        print_error("[git] Conflicts merge " + "origin/" + branch_from + " to " + branch_to + " in repo " + url)
+        cmd("git", ["merge", "--abort"], is_no_errors)
+      else:
+        cmd("git", ["push"], is_no_errors)
+      
+  os.chdir(old_cur)
+  return
+
+def update_repositories(repositories):
+  for repo in repositories:
+    value = repositories[repo]
+    current_dir = value[1]
+    if current_dir == False:
+      git_update(repo, value[0], False)
+    else:
+      if is_dir(current_dir + "/.git"):
+        delete_dir_with_access_error(current_dir);
+        delete_dir(current_dir)
+      if not is_dir(current_dir):
+        create_dir(current_dir)
+      cur_dir = os.getcwd()
+      os.chdir(current_dir)
+      git_update(repo, value[0], True)
+      os.chdir(cur_dir)
+
+def git_dir():
+  if ("windows" == host_platform()):
+    return run_command("git --info-path")['stdout'] + "/../../.."
 
 # qmake -------------------------------------------------
 def qt_setup(platform):
@@ -581,72 +679,53 @@ def generate_plist(path):
       
   return
 
-def sdkjs_addons_checkout():
+def get_sdkjs_addons():
+  result = {}
   if ("" == config.option("sdkjs-addons")):
-    return
+    return result
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
+    result[name] = [True, False]
 
   if ("" != config.option("sdkjs-addons-desktop")):
     addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
     for name in addons_list:
-      git_update(name, True)
-  return
+      result[name] = [True, False]
+  return result
 
-def server_addons_checkout():
+def get_server_addons():
+  result = {}
   if ("" == config.option("server-addons")):
-    return
+    return result
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
-  return
+    result[name] = [True, False]
+  return result
 
-def web_apps_addons_checkout():
+def get_web_apps_addons():
+  result = {}
   if ("" == config.option("web-apps-addons")):
-    return
+    return result
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    git_update(name, True)
-  return
+    result[name] = [True, False]
+  return result
 
-def sdkjs_plugins_checkout():
-  plugins_list_config = config.option("sdkjs-plugin")
-  if ("" == plugins_list_config):
-    return
-  plugins_list = plugins_list_config.rsplit(", ")
+def get_plugins(plugins_list=""):
+  result = {}
+  if ("" == plugins_list):
+    return result
+  plugins_list = plugins_list.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
-
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
   for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+    result["plugin-" + name] = [True, plugins_dir]
+  return result
 
-def sdkjs_plugins_server_checkout():
-  plugins_list_config = config.option("sdkjs-plugin-server")
-  if ("" == plugins_list_config):
-    return
-  plugins_list = plugins_list_config.rsplit(", ")
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
+def get_sdkjs_plugins():
+  return get_plugins(config.option("sdkjs-plugin"))
 
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
-  for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+def get_sdkjs_plugins_server():
+  return get_plugins(config.option("sdkjs-plugin-server"))
 
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):

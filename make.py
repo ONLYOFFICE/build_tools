@@ -3,6 +3,7 @@
 import sys
 sys.path.append('scripts')
 sys.path.append('scripts/develop')
+sys.path.append('scripts/develop/vendor')
 sys.path.append('scripts/core_common')
 sys.path.append('scripts/core_common/modules')
 import config
@@ -13,6 +14,7 @@ import build_server
 import deploy
 import make_common
 import config_server as develop_config_server
+import dependence
 
 # parse configuration
 config.parse()
@@ -51,34 +53,15 @@ base.check_build_version(base_dir)
 
 # update
 if ("1" == config.option("update")):
-  base.git_update("core")
-  base.git_update("sdkjs")
-  base.sdkjs_addons_checkout()
-  base.sdkjs_plugins_checkout()
-  base.sdkjs_plugins_server_checkout()
-  base.git_update("web-apps")
-  base.web_apps_addons_checkout()
-  base.git_update("desktop-sdk")
-  base.git_update("dictionaries")
-
-  if config.check_option("module", "builder"):
-    base.git_update("DocumentBuilder")
-
-  if config.check_option("module", "desktop"):
-    base.git_update("desktop-apps")
-
-  if (config.check_option("module", "server")):
-    base.git_update("server")
-    base.server_addons_checkout()
-    base.git_update("document-server-integration")
-    
-  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
-    base.git_update("core-fonts")
+  repositories = base.get_repositories()
+  base.update_repositories(repositories)
 
 base.configure_common_apps()
 
 # developing...
 if ("1" == config.option("develop")):
+  if not dependence.check_dependencies():
+    exit(1)
   build_server.build_server_develop()
   build_js.build_js_develop(base_dir + "/..")
   develop_config_server.make()

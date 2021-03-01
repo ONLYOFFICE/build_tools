@@ -264,8 +264,8 @@ epubfile.makefile          = $$CORE_ROOT_DIR/EpubFile/Makefile.EpubFile$$PRO_SUF
 }
 
 desktop {
-	hunspell.file            = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
-	hunspell.makefile        = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX
+	hunspell.file            = $$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/hunspell.pro
+	hunspell.makefile        = $$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/Makefile.hunspell$$PRO_SUFFIX
 
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX

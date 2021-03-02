@@ -13,6 +13,7 @@ import icu
 import openssl
 import v8
 import html2
+import hunspell
 
 def make():
   boost.make()
@@ -21,4 +22,5 @@ def make():
   openssl.make()
   v8.make()
   html2.make()
+  hunspell.make(False)
   return

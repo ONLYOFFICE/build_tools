@@ -909,7 +909,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2"])
+  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])

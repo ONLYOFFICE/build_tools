@@ -465,7 +465,7 @@ def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=Fa
     if "" != run_command("git log origin/" + branch_to + "..origin/" + branch_from)["stdout"]:
       cmd("git", ["checkout", "-f", branch_to], is_no_errors)
       cmd("git", ["pull"], is_no_errors)
-      cmd("hub", ["pull-request", "--force", "--base", branch_to, "--head", branch_from, "--message", "Merge from " + branch_from + " to " + branch_to], is_no_errors)
+      cmd("hub", ["pull-request", "--force", "--base", branch_to, "--head", branch_from, "--message", "Merge branch " + branch_from + " to " + branch_to], is_no_errors)
       if 0 != cmd("git", ["merge", "origin/" + branch_from, "--no-ff", "--no-edit"], is_no_errors):
         print_error("[git] Conflicts merge " + "origin/" + branch_from + " to " + branch_to + " in repo " + url)
         cmd("git", ["merge", "--abort"], is_no_errors)

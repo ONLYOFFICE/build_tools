@@ -23,6 +23,9 @@ OO_BRANDING_SUFFIX = $$(OO_BRANDING)
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "$$OO_BRANDING_SUFFIX")
 }
 
+message(current_makefile)
+message($$MAKEFILE)
+
 CONFIG += ordered
 
 core_windows {

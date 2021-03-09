@@ -15,6 +15,9 @@ if ("windows" == platform):
   dependence.check_pythonPath()
   dependence.check_gitPath()
 
+if (dependence.check_gh() != True or dependence.check_gh_auth() != True):
+  sys.exit(0)
+
 base.cmd_in_dir('../../', 'python', ['configure.py', '--branding', 'onlyoffice', '--branding-url', 'https://github.com/ONLYOFFICE/onlyoffice.git', '--branch', branch_from, '--module', 'core desktop builder server mobile', '--update', '1', '--update-light', '1', '--clean', '0'])
 
 # parse configuration

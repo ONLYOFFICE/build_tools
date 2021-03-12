@@ -1,6 +1,7 @@
 FROM onlyoffice/documentserver:latest
 RUN apt-get update -y && \ 
 	apt-get install git -y \
+			python -y \
 			openjdk-11-jdk -y \
 			npm -y && \
 			npm install -g grunt-cli -y && \

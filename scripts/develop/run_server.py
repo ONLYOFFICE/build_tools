@@ -74,7 +74,7 @@ def make(args = []):
     install_module('../../../server/DocService')
     install_module('../../../server/Common')
     install_module('../../../server/FileConverter')
-    install_module('../../../server/SpellChecker')
+#    install_module('../../../server/SpellChecker')
 
     base.set_env('NODE_ENV', 'development-' + platform)
     base.set_env('NODE_CONFIG_DIR', '../../Common/config')
@@ -87,7 +87,7 @@ def make(args = []):
     run_module('../../../server/DocService/sources', ['server.js'])
     run_module('../../../server/DocService/sources', ['gc.js'])
     run_module('../../../server/FileConverter/sources', ['convertermaster.js'])
-    run_module('../../../server/SpellChecker/sources', ['server.js'])
+#    run_module('../../../server/SpellChecker/sources', ['server.js'])
   except SystemExit:
     input("Ignoring SystemExit. Press Enter to continue...")
     exit(0)

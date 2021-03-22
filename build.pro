@@ -149,7 +149,7 @@ core_and_multimedia {
 }
 desktop {
 	message(desktop)
-	addSubProject(hunspell,		$$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro)
+	addSubProject(hunspell,		$$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/hunspell.pro)
 	addSubProject(ooxmlsignature,	$$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro,\
 					kernel unicodeconverter graphics)
 	addSubProject(documentscore,	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro,\

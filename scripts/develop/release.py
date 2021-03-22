@@ -49,6 +49,14 @@ base.update_repositories(repositories)
 repositories['onlyoffice'] = [True, False]
 
 for repo in repositories:
-  base.create_pull_request(branches_to, repo, True)
+  current_dir = repositories[repo][1]
+  if current_dir != False:
+    cur_dir = os.getcwd()
+    os.chdir(current_dir)
+  
+  base.create_pull_request(branches_to, repo, True, current_dir)
+  
+  if current_dir != False:
+    os.chdir(cur_dir)
 
 sys.exit(0)

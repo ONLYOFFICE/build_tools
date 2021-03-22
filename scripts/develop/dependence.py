@@ -387,6 +387,31 @@ def check_7z():
 
   return dependence
 
+def check_gh():
+  base.print_info('Check installed GitHub CLI')
+
+  result = base.run_command('gh --version')['stdout']
+
+  if (result == ''):
+    base.print_info('GitHub CLI not found')
+	# ToDo install
+    return False
+
+  base.print_info('GitHub CLI is installed')
+  return True
+
+def check_gh_auth():
+  base.print_info('Check auth for GitHub CLI')
+
+  result = base.run_command('gh auth status')['stderr']
+
+  if (result.find('not logged') != -1):
+    base.print_info('GitHub CLI not logged in to github')
+    return False
+
+  base.print_info('GitHub CLI logged in to github')
+  return True
+
 def get_mysql_path_to_bin(mysqlPath = ''):
   if (host_platform == 'windows'):
     if (mysqlPath == ''):

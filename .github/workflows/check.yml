@@ -12,4 +12,4 @@ jobs:
       - name: Check *.md files by `markdownlint`
         run: |
           npm install -g markdownlint-cli
-          markdownlint *.md
+          markdownlint *.md develop/*.md

@@ -14,6 +14,7 @@ import openssl
 import v8
 import html2
 import hunspell
+import glew
 
 def make():
   boost.make()
@@ -23,4 +24,5 @@ def make():
   v8.make()
   html2.make()
   hunspell.make(False)
+  glew.make()
   return

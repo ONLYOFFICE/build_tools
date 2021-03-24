@@ -49,21 +49,41 @@ def make():
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"
     sdk_dir_src = base_dir + "/../sdkjs/deploy/sdkjs/"
-    # banners
+    
+    base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
+                   vendor_dir_src + "underscore/underscore-min.js",
+                   base_dir + "/../sdkjs/common/externs/jszip-utils.js",
+                   base_dir + "/../sdkjs/common/Native/native.js",
+                   base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
+                   base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
+                   out_dir + "/mobile/sdkjs/banners_word.js")
+
     base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
                        vendor_dir_src + "underscore/underscore-min.js",
                        base_dir + "/../sdkjs/common/externs/jszip-utils.js",
-                       sdk_dir_src + "common/Native/native.js",
-                       sdk_dir_src + "../../common/Native/Wrappers/common.js",
-                       sdk_dir_src + "common/Native/jquery_native.js"], 
-                       out_dir + "/mobile/sdkjs/banners.js")
+                       base_dir + "/../sdkjs/common/Native/native.js",
+                       base_dir + "/../sdkjs/cell/native/common.js",
+                       base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
+                       out_dir + "/mobile/sdkjs/banners_cell.js")
+
+    base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
+                       vendor_dir_src + "underscore/underscore-min.js",
+                       base_dir + "/../sdkjs/common/externs/jszip-utils.js",
+                       base_dir + "/../sdkjs/common/Native/native.js",
+                       base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
+                       base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
+                       out_dir + "/mobile/sdkjs/banners_slide.js")
+
     base.create_dir(out_dir + "/mobile/sdkjs/word")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"], out_dir + "/mobile/sdkjs/word/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners_word.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"], out_dir + "/mobile/sdkjs/word/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/cell")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"], out_dir + "/mobile/sdkjs/cell/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners_cell.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"], out_dir + "/mobile/sdkjs/cell/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/slide")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"], out_dir + "/mobile/sdkjs/slide/script.bin")
-    base.delete_file(out_dir + "/mobile/sdkjs/banners.js")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners_slide.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"], out_dir + "/mobile/sdkjs/slide/script.bin")
+
+    base.delete_file(out_dir + "/mobile/sdkjs/banners_word.js")
+    base.delete_file(out_dir + "/mobile/sdkjs/banners_cell.js")
+    base.delete_file(out_dir + "/mobile/sdkjs/banners_slide.js")
   return
 
 # JS build

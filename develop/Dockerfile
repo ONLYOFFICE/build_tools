@@ -1,8 +1,9 @@
 FROM onlyoffice/documentserver:latest
 RUN apt-get update -y && \ 
 	apt-get install git -y \
+			python -y \
 			openjdk-11-jdk -y \
-			npm -y \
+			npm -y && \
 			npm install -g grunt-cli -y && \
 	git clone --depth 1 https://github.com/ONLYOFFICE/build_tools.git var/www/onlyoffice/documentserver/build_tools && \
 	rm -rf /var/lib/apt/lists/*

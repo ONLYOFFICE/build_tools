@@ -478,9 +478,14 @@ def check_mysqlServer():
 
   print('Valid MySQL Server not found')
   dependence.append_uninstall('MySQL Server')
+  dependence.append_uninstall('MySQL Installer')
+  dependence.append_install('MySQLInstaller')
   dependence.append_install('MySQLServer')
 
   MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
+  if base.is_exist(MySQLData) == False:
+    return dependence
+
   dir = os.listdir(MySQLData)
   for path in dir:
     if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
@@ -513,8 +518,7 @@ def execMySQLScript(mysql_path_to_bin, scriptPath):
   return True
 def set_MySQLEncrypt(mysql_path_to_bin, sEncrypt):
   print('Setting MySQL password encrypting...')
-  mysqlLoginSrt = get_mysqlLoginSrting()
-  
+
   code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginSrting() + ' -e "' + "ALTER USER '" + install_params['MySQLServer']['user'] + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + install_params['MySQLServer']['pass'] + "';" + '"')
   if (code != 0):
     print('Setting password encryption failed!')
@@ -749,12 +753,11 @@ def uninstallProgram(sName):
   if (code != 0):
     print("Uninstalling was failed!")
     return False
-  
+
   return True
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
-
   if (host_platform == 'windows'):
     if (sName in install_special):
       code = install_special[sName]()

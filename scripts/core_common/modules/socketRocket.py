@@ -26,7 +26,7 @@ def buildIOS():
 
   return
 
-  def buildMacOS():
+def buildMacOS():
 
 # Build for iphone
   base.cmd("xcodebuild", ["-sdk", "macosx", "BITCODE_GENERATION_MODE = bitcode", "ENABLE_BITCODE = YES", "OTHER_CFLAGS = -fembed-bitcode", "-configuration", "Release"])
@@ -49,9 +49,9 @@ def make():
   print("[build]: socketRocket")
   os.chdir(current_dir)
 
-  if (-1 != config.option("platform").find("mac")) 
+  if (-1 != config.option("platform").find("mac")):
     buildMacOS()
-  if (-1 != config.option("platform").find("ios"))
+  if (-1 != config.option("platform").find("ios")):
     buildIOS()
   os.chdir(current_dir_old)
   return

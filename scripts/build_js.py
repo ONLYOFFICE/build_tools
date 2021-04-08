@@ -102,9 +102,12 @@ def build_interface(directory):
   return
 
 def get_build_param(minimize=True):
+  minimize_scripts = minimize
+  if config.check_option("jsminimize", "0"):
+    minimize_scripts = False
   beta = "true" if config.check_option("beta", "1") else "false"
   params = ["--beta=" + beta]
-  return params + (["--level=ADVANCED"] if minimize else ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"])
+  return params + (["--level=ADVANCED"] if minimize_scripts else ["--level=WHITESPACE_ONLY", "--formatting=PRETTY_PRINT"])
 
 def build_sdk_desktop(directory):
   #_run_npm_cli(directory)

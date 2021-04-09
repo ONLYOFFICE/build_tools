@@ -11,8 +11,7 @@ def make():
   os.chdir(path)
   if (-1 != config.option("platform").find("android")):
       subprocess.call(["./build-android-openssl.sh"])
-      #base.cmd("sh", ["./build-android-openssl.sh"])
-
+      
   if (-1 != config.option("platform").find("ios")):
       subprocess.call(["./build-ios-openssl.sh"])
 

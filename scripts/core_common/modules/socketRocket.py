@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*- 
 import sys
 sys.path.append('../..')
+import config
 import base
 import os
 
-current_dir = base.get_script_dir() + "/../../core/Common/3dParty/socketRocket"
+current_dir = base.get_script_dir() + "/../../core/Common/3dParty/socketrocket"
 
 def buildIOS():
 
@@ -46,7 +47,7 @@ def make():
 
   current_dir_old = os.getcwd()
 
-  print("[build]: socketRocket")
+  print("[build]: socketrocket")
   os.chdir(current_dir)
 
   if (-1 != config.option("platform").find("mac")):

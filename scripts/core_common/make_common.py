@@ -13,7 +13,7 @@ import icu
 import openssl
 import curl
 import ixwebsocket
-import socketRocket
+import socketrocket
 import v8
 import html2
 
@@ -24,7 +24,7 @@ def make():
   openssl.make()
   curl.make()
   ixwebsocket.make()
-  socketRocket.make()
+  socketrocket.make()
   v8.make()
   html2.make()
   return

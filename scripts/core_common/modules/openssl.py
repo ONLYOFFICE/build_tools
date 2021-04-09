@@ -16,7 +16,7 @@ def clean():
 
 def make():
   if (-1 != config.option("platform").find("android") or -1 != config.option("platform").find("ios")):
-    #openssl_mobile.make()
+    openssl_mobile.make()
     return
 
   print("[fetch & build]: openssl")

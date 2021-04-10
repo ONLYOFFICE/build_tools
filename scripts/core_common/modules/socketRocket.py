@@ -5,6 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
+import config
 
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/socketrocket"
 

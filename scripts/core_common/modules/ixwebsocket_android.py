@@ -7,48 +7,35 @@ import os
 
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 
-current_path = base.get_env("PATH")
-
 CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
-CMAKE_DIR = base.get_env("ANDROID_HOME") + "/cmake/3.10.2.4988404/bin"
-CMAKE = CMAKE_DIR + "/cmake"
-NINJA = CMAKE_DIR  + "/ninja"
+CMAKE_DIR = base.get_env("ANDROID_HOME") + "/cmake/"
+
+arr = os.listdir(CMAKE_DIR)
+def find_last_version(arr):
+  res = arr[0]
+  for version in arr:
+    if(LooseVersion(version) > LooseVersion(res)):
+      res = version
+  return res
+
+CMAKE = CMAKE_DIR + find_last_version(arr) + "/bin/cmake"
 
 def build_arch(arch, api_version):
   print("ixwebsocket build: " + arch + " ----------------------------------------")
 
-  if base.is_dir(current_dir + "/IXWebSocket/build/" + arch):
-    base.delete_dir(current_dir + "/IXWebSocket/build/" + arch)
-  base.create_dir(current_dir + "/IXWebSocket/build/" + arch)
-  cache_dir = current_dir + "/IXWebSocket/build/cache"
+  if base.is_dir(current_dir + "/IXWebSocket/build/android/" + arch):
+    base.delete_dir(current_dir + "/IXWebSocket/build/android/" + arch)
+  base.create_dir(current_dir + "/IXWebSocket/build/android/" + arch)
+  cache_dir = current_dir + "/IXWebSocket/build/android/cache"
   base.create_dir(cache_dir)
   os.chdir(cache_dir)
 
 
-# ${CMAKE} \
-#     .. \
-#     -DANDROID_NATIVE_API_LEVEL=23 \
-#     -DANDROID_ABI=arm64-v8a, armeabi-v7a\
-#     -DANDROID_TOOLCHAIN=clang \
-#     -DANDROID_NDK=${ANDROID_NDK_ROOT} \
-#     -G'Unix Makefiles' \
-#     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} \
-#     -DCMAKE_MAKE_PROGRAM=make \
-#     -DUSE_WS=0 \
-#     -DUSE_ZLIB=1 \
-#     -DUSE_TLS=1 \
-#     -DUSE_OPEN_SSL=1 \
-#     -DOPENSSL_ROOT_DIR=/mnt/sdc/Development/StudioProjects/core/Common/3dParty/openssl/android/build/arm64-v8a \
-#     -DOPENSSL_INCLUDE_DIR=/mnt/sdc/Development/StudioProjects/core/Common/3dParty/openssl/android/build/arm64-v8a/include \
-#     -DOPENSSL_CRYPTO_LIBRARY=/mnt/sdc/Development/StudioProjects/core/Common/3dParty/openssl/android/build/arm64-v8a/lib/libcrypto.a \
-#     -DOPENSSL_SSL_LIBRARY=/mnt/sdc/Development/StudioProjects/core/Common/3dParty/openssl/android/build/arm64-v8a/lib/libssl.a \
-#     -DCMAKE_INSTALL_PREFIX:PATH=/ \
-
-  base.cmd(CMAKE, ["../..", "-DANDROID_NATIVE_API_LEVEL=" + api_version, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT"),
+  base.cmd(CMAKE, ["../../..", "-DANDROID_NATIVE_API_LEVEL=" + api_version, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT"),
     "-G","Unix Makefiles", "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DCMAKE_MAKE_PROGRAM=make", "-DUSE_WS=0", "-DUSE_ZLIB=1", "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
-    "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../openssl/android/build/" + arch + "/include",
-    "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../openssl/android/build/" + arch + "/lib/libcrypto.a",
-    "-DOPENSSL_SSL_LIBRARY=" + cache_dir + "/../../../../openssl/android/build/" + arch + "/lib/libssl.a",
+    "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/build/android/" + arch + "/include",
+    "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/build/android/" + arch + "/lib/libcrypto.a",
+    "-DOPENSSL_SSL_LIBRARY=" + cache_dir + "/../../../../../openssl/build/android/" + arch + "/lib/libssl.a",
     "-DCMAKE_INSTALL_PREFIX:PATH=/"])
 
   base.cmd("make", ["-j4"])
@@ -63,7 +50,7 @@ def make():
   if not base.is_dir(current_dir):
     base.create_dir(current_dir)
 
-  if base.is_dir(current_dir + "/IXWebSocket/build"):
+  if base.is_dir(current_dir + "/IXWebSocket/build/android"):
     return
 
   current_dir_old = os.getcwd()

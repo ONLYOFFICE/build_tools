@@ -7,8 +7,6 @@ import os
 
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 
-current_path = base.get_env("PATH")
-
 CMAKE_TOOLCHAIN_FILE = ""
 
 def build_arch(platform, arch):
@@ -27,9 +25,9 @@ def build_arch(platform, arch):
 
   base.cmd("cmake", ["../../..",
     "-G","Xcode", "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DDEPLOYMENT_TARGET=10", "-DENABLE_BITCODE=1", "-DPLATFORM=" + platform, "-DARCHS=" + arch, "-DUSE_WS=0", "-DUSE_ZLIB=1", "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
-    "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/ios/build/" + arch + "/include",
-    "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/ios/build/" + arch + "/lib/libcrypto.a",
-    "-DOPENSSL_SSL_LIBRARY=" + cache_dir + "/../../../../../openssl/ios/build/" + arch + "/lib/libssl.a",
+    "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/build/ios/" + arch + "/include",
+    "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/build/ios/" + arch + "/lib/libcrypto.a",
+    "-DOPENSSL_SSL_LIBRARY=" + cache_dir + "/../../../../../openssl/build/ios/" + arch + "/lib/libssl.a",
     "-DCMAKE_INSTALL_PREFIX:PATH=/"])
 
   base.cmd("cmake", ["--build", ".", "--config", "Release"])
@@ -45,7 +43,7 @@ def make():
   if not base.is_dir(current_dir):
     base.create_dir(current_dir)
 
-  if base.is_dir(current_dir + "/IXWebSocket/build"):
+  if base.is_dir(current_dir + "/IXWebSocket/build/ios"):
     return
 
   current_dir_old = os.getcwd()

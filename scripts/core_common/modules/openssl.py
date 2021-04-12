@@ -15,11 +15,12 @@ def clean():
   return
 
 def make():
+
+  print("[fetch & build]: openssl")
+
   if (-1 != config.option("platform").find("android") or -1 != config.option("platform").find("ios")):
     openssl_mobile.make()
     return
-
-  print("[fetch & build]: openssl")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/openssl"
   old_cur = os.getcwd()

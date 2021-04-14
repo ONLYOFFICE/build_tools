@@ -485,7 +485,6 @@ def check_mysqlServer():
   MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
   if base.is_exist(MySQLData) == False:
     return dependence
-
   dir = os.listdir(MySQLData)
   for path in dir:
     if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
@@ -753,11 +752,12 @@ def uninstallProgram(sName):
   if (code != 0):
     print("Uninstalling was failed!")
     return False
-
+  
   return True
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
+
   if (host_platform == 'windows'):
     if (sName in install_special):
       code = install_special[sName]()

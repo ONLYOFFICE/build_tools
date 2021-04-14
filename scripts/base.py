@@ -97,6 +97,14 @@ def copy_file(src, dst):
     return
   return shutil.copy2(get_path(src), get_path(dst))
 
+def move_file(src, dst):
+  if is_file(dst):
+    delete_file(dst)
+  if not is_file(src):
+    print("move warning [file not exist]: " + src)
+    return
+  return shutil.move(get_path(src), get_path(dst))
+
 def copy_files(src, dst, override=True):
   for file in glob.glob(src):
     file_name = os.path.basename(file)
@@ -109,6 +117,20 @@ def copy_files(src, dst, override=True):
       if not is_dir(dst + "/" + file_name):
         create_dir(dst + "/" + file_name)
       copy_files(file + "/*", dst + "/" + file_name, override)
+  return
+
+def move_files(src, dst, override=True):
+  for file in glob.glob(src):
+    file_name = os.path.basename(file)
+    if is_file(file):
+      if override and is_file(dst + "/" + file_name):
+        delete_file(dst + "/" + file_name)
+      if not is_file(dst + "/" + file_name):
+        move_file(file, dst)
+    elif is_dir(file):
+      if not is_dir(dst + "/" + file_name):
+        create_dir(dst + "/" + file_name)
+      move_files(file + "/*", dst + "/" + file_name, override)
   return
 
 def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
@@ -307,6 +329,12 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
+  cur_dir = os.getcwd()
+  ret = cmd(prog, args, is_no_errors)
+  os.chdir(cur_dir)
+  return ret
+
 def run_command(sCommand):
   popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   result = {'stdout' : '', 'stderr' : ''}
@@ -434,7 +462,19 @@ def get_repositories():
     
   if (config.check_option("module", "server") or config.check_option("platform", "ios")):
     result["core-fonts"] = [False, False]
+
+  get_branding_repositories(result)
   return result
+
+def get_branding_repositories(checker):
+  modules = ["core", "server", "mobile", "desktop", "builder"]
+  for mod in modules:
+    name = "repositories_" + mod
+    repos = config.option(name).rsplit(", ")
+    for repo in repos:
+      if (repo != ""):
+        checker[repo] = [False, False]
+  return
 
 def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
   print("[git] create pull request: " + repo)
@@ -452,15 +492,16 @@ def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=Fa
     is_not_exit = True
   old_cur = os.getcwd()
   os.chdir(folder)
-  cmd("git", ["checkout", "-f", config.option("branch")], is_no_errors)
+  branch_from = config.option("branch")
+  cmd("git", ["checkout", "-f", branch_from], is_no_errors)
   cmd("git", ["pull"], is_no_errors)
   for branch_to in branches_to:
-    if "" != run_command("git log origin/" + branch_to + "..origin/" + config.option("branch"))["stdout"]:
+    if "" != run_command("git log origin/" + branch_to + "..origin/" + branch_from)["stdout"]:
       cmd("git", ["checkout", "-f", branch_to], is_no_errors)
       cmd("git", ["pull"], is_no_errors)
-      cmd("hub", ["pull-request", "--force", "--base", branch_to, "--head", config.option("branch"), "--no-edit"], is_no_errors)
-      if 0 != cmd("git", ["merge", "origin/" + config.option("branch"), "--no-ff", "--no-edit"], is_no_errors):
-        print_error("[git] Conflicts merge " + "origin/" + config.option("branch") + " to " + branch_to + " in repo " + url)
+      cmd("gh", ["pr", "create", "--base", branch_to, "--head", branch_from, "--title", "Merge branch " + branch_from + " to " + branch_to, "--body", ""], is_no_errors)
+      if 0 != cmd("git", ["merge", "origin/" + branch_from, "--no-ff", "--no-edit"], is_no_errors):
+        print_error("[git] Conflicts merge " + "origin/" + branch_from + " to " + branch_to + " in repo " + url)
         cmd("git", ["merge", "--abort"], is_no_errors)
       else:
         cmd("git", ["push"], is_no_errors)
@@ -530,7 +571,16 @@ def qt_copy_lib(lib, dir):
     else:
       copy_lib(qt_dir, dir, lib + "d")
   else:
-    copy_file(qt_dir + "/../lib/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
+    src_file = qt_dir + "/../lib/lib" + lib + ".so." + qt_version()
+    if (is_file(src_file)):
+      copy_file(src_file, dir + "/lib" + lib + ".so." + qt_major_version())
+    else:
+      libFramework = lib
+      libFramework = libFramework.replace("Qt5", "Qt")
+      libFramework = libFramework.replace("Qt6", "Qt")
+      libFramework += ".framework"
+      if (is_dir(qt_dir + "/../lib/" + libFramework)):
+        copy_dir(qt_dir + "/../lib/" + libFramework, dir + "/" + libFramework)
   return
 
 def _check_icu_common(dir, out):
@@ -909,7 +959,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2"])
+  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])

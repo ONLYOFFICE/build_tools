@@ -45,7 +45,11 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
+
+    if (0 == platform.find("win") or 0 == platform.find("linux") or 0 == platform.find("mac")):
+      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
+    else:
+      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu
     if (0 == platform.find("win")):

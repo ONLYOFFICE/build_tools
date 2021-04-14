@@ -58,25 +58,26 @@ def make_pro_file(makefiles_dir, pro_file):
 
     # non windows platform
     if not base.is_windows():
-      if ("1" == config.option("clean")):
-        base.cmd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
-        base.cmd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
-
       if base.is_file(makefiles_dir + "/build.makefile_" + file_suff):
         base.delete_file(makefiles_dir + "/build.makefile_" + file_suff)
-      base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)    
-      base.cmd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff])
+      print("make file: " + makefiles_dir + "/build.makefile_" + file_suff)
+      base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)
+      if ("1" == config.option("clean")):
+        base.cmd_and_return_cwd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
+        base.cmd_and_return_cwd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
+        base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)
+      base.cmd_and_return_cwd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff])
     else:
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
-      if ("1" == config.option("clean")):
-        qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)
-        qmake_bat.append("call nmake distclean -f " + makefiles_dir + "/build.makefile_" + file_suff)
+      qmake_bat.append("if exist ./" + makefiles_dir + "/build.makefile_" + file_suff + " del /F ./" + makefiles_dir + "/build.makefile_" + file_suff)
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
         qmake_addon_string = " \"" + config.option("qmake_addon") + "\""
-      qmake_bat.append("if exist ./" + makefiles_dir + "/build.makefile_" + file_suff + " del /F ./" + makefiles_dir + "/build.makefile_" + file_suff)
       qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache " + pro_file + " \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
+      if ("1" == config.option("clean")):
+        qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)
+        qmake_bat.append("call nmake distclean -f " + makefiles_dir + "/build.makefile_" + file_suff)
       qmake_bat.append("call nmake -f " + makefiles_dir + "/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)
       

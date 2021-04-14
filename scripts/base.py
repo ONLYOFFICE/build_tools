@@ -454,6 +454,7 @@ def get_repositories():
   if config.check_option("module", "desktop"):
     result["desktop-sdk"] = [False, False]
     result["desktop-apps"] = [False, False]
+    result["document-templates"] = [False, False]
 
   if (config.check_option("module", "server")):
     result["server"] = [False, False]

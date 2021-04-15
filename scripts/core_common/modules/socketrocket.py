@@ -20,7 +20,7 @@ def buildIOS():
 # Remove arm64 for simulator for SDK 14
   base.cmd("lipo", ["-remove", "arm64", "-output", "build/Release-iphonesimulator/libSocketRocket.a", "build/Release-iphonesimulator/libSocketRocket.a"])
 
-  base.create_dir(current_dir + "/build/lib/ios")
+  base.create_dir(current_dir + "/build/ios/lib")
 
 # Create fat lib
   base.cmd("lipo", ["build/Release-iphonesimulator/libSocketRocket.a", "build/Release-iphoneos/libSocketRocket.a", "-create", "-output", 
@@ -33,11 +33,11 @@ def buildMacOS():
 # Build for iphone
   base.cmd("xcodebuild", ["-sdk", "macosx", "BITCODE_GENERATION_MODE = bitcode", "ENABLE_BITCODE = YES", "OTHER_CFLAGS = -fembed-bitcode", "-configuration", "Release"])
 
-  base.create_dir(current_dir + "/build/lib/mac")
+  base.create_dir(current_dir + "/build/mac/lib")
 
-  base.copy_file("build/Release/libSocketRocket.a", current_dir + "/build/lib/mac")
+  base.copy_file("build/Release/libSocketRocket.a", current_dir + "/build/mac/lib")
 
-  os.remove("build/Release/libSocketRocket.a")
+  base.delete_file("build/Release/libSocketRocket.a")
 
   return
 
@@ -53,7 +53,7 @@ def make():
 
   if (-1 != config.option("platform").find("mac")):
     buildMacOS()
-  if (-1 != config.option("platform").find("ios")):
+  elif (-1 != config.option("platform").find("ios")):
     buildIOS()
   os.chdir(current_dir_old)
   return

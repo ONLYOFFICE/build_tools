@@ -57,5 +57,3 @@ def make():
 
   os.chdir(current_dir_old)
   return
-
-make()

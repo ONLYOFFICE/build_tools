@@ -470,6 +470,8 @@ def get_repositories():
 def get_branding_repositories(checker):
   modules = ["core", "server", "mobile", "desktop", "builder"]
   for mod in modules:
+    if not config.check_option("module", mod):
+      continue
     name = "repositories_" + mod
     repos = config.option(name).rsplit(", ")
     for repo in repos:

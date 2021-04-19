@@ -34,7 +34,7 @@ def build_arch(platform, arch):
   base.cmd("cmake", ["--install", ".", "--config", "Release", "--prefix", cache_dir + "/../" + arch])
   #base.cmd("make", ["DESTDIR=" + cache_dir + "/../" + platform, "install"])
 
-  base.delete_dir(cache_dir)
+  #base.delete_dir(cache_dir)
   os.chdir(current_dir)
 
   return

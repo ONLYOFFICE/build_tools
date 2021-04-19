@@ -42,7 +42,7 @@ def build_arch(arch, api_version):
   base.cmd("make", ["-j4"])
   base.cmd("make", ["DESTDIR=" + cache_dir + "/../" + arch, "install"])
 
-  base.delete_dir(cache_dir)
+  #base.delete_dir(cache_dir)
   os.chdir(current_dir)
 
   return

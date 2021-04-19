@@ -46,6 +46,9 @@ def make():
   if base.is_dir(current_dir + "/build"):
     return
 
+  if (-1 == config.option("platform").find("mac") and -1 == config.option("platform").find("ios")):
+    return
+
   current_dir_old = os.getcwd()
 
   print("[build]: socketrocket")

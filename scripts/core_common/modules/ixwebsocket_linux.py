@@ -22,7 +22,10 @@ def build():
 
   base.cmd("cmake", ["../../..", 
     "-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make", "-DUSE_WS=0", "-DUSE_ZLIB=1", "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
+    #"-DPKG_CONFIG_PATH=" + cache_dir + "/../../../../../openssl/build/linux_64/lib/pkgconfig",
+    #"-DOPENSSL_ROOT_DIR=" + cache_dir + "/../../../../../openssl/build/linux_64",
     "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/build/linux_64/include",
+    #"-DOPENSSL_LIBRARIES=" + cache_dir + "/../../../../../openssl/build/linux_64/lib",
     "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/build/linux_64/lib/libcrypto.a",
     "-DOPENSSL_SSL_LIBRARY=" + cache_dir + "/../../../../../openssl/build/linux_64/lib/libssl.a",
     "-DCMAKE_INSTALL_PREFIX:PATH=/"])
@@ -30,7 +33,7 @@ def build():
   base.cmd("make", ["-j4"])
   base.cmd("make", ["DESTDIR=" + cache_dir + "/../", "install"])
 
-  base.delete_dir(cache_dir)
+  #base.delete_dir(cache_dir)
   os.chdir(current_dir)
 
   return

@@ -11,7 +11,6 @@ current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
 CMAKE_DIR = base.get_env("ANDROID_HOME") + "/cmake/"
 
-arr = os.listdir(CMAKE_DIR)
 def find_last_version(arr):
   res = arr[0]
   for version in arr:
@@ -19,7 +18,6 @@ def find_last_version(arr):
       res = version
   return res
 
-CMAKE = CMAKE_DIR + find_last_version(arr) + "/bin/cmake"
 
 def build_arch(arch, api_version):
   print("ixwebsocket build: " + arch + " ----------------------------------------")
@@ -54,6 +52,11 @@ def make():
   if base.is_dir(current_dir + "/IXWebSocket/build/android"):
     return
 
+  global CMAKE_DIR
+  arr = os.listdir(CMAKE_DIR)
+  global CMAKE
+  CMAKE = CMAKE_DIR + find_last_version(arr) + "/bin/cmake"
+  
   current_dir_old = os.getcwd()
 
   print("[fetch & build]: ixwebsocket_android")

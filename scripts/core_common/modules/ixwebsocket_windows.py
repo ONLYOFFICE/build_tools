@@ -31,10 +31,6 @@ def build():
     "-DCMAKE_INSTALL_PREFIX:PATH="+cache_dir + "/../"])
   
   base.cmd("cmake", ["--build", ".", "--target", "install", "--config", "Debug"])
-  #base.cmd("make", ["-j4"])
-  #base.cmd("make", ["DESTDIR=" + cache_dir + "/../", "install"])
-
-  #base.delete_dir(cache_dir)
   os.chdir(current_dir)
 
   return

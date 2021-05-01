@@ -3,6 +3,7 @@
 import config
 import base
 import os
+import multiprocessing
 
 def make_pro_file(makefiles_dir, pro_file):
   platforms = config.option("platform").split()
@@ -66,7 +67,7 @@ def make_pro_file(makefiles_dir, pro_file):
         base.cmd_and_return_cwd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
         base.cmd_and_return_cwd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
         base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)
-      base.cmd_and_return_cwd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff])
+      base.cmd_and_return_cwd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff, "-j" + str(multiprocessing.cpu_count())])
     else:
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
@@ -78,6 +79,7 @@ def make_pro_file(makefiles_dir, pro_file):
       if ("1" == config.option("clean")):
         qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)
         qmake_bat.append("call nmake distclean -f " + makefiles_dir + "/build.makefile_" + file_suff)
+      qmake_bat.append("set CL=/MP")
       qmake_bat.append("call nmake -f " + makefiles_dir + "/build.makefile_" + file_suff)
       base.run_as_bat(qmake_bat)
       

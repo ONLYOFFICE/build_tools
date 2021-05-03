@@ -62,6 +62,9 @@ def make():
   if ("ios" == config.option("platform")):
     return
 
+  if ("mac" == base.host_platform()) and (-1 != config.option("config").find("use_javascript_core")):
+    return
+
   if (-1 != config.option("platform").find("android")):
     base.cmd_in_dir(base_dir + "/android", "python", ["./make.py"])
     if (-1 == config.option("platform").find("linux")) and (-1 == config.option("platform").find("mac")) and (-1 == config.option("platform").find("win")):

@@ -72,7 +72,7 @@ def make():
       if (0 == platform.find("win")):
         base.copy_file(core_build_dir + "/lib/" + platform_postfix + "/doctrenderer.lib", root_dir + "/doctrenderer.lib")
         base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", root_dir + "/")
-      else:
+      elif (-1 == config.option("config").find("use_javascript_core")):
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/icudtl.dat")
 
     # app

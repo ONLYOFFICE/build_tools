@@ -5,6 +5,33 @@ sys.path.append('../..')
 import base
 import os
 
+def change_icu_defs(current_dir, arch):
+  icudef_file = current_dir + "/icudefs.mk"
+  icudef_file_old = current_dir + "/icudefs.mk.back"
+
+  param = "-arch x86_64"
+  if arch == "arm64":
+    param = "-arch arm64 -isysroot " + base.find_mac_sdk()
+
+  base.copy_file(icudef_file, icudef_file_old)
+
+  base.replaceInFile(icudef_file, "CFLAGS = ", "CFLAGS = " + param + " ")
+  base.replaceInFile(icudef_file, "CXXFLAGS = ", "CXXFLAGS = " + param + " ")
+  base.replaceInFile(icudef_file, "RPATHLDFLAGS =", "RPATHLDFLAGS2 =")
+  base.replaceInFile(icudef_file, "LDFLAGS = ", "LDFLAGS = " + param + " ")
+  base.replaceInFile(icudef_file, "RPATHLDFLAGS2 =", "RPATHLDFLAGS =")
+
+  return
+
+def restore_icu_defs(current_dir):
+  icudef_file = current_dir + "/icudefs.mk"
+  icudef_file_old = current_dir + "/icudefs.mk.back"
+
+  base.delete_file(icudef_file)
+  base.copy_file(icudef_file_old, icudef_file)
+  base.delete_file(icudef_file_old)
+  return
+
 icu_major = "58"
 icu_minor = "2"
 
@@ -16,29 +43,30 @@ os.chdir(current_dir)
 if not base.is_dir(current_dir + "/mac_cross_64"):
   base.create_dir(current_dir + "/mac_cross_64")
   os.chdir(current_dir + "/mac_cross_64")
+
   base.cmd("../icu/source/runConfigureICU", ["MacOSX",
     "--prefix=" + current_dir + "/mac_cross_64", "CFLAGS=-Os CXXFLAGS=--std=c++11"])
+
+  change_icu_defs(current_dir + "/mac_cross_64", "x86_64")
+
   base.cmd("make", ["-j4"])
   base.cmd("make", ["install"], True)
+
+  restore_icu_defs(current_dir + "/mac_cross_64")
+
   os.chdir(current_dir)
 
 os.chdir(current_dir + "/icu/source")
-param1 = "-arch arm64"
-param2 = "-target arm64-apple-macos10.15"
-param3 = "-isysroot " + base.find_mac_sdk()
-clang_params = param1 + " " + param3
+
 base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64", 
   "--with-cross-build=" + current_dir + "/mac_cross_64", "VERBOSE=1"])
 
-icudef_file = current_dir + "/icu/source/icudefs.mk"
-base.replaceInFile(icudef_file, "CFLAGS = ", "CFLAGS = " + clang_params + " ")
-base.replaceInFile(icudef_file, "CXXFLAGS = ", "CXXFLAGS = " + clang_params + " ")
-base.replaceInFile(icudef_file, "RPATHLDFLAGS =", "RPATHLDFLAGS2 =")
-base.replaceInFile(icudef_file, "LDFLAGS = ", "LDFLAGS = " + clang_params + " ")
-base.replaceInFile(icudef_file, "RPATHLDFLAGS2 =", "RPATHLDFLAGS =")
+change_icu_defs(current_dir + "/icu/source", "arm64")
 
 base.cmd("make", ["-j4"])
 base.cmd("make", ["install"])
+
+restore_icu_defs(current_dir + "/icu/source")
 
 os.chdir(current_dir)
 

@@ -83,7 +83,7 @@ def make():
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
+    base.cmd("./Configure", ["no-shared", "no-asm", "darwin64-x86_64-cc", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
     base.cmd("make", ["build_libs", "install"])
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_arm64"):

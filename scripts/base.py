@@ -1080,9 +1080,23 @@ def hack_xcode_ios():
     file.write(filedata)
   return
 
-def find_mac_sdk():
+def find_mac_sdk_version():
   sdk_dir = run_command("xcode-select -print-path")['stdout']
   sdk_dir = os.path.join(sdk_dir, "Platforms/MacOSX.platform/Developer/SDKs")
   sdks = [re.findall('^MacOSX(1\d\.\d+)\.sdk$', s) for s in os.listdir(sdk_dir)]
   sdks = [s[0] for s in sdks if s]
-  return sdk_dir + "/MacOSX" + sdks[0] + ".sdk"
+  return sdks[0]
+
+def find_mac_sdk():
+  sdk_dir = run_command("xcode-select -print-path")['stdout']
+  return sdk_dir + "/MacOSX" + find_mac_sdk_version() + ".sdk"
+
+def get_mac_sdk_version_number():
+  ver = find_mac_sdk_version()
+  ver_arr = ver.split(".")
+  if 0 == len(ver_arr):
+    return 0
+  if 1 == len(ver_arr):
+    return 1000 * int(ver_arr[0])
+  return 1000 * int(ver_arr[0]) + int(ver_arr[1])
+

@@ -149,6 +149,11 @@ def make():
       base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
       base.replaceInFile("v8/build/mac/find_sdk.py", "^MacOSX(10\\.\\d+)\\.sdk$", "^MacOSX(1\\d\\.\\d+)\\.sdk$")
 
+      if (11003 <= base.get_mac_sdk_version_number()):
+        base.copy_dir("v8/third_party/llvm-build/Release+Asserts/include", "v8/third_party/llvm-build/Release+Asserts/__include")
+        base.delete_dir("v8/third_party/llvm-build/Release+Asserts/include")
+        base.replaceInFile("v8/build/config/mac/BUILD.gn", "\"-mmacosx-version-min=$mac_deployment_target\",", "\"-mmacosx-version-min=$mac_deployment_target\",\n    \"-Wno-deprecated-declarations\",")
+
   # --------------------------------------------------------------------------
   # build
   os.chdir("v8")

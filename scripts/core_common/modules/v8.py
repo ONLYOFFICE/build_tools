@@ -62,7 +62,7 @@ def make():
   if ("ios" == config.option("platform")):
     return
 
-  if ("mac" == base.host_platform()) and (-1 != config.option("config").find("use_javascript_core")):
+  if ("mac" == base.host_platform()) and (-1 == config.option("config").find("use_v8")):
     return
 
   if (-1 != config.option("platform").find("android")):

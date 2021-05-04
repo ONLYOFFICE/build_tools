@@ -94,13 +94,14 @@ class EditorApi(object):
       line = line.strip("\t\n\r ")
       line = line.replace("{", "")
       line = line.replace("}", "")
+      lineWithoutSpaces = line.replace(" ", "")
       if not is_found_function and 0 == line.find("function "):
         codeCorrect += (line + addon_for_func + "\n")
         is_found_function = True
       if not is_found_function and -1 != line.find(".prototype."):
         codeCorrect += (line + self.getReturnValue(decoration) + ";\n")
         is_found_function = True
-      if -1 != line.find(".prototype="):
+      if -1 != lineWithoutSpaces.find(".prototype="):
         codeCorrect += (line + "\n")
       if -1 != line.find(".prototype.constructor"):
         codeCorrect += (line + "\n")

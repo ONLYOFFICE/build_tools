@@ -33,9 +33,11 @@ def buildMacOS():
 # Build for iphone
   base.cmd("xcodebuild", ["-sdk", "macosx", "BITCODE_GENERATION_MODE = bitcode", "ENABLE_BITCODE = YES", "OTHER_CFLAGS = -fembed-bitcode", "-configuration", "Release"])
 
-  base.create_dir(current_dir + "/build/mac/lib")
+  base.create_dir(current_dir + "/build/mac_64/lib")
+  base.create_dir(current_dir + "/build/mac_arm64/lib")
 
-  base.copy_file("build/Release/libSocketRocket.a", current_dir + "/build/mac/lib")
+  base.cmd("lipo", ["build/Release/libSocketRocket.a", "-thin", "x86_64", "-output", "build/mac_64/lib/libSoсketRocket.a"])
+  base.cmd("lipo", ["build/Release/libSocketRocket.a", "-thin", "arm64", "-output", "build/mac_arm64/lib/libSoсketRocket.a"])
 
   base.delete_file("build/Release/libSocketRocket.a")
 

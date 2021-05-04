@@ -9,6 +9,7 @@ import ixwebsocket_android
 import ixwebsocket_ios
 import ixwebsocket_linux
 import ixwebsocket_windows
+import ixwebsocket_mac
 
 def make():
   if (-1 != config.option("platform").find("android")):
@@ -20,8 +21,8 @@ def make():
   elif (-1 != config.option("platform").find("linux")):
     ixwebsocket_linux.make()
 
-  #elif (-1 != config.option("platform").find("mac")):
-    #ixwebsocket_mac.make()
+  elif (-1 != config.option("platform").find("mac")):
+    ixwebsocket_mac.make()
 
   elif ("windows" == base.host_platform()):
     ixwebsocket_windows.make()

@@ -1088,8 +1088,7 @@ def find_mac_sdk_version():
   return sdks[0]
 
 def find_mac_sdk():
-  sdk_dir = run_command("xcode-select -print-path")['stdout']
-  return sdk_dir + "/MacOSX" + find_mac_sdk_version() + ".sdk"
+  return run_command("xcrun --sdk macosx --show-sdk-path")['stdout']
 
 def get_mac_sdk_version_number():
   ver = find_mac_sdk_version()

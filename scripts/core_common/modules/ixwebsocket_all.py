@@ -9,8 +9,6 @@ from distutils.version import LooseVersion, StrictVersion
 
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 
-CMAKE_TOOLCHAIN_FILE = ""
-CMAKE_DIR = ""
 CMAKE = "cmake"
 
 def find_last_version(arr):
@@ -32,9 +30,11 @@ def build_arch(platform, arch, params):
 
   libext = "a" 
   prefix = "/"
-  if(-1 != config.option("platform").find("windows")):
+  zlib = "1"
+  if(platform == "windows"):
+    zlib = "0"
     libext = "lib"
-    prefix = cache_dir + "/../"
+    prefix = cache_dir + "/../" + arch
 
   path = platform
   if(platform == "ios" or platform == "android"):
@@ -43,7 +43,7 @@ def build_arch(platform, arch, params):
     path = ""
 
   base.cmd(CMAKE, ["../../..",
-    "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DCMAKE_MAKE_PROGRAM=make", "-DUSE_WS=0", "-DUSE_ZLIB=1", "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
+    "-DUSE_WS=0", "-DUSE_ZLIB=" + zlib, "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
     "-DOPENSSL_ROOT_DIR=" + cache_dir + "/../../../../../openssl/build/" + path + arch,
     "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/build/"  + path + arch + "/include",
     "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/build/" + path + arch + "/lib/libcrypto." + libext,
@@ -60,7 +60,7 @@ def build_arch(platform, arch, params):
     conf = "Debug" if -1 != config.option("config").lower().find("debug") else "Release"
     base.cmd(CMAKE, ["--build", ".", "--target", "install", "--config", conf])
 
-  #base.delete_dir(cache_dir)
+  base.delete_dir(cache_dir)
   os.chdir(current_dir)
 
   return
@@ -86,8 +86,6 @@ def make():
 
    os.chdir(current_dir + "/IXWebSocket")
 
-   global CMAKE_TOOLCHAIN_FILE
-   global CMAKE_DIR
    global CMAKE
 
    CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
@@ -95,7 +93,7 @@ def make():
    CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR)) + "/bin/cmake"
 
    def param_android(arch, api):
-    return ["-G","Unix Makefiles", "-DANDROID_NATIVE_API_LEVEL=" + api, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT")]
+    return ["-G","Unix Makefiles", "-DANDROID_NATIVE_API_LEVEL=" + api, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT"), "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DCMAKE_MAKE_PROGRAM=make"]
 
    build_arch("android", "arm64-v8a", param_android("arm64-v8a", "21"))
    build_arch("android", "armeabi-v7a", param_android("armeabi-v7a", "16"))
@@ -111,7 +109,6 @@ def make():
     if not base.is_dir(current_dir + "/ios-cmake"):
      base.cmd("git", ["clone", "https://github.com/leetal/ios-cmake"])
 
-    global CMAKE_TOOLCHAIN_FILE
     CMAKE_TOOLCHAIN_FILE = current_dir + "/ios-cmake/ios.toolchain.cmake"
 
     os_cmd = 'cmake'
@@ -121,7 +118,7 @@ def make():
     os.chdir(current_dir + "/IXWebSocket")
 
     def param_apple(platform, arch):
-      return ["-G","Xcode", "-DDEPLOYMENT_TARGET=10", "-DENABLE_BITCODE=1", "-DPLATFORM=" + platform, "-DARCHS=" + arch]
+      return ["-G","Xcode", "-DDEPLOYMENT_TARGET=10", "-DENABLE_BITCODE=1", "-DPLATFORM=" + platform, "-DARCHS=" + arch, "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE]
 
     if(platform == "ios"):
       build_arch("ios", "armv7", param_apple("OS", "armv7"))
@@ -160,15 +157,15 @@ def make():
       return
      
     #will support when openssl x86 will support
-    #build_arch("linux", "linux_32", ["-DCMAKE_C_FLAGS=-m32", "-DCMAKE_CXX_FLAGS=-m32", "-G","Unix Makefiles"])
-    build_arch("linux", "linux_64", ["-G","Unix Makefiles"])
+    #build_arch("linux", "linux_32", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make", "-DCMAKE_C_FLAGS=-m32", "-DCMAKE_CXX_FLAGS=-m32"])
+    build_arch("linux", "linux_64", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make"])
 
 
   elif ("windows" == base.host_platform()):
     if base.is_dir(current_dir + "/IXWebSocket/build/windows"):
       return
 
-    build_arch("windows", "win_32", ["-G","Visual Studio 14 2015 Win32"])
+    build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
     build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
   
 

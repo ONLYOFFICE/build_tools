@@ -24,7 +24,7 @@ def make():
       version_zip = re.sub(r"\.(\d+)$", "", base.get_env("PRODUCT_VERSION"))
       macos_zip = macos_dir + "/build/ONLYOFFICE-" + version_zip + ".zip"
 
-      base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release"])
+      base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release", "skip_git_bump:true"])
 
       base.delete_dir(update_dir)
       base.delete_dir(os.path.expanduser("~/Library/Caches/Sparkle_generate_appcast"))

@@ -157,17 +157,20 @@ def make():
       return
      
     #will support when openssl x86 will support
-    #build_arch("linux", "linux_32", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make", "-DCMAKE_C_FLAGS=-m32", "-DCMAKE_CXX_FLAGS=-m32"])
-    build_arch("linux", "linux_64", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make"])
+    #if (-1 != config.option("platform").find("linux_32")):
+      #build_arch("linux", "linux_32", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make", "-DCMAKE_C_FLAGS=-m32", "-DCMAKE_CXX_FLAGS=-m32"])
+    if (-1 != config.option("platform").find("linux_64")):
+      build_arch("linux", "linux_64", ["-G","Unix Makefiles", "-DCMAKE_MAKE_PROGRAM=make"])
 
 
   elif ("windows" == base.host_platform()):
     if base.is_dir(current_dir + "/IXWebSocket/build/windows"):
       return
 
-    build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
-    build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
-  
+    if (-1 != config.option("platform").find("win_32")):
+      build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
+    if (-1 != config.option("platform").find("win_64")):
+      build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
 
   os.chdir(current_dir_old)
   return

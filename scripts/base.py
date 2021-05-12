@@ -578,7 +578,9 @@ def qt_copy_plugin(name, out):
         if ("" == qt_dst_postfix()):
           delete_file(file)
         else:
-          delete_file(fileCheck)    
+          delete_file(fileCheck)
+    for file in glob.glob(out + "/" + name + "/*.pdb"):
+      delete_file(file)      
   return
 
 def qt_dst_postfix():

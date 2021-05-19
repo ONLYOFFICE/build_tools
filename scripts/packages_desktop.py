@@ -47,7 +47,8 @@ def make():
         "\\1ReleaseNotesRU\\2")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(url=\".+/mac/)(ONLYOFFICE.+\.(zip|delta)\")", "\\1updates/onlyoffice/\\2")
-      base.cmd_in_dir(update_dir, "find", [".", "-type", "f", "-name", "*.zip",
-        "-not", "-name", "*-" + version_zip + ".zip", "-delete"])
+      for file in os.listdir(update_dir):
+        if -1 == file.find(version_zip) and (file.endswith(".zip") or file.endswith(".html")):
+          base.delete_dir(update_dir + "/" + file)
 
   return

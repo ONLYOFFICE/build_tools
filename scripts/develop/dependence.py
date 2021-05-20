@@ -102,11 +102,11 @@ def check_dependencies():
     install_args += checksResult.get_uninstall()
     install_args += checksResult.get_removepath()
     install_args += checksResult.get_install()
+    install_args[0] = './scripts/develop/' + install_args[0]
     if (host_platform == 'windows'):
-      install_args[0] = './scripts/develop/' + install_args[0]
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
-      base.cmd_in_dir('./scripts/develop/', 'python', install_args)
+      base.cmd('python', install_args, False)
       get_updates()
   
   check_npmPath()
@@ -195,16 +195,19 @@ def check_java():
 def get_erlang_path_to_bin():
   erlangPath = ''
   if (host_platform == 'windows'):
-    erlangPath = os.getenv("ERLANG_HOME")
-    if (erlangPath is not None):
-      erlangPath += '\\bin'
+    erlangPath = os.getenv("ERLANG_HOME", "")
+    if (erlangPath != ""):
+      erlangPath += "\\bin"
   return erlangPath
 def check_erlang():
   dependence = CDependencies()
   base.print_info('Check installed Erlang')
 
-  erlangBitness = base.run_command_in_dir(get_erlang_path_to_bin(), 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
-
+  erlangBitness = ""
+  erlang_path_home = get_erlang_path_to_bin()
+  if ("" != erlang_path_home or host_platform != 'windows'):
+    erlangBitness = base.run_command_in_dir(erlang_path_home, 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
+  
   if (erlangBitness == '8'):
     print("Installed Erlang is valid")
     return dependence
@@ -384,6 +387,31 @@ def check_7z():
 
   return dependence
 
+def check_gh():
+  base.print_info('Check installed GitHub CLI')
+
+  result = base.run_command('gh --version')['stdout']
+
+  if (result == ''):
+    base.print_info('GitHub CLI not found')
+	# ToDo install
+    return False
+
+  base.print_info('GitHub CLI is installed')
+  return True
+
+def check_gh_auth():
+  base.print_info('Check auth for GitHub CLI')
+
+  result = base.run_command('gh auth status')['stderr']
+
+  if (result.find('not logged') != -1):
+    base.print_info('GitHub CLI not logged in to github')
+    return False
+
+  base.print_info('GitHub CLI logged in to github')
+  return True
+
 def get_mysql_path_to_bin(mysqlPath = ''):
   if (host_platform == 'windows'):
     if (mysqlPath == ''):
@@ -450,9 +478,14 @@ def check_mysqlServer():
 
   print('Valid MySQL Server not found')
   dependence.append_uninstall('MySQL Server')
+  dependence.append_uninstall('MySQL Installer')
+  dependence.append_install('MySQLInstaller')
   dependence.append_install('MySQLServer')
 
   MySQLData = os.environ['ProgramData'] + '\\MySQL\\'
+  if base.is_exist(MySQLData) == False:
+    return dependence
+
   dir = os.listdir(MySQLData)
   for path in dir:
     if (path.find('MySQL Server') != -1) and (base.is_file(MySQLData + path) == False):
@@ -467,27 +500,26 @@ def check_MySQLConfig(mysqlPath = ''):
   if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find('onlyoffice') == -1):
     print('Database onlyoffice not found')
     creatdb_path = base.get_script_dir() + "/../../server/schema/mysql/createdb.sql"
-    result = execMySQLScript(mysqlPath, creatdb_path)
+    result = execMySQLScript(mysql_path_to_bin, creatdb_path)
   if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';" + '"')['stdout'].find('mysql_native_password') == -1):
     print('Password encryption is not valid')
-    result = set_MySQLEncrypt(mysqlPath, 'mysql_native_password') and result
+    result = set_MySQLEncrypt(mysql_path_to_bin, 'mysql_native_password') and result
 
   return result
-def execMySQLScript(mysqlPath, scriptPath):
-  #ToDo check path to mysql
+def execMySQLScript(mysql_path_to_bin, scriptPath):
   print('Execution ' + scriptPath)
-
-  code = subprocess.call(get_mysqlLoginSrting() + ' < "' + scriptPath + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  mysqlLoginSrt = get_mysqlLoginSrting()
+  
+  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginSrting() + ' < "' + scriptPath + '"')
   if (code != 0):
     print('Execution failed!')
     return False
   print('Execution completed')
   return True
-def set_MySQLEncrypt(mysqlPath, sEncrypt):
-  #ToDo check path to mysql
+def set_MySQLEncrypt(mysql_path_to_bin, sEncrypt):
   print('Setting MySQL password encrypting...')
 
-  code = subprocess.call(get_mysqlLoginSrting() + ' -e "' + "ALTER USER '" + install_params['MySQLServer']['user'] + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + install_params['MySQLServer']['pass'] + "';" + '"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginSrting() + ' -e "' + "ALTER USER '" + install_params['MySQLServer']['user'] + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + install_params['MySQLServer']['pass'] + "';" + '"')
   if (code != 0):
     print('Setting password encryption failed!')
     return False
@@ -508,8 +540,8 @@ def uninstall_mysqlserver():
 def get_postrgre_path_to_bin(postgrePath = ''):
   if (host_platform == 'windows'):
     if (postgrePath == ''):
-      postgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13\\'
-    postgrePath += 'bin'
+      postgrePath = os.environ['PROGRAMW6432'] + '\\PostgreSQL\\13'
+    postgrePath += '\\bin'
   return postgrePath
 def get_postgreLoginSrting(userName):
   if (host_platform == 'windows'):
@@ -548,8 +580,9 @@ def check_postgreSQL():
 
   if (host_platform == 'linux'):
     result = os.system(postgreLoginSrt + ' -c "\q"')
+    connectionResult = base.run_command(connectionString)['stdout']
 
-    if (result != 0):
+    if (result != 0 or connectionResult.find(install_params['PostgreSQL']['dbPort']) == -1):
       print('Valid PostgreSQL not found!')
       dependence.append_install('PostgreSQL')
       dependence.append_uninstall('PostgreSQL')
@@ -563,7 +596,7 @@ def check_postgreSQL():
   for info in arrInfo:
     if (base.is_dir(info['Location']) == False):
       continue
-
+    
     postgre_full_name = 'PostgreSQL ' + info['Version'][:2] + ' '
     connectionResult = base.run_command_in_dir(get_postrgre_path_to_bin(info['Location']), connectionString)['stdout']
 
@@ -601,60 +634,55 @@ def check_postgreConfig(postgrePath = ''):
     if (os.system(postgreLoginDbUser + '-c "\q"') != 0):
       print('Invalid user password!')
       base.print_info('Changing password...')
-      result = change_userPass(dbUser, dbPass, postgrePath) and result
+      result = change_userPass(dbUser, dbPass, postgre_path_to_bin) and result
   else:
     print('User ' + dbUser + ' not exist!')
     base.print_info('Creating ' + dbName + ' user...')
-    result = create_postgreUser(dbUser, dbPass, postgrePath) and result
+    result = create_postgreUser(dbUser, dbPass, postgre_path_to_bin) and result
 
   if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find('onlyoffice') == -1):
     print('Database ' + dbName + ' not found')
     base.print_info('Creating ' + dbName + ' database...')
-    result = create_postgreDb(dbName, postgrePath) and configureDb(dbUser, dbName, creatdb_path, postgrePath)
+    result = create_postgreDb(dbName, postgre_path_to_bin) and configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
   else:
     if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"')['stdout'].find('7559 kB') != -1):
       print('Database ' + dbName + ' not configured')
       base.print_info('Configuring ' + dbName + ' database...')
-      result = configureDb(dbName, creatdb_path, postgrePath) and result
+      result = configureDb(dbName, creatdb_path, postgre_path_to_bin) and result
     print('Database ' + dbName + ' is valid')
 
   if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
     print('User ' + dbUser + ' has no database privileges!')
     base.print_info('Setting database privileges for user ' + dbUser + '...')
-    result = set_dbPrivilegesForUser(dbUser, dbName, postgrePath) and result
+    result = set_dbPrivilegesForUser(dbUser, dbName, postgre_path_to_bin) and result
   print('User ' + dbUser + ' has database privileges')
 
   return result
-def create_postgreDb(dbName, postgrePath = ''):
-  #ToDo check path to postgre
+def create_postgreDb(dbName, postgre_path_to_bin = ''):
   postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (os.system(postgreLoginUser + '-c "CREATE DATABASE ' + dbName +';"') != 0):
+  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "CREATE DATABASE ' + dbName +';"') != 0):
     return False
   return True
-def set_dbPrivilegesForUser(userName, dbName, postgrePath = ''):
-  #ToDo check path to postgre
+def set_dbPrivilegesForUser(userName, dbName, postgre_path_to_bin = ''):
   postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (os.system(postgreLoginUser + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + userName + ';"') != 0):
+  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + userName + ';"') != 0):
     return False
   return True
-def create_postgreUser(userName, userPass, postgrePath = ''):
-  #ToDo check path to postgre
+def create_postgreUser(userName, userPass, postgre_path_to_bin = ''):
   postgreLoginRoot = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (os.system(postgreLoginRoot + '-c "CREATE USER ' + userName + ' WITH password ' + "'" + userPass + "'" + ';"') != 0):
+  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "CREATE USER ' + userName + ' WITH password ' + "'" + userPass + "'" + ';"') != 0):
     return False
   return True
-def change_userPass(userName, userPass, postgrePath = ''):
-  #ToDo check path to postgre
+def change_userPass(userName, userPass, postgre_path_to_bin = ''):
   postgreLoginRoot = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (os.system(postgreLoginRoot + '-c "ALTER USER ' + userName + " WITH PASSWORD '" +  userPass + "';" + '"') != 0):
+  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "ALTER USER ' + userName + " WITH PASSWORD '" +  userPass + "';" + '"') != 0):
     return False
   return True
-def configureDb(userName, dbName, scriptPath, postgrePath = ''):
-  #ToDo check path to postgre
+def configureDb(userName, dbName, scriptPath, postgre_path_to_bin = ''):
   print('Execution ' + scriptPath)
   postgreLoginSrt = get_postgreLoginSrting(userName)
 
-  code = os.system(postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"')
+  code = base.exec_command_in_dir(postgre_path_to_bin, postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"')
   if (code != 0):
     print('Execution failed!')
     return False
@@ -667,6 +695,7 @@ def uninstall_postgresql():
   code = os.system('sudo rm -rf /etc/postgresql/') and code
   code = os.system('sudo userdel -r postgres') and code
   code = os.system('sudo groupdel postgres') and code
+  os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp 5432')['stdout'])
 
   return  code
 
@@ -724,12 +753,11 @@ def uninstallProgram(sName):
   if (code != 0):
     print("Uninstalling was failed!")
     return False
-  
+
   return True
 
 def installProgram(sName):
   base.print_info("Installing " + sName + "...")
-
   if (host_platform == 'windows'):
     if (sName in install_special):
       code = install_special[sName]()
@@ -891,3 +919,4 @@ install_params = {
 uninstall_params = {
   'PostgreSQL': '--mode unattended --unattendedmodeui none'
 }
+

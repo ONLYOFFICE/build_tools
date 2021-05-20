@@ -7,12 +7,12 @@ import base
 import os
 import build
 
-def make(src_dir, modules):
+def make(src_dir, modules, build_platform="android"):
   old_cur = os.getcwd()
 
   print("boost-headers...")
   base.cmd("./bootstrap.sh", ["--with-libraries=system"])
-  base.cmd("./b2", ["--prefix=./../build/android", "headers", "install"])
+  base.cmd("./b2", ["--prefix=./../build/" + build_platform, "headers", "install"])
 
   for module in modules:
     print("boost-module: " + module + " ...")
@@ -40,7 +40,7 @@ def make(src_dir, modules):
     pro_file_content.append("")
     pro_file_content.append("SOURCES += $$files($$PWD/src/*.cpp, true)")
     pro_file_content.append("")
-    pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/android/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
+    pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/" + build_platform + "/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
     build.make_pro_file(module_dir + "/makefiles", module_dir + "/" + module + ".pro")
   

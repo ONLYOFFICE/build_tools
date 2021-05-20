@@ -106,7 +106,7 @@ def make():
 
     if (0 == platform.find("win")):
       base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", converter_dir + "/")
-    else:
+    elif (-1 == config.option("config").find("use_javascript_core")):
       base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", converter_dir + "/icudtl.dat")
 
     # builder

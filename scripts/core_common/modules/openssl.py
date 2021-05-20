@@ -83,7 +83,25 @@ def make():
     # TODO: support x86
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
+    base.cmd("./Configure", ["no-shared", "no-asm", "darwin64-x86_64-cc", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
+    base.cmd("make", ["build_libs", "install"])
+
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_arm64"):
+    os.chdir(base_dir)
+    base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git", "openssl2"])
+    os.chdir(base_dir + "/openssl2")
+    replace1 = "\"darwin64-x86_64-cc\" => {"
+    replace2 = "\"darwin64-arm64-cc\" => {\n\
+        inherit_from     => [ \"darwin-common\", asm(\"aarch64_asm\") ],\n\
+        CFLAGS           => add(\"-Wall\"),\n\
+        cflags           => add(\"-arch arm64 -isysroot " + base.find_mac_sdk() + "\"),\n\
+        lib_cppflags     => add(\"-DL_ENDIAN\"),\n\
+        bn_ops           => \"SIXTY_FOUR_BIT_LONG\",\n\
+        perlasm_scheme   => \"macosx\",\n\
+    },\n\
+    \"darwin64-x86_64-cc\" => {"
+    base.replaceInFile(base_dir + "/openssl2/Configurations/10-main.conf", replace1, replace2)
+    base.cmd("./Configure", ["no-shared", "no-asm", "darwin64-arm64-cc", "--prefix=" + old_cur_dir + "/build/mac_arm64", "--openssldir=" + old_cur_dir + "/build/mac_arm64"])
     base.cmd("make", ["build_libs", "install"])
 
   os.chdir(old_cur)

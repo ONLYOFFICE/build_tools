@@ -328,11 +328,29 @@ def run_command(sCommand):
   return result
 
 def run_command_in_dir(directory, sCommand):
-  dir = get_path(directory)
-  cur_dir = os.getcwd()
-  os.chdir(dir)
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
   ret = run_command(sCommand)
-  os.chdir(cur_dir)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
+  return ret
+  
+def exec_command_in_dir(directory, sCommand):
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
+  ret = os.system(sCommand)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
   return ret
 
 def run_process(args=[]):
@@ -390,8 +408,10 @@ def git_update(repo, is_no_errors=False, is_current_dir=False):
       print("branch does not exist...")
       print("switching to master...")
       cmd("git", ["checkout", "-f", "master"])
+    cmd("git", ["submodule", "update", "--init", "--recursive"], True)
   if (0 != config.option("branch").find("tags/")):
     cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
+    cmd("git", ["submodule", "update", "--recursive", "--remote"], True)
   os.chdir(old_cur)
   return
 
@@ -445,7 +465,7 @@ def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=Fa
     if "" != run_command("git log origin/" + branch_to + "..origin/" + branch_from)["stdout"]:
       cmd("git", ["checkout", "-f", branch_to], is_no_errors)
       cmd("git", ["pull"], is_no_errors)
-      cmd("hub", ["pull-request", "--force", "--base", branch_to, "--head", branch_from, "--message", "Merge from " + branch_from + " to " + branch_to], is_no_errors)
+      cmd("gh", ["pr", "create", "--base", branch_to, "--head", branch_from, "--title", "Merge branch " + branch_from + " to " + branch_to, "--body", ""], is_no_errors)
       if 0 != cmd("git", ["merge", "origin/" + branch_from, "--no-ff", "--no-edit"], is_no_errors):
         print_error("[git] Conflicts merge " + "origin/" + branch_from + " to " + branch_to + " in repo " + url)
         cmd("git", ["merge", "--abort"], is_no_errors)
@@ -501,6 +521,8 @@ def qt_config(platform):
     config_param += " iphoneos device"
     if (-1 == config_param_lower.find("debug")):
       config_param += " release"
+  if ("mac_arm64" == platform):
+    config_param += " apple_silicon use_javascript_core"
   return config_param
 
 def qt_major_version():
@@ -510,7 +532,10 @@ def qt_major_version():
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
   if ("windows" == host_platform()):
-    copy_lib(qt_dir, dir, lib)
+    if ("" == qt_dst_postfix()):
+      copy_lib(qt_dir, dir, lib)
+    else:
+      copy_lib(qt_dir, dir, lib + "d")
   else:
     copy_file(qt_dir + "/../lib/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
   return
@@ -550,8 +575,12 @@ def qt_copy_plugin(name, out):
     for file in glob.glob(out + "/" + name + "/*d.dll"):
       fileCheck = file[0:-5] + ".dll"
       if is_file(fileCheck):
-        delete_file(file)
-    
+        if ("" == qt_dst_postfix()):
+          delete_file(file)
+        else:
+          delete_file(fileCheck)
+    for file in glob.glob(out + "/" + name + "/*.pdb"):
+      delete_file(file)      
   return
 
 def qt_dst_postfix():
@@ -822,12 +851,15 @@ def vcvarsall_end():
   return
 
 def run_as_bat(lines, is_no_errors=False):
-  name = "tmp.bat"
+  name = "tmp.bat" if ("windows" == host_platform()) else "./tmp.sh"
   content = "\n".join(lines)
 
   file = codecs.open(name, "w", "utf-8")
   file.write(content)
   file.close()
+
+  if ("windows" != host_platform()):
+    os.system("chmod +x " + name)
 
   cmd(name, [], is_no_errors)
   delete_file(name)
@@ -886,7 +918,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2"])
+  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])
@@ -1049,3 +1081,23 @@ def hack_xcode_ios():
   with open(get_path(qmake_spec_file), "w") as file:
     file.write(filedata)
   return
+
+def find_mac_sdk_version():
+  sdk_dir = run_command("xcode-select -print-path")['stdout']
+  sdk_dir = os.path.join(sdk_dir, "Platforms/MacOSX.platform/Developer/SDKs")
+  sdks = [re.findall('^MacOSX(1\d\.\d+)\.sdk$', s) for s in os.listdir(sdk_dir)]
+  sdks = [s[0] for s in sdks if s]
+  return sdks[0]
+
+def find_mac_sdk():
+  return run_command("xcrun --sdk macosx --show-sdk-path")['stdout']
+
+def get_mac_sdk_version_number():
+  ver = find_mac_sdk_version()
+  ver_arr = ver.split(".")
+  if 0 == len(ver_arr):
+    return 0
+  if 1 == len(ver_arr):
+    return 1000 * int(ver_arr[0])
+  return 1000 * int(ver_arr[0]) + int(ver_arr[1])
+

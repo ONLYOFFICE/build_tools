@@ -31,12 +31,21 @@ def start_mac_services():
   base.run_process(['mysql.server', 'restart'])
   base.print_info('Start RabbitMQ Server')
   base.run_process(['rabbitmq-server'])
-  base.print_info('Start Redis')
-  base.run_process(['redis-server'])
+#  base.print_info('Start Redis')
+#  base.run_process(['redis-server'])
 
+def start_linux_services():
+  base.print_info('Restart MySQL Server')
+  os.system('sudo service mysql restart')
+  base.print_info('Restart RabbitMQ Server')
+  os.system('sudo service rabbitmq-server restart')
+  
 def run_integration_example():
   base.cmd_in_dir('../../../document-server-integration/web/documentserver-example/nodejs', 'python', ['run-develop.py'])
 
+def start_linux_services():
+  base.print_info('Restart MySQL Server')
+  
 def make(args = []):
   try:
     base.configure_common_apps()
@@ -48,6 +57,9 @@ def make(args = []):
       restart_win_rabbit()
     elif ("mac" == platform):
       start_mac_services()
+    elif ("linux" == platform):
+      start_linux_services()
+      
 
     branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
     
@@ -62,7 +74,7 @@ def make(args = []):
     install_module('../../../server/DocService')
     install_module('../../../server/Common')
     install_module('../../../server/FileConverter')
-    install_module('../../../server/SpellChecker')
+#    install_module('../../../server/SpellChecker')
 
     base.set_env('NODE_ENV', 'development-' + platform)
     base.set_env('NODE_CONFIG_DIR', '../../Common/config')
@@ -75,7 +87,7 @@ def make(args = []):
     run_module('../../../server/DocService/sources', ['server.js'])
     run_module('../../../server/DocService/sources', ['gc.js'])
     run_module('../../../server/FileConverter/sources', ['convertermaster.js'])
-    run_module('../../../server/SpellChecker/sources', ['server.js'])
+#    run_module('../../../server/SpellChecker/sources', ['server.js'])
   except SystemExit:
     input("Ignoring SystemExit. Press Enter to continue...")
     exit(0)

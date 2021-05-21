@@ -624,7 +624,9 @@ def qt_copy_plugin(name, out):
         if ("" == qt_dst_postfix()):
           delete_file(file)
         else:
-          delete_file(fileCheck)    
+          delete_file(fileCheck)
+    for file in glob.glob(out + "/" + name + "/*.pdb"):
+      delete_file(file)      
   return
 
 def qt_dst_postfix():
@@ -1134,8 +1136,7 @@ def find_mac_sdk_version():
   return sdks[0]
 
 def find_mac_sdk():
-  sdk_dir = run_command("xcode-select -print-path")['stdout']
-  return sdk_dir + "/MacOSX" + find_mac_sdk_version() + ".sdk"
+  return run_command("xcrun --sdk macosx --show-sdk-path")['stdout']
 
 def get_mac_sdk_version_number():
   ver = find_mac_sdk_version()

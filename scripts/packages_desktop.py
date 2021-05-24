@@ -21,10 +21,10 @@ def make():
     if (0 == platform.find("mac")):
       macos_dir = git_dir + "/desktop-apps/macos"
       update_dir = macos_dir + "/build/update"
-      version_zip = base.cmd("mdls", ["-name", "kMDItemVersion",
+      app_version = base.cmd("mdls", ["-name", "kMDItemVersion",
         "-raw", macos_dir + "/build/ONLYOFFICE.app"])
-      macos_zip = macos_dir + "/build/ONLYOFFICE-" + version_zip + ".zip"
-      changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + version_zip
+      macos_zip = macos_dir + "/build/ONLYOFFICE-" + app_version + ".zip"
+      changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version
 
       base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release", "skip_git_bump:true"])
 
@@ -53,7 +53,7 @@ def make():
         r"(url=\")(?:.+)(ONLYOFFICE.+\.(zip|delta)\")", "\\1" + base_url + "/\\2")
 
       for file in os.listdir(update_dir):
-        if -1 == file.find(version_zip) and (file.endswith(".zip") or file.endswith(".html")):
+        if -1 == file.find(app_version) and (file.endswith(".zip") or file.endswith(".html")):
           base.delete_dir(update_dir + "/" + file)
 
   return

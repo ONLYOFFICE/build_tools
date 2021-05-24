@@ -21,7 +21,8 @@ def make():
     if (0 == platform.find("mac")):
       macos_dir = git_dir + "/desktop-apps/macos"
       update_dir = macos_dir + "/build/update"
-      version_zip = re.sub(r"\.0$", "", base.get_env("PRODUCT_VERSION"))
+      version_zip = base.cmd("mdls", ["-name", "kMDItemVersion",
+        "-raw", macos_dir + "/build/ONLYOFFICE.app"])
       macos_zip = macos_dir + "/build/ONLYOFFICE-" + version_zip + ".zip"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + version_zip
 

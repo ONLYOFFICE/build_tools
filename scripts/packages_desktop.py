@@ -40,14 +40,15 @@ def make():
           base.copy_file(changes_dir + "/ReleaseNotesRU.html",
             update_dir + "/" + os.path.splitext(file)[0] + ".ru.html")
       base.cmd(macos_dir + "/Vendor/Sparkle/bin/generate_appcast", [update_dir])
+      base_url = "https://download.onlyoffice.com/install/desktop/editors/mac/updates/onlyoffice"
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
-        r"(<sparkle:releaseNotesLink>.+/mac/)(?:.+-)([0-9.]+)(\.html</sparkle:releaseNotesLink>)",
-        "\\1updates/onlyoffice/changes/\\2/ReleaseNotes\\3")
+        r"(<sparkle:releaseNotesLink>)(?:.+ONLYOFFICE-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+        "\\1" + base_url + "/changes/\\2/ReleaseNotes.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
-        r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:.+-[0-9.]+\.ru)(\.html</sparkle:releaseNotesLink>)",
-        "\\1ReleaseNotesRU\\2")
+        r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:ONLYOFFICE-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+        "\\1" + base_url + "/changes/\\2/ReleaseNotesRU.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
-        r"(url=\".+/mac/)(ONLYOFFICE.+\.(zip|delta)\")", "\\1updates/onlyoffice/\\2")
+        r"(url=\")(?:.+)(ONLYOFFICE.+\.(zip|delta)\")", "\\1" + base_url + "/\\2")
       for file in os.listdir(update_dir):
         if -1 == file.find(version_zip) and (file.endswith(".zip") or file.endswith(".html")):
           base.delete_dir(update_dir + "/" + file)

@@ -21,13 +21,13 @@ def make():
     if (0 == platform.find("mac")):
       macos_dir = git_dir + "/desktop-apps/macos"
       update_dir = macos_dir + "/build/update"
+
+      base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release", "skip_git_bump:true"])
+
       app_version = base.cmd("mdls", ["-name", "kMDItemVersion",
         "-raw", macos_dir + "/build/ONLYOFFICE.app"])
       macos_zip = macos_dir + "/build/ONLYOFFICE-" + app_version + ".zip"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version
-
-      base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release", "skip_git_bump:true"])
-
       base.delete_dir(update_dir)
       base.delete_dir(os.path.expanduser("~/Library/Caches/Sparkle_generate_appcast"))
       base.create_dir(update_dir)

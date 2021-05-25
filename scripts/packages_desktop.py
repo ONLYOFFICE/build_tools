@@ -24,8 +24,8 @@ def make():
 
       base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", "release", "skip_git_bump:true"])
 
-      app_version = base.cmd("mdls", ["-name", "kMDItemVersion",
-        "-raw", macos_dir + "/build/ONLYOFFICE.app"])
+      app_version = base.run_command("mdls -name kMDItemVersion -raw " +
+        macos_dir + "/build/ONLYOFFICE.app")['stdout']
       macos_zip = macos_dir + "/build/ONLYOFFICE-" + app_version + ".zip"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version
       base.delete_dir(update_dir)

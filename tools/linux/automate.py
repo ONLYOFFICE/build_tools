@@ -17,6 +17,9 @@ def get_branch_name(directory):
   return current_branch
 
 def install_deps():
+  if base.is_file("./packages_complete"):
+    return
+
   # dependencies
   packages = ["apt-transport-https", 
               "autoconf2.13",
@@ -51,22 +54,42 @@ def install_deps():
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 
   # nodejs
-  if not base.is_file("./node_js_setup_10.x"):
+  base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
+  nodejs_version = base.run_command('node -v')['stdout']
+  nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
+  nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
+  nodejs_cur = nodejs_cur_version_major * 1000 + nodejs_cur_version_minor
+  print("Installed Node.js version: " + str(nodejs_cur_version_major) + "." + str(nodejs_cur_version_minor))
+  if (nodejs_cur < 10020):
+    print("Node.js version cannot be less 10.20")
+    print("Reinstall")
+    if (base.is_dir("./node_js_setup_10.x")):
+      base.delete_dir("./node_js_setup_10.x")
+    base.cmd("sudo", ["apt-get", "remove", "--purge", "-y", "nodejs"])
     base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
     base.cmd('curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -')
     base.cmd("sudo", ["bash", "./node_js_setup_10.x"])
     base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
     base.cmd("sudo", ["npm", "install", "-g", "npm@6"])
-    base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
-    base.cmd("sudo", ["npm", "install", "-g", "pkg"])
+  else:
+    print("OK")
+    base.cmd("sudo", ["apt-get", "install", "npm", "yarn"], True)
+  base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
+  base.cmd("sudo", ["npm", "install", "-g", "pkg"])
 
   # java
-  base.cmd("sudo", ["apt-get", "-y", "install", "software-properties-common"])
-  base.cmd("sudo", ["add-apt-repository", "-y", "ppa:openjdk-r/ppa"])
-  base.cmd("sudo", ["apt-get", "update"])
-  base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-8-jdk"])
-  base.cmd("sudo", ["update-alternatives", "--config", "java"])
-  base.cmd("sudo", ["update-alternatives", "--config", "javac"])
+  java_error = base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-11-jdk"], True)
+  if (0 != java_error):
+    java_error = base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-8-jdk"], True)
+  if (0 != java_error):
+    base.cmd("sudo", ["apt-get", "-y", "install", "software-properties-common"])
+    base.cmd("sudo", ["add-apt-repository", "-y", "ppa:openjdk-r/ppa"])
+    base.cmd("sudo", ["apt-get", "update"])
+    base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-8-jdk"])
+    base.cmd("sudo", ["update-alternatives", "--config", "java"])
+    base.cmd("sudo", ["update-alternatives", "--config", "javac"])
+    
+  base.writeFile("./packages_complete", "complete")
   return
 
 def install_qt():

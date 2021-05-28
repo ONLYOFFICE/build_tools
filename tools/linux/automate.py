@@ -55,11 +55,15 @@ def install_deps():
 
   # nodejs
   base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
-  nodejs_version = base.run_command('node -v')['stdout']
-  nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
-  nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
-  nodejs_cur = nodejs_cur_version_major * 1000 + nodejs_cur_version_minor
-  print("Installed Node.js version: " + str(nodejs_cur_version_major) + "." + str(nodejs_cur_version_minor))
+  nodejs_cur = 0
+  try:
+    nodejs_version = base.run_command('node -v')['stdout']
+    nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
+    nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
+    nodejs_cur = nodejs_cur_version_major * 1000 + nodejs_cur_version_minor
+    print("Installed Node.js version: " + str(nodejs_cur_version_major) + "." + str(nodejs_cur_version_minor))
+  except:
+    nodejs_cur = 1
   if (nodejs_cur < 10020):
     print("Node.js version cannot be less 10.20")
     print("Reinstall")

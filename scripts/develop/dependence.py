@@ -151,6 +151,7 @@ def check_git():
 def check_nodejs():
   dependence = CDependencies()
 
+  isNeedReinstall = False
   base.print_info('Check installed Node.js')
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
@@ -168,7 +169,7 @@ def check_nodejs():
   if len(major_minor_min_version) > 1:
     nodejs_min_version_minor = int(major_minor_min_version[1])
   nodejs_max_version = '14'
-  nodejs_max_version_minor = 0
+  nodejs_max_version_minor = float("inf")
   major_minor_max_version = nodejs_max_version.split('.')
   nodejs_max_version_major = int(major_minor_max_version[0])
   if len(major_minor_max_version) > 1:
@@ -176,21 +177,22 @@ def check_nodejs():
 
   if (nodejs_min_version_major > nodejs_cur_version_major or nodejs_cur_version_major > nodejs_max_version_major):
     print('Installed Node.js version must be 10.20 to 14.x')
+    isNeedReinstall = True
+  elif (nodejs_min_version_major == nodejs_cur_version_major):
+    if (nodejs_min_version_minor > nodejs_cur_version_minor):
+      isNeedReinstall = True
+  elif (nodejs_cur_version_major == nodejs_max_version_major):
+    if (nodejs_cur_version_minor > nodejs_max_version_minor):
+      isNeedReinstall = True
+
+  if (True == isNeedReinstall):
+    print('Installed Node.js version must be 10.20 to 14.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
     elif (host_platform == 'linux'):
       dependence.append_uninstall('nodejs')
     dependence.append_install('Node.js')
     return dependence
-  elif (nodejs_min_version_major == nodejs_cur_version_major or nodejs_cur_version_major == nodejs_max_version_major):
-    if (nodejs_min_version_minor > nodejs_cur_version_minor or nodejs_cur_version_minor > nodejs_max_version_minor):
-      print('Installed Node.js version must be 10.20 to 14.x')
-      if (host_platform == 'windows'):
-        dependence.append_uninstall('Node.js')
-      elif (host_platform == 'linux'):
-        dependence.append_uninstall('nodejs')
-      dependence.append_install('Node.js')
-      return dependence
 
   print('Installed Node.js is valid')
   return dependence

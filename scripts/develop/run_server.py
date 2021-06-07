@@ -9,7 +9,7 @@ import traceback
 
 def install_module(path):
   base.print_info('Install: ' + path)
-  base.cmd_in_dir(path, 'npm', ['install'])
+  base.cmd_in_dir(path, 'npm', ['ci'])
 
 def run_module(directory, args=[]):
   base.run_nodejs_in_dir(directory, args)

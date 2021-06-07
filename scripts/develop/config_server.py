@@ -89,7 +89,7 @@ def make():
   #base.cmd_exe("./allthemesgen", ["--converter-dir=\"" + git_dir + "/server/FileConverter/bin\"", "--src=\"" + git_dir + "/sdkjs/slide/themes\"", "--output=\"" + git_dir + "/sdkjs/common/Images\"", "--postfix=android", "--params=280,224"])
 
   # add directories to open directories
-  addon_base_path = "../../../"
+  addon_base_path = "../../"
   server_config = {}
   static_content = {}
   sql = {}

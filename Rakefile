@@ -2,8 +2,9 @@
 
 desc 'Cleanup old build files'
 task :clean do
+  archive_name_pattern = 'build_tools*.tar.gz'
   sh('sudo rm -rf out')
-  sh('rm build_tools*.tar.gz')
+  sh("rm #{archive_name_pattern}") unless Dir.glob(archive_name_pattern).empty?
 end
 
 desc 'Build version anew'

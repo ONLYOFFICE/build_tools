@@ -74,20 +74,18 @@ def make(args = []):
     install_module('../../../server/DocService')
     install_module('../../../server/Common')
     install_module('../../../server/FileConverter')
-#    install_module('../../../server/SpellChecker')
 
     base.set_env('NODE_ENV', 'development-' + platform)
-    base.set_env('NODE_CONFIG_DIR', '../../Common/config')
+    base.set_env('NODE_CONFIG_DIR', '../Common/config')
 
     if ("mac" == platform):
-      base.set_env('DYLD_LIBRARY_PATH', '../../FileConverter/bin/')
+      base.set_env('DYLD_LIBRARY_PATH', '../FileConverter/bin/')
     elif ("linux" == platform):
-      base.set_env('LD_LIBRARY_PATH', '../../FileConverter/bin/')
+      base.set_env('LD_LIBRARY_PATH', '../FileConverter/bin/')
 
-    run_module('../../../server/DocService/sources', ['server.js'])
-    run_module('../../../server/DocService/sources', ['gc.js'])
-    run_module('../../../server/FileConverter/sources', ['convertermaster.js'])
-#    run_module('../../../server/SpellChecker/sources', ['server.js'])
+    run_module('../../../server/DocService', ['sources/server.js'])
+    #run_module('../../../server/DocService', ['sources/gc.js'])
+    run_module('../../../server/FileConverter', ['sources/convertermaster.js'])
   except SystemExit:
     input("Ignoring SystemExit. Press Enter to continue...")
     exit(0)

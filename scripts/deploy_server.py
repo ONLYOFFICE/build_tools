@@ -33,6 +33,7 @@ def make():
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + "/documentserver")
     root_dir_snap = root_dir + '-snap/var/www/onlyoffice/documentserver'
+    root_dir_snap_example = root_dir_snap + '-example'
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -197,7 +198,8 @@ def make():
       base.delete_file(root_dir_snap + '/server/FileConverter/converter')
       base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
       base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
-      base.copy_dir(bin_example_dir + '/..', root_dir_snap + '/example')
+      base.create_dir(root_dir_snap_example)
+      base.copy_dir(bin_example_dir + '/..', root_dir_snap_example)
       base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return

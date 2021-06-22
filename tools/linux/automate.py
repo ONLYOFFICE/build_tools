@@ -181,4 +181,8 @@ base.cmd_in_dir("../..", "./configure.py", build_tools_params)
 base.cmd_in_dir("../..", "./make.py")
 
 
+base.cmd("sudo", ["apt-get", "-y", "install", "dpkg-dev", "debhelper"], True)
+base.cmd('mkdir -p ../../out/package')
+base.cmd('cp -a ../../debianpackage ../../out/package/onlyoffice')
+base.cmd_in_dir("../../out/package/onlyoffice", "sudo", ["dpkg-buildpackage", "-b", "-us", "-uc"])
 

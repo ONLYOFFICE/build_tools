@@ -1,0 +1,13 @@
+onlyoffice (6.3.0-111) unstable; urgency=low
+
+  * Rest of the plugins documentation has been updated to match 2019 gui.
+  * Removed tooltips from main menu.
+  * Added initial useful explanations on options documentation.
+  * Disable action buttons when an option is run.
+  * UEFI options now show the final user when the backup of EFI directory fails.
+  * README reorganisation.
+  * Stable version.
+
+
+ -- Ascensio System SIA <support@onlyoffice.com>  Sat, 28 Mar 2020 21:54:00 +0000
+

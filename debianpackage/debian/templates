@@ -1,0 +1,92 @@
+Template: onlyoffice/db-type
+Type: select
+Choices: postgres, mariadb, mysql
+Default: postgres
+Description: Choose database type:
+
+Template: onlyoffice/db-host
+Type: string
+Default: localhost
+Description: Database host:
+
+Template: onlyoffice/db-port
+Type: string
+Description: Database port:
+ Leave the field blank to use the default value.
+
+Template: onlyoffice/db-user
+Type: string
+Default: onlyoffice
+Description: Database user:
+
+Template: onlyoffice/db-pwd
+Type: password
+Default: onlyoffice
+Description: Database password:
+
+Template: onlyoffice/db-name
+Type: string
+Default: onlyoffice
+Description: Database name:
+
+Template: onlyoffice/remove-db
+Type: boolean
+Default: false
+Description: Remove database?
+ This operation will remove the database which contain all ONLYOFFICE data. It is recommended to take backup before removing the database.
+
+Template: onlyoffice/cluster-mode
+Type: boolean
+Default: false
+Description: Use cluster mode?
+ Type true if documentserver will use in cluster mode.
+
+Template: onlyoffice/ds-port
+Type: string
+Default: 80
+Description: documentserver listening port:
+
+Template: onlyoffice/docservice-port
+Type: string
+Default: 8000
+Description: documentserver docservice listening port:
+
+Template: onlyoffice/spellchecker-port
+Type: string
+Default: 8080
+Description: documentserver spellchecker listening port:
+
+Template: onlyoffice/example-port
+Type: string
+Default: 3000
+Description: documentserver example listening port:
+
+Template: onlyoffice/rabbitmq-host
+Type: string
+Default: localhost
+Description: RabbitMQ host:
+
+Template: onlyoffice/rabbitmq-user
+Type: string
+Default: guest
+Description: RabbitMQ user:
+
+Template: onlyoffice/rabbitmq-pwd
+Type: password
+Default: guest
+Description: RabbitMQ password:
+
+Template: onlyoffice/jwt-enabled
+Type: boolean
+Default: false
+Description: Enable jwt for documentserver?
+
+Template: onlyoffice/jwt-secret
+Type: string
+Default: secret
+Description: Jwt secret:
+
+Template: onlyoffice/jwt-header
+Type: string
+Default: Authorization
+Description: Jwt authorization header:

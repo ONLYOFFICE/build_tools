@@ -1,0 +1,10 @@
+{
+  "name": "installtools",
+  "version": "0.0.0",
+  "homepage": "http://www.onlyoffice.com",
+  "private": true,
+  "dependencies": {
+    "json": "^9.0.6",
+    "replace": "^1.0.1"
+  }
+}

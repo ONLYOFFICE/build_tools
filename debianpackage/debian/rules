@@ -29,6 +29,9 @@ override_dh_shlibdeps:
 #	dh_auto_configure -- \
 #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
+# Avoid embedded nodejs executable parts from vercel/pkg to be stripped
+override_dh_strip:
+
 
 
 

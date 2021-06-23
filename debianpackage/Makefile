@@ -80,6 +80,8 @@ install:
 	ln -s $(liblink)/libPdfWriter.so $(libtarget)/libPdfWriter.so
 	ln -s $(liblink)/libUnicodeConverter.so $(libtarget)/libUnicodeConverter.so
 	ln -s $(liblink)/libXpsFile.so $(libtarget)/libXpsFile.so
+	ln -s $(liblink)/libicudata.so.58 $(libtarget)/libicudata.so.58
+	ln -s $(liblink)/libicuuc.so.58 $(libtarget)/libicuuc.so.58
 
 	install -d $(etclogrotatetarget)/
 	ln -r -s $(documentserveretclogrotatetarget)/ds.conf $(etclogrotatetarget)/ds.conf

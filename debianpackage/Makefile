@@ -58,7 +58,10 @@ install:
 	cp -a documentserver-example-supervisor-conf/* $(documentserverexampleetcsupervisortarget)/
 
 	cp -a $(documentserversource)/* $(documentservertarget)/
-	cp -a $(documentserver-examplesource)/* $(documentserver-exampletarget)/
+	install -d $(documentserver-exampletarget)/config/
+	install -d $(documentserver-exampletarget)/welcome/
+	install -m 755 $(documentserver-examplesource)/example $(documentserver-exampletarget)/
+
 	cp -a $(documentserveretcsource)/* $(documentserveretctarget)/
 	cp -a $(documentserverexampleetcsource)/* $(documentserverexampleetctarget)/
 

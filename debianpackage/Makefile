@@ -60,6 +60,7 @@ install:
 	cp -a $(documentserversource)/* $(documentservertarget)/
 	install -d $(documentserver-exampletarget)/config/
 	install -d $(documentserver-exampletarget)/welcome/
+	cp -a documentserver-example-welcome/* $(documentserver-exampletarget)/welcome/
 	install -m 755 $(documentserver-examplesource)/example $(documentserver-exampletarget)/
 
 	cp -a $(documentserveretcsource)/* $(documentserveretctarget)/

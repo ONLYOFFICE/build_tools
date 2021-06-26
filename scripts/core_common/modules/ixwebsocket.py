@@ -18,7 +18,7 @@ def find_last_version(arr):
         res = version
     return res
 
-def build_arch(platform, arch, params):
+def build_arch(platform, arch, params, is_debug=False):
   print("ixwebsocket build: " + platform + "....." + arch + " ----------------------------------------")
 
   if base.is_dir(current_dir + "/IXWebSocket/build/"+ platform + "/" + arch):
@@ -31,7 +31,7 @@ def build_arch(platform, arch, params):
   libext = "a" 
   prefix = "/"
   zlib = "1"
-  if(platform == "windows"):
+  if (0 == platform.find("windows")):
     zlib = "0"
     libext = "lib"
     prefix = cache_dir + "/../" + arch
@@ -43,7 +43,7 @@ def build_arch(platform, arch, params):
     path = ""
 
   base.cmd(CMAKE, ["../../..",
-    "-DUSE_WS=0", "-DUSE_ZLIB=" + zlib, "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1",
+    "-DUSE_WS=0", "-DUSE_ZLIB=" + zlib, "-DUSE_TLS=1", "-DUSE_OPEN_SSL=1", 
     "-DOPENSSL_ROOT_DIR=" + cache_dir + "/../../../../../openssl/build/" + path + arch,
     "-DOPENSSL_INCLUDE_DIR=" + cache_dir + "/../../../../../openssl/build/"  + path + arch + "/include",
     "-DOPENSSL_CRYPTO_LIBRARY=" + cache_dir + "/../../../../../openssl/build/" + path + arch + "/lib/libcrypto." + libext,
@@ -57,7 +57,7 @@ def build_arch(platform, arch, params):
     base.cmd("make", ["-j4"])
     base.cmd("make", ["DESTDIR=" + cache_dir + "/../" + arch, "install"])
   elif(-1 != platform.find("windows")):
-    conf = "Debug" if -1 != config.option("config").lower().find("debug") else "Release"
+    conf = "Debug" if is_debug else "Release"
     base.cmd(CMAKE, ["--build", ".", "--target", "install", "--config", conf])
 
   base.delete_dir(cache_dir)
@@ -82,6 +82,7 @@ def make():
   # build for platform
   if (-1 != config.option("platform").find("android")):
    if base.is_dir(current_dir + "/IXWebSocket/build/android"):
+    os.chdir(current_dir_old)
     return
 
    os.chdir(current_dir + "/IXWebSocket")
@@ -154,6 +155,7 @@ def make():
 
   elif (-1 != config.option("platform").find("linux")):
     if base.is_dir(current_dir + "/IXWebSocket/build/linux"):
+      os.chdir(current_dir_old)
       return
      
     #will support when openssl x86 will support
@@ -165,12 +167,15 @@ def make():
 
   elif ("windows" == base.host_platform()):
     if base.is_dir(current_dir + "/IXWebSocket/build/windows"):
+      os.chdir(current_dir_old)
       return
 
     if (-1 != config.option("platform").find("win_32")):
       build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
+      build_arch("windows_debug", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"], True)      
     if (-1 != config.option("platform").find("win_64")):
       build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
+      build_arch("windows_debug", "win_64", ["-G","Visual Studio 14 2015 Win64"], True)
 
   os.chdir(current_dir_old)
   return

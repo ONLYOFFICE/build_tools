@@ -560,6 +560,8 @@ def qt_config(platform):
       config_param += " release"
   if ("mac_arm64" == platform):
     config_param += " apple_silicon use_javascript_core"
+  if config.check_option("module", "mobile"):
+    config_param += " support_web_socket"
   return config_param
 
 def qt_major_version():

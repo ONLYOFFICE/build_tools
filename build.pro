@@ -33,6 +33,8 @@ addSubProject(kernel,		$$CORE_ROOT_DIR/Common/kernel.pro,\
 				cryptopp)
 addSubProject(unicodeconverter,	$$CORE_ROOT_DIR/UnicodeConverter/UnicodeConverter.pro,\
 				kernel)
+addSubProject(network,	$$CORE_ROOT_DIR/Common/Network/network.pro,\
+				kernel)
 addSubProject(graphics,		$$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro,\
 				kernel unicodeconverter)
 addSubProject(pdfwriter,	$$CORE_ROOT_DIR/PdfWriter/PdfWriter.pro,\
@@ -46,7 +48,7 @@ addSubProject(htmlrenderer,	$$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro,\
 addSubProject(pdfreader,	$$CORE_ROOT_DIR/PdfReader/PdfReader.pro,\
 				kernel unicodeconverter graphics pdfwriter htmlrenderer)
 addSubProject(htmlfile2,	$$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro,\
-				kernel unicodeconverter graphics)
+				kernel unicodeconverter graphics network)
 addSubProject(doctrenderer,	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro,\
 				kernel unicodeconverter graphics)
 addSubProject(fb2file,		$$CORE_ROOT_DIR/Fb2File/Fb2File.pro,\

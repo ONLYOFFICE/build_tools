@@ -23,10 +23,11 @@ def make():
   cef.make()
   icu.make()
   openssl.make()
-  curl.make()
-  websocket.make()
   v8.make()
   html2.make()
   hunspell.make(False)
   glew.make()
+  if config.check_option("module", "mobile"):
+    curl.make()
+    websocket.make()
   return

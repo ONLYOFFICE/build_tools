@@ -26,6 +26,7 @@ def make():
     platform = native_platform
 
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "kernel")
+    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "network")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlRenderer")

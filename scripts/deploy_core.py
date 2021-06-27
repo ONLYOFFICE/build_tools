@@ -24,21 +24,22 @@ def make():
     base.create_dir(archive_dir)
 
     platform = native_platform
+    platform_postfix = platform + base.qt_dst_postfix()
 
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "network")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "graphics")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "doctrenderer")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlRenderer")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "DjVuFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "PdfReader")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "PdfWriter")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "HtmlFile2")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "UnicodeConverter")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "Fb2File")
-    base.copy_lib(core_build_dir + "/lib/" + platform, archive_dir, "EpubFile")
-    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "x2t")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "kernel")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "network")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "graphics")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "doctrenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DjVuFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "PdfReader")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "PdfWriter")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlFile2")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "UnicodeConverter")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "EpubFile")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2t")
 
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", archive_dir + "/sdkjs")
     base.create_dir(archive_dir + "/sdkjs/vendor")
@@ -53,9 +54,9 @@ def make():
       if (-1 == config.option("config").find("use_javascript_core")):
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", archive_dir + "/")
 
-    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allfontsgen")
-    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "allthemesgen")
-    base.copy_exe(core_build_dir + "/bin/" + platform, archive_dir, "standardtester")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allfontsgen")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allthemesgen")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "standardtester")
 
     if base.is_file(archive_dir + "/core.7z"):
       base.delete_file(archive_dir + "/core.7z")

@@ -8,6 +8,8 @@ def make():
   if ("1" == base.get_env("OO_NO_BUILD_JS")):
     return
 
+  base.set_env('NODE_ENV', 'production')
+
   base_dir = base.get_script_dir() + "/.."
   out_dir = base_dir + "/out/js/";
   branding = config.option("branding-name")

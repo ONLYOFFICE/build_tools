@@ -65,5 +65,5 @@ defineTest(addSubProject) {
 		export($${pro_name}.depends)
 	}
 	# remove makefile
-	qmakeClear(path, name)
+	qmakeClear($$path, $$name)
 }

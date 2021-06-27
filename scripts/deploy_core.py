@@ -27,7 +27,7 @@ def make():
     platform_postfix = platform + base.qt_dst_postfix()
 
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "network")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlRenderer")

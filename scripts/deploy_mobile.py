@@ -34,7 +34,7 @@ def make():
 
     # x2t
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "network")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfWriter")

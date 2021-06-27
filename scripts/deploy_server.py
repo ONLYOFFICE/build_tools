@@ -76,7 +76,7 @@ def make():
     base.create_dir(converter_dir)
 
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "network")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "PdfWriter")

@@ -167,10 +167,6 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
         proxy_pass http://localhost:8000;
         proxy_http_version 1.1;
       }
-      location /spellchecker/ {
-        proxy_pass http://localhost:8080/;
-        proxy_http_version 1.1;
-      }
     }
     ```
 
@@ -261,16 +257,7 @@ allow to run foreground processes in background mode.
     ./converter
     ```
 
-2. Start the **SpellChecker** service:
-
-    ```bash
-    cd out/linux_64/onlyoffice/documentserver/server/SpellChecker
-    NODE_ENV=development-linux \
-    NODE_CONFIG_DIR=$PWD/../Common/config \
-    ./spellchecker
-    ```
-
-3. Start the **DocService** service:
+2. Start the **DocService** service:
 
     ```bash
     cd out/linux_64/onlyoffice/documentserver/server/DocService

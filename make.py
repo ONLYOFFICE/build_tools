@@ -2,6 +2,8 @@
 
 import sys
 sys.path.append('scripts')
+sys.path.append('scripts/develop')
+sys.path.append('scripts/develop/vendor')
 sys.path.append('scripts/core_common')
 sys.path.append('scripts/core_common/modules')
 import config
@@ -11,12 +13,14 @@ import build_js
 import build_server
 import deploy
 import make_common
+import develop
 import os
 
 # parse configuration
 config.parse()
 
 base_dir = base.get_script_dir(__file__)
+
 base.set_env("BUILD_PLATFORM", config.option("platform"))
 
 # branding
@@ -32,7 +36,7 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
     base.cmd_in_dir(branding_dir, "git", ["fetch"], True)
    
     if not is_exist or ("1" != config.option("update-light")):
-      base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")])
+      base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")], True)
 
     base.cmd_in_dir(branding_dir, "git", ["pull"], True)
 
@@ -50,29 +54,28 @@ base.check_build_version(base_dir)
 
 # update
 if ("1" == config.option("update")):
-  base.git_update("core")
-  base.git_update("sdkjs")
-  base.sdkjs_addons_checkout()
-  base.sdkjs_plugins_checkout()
-  base.sdkjs_plugins_server_checkout()
-  base.git_update("web-apps")
-  base.web_apps_addons_checkout()
-  base.git_update("desktop-sdk")
-  base.git_update("dictionaries")
+  repositories = base.get_repositories()
+  base.update_repositories(repositories)
 
-  if config.check_option("module", "builder"):
-    base.git_update("DocumentBuilder")
+  # Apply patches if available
+  patchdir = base_dir + '/patches/' + base.host_platform()
+  if os.path.exists(patchdir) :
+    for root, dirs, files in os.walk(patchdir) :
+      for filename in files :
+        tmpdir = base_dir + '/../' + filename.split('.', 1)[0]
+        print('Patching directory %s' % tmpdir)
+        base.cmd("patch", ["-d", tmpdir, "-i", patchdir + "/" + filename])
 
-  if config.check_option("module", "desktop"):
-    base.git_update("desktop-apps")
 
-  if (config.check_option("module", "develop") or config.check_option("module", "server")):
-    base.git_update("server")
-    base.server_addons_checkout()
-    base.git_update("document-server-integration")
-    
-  if (config.check_option("module", "develop") or config.check_option("module", "server") or config.check_option("platform", "ios")):
-    base.git_update("core-fonts")
+  # Apply patches if available
+  patchdir = base_dir + '/patches/' + base.host_platform()
+  if os.path.exists(patchdir) :
+    for root, dirs, files in os.walk(patchdir) :
+      for filename in files :
+        tmpdir = base_dir + '/../' + filename.split('.', 1)[0]
+        print('Patching directory %s' % tmpdir)
+        base.cmd("patch", ["-N", "-d", tmpdir, "-i", patchdir + "/" + filename])
+
 
   # Apply patches if available
   patchdir = base_dir + '/patches/' + base.host_platform()
@@ -87,10 +90,7 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-if ("develop" == config.option("module")):
-  build_js.build_js_develop(base_dir + "/..")
-  deploy.make()
-  exit(0)
+develop.make();
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):

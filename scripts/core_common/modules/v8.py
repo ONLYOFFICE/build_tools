@@ -29,6 +29,10 @@ def is_main_platform():
     return True
   if config.check_option("platform", "mac_64"):
     return True
+  if config.check_option("platform", "ios"):
+    return True
+  if (-1 != config.option("platform").find("android")):
+    return True
   return False
 
 def is_xp_platform():
@@ -37,18 +41,10 @@ def is_xp_platform():
   return False
 
 def is_use_clang():
-  get_gcc_version = "gcc -dumpfullversion -dumpversion"
-  popen = subprocess.Popen(get_gcc_version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   gcc_version = 4
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    gcc_version_str = stdout.strip().decode("utf-8")
-    gcc_version_major = gcc_version_str.split(".")[0]
-    gcc_version = int(gcc_version_major)
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  if (gcc_version_str != ""):
+    gcc_version = int(gcc_version_str.split(".")[0])
     
   is_clang = "false"
   if (gcc_version >= 6):
@@ -62,12 +58,21 @@ def make():
     make_xp()
     return
 
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
   if ("ios" == config.option("platform")):
     return
 
-  print("[fetch & build]: v8")
+  if (-1 != config.option("platform").find("android")):
+    base.cmd_in_dir(base_dir + "/android", "python", ["./make.py"])
+    if (-1 == config.option("platform").find("linux")) and (-1 == config.option("platform").find("mac")) and (-1 == config.option("platform").find("win")):
+      return
 
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8"
+  if ("mac" == base.host_platform()) and (-1 == config.option("config").find("use_v8")):
+    return
+
+  print("[fetch & build]: v8")
+  old_env = dict(os.environ)
+
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
@@ -103,7 +108,18 @@ def make():
   # --------------------------------------------------------------------------
   # correct
   if not base.is_dir("v8/out.gn"):
-    base.cmd("gclient", ["sync"], True)
+    
+    # windows hack (delete later) ----------------------
+    if ("windows" == base.host_platform()):
+      base.delete_dir_with_access_error("v8/buildtools/win")
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      base.cmd("gclient", ["sync", "--force"], True)
+    else:
+      base.cmd("gclient", ["sync"], True) 
+
+    # normal version !!!
+    #base.cmd("gclient", ["sync"], True)
+    # --------------------------------------------------
 
     if ("linux" == base.host_platform()):
       if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):
@@ -130,7 +146,13 @@ def make():
     if ("windows" == base.host_platform()):
       base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
     if ("mac" == base.host_platform()):
-      base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")  
+      base.replaceInFile("v8/build/config/mac/mac_sdk.gni", "if (mac_sdk_version != mac_sdk_min_build_override", "if (false && mac_sdk_version != mac_sdk_min_build_override")
+      base.replaceInFile("v8/build/mac/find_sdk.py", "^MacOSX(10\\.\\d+)\\.sdk$", "^MacOSX(1\\d\\.\\d+)\\.sdk$")
+
+      if (11003 <= base.get_mac_sdk_version_number()):
+        base.copy_dir("v8/third_party/llvm-build/Release+Asserts/include", "v8/third_party/llvm-build/Release+Asserts/__include")
+        base.delete_dir("v8/third_party/llvm-build/Release+Asserts/include")
+        base.replaceInFile("v8/build/config/mac/BUILD.gn", "\"-mmacosx-version-min=$mac_deployment_target\",", "\"-mmacosx-version-min=$mac_deployment_target\",\n    \"-Wno-deprecated-declarations\",")
 
   # --------------------------------------------------------------------------
   # build
@@ -168,9 +190,10 @@ def make():
     base.cmd("ninja", ["-C", "out.gn/win_32/release"])
 
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
 
   make_xp()
-
   return
 
 def make_xp():
@@ -178,6 +201,7 @@ def make_xp():
     return
 
   print("[fetch & build]: v8_xp")
+  old_env = dict(os.environ)
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8/v8_xp"
   old_cur = os.getcwd()
@@ -199,7 +223,6 @@ def make_xp():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
-  old_path = os.environ["PATH"]
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
     config.option("vs-path") + "/../Common7/IDE",
@@ -210,6 +233,9 @@ def make_xp():
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
+    base.delete_dir_with_access_error("v8/buildtools/win")
+    base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+    base.cmd("gclient", ["sync", "--force"], True)
 
   # save common py script
   base.save_as_script("v8/build/common_xp.py", [
@@ -259,6 +285,7 @@ def make_xp():
       base.copy_files("v8/build/Debug/lib/*", "win_32/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32/debug/icudt.dll")
 
-  os.environ["PATH"] = old_path
   os.chdir(old_cur)
+  os.environ.clear()
+  os.environ.update(old_env)
   return

@@ -50,6 +50,7 @@ def make():
   if ("freebsd" == base.host_platform()):
     pkg_target += "-freebsd"
     pkgBin = "/usr/local/bin/" + pkgBin
+    pkg_target = "node12"
 
   if ("windows" == base.host_platform()):
     pkg_target += "-win"
@@ -60,5 +61,18 @@ def make():
   base.cmd_in_dir(server_build_dir + "/SpellChecker", pkgBin, [".", "-t", pkg_target, "-o", "spellchecker"])
 
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
+  base.delete_dir(example_dir  + "/node_modules")
   base.cmd_in_dir(example_dir, "npm", ["install"])
+  sync_rpc_lib_dir = example_dir + "/node_modules/sync-rpc/lib"
+  patch_file = base.get_script_dir() + "/../tools/linux/sync-rpc.patch"
+  if ("linux" == base.host_platform() or "freebsd" == base.host_platform()):  
+    base.cmd_in_dir(sync_rpc_lib_dir, "patch", ["-N", "-i", patch_file])
+  if ("windows" == base.host_platform()):
+    patch_exe_dir = base.git_dir() + "/usr/bin"
+    base.cmd_in_dir(patch_exe_dir, "patch.exe", ["-N", "-d", sync_rpc_lib_dir, "-i", patch_file])
   base.cmd_in_dir(example_dir, pkgBin, [".", "-t", pkg_target, "-o", "example"])
+
+def build_server_develop():
+  server_dir = base.get_script_dir() + "/../../server"
+  base.cmd_in_dir(server_dir, "npm", ["install"])
+  base.cmd_in_dir(server_dir, "grunt", ["develop", "-v"] + base.server_addons_param())

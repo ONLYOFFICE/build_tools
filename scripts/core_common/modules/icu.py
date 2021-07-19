@@ -5,9 +5,13 @@ sys.path.append('../..')
 import config
 import base
 import os
+import icu_android
 
 def make():
   print("[fetch & build]: icu")
+
+  if (-1 != config.option("platform").find("android")):
+    icu_android.make()
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"
   old_cur = os.getcwd()
@@ -63,10 +67,12 @@ def make():
   if (-1 != config.option("platform").find("ios")):
     if not base.is_dir("build"):
       base.bash("./icu_ios")
+  elif (platform == "mac_64") and not base.is_dir(platform + "/build"):
+    base.cmd_in_dir(base_dir + "/../../../../build_tools/scripts/core_common/modules", "python", ["icu_mac.py"])
   elif ("" != platform) and not base.is_dir(platform + "/build"):
     base.create_dir(platform)
     os.chdir("icu/source")
-    base.cmd("./runConfigureICU", ["Linux" if "linux" == base.host_platform() else "MacOSX"])
+    base.cmd("./runConfigureICU", ["Linux"])
     old_dest_dir = base.get_env("DESTDIR")
     base.set_env("DESTDIR", base_dir + "/" + platform)
     base.cmd("make", ["install"])
@@ -79,9 +85,6 @@ def make():
     if ("linux_64" == platform):
       base.copy_file("icu/source/lib/libicudata.so." + icu_major + "." + icu_minor, platform + "/build/libicudata.so." + icu_major)
       base.copy_file("icu/source/lib/libicuuc.so." + icu_major + "." + icu_minor, platform + "/build/libicuuc.so." + icu_major)
-    elif ("mac_64" == platform):
-      base.copy_file("icu/source/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", platform + "/build/libicudata." + icu_major + ".dylib")
-      base.copy_file("icu/source/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", platform + "/build/libicuuc." + icu_major + ".dylib")
       
   os.chdir(old_cur)
   return

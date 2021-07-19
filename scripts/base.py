@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import platform
+import struct
 import glob
 import shutil
 import os
@@ -27,6 +28,12 @@ def host_platform():
     return "mac"
   return ret
 
+def is_os_64bit():
+  return platform.machine().endswith('64')
+
+def is_python_64bit():
+  return (struct.calcsize("P") == 8)
+
 def get_path(path):
   if "windows" == host_platform():
     return path.replace("/", "\\")
@@ -39,11 +46,11 @@ def set_env(name, value):
   os.environ[name] = value
   return
 
-def configure_common_apps():
+def configure_common_apps(file=""):
   if ("windows" == host_platform()):
-    os.environ["PATH"] = get_script_dir() + "/../tools/win/7z" + os.pathsep + get_script_dir() + "/../tools/win/curl" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]
   elif ("mac" == host_platform()):
-    os.environ["PATH"] = get_script_dir() + "/../tools/mac" + os.pathsep + os.environ["PATH"]
+    os.environ["PATH"] = get_script_dir(file) + "/../tools/mac" + os.pathsep + os.environ["PATH"]
   return
 
 def check_build_version(dir):
@@ -61,6 +68,13 @@ def print_info(info=""):
   print("------------------------------------------")
   print(info)
   print("------------------------------------------")
+  return
+
+def print_error(error=""):
+  print("\033[91m" + error + "\033[0m")
+
+def print_list(list):
+  print('[%s]' % ', '.join(map(str, list)))
   return
 
 # file system -------------------------------------------
@@ -181,6 +195,8 @@ def copy_lib(src, dst, name):
       lib_ext = ".a"
     elif is_file(file_src + ".lib"):
       lib_ext = ".lib"
+    elif is_file(file_src + ".so"):
+      lib_ext = ".so"
 
   lib_dst = dst + "/"
   if not ("windows" == host_platform()):
@@ -291,6 +307,52 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
+  cur_dir = os.getcwd()
+  ret = cmd(prog, args, is_no_errors)
+  os.chdir(cur_dir)
+  return ret
+
+def run_command(sCommand):
+  popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+  result = {'stdout' : '', 'stderr' : ''}
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    result['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
+    result['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+  
+  return result
+
+def run_command_in_dir(directory, sCommand):
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
+  ret = run_command(sCommand)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
+  return ret
+  
+def exec_command_in_dir(directory, sCommand):
+  host = host_platform()
+  if (host == 'windows'):
+    dir = get_path(directory)
+    cur_dir = os.getcwd()
+    os.chdir(dir)
+
+  ret = os.system(sCommand)
+
+  if (host == 'windows'):
+    os.chdir(cur_dir)
+  return ret
+
 def run_process(args=[]):
   subprocess.Popen(args)
 
@@ -346,10 +408,93 @@ def git_update(repo, is_no_errors=False, is_current_dir=False):
       print("branch does not exist...")
       print("switching to master...")
       cmd("git", ["checkout", "-f", "master"])
+    cmd("git", ["submodule", "update", "--init", "--recursive"], True)
   if (0 != config.option("branch").find("tags/")):
     cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
+    cmd("git", ["submodule", "update", "--recursive", "--remote"], True)
   os.chdir(old_cur)
   return
+
+def get_repositories():
+  result = {}
+  result["core"] = [False, False]
+  result["sdkjs"] = [False, False]
+  result.update(get_sdkjs_addons())
+  result.update(get_sdkjs_plugins())
+  result.update(get_sdkjs_plugins_server())
+  result["web-apps"] = [False, False]
+  result.update(get_web_apps_addons())
+  result["dictionaries"] = [False, False]
+
+  if config.check_option("module", "builder"):
+    result["DocumentBuilder"] = [False, False]
+
+  if config.check_option("module", "desktop"):
+    result["desktop-sdk"] = [False, False]
+    result["desktop-apps"] = [False, False]
+
+  if (config.check_option("module", "server")):
+    result["server"] = [False, False]
+    result.update(get_server_addons())
+    result["document-server-integration"] = [False, False]
+    
+  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
+    result["core-fonts"] = [False, False]
+  return result
+
+def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
+  print("[git] create pull request: " + repo)
+  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  if config.option("git-protocol") == "ssh":
+    url = "git@github.com:ONLYOFFICE/" + repo + ".git"
+  folder = get_script_dir() + "/../../" + repo
+  if is_current_dir:
+    folder = repo
+  is_not_exit = False
+  if not is_dir(folder):
+    retClone = cmd("git", ["clone", url, folder], is_no_errors)
+    if retClone != 0:
+      return
+    is_not_exit = True
+  old_cur = os.getcwd()
+  os.chdir(folder)
+  branch_from = config.option("branch")
+  cmd("git", ["checkout", "-f", branch_from], is_no_errors)
+  cmd("git", ["pull"], is_no_errors)
+  for branch_to in branches_to:
+    if "" != run_command("git log origin/" + branch_to + "..origin/" + branch_from)["stdout"]:
+      cmd("git", ["checkout", "-f", branch_to], is_no_errors)
+      cmd("git", ["pull"], is_no_errors)
+      cmd("gh", ["pr", "create", "--base", branch_to, "--head", branch_from, "--title", "Merge branch " + branch_from + " to " + branch_to, "--body", ""], is_no_errors)
+      if 0 != cmd("git", ["merge", "origin/" + branch_from, "--no-ff", "--no-edit"], is_no_errors):
+        print_error("[git] Conflicts merge " + "origin/" + branch_from + " to " + branch_to + " in repo " + url)
+        cmd("git", ["merge", "--abort"], is_no_errors)
+      else:
+        cmd("git", ["push"], is_no_errors)
+      
+  os.chdir(old_cur)
+  return
+
+def update_repositories(repositories):
+  for repo in repositories:
+    value = repositories[repo]
+    current_dir = value[1]
+    if current_dir == False:
+      git_update(repo, value[0], False)
+    else:
+      if is_dir(current_dir + "/.git"):
+        delete_dir_with_access_error(current_dir);
+        delete_dir(current_dir)
+      if not is_dir(current_dir):
+        create_dir(current_dir)
+      cur_dir = os.getcwd()
+      os.chdir(current_dir)
+      git_update(repo, value[0], True)
+      os.chdir(cur_dir)
+
+def git_dir():
+  if ("windows" == host_platform()):
+    return run_command("git --info-path")['stdout'] + "/../../.."
 
 # qmake -------------------------------------------------
 def qt_setup(platform):
@@ -365,7 +510,7 @@ def qt_version():
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
 def qt_config(platform):
-  config_param = config.option("module") + " " + config.option("config")
+  config_param = config.option("module") + " " + config.option("config") + " " + config.option("features")
   config_param_lower = config_param.lower()
   if (-1 != platform.find("xp")):
     config_param += " build_xp"
@@ -376,6 +521,8 @@ def qt_config(platform):
     config_param += " iphoneos device"
     if (-1 == config_param_lower.find("debug")):
       config_param += " release"
+  if ("mac_arm64" == platform):
+    config_param += " apple_silicon use_javascript_core"
   return config_param
 
 def qt_major_version():
@@ -385,7 +532,10 @@ def qt_major_version():
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
   if ("windows" == host_platform()):
-    copy_lib(qt_dir, dir, lib)
+    if ("" == qt_dst_postfix()):
+      copy_lib(qt_dir, dir, lib)
+    else:
+      copy_lib(qt_dir, dir, lib + "d")
   else:
     copy_file(qt_dir + "/../lib/lib" + lib + ".so." + qt_version(), dir + "/lib" + lib + ".so." + qt_major_version())
   return
@@ -425,8 +575,12 @@ def qt_copy_plugin(name, out):
     for file in glob.glob(out + "/" + name + "/*d.dll"):
       fileCheck = file[0:-5] + ".dll"
       if is_file(fileCheck):
-        delete_file(file)
-    
+        if ("" == qt_dst_postfix()):
+          delete_file(file)
+        else:
+          delete_file(fileCheck)
+    for file in glob.glob(out + "/" + name + "/*.pdb"):
+      delete_file(file)      
   return
 
 def qt_dst_postfix():
@@ -513,7 +667,7 @@ def generate_plist(path):
   bundle_version_natural = readFile(get_script_dir() + "/../../core/Common/version.txt").split(".")
   bundle_version = []
   for n in bundle_version_natural:
-    bundle_version.append("255" if int(n) > 255 else n)
+    bundle_version.append(n)
 
   for file in glob.glob(path + "/*.framework"):
     if not is_dir(file):
@@ -554,76 +708,53 @@ def generate_plist(path):
       
   return
 
-def sdkjs_addons_checkout():
+def get_sdkjs_addons():
+  result = {}
   if ("" == config.option("sdkjs-addons")):
-    return
+    return result
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons:
-      git_update(config.sdkjs_addons[name], True)
+    result[name] = [True, False]
 
   if ("" != config.option("sdkjs-addons-desktop")):
     addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
     for name in addons_list:
-      if name in config.sdkjs_addons_desktop:
-        git_update(config.sdkjs_addons_desktop[name], True)
-  return
+      result[name] = [True, False]
+  return result
 
-def server_addons_checkout():
+def get_server_addons():
+  result = {}
   if ("" == config.option("server-addons")):
-    return
+    return result
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.server_addons:
-      git_update(config.server_addons[name], True)
-  return
+    result[name] = [True, False]
+  return result
 
-def web_apps_addons_checkout():
+def get_web_apps_addons():
+  result = {}
   if ("" == config.option("web-apps-addons")):
-    return
+    return result
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.web_apps_addons:
-      git_update(config.web_apps_addons[name], True)
-  return
+    result[name] = [True, False]
+  return result
 
-def sdkjs_plugins_checkout():
-  plugins_list_config = config.option("sdkjs-plugin")
-  if ("" == plugins_list_config):
-    return
-  plugins_list = plugins_list_config.rsplit(", ")
+def get_plugins(plugins_list=""):
+  result = {}
+  if ("" == plugins_list):
+    return result
+  plugins_list = plugins_list.rsplit(", ")
   plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
-
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
   for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+    result["plugin-" + name] = [True, plugins_dir]
+  return result
 
-def sdkjs_plugins_server_checkout():
-  plugins_list_config = config.option("sdkjs-plugin-server")
-  if ("" == plugins_list_config):
-    return
-  plugins_list = plugins_list_config.rsplit(", ")
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  if is_dir(plugins_dir + "/.git"):
-    delete_dir_with_access_error(plugins_dir);
-    delete_dir(plugins_dir)
-  if not is_dir(plugins_dir):
-    create_dir(plugins_dir)
+def get_sdkjs_plugins():
+  return get_plugins(config.option("sdkjs-plugin"))
 
-  cur_dir = os.getcwd()
-  os.chdir(plugins_dir)
-  for name in plugins_list:
-    git_update("plugin-" + name, True, True)
-  os.chdir(cur_dir)
-  return
+def get_sdkjs_plugins_server():
+  return get_plugins(config.option("sdkjs-plugin-server"))
 
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
@@ -631,8 +762,7 @@ def sdkjs_addons_param():
   params = []
   addons_list = config.option("sdkjs-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons:
-      params.append("--addon=" + config.sdkjs_addons[name])
+    params.append("--addon=" + name)
   return params
 
 def sdkjs_addons_desktop_param():
@@ -641,8 +771,7 @@ def sdkjs_addons_desktop_param():
   params = []
   addons_list = config.option("sdkjs-addons-desktop").rsplit(", ")
   for name in addons_list:
-    if name in config.sdkjs_addons_desktop:
-      params.append("--addon=" + config.sdkjs_addons_desktop[name])
+    params.append("--addon=" + name)
   return params
 
 def server_addons_param():
@@ -651,8 +780,7 @@ def server_addons_param():
   params = []
   addons_list = config.option("server-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.server_addons:
-      params.append("--addon=" + config.server_addons[name])
+    params.append("--addon=" + name)
   return params
 
 def web_apps_addons_param():
@@ -661,8 +789,7 @@ def web_apps_addons_param():
   params = []
   addons_list = config.option("web-apps-addons").rsplit(", ")
   for name in addons_list:
-    if name in config.web_apps_addons:
-      params.append("--addon=" + config.web_apps_addons[name])
+    params.append("--addon=" + name)
   return params
 
 # common apps
@@ -724,12 +851,15 @@ def vcvarsall_end():
   return
 
 def run_as_bat(lines, is_no_errors=False):
-  name = "tmp.bat"
+  name = "tmp.bat" if ("windows" == host_platform()) else "./tmp.sh"
   content = "\n".join(lines)
 
   file = codecs.open(name, "w", "utf-8")
   file.write(content)
   file.close()
+
+  if ("windows" != host_platform()):
+    os.system("chmod +x " + name)
 
   cmd(name, [], is_no_errors)
   delete_file(name)
@@ -743,28 +873,31 @@ def save_as_script(path, lines):
   file.close()
   return
 
+def join_scripts(files, path):
+  files_data = []
+  for file in files:
+    with open(get_path(file), "r") as content:
+      files_data.append(content.read())
+
+  dst_content = "\n".join(files_data)
+  dst_file = codecs.open(path, "w", "utf-8")
+  dst_file.write(dst_content)
+  dst_file.close()
+  return
+
 def get_file_last_modified_url(url):
-  curl_command = 'curl --head %s' % (url)
-  popen = subprocess.Popen(curl_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   retvalue = ""
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-
-    lines = stdout.strip().decode("utf-8").split("\n")
-    for line in lines:
-      if ':' not in line:
-        continue
-      line = line.strip()
-      key, value = line.split(':', 1)
-      key = key.upper()
-      if key == "LAST-MODIFIED":
-        retvalue = value
-
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-
+  curl_command = 'curl --head %s' % (url)
+  lines = run_command(curl_command)['stdout'].split("\n")
+  for line in lines:
+    if ':' not in line:
+      continue
+    line = line.strip()
+    key, value = line.split(':', 1)
+    key = key.upper()
+    if key == "LAST-MODIFIED":
+      retvalue = value
+  
   return retvalue
 
 def mac_correct_rpath_binary(path, libs):
@@ -780,11 +913,13 @@ def mac_correct_rpath_x2t(dir):
   os.chdir(dir)
   mac_correct_rpath_library("icudata.58", [])
   mac_correct_rpath_library("icuuc.58", ["icudata.58"])
-  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58"])
+  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58", "kernel"])
   mac_correct_rpath_library("kernel", [])
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("HtmlFile", ["UnicodeConverter", "kernel"])
+  mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "graphics"])
+  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
+  mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
@@ -792,7 +927,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile", "doctrenderer"])
+  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
@@ -860,6 +995,9 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
       delete_dir(dst_dir_path)
     create_dir(dst_dir_path)
     copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
+    if is_desktop_local:
+      for file in glob.glob(dst_dir_path + "/*.html"):
+        replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
     return
   if not is_file(src_dir_path + "/config.json"):
     return
@@ -916,3 +1054,50 @@ def support_old_versions_plugins(out_dir):
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
   return
+
+def get_xcode_major_version():
+  version = run_command("xcodebuild -version")['stdout']
+  return int(version.split('.')[0][6:])
+
+def hack_xcode_ios():
+  if (12 > get_xcode_major_version()):
+    return
+
+  qmake_spec_file = config.option("qt-dir") + "/ios/mkspecs/macx-ios-clang/qmake.conf"
+
+  filedata = ""
+  with open(get_path(qmake_spec_file), "r") as file:
+    filedata = file.read()
+
+  content_hack = "QMAKE_CXXFLAGS += -arch $$QT_ARCH"
+  if (-1 != filedata.find(content_hack)):
+    return
+
+  filedata += "\n"
+  filedata += content_hack
+  filedata += "\n\n"
+  
+  delete_file(qmake_spec_file)
+  with open(get_path(qmake_spec_file), "w") as file:
+    file.write(filedata)
+  return
+
+def find_mac_sdk_version():
+  sdk_dir = run_command("xcode-select -print-path")['stdout']
+  sdk_dir = os.path.join(sdk_dir, "Platforms/MacOSX.platform/Developer/SDKs")
+  sdks = [re.findall('^MacOSX(1\d\.\d+)\.sdk$', s) for s in os.listdir(sdk_dir)]
+  sdks = [s[0] for s in sdks if s]
+  return sdks[0]
+
+def find_mac_sdk():
+  return run_command("xcrun --sdk macosx --show-sdk-path")['stdout']
+
+def get_mac_sdk_version_number():
+  ver = find_mac_sdk_version()
+  ver_arr = ver.split(".")
+  if 0 == len(ver_arr):
+    return 0
+  if 1 == len(ver_arr):
+    return 1000 * int(ver_arr[0])
+  return 1000 * int(ver_arr[0]) + int(ver_arr[1])
+

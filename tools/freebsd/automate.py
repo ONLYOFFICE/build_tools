@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+# 
+# Before calling this script:
+#   - be sure that "git" (or "git-lite"), "sudo" "npm-node10" and # "python27" 
+#     are installed:
+#     # pkg install git-lite sudo python27 npm-node10
+#   - /usr/bin/python is a symlink to /usr/local/bin/python2.7:
+#     # ln -s /usr/local/bin/python2.7 /usr/bin/python
+#   - CC and CXX environment variables are respectively set to clang and clang++
+#     # export CC=clang
+#     # export CXX=clang++
 
 import sys
 sys.path.append('../../scripts')
@@ -33,7 +43,6 @@ def install_deps():
 	      "p7zip",
 	      "qt5-qmake",
 	      "boost-libs",
-	      "npm-node10",
 	      "openjdk8",
 	      "subversion"]
 

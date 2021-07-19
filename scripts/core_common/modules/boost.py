@@ -6,7 +6,7 @@ import config
 import base
 import os
 import glob
-import boost_android
+import boost_qt
 
 def move_debug_libs_windows(dir):
   base.create_dir(dir + "/debug")
@@ -68,12 +68,12 @@ def make():
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
     if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
-      base.cmd("bootstrap.bat")
+      base.cmd("bootstrap.bat", ["vc14"])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
-      base.cmd("bootstrap.bat")
+      base.cmd("bootstrap.bat", ["vc14"])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
@@ -87,28 +87,27 @@ def make():
     base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
     # TODO: support x86
 
-  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    clang_correct()
-    base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
-    base.cmd("./b2", ["headers"])
-    base.cmd("./b2", ["--clean"])
-    base.cmd("./b2", ["--prefix=./../build/mac_64", "link=static", "install"])
-
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
     clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
 
-  if (-1 != config.option("platform").find("android")):
-    platforms = config.option("platform").split()
-    for platform in platforms:
-      if not platform in config.platforms:
-        continue
-      if (0 != platform.find("android")):
-        continue
-      if (base.is_dir("../build/" + platform)):
-        continue
-      boost_android.make(platform[8:])
+  if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])
+
+  if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "mac_64")
+    directory_build = base_dir + "/build/mac_64/lib"
+    base.delete_file(directory_build + "/libboost_system.a")
+    base.delete_file(directory_build + "/libboost_system.dylib")
+    base.copy_files(directory_build + "/mac_64/*.a", directory_build)
+
+  if (-1 != config.option("platform").find("mac_arm64")) and not base.is_dir("../build/mac_arm64"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "mac_arm64")
+    directory_build = base_dir + "/build/mac_arm64/lib"
+    base.delete_file(directory_build + "/libboost_system.a")
+    base.delete_file(directory_build + "/libboost_system.dylib")
+    base.copy_files(directory_build + "/mac_arm64/*.a", directory_build)
 
   os.chdir(old_cur)
   return

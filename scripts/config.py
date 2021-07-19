@@ -26,7 +26,7 @@ def parse():
   global platforms
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
                "linux_64", "linux_32", 
-               "mac_64", 
+               "mac_64", "mac_arm64",
                "ios", 
                "android_arm64_v8a", "android_armv7", "android_x86", "android_x86_64"]
 
@@ -70,25 +70,6 @@ def parse():
     options["sdkjs-plugin"] = "default"
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"  
-
-  global sdkjs_addons
-  sdkjs_addons = {}
-  sdkjs_addons["comparison"] = "sdkjs-comparison"
-  sdkjs_addons["content-controls"] = "sdkjs-content-controls"
-  sdkjs_addons["pivot-tables"] = "sdkjs-pivot-tables"
-
-  global sdkjs_addons_desktop
-  sdkjs_addons_desktop = {}
-  sdkjs_addons_desktop["disable-features"] = "sdkjs-disable-features"
-
-  global server_addons
-  server_addons = {}
-  server_addons["license"] = "server-license"
-  server_addons["lockstorage"] = "server-lockstorage"
-
-  global web_apps_addons
-  web_apps_addons = {}
-  web_apps_addons["mobile"] = "web-apps-mobile"
 
   return
 
@@ -166,4 +147,6 @@ def parse_defaults():
   for name in defaults_options:
     if name in options:
       options[name] = options[name].replace("default", defaults_options[name])
+    else:
+      options[name] = defaults_options[name]
   return

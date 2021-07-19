@@ -60,7 +60,7 @@ def make():
     base.create_dir(build_server_dir + '/SpellChecker')
     base.copy_exe(bin_server_dir + "/SpellChecker", build_server_dir + '/SpellChecker', "spellchecker")
     base.create_dir(build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release')
-    base.copy_file(bin_server_dir + "/SpellChecker/node_modules/nodehun/build/Release/nodehun.node", build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release/nodehun.node')
+    base.copy_file(bin_server_dir + "/SpellChecker/node_modules/nodehun/build/Release/Nodehun.node", build_server_dir + '/SpellChecker/node_modules/nodehun/build/Release/Nodehun.node')
     
 
     qt_dir = base.qt_setup(native_platform)
@@ -82,9 +82,11 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "doctrenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "EpubFile")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "x2t")
 
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
@@ -104,24 +106,13 @@ def make():
 
     if (0 == platform.find("win")):
       base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", converter_dir + "/")
-    elif (0 == platform.find("freebsd")):
-      pass
-    else:
+    elif (-1 == config.option("config").find("use_javascript_core")):
       base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", converter_dir + "/icudtl.dat")
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
     # XXX warning under FreeBSD
     base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
-
-    # html
-    # XXX warning under FreeBSD
-    base.create_dir(converter_dir + "/HtmlFileInternal")
-    base.copy_exe(core_build_dir + "/lib/" + platform_postfix, converter_dir + "/HtmlFileInternal", "HtmlFileInternal")
-    base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", converter_dir + "/HtmlFileInternal")
-    if (0 == platform.find("win")):
-      base.delete_file(root_dir + "/HtmlFileInternal/cef_sandbox.lib")
-      base.delete_file(root_dir + "/HtmlFileInternal/libcef.lib")
 
     # js
     js_dir = root_dir
@@ -130,8 +121,12 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
-    base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins")
-    base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins")
+    base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins", False, True)
+    base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins", False, True)
+    base.create_dir(js_dir + "/sdkjs-plugins/v1")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", js_dir + "/sdkjs-plugins/v1/plugins.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", js_dir + "/sdkjs-plugins/v1/plugins-ui.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
     
     # tools
@@ -141,7 +136,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
 
     branding_dir = server_dir + "/branding"
-    if("" != config.option("branding")):
+    if("" != config.option("branding") and "onlyoffice" != config.option("branding")):
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries
@@ -196,20 +191,23 @@ def make():
     base.copy_dir(bin_example_dir + "/config", build_example_dir + "/config")
 
     # snap
-    base.create_dir(root_dir_snap)
-    base.copy_dir(root_dir, root_dir_snap)
-    base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
-    base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
-    base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
-    base.delete_file(root_dir_snap + '/server/DocService/docservice')
-    base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
-    base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
-    base.delete_file(root_dir_snap + '/server/FileConverter/converter')
-    base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
-    base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
-    base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
-    base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
-    base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
+    if (0 == platform.find("linux")):
+      base.create_dir(root_dir_snap)
+      base.copy_dir(root_dir, root_dir_snap)
+      base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
+      base.copy_dir(bin_server_dir + '/DocService/sources', root_dir_snap + '/server/DocService/sources')
+      base.copy_dir(bin_server_dir + '/DocService/public', root_dir_snap + '/server/DocService/public')
+      base.delete_file(root_dir_snap + '/server/DocService/docservice')
+      base.copy_dir(bin_server_dir + '/FileConverter/node_modules', root_dir_snap + '/server/FileConverter/node_modules')
+      base.copy_dir(bin_server_dir + '/FileConverter/sources', root_dir_snap + '/server/FileConverter/sources')
+      base.delete_file(root_dir_snap + '/server/FileConverter/converter')
+      base.copy_dir(bin_server_dir + '/SpellChecker/node_modules', root_dir_snap + '/server/SpellChecker/node_modules')
+      base.copy_dir(bin_server_dir + '/SpellChecker/sources', root_dir_snap + '/server/SpellChecker/sources')
+      base.delete_file(root_dir_snap + '/server/SpellChecker/spellchecker')
+      base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
+      base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
+      base.copy_dir(bin_example_dir + '/..', root_dir_snap + '/example')
+      base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return
 

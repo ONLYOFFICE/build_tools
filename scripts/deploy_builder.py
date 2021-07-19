@@ -39,8 +39,10 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
 
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
@@ -70,7 +72,7 @@ def make():
       if (0 == platform.find("win")):
         base.copy_file(core_build_dir + "/lib/" + platform_postfix + "/doctrenderer.lib", root_dir + "/doctrenderer.lib")
         base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", root_dir + "/")
-      else:
+      elif (-1 == config.option("config").find("use_javascript_core")):
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/icudtl.dat")
 
     # app
@@ -78,15 +80,6 @@ def make():
     base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
     base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
     base.copy_dir(git_dir + "/DocumentBuilder/samples", root_dir + "/samples")
-
-    # html
-    base.create_dir(root_dir + "/HtmlFileInternal")
-    if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
-      base.copy_exe(core_build_dir + "/lib/" + platform_postfix, root_dir + "/HtmlFileInternal", "HtmlFileInternal")
-      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir + "/HtmlFileInternal")
-      if (0 == platform.find("win")):
-        base.delete_file(root_dir + "/HtmlFileInternal/cef_sandbox.lib")
-        base.delete_file(root_dir + "/HtmlFileInternal/libcef.lib")
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", root_dir + "/sdkjs")

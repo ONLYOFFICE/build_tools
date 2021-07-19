@@ -14,6 +14,7 @@ import build_server
 import deploy
 import make_common
 import develop
+import os
 
 # parse configuration
 config.parse()
@@ -56,6 +57,16 @@ if ("1" == config.option("update")):
   repositories = base.get_repositories()
   base.update_repositories(repositories)
 
+  # Apply patches if available
+  patchdir = base_dir + '/patches/' + base.host_platform()
+  if os.path.exists(patchdir) :
+    for root, dirs, files in os.walk(patchdir) :
+      for filename in files :
+        tmpdir = base_dir + '/../' + filename.split('.', 1)[0]
+        print('Patching directory %s' % tmpdir)
+        base.cmd("patch", ["-N", "-d", tmpdir, "-i", patchdir + "/" + filename])
+
+
 base.configure_common_apps()
 
 # developing...
@@ -67,7 +78,8 @@ if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
   exit(0)
 
 # core 3rdParty
-make_common.make()
+if base.host_platform() != 'freebsd' :
+  make_common.make()
 
 # build updmodule for desktop (only for windows version)
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):

@@ -96,7 +96,7 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", converter_dir + "/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", converter_dir + "/icuuc58.dll")
 
-    if (0 == platform.find("linux")):
+    if (0 == platform.find("linux") and 0 != platform.find('freebsd')):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", converter_dir + "/libicudata.so.58")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", converter_dir + "/libicuuc.so.58")
 
@@ -111,6 +111,7 @@ def make():
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
+    # XXX warning under FreeBSD
     base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
 
     # js

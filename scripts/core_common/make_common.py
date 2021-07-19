@@ -16,11 +16,12 @@ import html2
 import hunspell
 
 def make():
-  boost.make()
-  cef.make()
-  icu.make()
-  openssl.make()
-  v8.make()
+  if base.host_platform() != 'freebsd' :
+    boost.make()
+    cef.make()
+    icu.make()
+    openssl.make()
+    v8.make()
   html2.make()
   hunspell.make(False)
   return

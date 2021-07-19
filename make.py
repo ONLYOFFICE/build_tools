@@ -14,6 +14,7 @@ import build_server
 import deploy
 import make_common
 import develop
+import os
 
 # parse configuration
 config.parse()
@@ -64,6 +65,16 @@ if ("1" == config.option("update")):
         tmpdir = base_dir + '/../' + filename.split('.', 1)[0]
         print('Patching directory %s' % tmpdir)
         base.cmd("patch", ["-d", tmpdir, "-i", patchdir + "/" + filename])
+
+
+  # Apply patches if available
+  patchdir = base_dir + '/patches/' + base.host_platform()
+  if os.path.exists(patchdir) :
+    for root, dirs, files in os.walk(patchdir) :
+      for filename in files :
+        tmpdir = base_dir + '/../' + filename.split('.', 1)[0]
+        print('Patching directory %s' % tmpdir)
+        base.cmd("patch", ["-N", "-d", tmpdir, "-i", patchdir + "/" + filename])
 
 
 base.configure_common_apps()

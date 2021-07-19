@@ -2,6 +2,7 @@
 
 import config
 import base
+import os
 
 def make():
   base_dir = base.get_script_dir() + "/../out"
@@ -48,9 +49,10 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "PdfReader")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "EpubFile")
 
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")
@@ -78,14 +80,11 @@ def make():
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "doctrenderer")
       if (0 == platform.find("win")):
         base.copy_files(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/release/icudt*.dat", root_dir + "/converter/")
-      else:
+      elif (-1 == config.option("config").find("use_javascript_core")):
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/converter/icudtl.dat")
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
     base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
-
-    if (False == isWindowsXP) and (0 != platform.find("mac")) and (0 != platform.find("ios")):
-      base.copy_exe(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFileInternal")
 
     # dictionaries
     base.create_dir(root_dir + "/dictionaries")
@@ -179,14 +178,20 @@ def make():
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt", root_dir + "/editors/sdkjs-plugins", "advanced2", True)
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
-
-    if (0 != platform.find("mac")):
-      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "audio", True)
-      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "video", True)
-      base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
-    base.copy_file(git_dir + "/desktop-apps/common/loginpage/addon/externalcloud.json", root_dir + "/editors/externalcloud.json")
+    base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
+
+    isUseJSC = False
+    if (0 == platform.find("mac")):
+      file_size_doctrenderer = os.path.getsize(root_dir + "/converter/libdoctrenderer.dylib")
+      print("file_size_doctrenderer: " + str(file_size_doctrenderer))
+      if (file_size_doctrenderer < 5*1024*1024):
+        isUseJSC = True
+
+    if isUseJSC:
+      base.delete_file(root_dir + "/converter/icudtl.dat")
 
     if (0 == platform.find("win")):
       base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")
@@ -210,7 +215,9 @@ def make():
     base.delete_exe(root_dir + "/converter/allthemesgen")
     base.delete_file(root_dir + "/converter/AllFonts.js")
     base.delete_file(root_dir + "/converter/font_selection.bin")
-    base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
+
+    if not isUseJSC:
+      base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
 
   return
 

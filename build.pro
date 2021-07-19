@@ -23,6 +23,9 @@ OO_BRANDING_SUFFIX = $$(OO_BRANDING)
 	MAKEFILE=$$join(MAKEFILE, MAKEFILE, "", "$$OO_BRANDING_SUFFIX")
 }
 
+message(current_makefile)
+message($$MAKEFILE)
+
 CONFIG += ordered
 
 core_windows {
@@ -38,19 +41,13 @@ core_freebsd {
 	CONFIG += no_use_htmlfileinternal
 }
 core_mac {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_desktop_apps
 }
-build_xp {
-	CONFIG += no_use_htmlfileinternal
-}
 core_ios {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
 core_android {
-	CONFIG += no_use_htmlfileinternal
 	CONFIG += no_use_common_binary
 	CONFIG += no_desktop_apps
 }
@@ -66,9 +63,10 @@ SUBDIRS = \
 	xpsfile \
 	htmlrenderer \
 	pdfreader \
-	htmlfile \
+	htmlfile2 \
 	doctrenderer \
-	fb2file
+	fb2file \
+	epubfile
 
 !no_x2t {
 SUBDIRS += \
@@ -83,10 +81,6 @@ SUBDIRS += \
     odffilewriter \
     xlsformat \
     x2t
-}
-
-!no_use_htmlfileinternal {
-	SUBDIRS += htmlfileinternal
 }
 
 !no_use_common_binary {
@@ -139,46 +133,52 @@ ordered {
 			system($$QMAKE_DEL_FILE $$shell_quote($$file) $$escape_expand(\\n\\t))
 		}	
 	}
+	defineTest(qmakeClear) {
+		dir = $$1
+		name = $$2
+		removeFile($$1/Makefile.$$2$$PRO_SUFFIX)
+		removeFile($$1/.qmake.stash)
+	}
 
-	removeFile($$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/Makefile.cryptopp$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/Common/Makefile.kernel$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/UnicodeConverter/Makefile.UnicodeConverter$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/graphics/pro/Makefile.graphics$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/PdfWriter/Makefile.PdfWriter$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DjVuFile/Makefile.DjVuFile$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/XpsFile/Makefile.XpsFile$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX)
+	qmakeClear($$CORE_ROOT_DIR/Common/3dParty/cryptopp/project, cryptopp)
+	qmakeClear($$CORE_ROOT_DIR/Common, kernel)
+	qmakeClear($$CORE_ROOT_DIR/UnicodeConverter, UnicodeConverter)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/graphics/pro, graphics)
+	qmakeClear($$CORE_ROOT_DIR/PdfWriter, PdfWriter)
+	qmakeClear($$CORE_ROOT_DIR/DjVuFile, DjVuFile)
+	qmakeClear($$CORE_ROOT_DIR/XpsFile, XpsFile)
+	qmakeClear($$CORE_ROOT_DIR/HtmlRenderer, htmlrenderer)
+	qmakeClear($$CORE_ROOT_DIR/PdfReader, PdfReader)
+	qmakeClear($$CORE_ROOT_DIR/HtmlFile2, HtmlFile2)
+	qmakeClear($$CORE_ROOT_DIR/EpubFile, EpubFile)
+	qmakeClear($$CORE_ROOT_DIR/Fb2File, Fb2File)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/doctrenderer, doctrenderer)
 
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/Makefile.AllFontsGen$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/allthemesgen/Makefile.allthemesgen$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/Makefile.docbuilder$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/Test/Applications/StandardTester/Makefile.standardtester$$PRO_SUFFIX)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/AllFontsGen, AllFontsGen)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/allthemesgen, allthemesgen)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder, docbuilder)
+	qmakeClear($$CORE_ROOT_DIR/Test/Applications/StandardTester, standardtester)
 
-	removeFile($$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/Makefile.DocxFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/Makefile.PPTXFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/Makefile.ASCOfficeDocxFile2Lib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/Makefile.TxtXmlFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/Makefile.RtfFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/Makefile.PPTFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/Makefile.DocFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/Makefile.OdfFileReaderLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/Makefile.OdfFileWriterLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/Makefile.XlsFormatLib$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/X2tConverter/build/Qt/Makefile.X2tConverter$$PRO_SUFFIX)
+	qmakeClear($$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib, DocxFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib, PPTXFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux, ASCOfficeDocxFile2Lib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux, TxtXmlFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux, RtfFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux, PPTFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux, DocFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeOdfFile/linux, OdfFileReaderLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux, OdfFileWriterLib)
+	qmakeClear($$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux, XlsFormatLib)
+	qmakeClear($$CORE_ROOT_DIR/X2tConverter/build/Qt, X2tConverter)
 
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX)
-	removeFile($$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/Makefile.ascdocumentscore_helper$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/Makefile.qtascdocumentscore$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib/Makefile.videoplayerlib$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-apps/win-linux/extras/projicons/Makefile.ProjIcons$$PRO_SUFFIX)
-	removeFile($$ROOT_DIR/desktop-apps/win-linux/Makefile.ASCDocumentEditor$$PRO_SUFFIX)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt, hunspell)
+	qmakeClear($$CORE_ROOT_DIR/DesktopEditor/xmlsec/src, ooxmlsignature)
+	qmakeClear($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib, ascdocumentscore)
+	qmakeClear($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib, ascdocumentscore_helper)
+	qmakeClear($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper, qtascdocumentscore)
+	qmakeClear($$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/videoplayerlib, videoplayerlib)
+	qmakeClear($$ROOT_DIR/desktop-apps/win-linux/extras/projicons, ProjIcons)
+	qmakeClear($$ROOT_DIR/desktop-apps/win-linux, ASCDocumentEditor)
 }
 
 # PROJECTS
@@ -209,8 +209,8 @@ htmlrenderer.makefile      = $$CORE_ROOT_DIR/HtmlRenderer/Makefile.htmlrenderer$
 pdfreader.file             = $$CORE_ROOT_DIR/PdfReader/PdfReader.pro
 pdfreader.makefile         = $$CORE_ROOT_DIR/PdfReader/Makefile.PdfReader$$PRO_SUFFIX
 
-htmlfile.file              = $$CORE_ROOT_DIR/HtmlFile/HtmlFile.pro
-htmlfile.makefile          = $$CORE_ROOT_DIR/HtmlFile/Makefile.HtmlFile$$PRO_SUFFIX
+htmlfile2.file             = $$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro
+htmlfile2.makefile         = $$CORE_ROOT_DIR/HtmlFile2/Makefile.HtmlFile2$$PRO_SUFFIX
 
 doctrenderer.file          = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro
 doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile.doctrenderer$$PRO_SUFFIX
@@ -218,10 +218,8 @@ doctrenderer.makefile      = $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/Makefile
 fb2file.file               = $$CORE_ROOT_DIR/Fb2File/Fb2File.pro
 fb2file.makefile           = $$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFIX
 
-!no_use_htmlfileinternal {
-	htmlfileinternal.file      = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Internal.pro
-	htmlfileinternal.makefile  = $$ROOT_DIR/desktop-sdk/HtmlFile/Internal/Makefile.Internal$$PRO_SUFFIX
-}
+epubfile.file              = $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro
+epubfile.makefile          = $$CORE_ROOT_DIR/EpubFile/Makefile.EpubFile$$PRO_SUFFIX
 
 !no_use_common_binary {
 	allfontsgen.file           = $$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro
@@ -275,8 +273,8 @@ fb2file.makefile           = $$CORE_ROOT_DIR/Fb2File/Makefile.Fb2File$$PRO_SUFFI
 }
 
 desktop {
-	hunspell.file            = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/hunspell.pro
-	hunspell.makefile        = $$CORE_ROOT_DIR/DesktopEditor/hunspell-1.3.3/src/qt/Makefile.hunspell$$PRO_SUFFIX
+	hunspell.file            = $$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/hunspell.pro
+	hunspell.makefile        = $$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/Makefile.hunspell$$PRO_SUFFIX
 
 	ooxmlsignature.file      = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro
 	ooxmlsignature.makefile  = $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/Makefile.ooxmlsignature$$PRO_SUFFIX
@@ -309,19 +307,17 @@ core_and_multimedia {
 
 # DEPENDS
 kernel.depends            = cryptopp
+unicodeconverter.depends  = kernel
 graphics.depends          = kernel unicodeconverter
 pdfwriter.depends         = kernel unicodeconverter graphics
 djvufile.depends          = kernel unicodeconverter graphics pdfwriter
 xpsfile.depends           = kernel unicodeconverter graphics pdfwriter
 htmlrenderer.depends      = kernel unicodeconverter graphics pdfwriter
 pdfreader.depends         = kernel unicodeconverter graphics pdfwriter htmlrenderer
-htmlfile.depends          = kernel unicodeconverter graphics
+htmlfile2.depends         = kernel unicodeconverter graphics
 doctrenderer.depends      = kernel unicodeconverter graphics
 fb2file.depends           = kernel unicodeconverter graphics
-
-!no_use_htmlfileinternal {
-	htmlfileinternal.depends  = kernel unicodeconverter graphics
-}
+epubfile.depends          = kernel unicodeconverter graphics htmlfile2
 
 !no_use_common_binary {
 	allfontsgen.depends       = kernel unicodeconverter graphics
@@ -361,5 +357,6 @@ desktop {
 	    odffilereader \
 	    odffilewriter \
 	    xlsformat \
-		fb2file
+		fb2file \
+		epubfile
 }

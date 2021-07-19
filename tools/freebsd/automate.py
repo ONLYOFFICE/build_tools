@@ -65,6 +65,9 @@ if not base.is_dir("./qt"):
     base.cmd("mkdir", ["qt",])
     base.cmd("ln", ["-s", "/usr/local/lib/qt5", "qt/gcc_64"])
 
+# Apply a patch on the node_gyp cache in case of npm-node10 use..
+base.cmd("bash", ["patch_nodegyp.sh",])
+
 branch = get_branch_name("../..")
 
 array_args = sys.argv[1:]

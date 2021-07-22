@@ -2,6 +2,7 @@
 
 import config
 import base
+import os
 
 # make build.pro
 def make():
@@ -141,4 +142,15 @@ def build_js_develop(root_dir):
   _run_npm(root_dir + external_folder + "/web-apps/build")
   _run_npm(root_dir + external_folder + "/web-apps/build/sprites")
   _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
+
+  old_cur = os.getcwd()
+  old_product_version = base.get_env("PRODUCT_VERSION")
+  base.set_env("PRODUCT_VERSION", old_product_version + "d")
+  os.chdir(root_dir + external_folder + "/web-apps/vendor/framework7-react")
+  base.cmd("npm", ["install"])
+  base.cmd("npm", ["run", "deploy-word"])
+  base.cmd("npm", ["run", "deploy-cell"])
+  base.cmd("npm", ["run", "deploy-slide"])
+  base.set_env("PRODUCT_VERSION", old_product_version)
+  os.chdir(old_cur)
   return

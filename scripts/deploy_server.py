@@ -136,7 +136,7 @@ def make():
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries
-    spellchecker_dictionaries = build_server_dir + '/dictionaries'
+    spellchecker_dictionaries = root_dir + '/dictionaries'
     spellchecker_dictionaries_files = server_dir + '/../dictionaries/*_*'
     base.create_dir(spellchecker_dictionaries)
     base.copy_files(spellchecker_dictionaries_files, spellchecker_dictionaries)

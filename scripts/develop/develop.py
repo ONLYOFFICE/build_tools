@@ -18,5 +18,10 @@ def make():
   build_server.build_server_develop()
   build_js.build_js_develop(base_dir + "/../../..")
   develop_config_server.make()
+  if ("" != config.option("branding")):
+    base.set_env("PRODUCT_VERSION", base.get_env("PRODUCT_VERSION") + "d")
+    branding_develop_script_dir = base_dir + "/../../../" + config.option("branding") + "/build_tools/scripts"
+    if base.is_file(branding_develop_script_dir + "/develop.py"):
+      base.cmd_in_dir(branding_develop_script_dir, "python", ["develop.py"], True)
   exit(0)
   

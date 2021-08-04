@@ -3,11 +3,25 @@
 import sys
 sys.path.append('../')
 
+import optparse
 import config
 import base
 import os
 
-base.cmd_in_dir('../../', 'python',['configure.py', '--branding', 'onlyoffice', '--module', 'core desktop builder server'])
+arguments = sys.argv[1:]
+
+parser = optparse.OptionParser()
+parser.add_option("--module", action="store", type="string", dest="module", default="core desktop builder server", help="defines modules")
+parser.add_option("--platform", action="store", type="string", dest="platform", default="native", help="defines platform")
+parser.add_option("--branding", action="store", type="string", dest="branding", default="onlyoffice", help="provides branding path")
+
+(options, args) = parser.parse_args(arguments)
+configOptions = vars(options)
+
+base.cmd_in_dir('../../', 'python',['configure.py',
+  '--module', configOptions["module"],
+  '--platform', configOptions["platform"],
+  '--branding', configOptions["branding"]])
 
 # parse configuration
 config.parse()

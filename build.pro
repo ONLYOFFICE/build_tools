@@ -107,3 +107,7 @@ desktop {
 	}
 }
 
+mobile {
+	message(mobile)
+	addSubProject(hunspell,		$$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/hunspell.pro)
+}

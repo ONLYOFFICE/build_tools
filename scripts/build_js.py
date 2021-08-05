@@ -20,12 +20,11 @@ def make():
   base.create_dir(out_dir)
 
   # builder
-  if (config.option("module") != "mobile") and (config.option("module") != "desktop"):
-    build_interface(base_dir + "/../web-apps/build")
-    build_sdk_builder(base_dir + "/../sdkjs/build")
-    base.create_dir(out_dir + "/builder")
-    base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
-    base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
+  build_interface(base_dir + "/../web-apps/build")
+  build_sdk_builder(base_dir + "/../sdkjs/build")
+  base.create_dir(out_dir + "/builder")
+  base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
+  base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
 
   # desktop
   if config.check_option("module", "desktop"):

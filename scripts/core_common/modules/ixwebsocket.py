@@ -105,6 +105,7 @@ def make():
   elif (-1 != config.option("platform").find("ios") or -1 != config.option("platform").find("mac")):
     platform = "ios" if -1 != config.option("platform").find("ios") else "mac"
     if base.is_dir(current_dir + "/IXWebSocket/build/" + platform):
+      os.chdir(current_dir_old)
       return
 
     if not base.is_dir(current_dir + "/ios-cmake"):

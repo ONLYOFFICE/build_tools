@@ -126,6 +126,14 @@ def branding():
     branding = "onlyoffice"
   return branding
 
+def is_mobile_platform():
+  all_platforms = option("platform")
+  if (-1 != all_platforms.find("android")):
+    return True
+  if (-1 != all_platforms.find("ios")):
+    return True
+  return False
+
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"
   if ("" != option("branding")):

@@ -158,6 +158,12 @@ def make():
     base.create_dir(core_fonts)
     base.copy_dir_content(core_fonts_files, core_fonts, "", ".git")
 
+    #document-templates
+    document_templates_files = server_dir + '/../document-templates'
+    document_templates = build_server_dir + '/../document-templates'
+    base.create_dir(document_templates)
+    base.copy_dir(document_templates_files, document_templates)
+
     #license
     license_file1 = server_dir + '/LICENSE.txt'
     license_file2 = server_dir + '/3rd-Party.txt'

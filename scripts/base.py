@@ -460,6 +460,7 @@ def get_repositories():
     result["server"] = [False, False]
     result.update(get_server_addons())
     result["document-server-integration"] = [False, False]
+    result["document-templates"] = [False, False]
     
   if (config.check_option("module", "server") or config.check_option("platform", "ios")):
     result["core-fonts"] = [False, False]

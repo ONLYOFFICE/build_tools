@@ -151,6 +151,7 @@ def check_git():
 def check_nodejs():
   dependence = CDependencies()
 
+  isNeedReinstall = False
   base.print_info('Check installed Node.js')
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
@@ -158,12 +159,34 @@ def check_nodejs():
     dependence.append_install('Node.js')
     return dependence
 
-  nodejs_cur_version = int(nodejs_version.split('.')[0][1:])
-  print('Installed Node.js version: ' + str(nodejs_cur_version))
-  nodejs_min_version = 8
-  nodejs_max_version = 14
-  if (nodejs_min_version > nodejs_cur_version or nodejs_cur_version > nodejs_max_version):
-    print('Installed Node.js version must be 8.x to 14.x')
+  nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
+  nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
+  print('Installed Node.js version: ' + nodejs_version[1:])
+  nodejs_min_version = '10.20'
+  nodejs_min_version_minor  = 0
+  major_minor_min_version = nodejs_min_version.split('.')
+  nodejs_min_version_major = int(major_minor_min_version[0])
+  if len(major_minor_min_version) > 1:
+    nodejs_min_version_minor = int(major_minor_min_version[1])
+  nodejs_max_version = '14'
+  nodejs_max_version_minor = float("inf")
+  major_minor_max_version = nodejs_max_version.split('.')
+  nodejs_max_version_major = int(major_minor_max_version[0])
+  if len(major_minor_max_version) > 1:
+    nodejs_max_version_minor = int(major_minor_max_version[1])
+
+  if (nodejs_min_version_major > nodejs_cur_version_major or nodejs_cur_version_major > nodejs_max_version_major):
+    print('Installed Node.js version must be 10.20 to 14.x')
+    isNeedReinstall = True
+  elif (nodejs_min_version_major == nodejs_cur_version_major):
+    if (nodejs_min_version_minor > nodejs_cur_version_minor):
+      isNeedReinstall = True
+  elif (nodejs_cur_version_major == nodejs_max_version_major):
+    if (nodejs_cur_version_minor > nodejs_max_version_minor):
+      isNeedReinstall = True
+
+  if (True == isNeedReinstall):
+    print('Installed Node.js version must be 10.20 to 14.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
     elif (host_platform == 'linux'):
@@ -205,6 +228,11 @@ def check_erlang():
 
   erlangBitness = ""
   erlang_path_home = get_erlang_path_to_bin()
+  if base.is_exist(erlang_path_home) == False:
+    dependence.append_uninstall('Erlang')
+    dependence.append_uninstall('RabbitMQ')
+    return dependence
+  
   if ("" != erlang_path_home or host_platform != 'windows'):
     erlangBitness = base.run_command_in_dir(erlang_path_home, 'erl -eval "erlang:display(erlang:system_info(wordsize)), halt()." -noshell')['stdout']
   

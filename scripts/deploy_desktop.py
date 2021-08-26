@@ -84,7 +84,7 @@ def make():
         base.copy_file(core_dir + "/Common/3dParty/v8/v8/out.gn/" + platform + "/icudtl.dat", root_dir + "/converter/icudtl.dat")
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
-    base.copy_dir(git_dir + "/desktop-apps/common/converter/empty", root_dir + "/converter/empty")
+    base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
 
     # dictionaries
     base.create_dir(root_dir + "/dictionaries")

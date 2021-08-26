@@ -9,7 +9,7 @@ import traceback
 
 def install_module(path):
   base.print_info('Install: ' + path)
-  base.cmd_in_dir(path, 'npm', ['install'])
+  base.cmd_in_dir(path, 'npm', ['ci'])
 
 def run_module(directory, args=[]):
   base.run_nodejs_in_dir(directory, args)
@@ -84,8 +84,9 @@ def make(args = []):
       base.set_env('LD_LIBRARY_PATH', '../FileConverter/bin/')
 
     run_module('../../../server/DocService', ['sources/server.js'])
-    #run_module('../../../server/DocService', ['sources/gc.js'])
+#    run_module('../../../server/DocService', ['sources/gc.js'])
     run_module('../../../server/FileConverter', ['sources/convertermaster.js'])
+#    run_module('../../../server/SpellChecker', ['sources/server.js'])
   except SystemExit:
     input("Ignoring SystemExit. Press Enter to continue...")
     exit(0)

@@ -21,6 +21,7 @@ def make():
     if (0 == platform.find("mac")):
       macos_dir = git_dir + "/desktop-apps/macos"
       update_dir = macos_dir + "/build/update"
+      changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes"
 
       isX86 = True if ("" != base.get_env("_X86")) else False
 
@@ -32,7 +33,6 @@ def make():
         macos_dir + "/build/ONLYOFFICE.app/Contents/Info.plist")['stdout']
       macos_zip = macos_dir + "/build/" + package + "-" + app_version + ".zip"
       update_storage = base.get_env("ARCHIVES_DIR") + "/" + ("ONLYOFFICE-x86_64" if not isX86 else "ONLYOFFICE-v8") + "/_updates"
-      changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version
       base.delete_dir(update_dir)
       base.delete_dir(os.path.expanduser("~/Library/Caches/Sparkle_generate_appcast"))
       base.create_dir(update_dir)
@@ -40,10 +40,12 @@ def make():
       base.copy_file(macos_zip, update_dir)
       for file in os.listdir(update_dir):
         if file.endswith(".zip"):
-          base.copy_file(changes_dir + "/ReleaseNotes.html",
-            update_dir + "/" + os.path.splitext(file)[0] + ".html")
-          base.copy_file(changes_dir + "/ReleaseNotesRU.html",
-            update_dir + "/" + os.path.splitext(file)[0] + ".ru.html")
+          zip_name = os.path.splitext(file)[0]
+          zip_ver = os.path.splitext(file)[0].split("-")[1]
+          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html",
+            update_dir + "/" + zip_name + ".html")
+          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html",
+            update_dir + "/" + zip_name + ".ru.html")
 
       base.cmd(macos_dir + "/Vendor/Sparkle/bin/generate_appcast", [update_dir])
 

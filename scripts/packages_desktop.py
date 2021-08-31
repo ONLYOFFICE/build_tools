@@ -63,7 +63,7 @@ def make():
         r"(url=\")(?:.+/)(ONLYOFFICE.+\")", "\\1" + update_url + "/\\2")
 
       for file in os.listdir(update_dir):
-        if -1 == file.find(app_version) and (file.endswith(".zip") or file.endswith(".html")):
-          base.delete_dir(update_dir + "/" + file)
+        if (-1 == file.find(app_version)) and (file.endswith(".zip") or file.endswith(".html")):
+          base.delete_file(update_dir + "/" + file)
 
   return

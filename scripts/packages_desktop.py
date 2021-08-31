@@ -28,8 +28,8 @@ def make():
       base.cmd_in_dir(macos_dir, "bundler", ["exec", "fastlane", target, "skip_git_bump:true"])
 
       package = "ONLYOFFICE" if not isX86 else "ONLYOFFICE-x86"
-      app_version = base.run_command("mdls -name kMDItemVersion -raw " +
-        macos_dir + "/build/ONLYOFFICE.app")['stdout']
+      app_version = base.run_command("/usr/libexec/PlistBuddy -c 'print :CFBundleShortVersionString' " +
+        macos_dir + "/build/ONLYOFFICE.app/Contents/Info.plist")['stdout']
       macos_zip = macos_dir + "/build/" + package + "-" + app_version + ".zip"
       update_storage = base.get_env("ARCHIVES_DIR") + "/" + package + "/_updates"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version

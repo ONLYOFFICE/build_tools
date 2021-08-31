@@ -31,7 +31,7 @@ def make():
       app_version = base.run_command("/usr/libexec/PlistBuddy -c 'print :CFBundleShortVersionString' " +
         macos_dir + "/build/ONLYOFFICE.app/Contents/Info.plist")['stdout']
       macos_zip = macos_dir + "/build/" + package + "-" + app_version + ".zip"
-      update_storage = base.get_env("ARCHIVES_DIR") + "/" + package + "/_updates"
+      update_storage = base.get_env("ARCHIVES_DIR") + "/" + ("ONLYOFFICE-x86_64" if not isX86 else "ONLYOFFICE-v8") + "/_updates"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes/" + app_version
       base.delete_dir(update_dir)
       base.delete_dir(os.path.expanduser("~/Library/Caches/Sparkle_generate_appcast"))

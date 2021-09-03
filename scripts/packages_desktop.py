@@ -54,7 +54,7 @@ def make():
         if file.endswith(".zip"):
           zip_name = os.path.splitext(file)[0]
           zip_ver = os.path.splitext(file)[0].split("-")[-1]
-          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html", update_dir + "/" + zip_name + ".html")
+          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html",   update_dir + "/" + zip_name + ".html")
           base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html", update_dir + "/" + zip_name + ".ru.html")
 
       print("$ ./generate_appcast " + update_dir)

@@ -194,6 +194,8 @@ def make():
 
     # snap
     if (0 == platform.find("linux")):
+      if (base.is_dir(root_dir_snap)):
+        base.delete_dir(root_dir_snap)
       base.create_dir(root_dir_snap)
       base.copy_dir(root_dir, root_dir_snap)
       base.copy_dir(bin_server_dir + '/DocService/node_modules', root_dir_snap + '/server/DocService/node_modules')
@@ -205,6 +207,8 @@ def make():
       base.delete_file(root_dir_snap + '/server/FileConverter/converter')
       base.copy_dir(bin_server_dir + '/Common/node_modules', root_dir_snap + '/server/Common/node_modules')
       base.copy_dir(bin_server_dir + '/Common/sources', root_dir_snap + '/server/Common/sources')
+      if (base.is_dir(root_dir_snap_example)):
+        base.delete_dir(root_dir_snap_example)
       base.create_dir(root_dir_snap_example)
       base.copy_dir(bin_example_dir + '/..', root_dir_snap_example)
       base.delete_file(root_dir_snap + '/example/nodejs/example')

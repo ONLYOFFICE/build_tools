@@ -31,6 +31,11 @@ def host_platform():
 def is_os_64bit():
   return platform.machine().endswith('64')
 
+def is_os_arm():
+  if -1 == platform.machine().find('arm'):
+    return False
+  return True
+
 def is_python_64bit():
   return (struct.calcsize("P") == 8)
 

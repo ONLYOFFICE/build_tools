@@ -13,7 +13,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64"]
 
   url = "http://d2ettrnqo7v976.cloudfront.net/cef/4280/"
 
@@ -54,14 +54,14 @@ def make():
     base.create_dir("./build")
 
     # deploy
-    if ("mac_64" != platform):
+    if (0 != platform.find("mac")):
       base.copy_files("cef_binary/Release/*", "build/")
       base.copy_files("cef_binary/Resources/*", "build/")
 
     if (0 == platform.find("linux")):
       base.cmd("chmod", ["a+xr", "build/locales"])
 
-    if ("mac_64" == platform):
+    if (0 == platform.find("mac")):
       base.cmd("mv", ["Chromium Embedded Framework.framework", "build/Chromium Embedded Framework.framework"])
 
     os.chdir(base_dir)

@@ -1,39 +1,31 @@
 #!/usr/bin/env python
 
-import config
 import base
 import os
 import re
 
-def make():
+def make(packages):
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
-  branding = config.branding()
 
-  platforms = config.option("platform").split()
-  for native_platform in platforms:
-    if not native_platform in config.platforms:
-      continue
+  for package in packages:
 
-    isWindowsXP = False if (-1 == native_platform.find("_xp")) else True
-    platform = native_platform[0:-3] if isWindowsXP else native_platform
-
-    if (0 == platform.find("mac")):
+    if -1 != package.find("diskimage"):
       macos_dir = os.path.abspath(git_dir + "/desktop-apps/macos")
       update_dir = macos_dir + "/build/update"
       changes_dir = macos_dir + "/ONLYOFFICE/update/updates/ONLYOFFICE/changes"
 
-      isV8 = -1 != config.option("config").find("use_v8")
-
-      if (platform == "mac_64" and isV8):
-        lane = "release_v8"
-        scheme = "ONLYOFFICE-v8"
-      elif (platform == "mac_64"):
+      if (package == "diskimage-x86_64"):
         lane = "release_x86_64"
         scheme = "ONLYOFFICE-x86_64"
-      elif (platform == "mac_arm64"):
+      elif (package == "diskimage-v8-x86_64"):
+        lane = "release_v8"
+        scheme = "ONLYOFFICE-v8"
+      elif (package == "diskimage-arm64"):
         lane = "release_arm"
         scheme = "ONLYOFFICE-arm"
+      else:
+        exit(1)
 
       print("Build package " + scheme)
 
@@ -69,10 +61,10 @@ def make():
 
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(<sparkle:releaseNotesLink>)(?:.+ONLYOFFICE-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + sparkle_base_url + "/changes/\\2/ReleaseNotes.html\\3")
+        "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:ONLYOFFICE-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + sparkle_base_url + "/changes/\\2/ReleaseNotesRU.html\\3")
+        "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(url=\")(?:.+/)(ONLYOFFICE.+\")", "\\1" + sparkle_base_url + "/updates/\\2")
 

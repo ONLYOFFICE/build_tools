@@ -19,10 +19,10 @@ configOptions = vars(options)
 branding = configOptions["branding"]
 product = configOptions["product"]
 package_list = configOptions["package"]
+base_dir = base.get_script_dir(__file__)
 
 # branding
 if ("" != branding):
-  base_dir = base.get_script_dir(__file__)
   branding_dir = base_dir + "/../" + configOptions["branding"]
 
   if base.is_file(branding_dir + "/build_tools/make_packages.py"):

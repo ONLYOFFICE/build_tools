@@ -5,10 +5,10 @@ import packages_desktop
 # import packages_builder
 
 def make(product, package_list):
-  if -1 != product.find("desktop"):
+  if ("desktop" == product):
     packages_desktop.make(package_list.split())
-  # if -1 != product.find("server"):
+  # if ("server" == product):
   #   packages_server.make(package_list.split())
-  # if -1 != product.find("builder"):
+  # if ("builder" == product):
   #   packages_builder.make(package_list.split())
   return

@@ -2,33 +2,39 @@
 
 import sys
 sys.path.append('scripts')
-sys.path.append('scripts/develop')
-sys.path.append('scripts/develop/vendor')
-sys.path.append('scripts/core_common')
-sys.path.append('scripts/core_common/modules')
+import optparse
 import config
 import base
 import packages
 
-# parse configuration
-config.parse()
+arguments = sys.argv[1:]
+parser = optparse.OptionParser()
+parser.add_option("--branding", action="store", type="string", dest="branding", default="", help="provides branding path")
+parser.add_option("--product", action="store", type="string", dest="product", default="", help="defines product")
+parser.add_option("--package", action="store", type="string", dest="package", default="", help="defines packages")
 
-base_dir = base.get_script_dir(__file__)
+(options, args) = parser.parse_args(arguments)
+configOptions = vars(options)
 
-base.set_env("BUILD_PLATFORM", config.option("platform"))
+branding = configOptions["branding"]
+product = configOptions["product"]
+package_list = configOptions["package"]
 
 # branding
-if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("branding")):
-  branding_dir = base_dir + "/../" + config.option("branding")
+if ("" != branding):
+  base_dir = base.get_script_dir(__file__)
+  branding_dir = base_dir + "/../" + configOptions["branding"]
 
   if base.is_file(branding_dir + "/build_tools/make_packages.py"):
     base.check_build_version(branding_dir + "/build_tools")
-    base.set_env("OO_RUNNING_BRANDING", "1")
-    base.set_env("OO_BRANDING", config.option("branding"))
-    base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make_packages.py"])
+    base.cmd_in_dir(branding_dir + "/build_tools",
+      "python", ["make_packages.py",
+      '--product', product,
+      '--package', package_list
+    ])
     exit(0)
 
 base.check_build_version(base_dir)
 
 # build packages
-packages.make()
+packages.make(product, package_list)

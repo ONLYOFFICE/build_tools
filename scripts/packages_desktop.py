@@ -61,10 +61,10 @@ def make(packages):
 
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(<sparkle:releaseNotesLink>)(?:.+ONLYOFFICE-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + sparkle_base_url + "/changes/\\2/ReleaseNotes.html\\3")
+        "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:ONLYOFFICE-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + sparkle_base_url + "/changes/\\2/ReleaseNotesRU.html\\3")
+        "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(url=\")(?:.+/)(ONLYOFFICE.+\")", "\\1" + sparkle_base_url + "/updates/\\2")
 

@@ -55,9 +55,9 @@ def make(packages):
       print("Edit Sparkle appcast links")
 
       sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"
-      if (platform == "mac_64" and isV8): sparkle_base_url += "/v8"
-      elif (platform == "mac_64"):        sparkle_base_url += "/x86_64"
-      elif (platform == "mac_arm64"):     sparkle_base_url += "/arm"
+      if (package == "diskimage-x86_64"):      sparkle_base_url += "/x86_64"
+      elif (package == "diskimage-v8-x86_64"): sparkle_base_url += "/v8"
+      elif (package == "diskimage-arm64"):     sparkle_base_url += "/arm"
 
       base.replaceInFileRE(update_dir + "/onlyoffice.xml",
         r"(<sparkle:releaseNotesLink>)(?:.+ONLYOFFICE-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",

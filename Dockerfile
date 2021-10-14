@@ -12,4 +12,4 @@ ADD . /build_tools
 WORKDIR /build_tools
 
 CMD cd tools/linux && \
-    python3 ./automate.py desktop server
+    python3 ./automate.py

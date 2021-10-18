@@ -11,7 +11,11 @@ current_dir = base.get_script_dir() + "/../../core/Common/3dParty/ixwebsocket"
 
 CMAKE = "cmake"
 
-def find_last_version(arr):
+def find_last_version(arr_input, base_directory):
+    arr = []
+    for arr_rec in arr_input:
+      if base.is_file(base_directory + "/" + arr_rec + "/bin/cmake"):
+        arr.append(arr_rec)
     res = arr[0]
     for version in arr:
       if(LooseVersion(version) > LooseVersion(res)):
@@ -91,7 +95,7 @@ def make():
 
    CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
    CMAKE_DIR = base.get_env("ANDROID_HOME") + "/cmake/"
-   CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR)) + "/bin/cmake"
+   CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR), CMAKE_DIR) + "/bin/cmake"
 
    def param_android(arch, api):
     return ["-G","Unix Makefiles", "-DANDROID_NATIVE_API_LEVEL=" + api, "-DANDROID_ABI=" + arch, "-DANDROID_TOOLCHAIN=clang", "-DANDROID_NDK=" + base.get_env("ANDROID_NDK_ROOT"), "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE, "-DCMAKE_MAKE_PROGRAM=make"]

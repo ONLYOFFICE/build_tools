@@ -568,6 +568,8 @@ def qt_config(platform):
     config_param += " apple_silicon use_javascript_core"
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
+  if (config.option("vs-version") == "2019"):
+    config_param += " v8_version_87 vs2019"
   return config_param
 
 def qt_major_version():

@@ -24,6 +24,9 @@ def make():
     base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
 
   if ("windows" == base.host_platform()):
+    platformToolset = "v140"
+    if (config.option("vs-version") == "2019"):
+      platformToolset = "v142"
     need_platforms = []
     if (-1 != config.option("platform").find("win_64")):
       need_platforms.append("win_64")
@@ -37,12 +40,9 @@ def make():
         compile_bat = []
         compile_bat.append("setlocal")
         compile_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
-        compile_bat.append("call MSBuild.exe icu/source/allinone/allinone.sln /p:Configuration=Release /p:PlatformToolset=v140 /p:Platform=" + ("Win32" if base.platform_is_32(platform) else "X64"))
+        compile_bat.append("call MSBuild.exe icu/source/allinone/allinone.sln /p:Configuration=Release /p:PlatformToolset=" + platformToolset + " /p:Platform=" + ("Win32" if base.platform_is_32(platform) else "X64"))
         compile_bat.append("endlocal")
         base.run_as_bat(compile_bat)
-        #base.vcvarsall_start("x64" if ("win_64" == platform) else "x86")
-        #base.cmd("MSBuild.exe", ["icu/source/allinone/allinone.sln", "/p:Configuration=Release", "/p:PlatformToolset=v140", "/p:Platform=" + ("X64" if ("win_64" == platform) else "Win32")])
-        #base.vcvarsall_end()
         bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
         lib_dir = "icu/lib64/" if ("win_64" == platform) else "icu/lib/"
         base.create_dir(platform + "/build")

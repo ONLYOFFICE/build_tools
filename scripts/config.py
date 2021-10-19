@@ -63,11 +63,24 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
+  # check vs-version
+  if ("" == option("vs-version")):
+    options["vs-version"] = "2015"
+
   # check vs-path
-  if ("windows" == host_platform):
-    options["vs-path"] = base.get_env("ProgramFiles") + "/Microsoft Visual Studio 14.0/VC"
+  if ("windows" == host_platform) and ("" == option("vs-path")):
+    programFilesDir = base.get_env("ProgramFiles")
     if ("" != base.get_env("ProgramFiles(x86)")):
-      options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
+      programFilesDir = base.get_env("ProgramFiles(x86)")
+    if ("2015" == options["vs-version"]):
+      options["vs-path"] = programFilesDir + "/Microsoft Visual Studio 14.0/VC"
+    elif ("2019" == options["vs-version"]):
+      if base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"):
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"
+      elif base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"):
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"
+      else:
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build"
 
   # check sdkjs-plugins
   if not "sdkjs-plugin" in options:
@@ -88,8 +101,8 @@ def check_compiler(platform):
     return compiler
 
   if (0 == platform.find("win")):
-    compiler["compiler"] = "msvc2015"
-    compiler["compiler_64"] = "msvc2015_64"
+    compiler["compiler"] = "msvc2019"
+    compiler["compiler_64"] = "msvc2019_64"
   elif (0 == platform.find("linux")):
     compiler["compiler"] = "gcc"
     compiler["compiler_64"] = "gcc_64"

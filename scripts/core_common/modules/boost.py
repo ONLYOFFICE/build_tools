@@ -67,13 +67,17 @@ def make():
   # build
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
+    win_boot_arg = "vc14"
+    if (config.option("vs-version") == "2019"):
+      win_toolset = "msvc-14.2"
+      win_boot_arg = "vc142"
     if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
-      base.cmd("bootstrap.bat", ["vc14"])
+      base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
-      base.cmd("bootstrap.bat", ["vc14"])
+      base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])

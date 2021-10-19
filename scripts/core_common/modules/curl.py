@@ -13,11 +13,13 @@ def make():
   os.chdir(path)
   if (-1 != config.option("platform").find("android")):
     if base.is_dir(path + "/build/android"):
+      os.chdir(old_cur)
       return
     subprocess.call(["./build-android-curl.sh"])
 
   elif (-1 != config.option("platform").find("ios")):
     if base.is_dir(path + "/build/ios"):
+      os.chdir(old_cur)
       return
     subprocess.call(["./build-ios-curl.sh"])
 

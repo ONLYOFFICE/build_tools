@@ -34,7 +34,7 @@ def make():
   old_env = dict(os.environ)
   old_cur = os.getcwd()
 
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8_87"
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8_89"
   if not base.is_dir(base_dir):
     base.create_dir(base_dir)
 
@@ -50,7 +50,7 @@ def make():
 
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
-    base.cmd("./depot_tools/gclient", ["sync", "-r", "8.7.220.25"], True)
+    base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
     base.cmd("gclient", ["sync", "--force"], True)
 
   if ("windows" == base.host_platform()):

@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
-import config
-import base
 import packages_desktop
 # import packages_server
 # import packages_builder
 
-def make():
-  if config.check_option("module", "desktop"):
-    packages_desktop.make()
-  # if config.check_option("module", "server"):
-  #   packages_server.make()
-  # if config.check_option("module", "builder"):
-  #   packages_builder.make()
+def make(product, package_list):
+  if ("desktop" == product):
+    packages_desktop.make(package_list.split())
+  # if ("server" == product):
+  #   packages_server.make(package_list.split())
+  # if ("builder" == product):
+  #   packages_builder.make(package_list.split())
   return

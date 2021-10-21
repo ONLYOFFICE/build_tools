@@ -78,7 +78,7 @@ def make():
     use_v8_89 = True
 
   if (use_v8_89):
-    use_v8_89.make()
+    v8_89.make()
     return
 
   print("[fetch & build]: v8")

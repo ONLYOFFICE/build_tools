@@ -23,8 +23,8 @@ def buildIOS():
   base.create_dir(current_dir + "/build/ios/lib")
 
 # Create fat lib
-  base.cmd("lipo", ["build/Release-iphonesimulator/libSocketRocket.a", "build/Release-iphoneos/libSocketRocket.a", "-create", "-output", 
-     "build/lib/ios/libSoсketRocket.a"])
+  base.cmd("lipo", ["./build/Release-iphonesimulator/libSocketRocket.a", "./build/Release-iphoneos/libSocketRocket.a", "-create", "-output", 
+     "./build/ios/lib/libSoсketRocket.a"])
 
   return
 
@@ -44,10 +44,6 @@ def buildMacOS():
   return
 
 def make():
- 
-  if base.is_dir(current_dir + "/build"):
-    return
-
   if (-1 == config.option("platform").find("mac") and -1 == config.option("platform").find("ios")):
     return
 
@@ -57,8 +53,10 @@ def make():
   os.chdir(current_dir)
 
   if (-1 != config.option("platform").find("mac")):
-    buildMacOS()
+    if not base.is_dir(current_dir + "/build/mac_64") or not base.is_dir(current_dir + "/build/mac_arm_64"):
+      buildMacOS()
   elif (-1 != config.option("platform").find("ios")):
-    buildIOS()
+    if not base.is_dir(current_dir + "/build/ios"):
+      buildIOS()
   os.chdir(current_dir_old)
   return

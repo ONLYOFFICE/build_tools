@@ -141,19 +141,24 @@ def make():
       base.create_dir(current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal/include")
       base.create_dir(current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal/lib")
 
-    #copy include
-      if base.is_dir(current_dir + "/IXWebSocket/build/ios/armv7/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/armv7/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/armv64/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/armv64/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/i386/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/i386/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
-      elif base.is_dir(current_dir + "/IXWebSocket/build/ios/x86_64/include"):
-         base.cmd("cp", [ "-r", current_dir + "/IXWebSocket/build/ios/x86_64/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      #copy include
+      prefix_dir = current_dir + "/IXWebSocket/build/ios/"
+      postfix_dir = ""
+      if base.is_dir(prefix_dir + "armv7/usr"):
+        postfix_dir = "/usr"
+
+      if base.is_dir(prefix_dir + "armv7" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "armv7" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "armv64" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "armv64" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "i386" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "i386" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
+      elif base.is_dir(prefix_dir + "x86_64" + postfix_dir + "/include"):
+         base.cmd("cp", [ "-r", prefix_dir + "x86_64" + postfix_dir + "/include", current_dir + "/IXWebSocket/build/ios/ixwebsocket-universal"])
 
       # Create fat lib
-      base.cmd("lipo", ["IXWebSocket/build/ios/armv7/lib/libixwebsocket.a", "IXWebSocket/build/ios/arm64/lib/libixwebsocket.a", 
-        "IXWebSocket/build/ios/i386/lib/libixwebsocket.a", "IXWebSocket/build/ios/x86_64/lib/libixwebsocket.a",
+      base.cmd("lipo", ["IXWebSocket/build/ios/armv7" + postfix_dir + "/lib/libixwebsocket.a", "IXWebSocket/build/ios/arm64" + postfix_dir + "/lib/libixwebsocket.a", 
+        "IXWebSocket/build/ios/i386" + postfix_dir + "/lib/libixwebsocket.a", "IXWebSocket/build/ios/x86_64" + postfix_dir + "/lib/libixwebsocket.a",
         "-create", "-output", 
          "IXWebSocket/build/ios/ixwebsocket-universal/lib/libixwebsocket.a"])
 

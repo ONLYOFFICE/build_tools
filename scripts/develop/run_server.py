@@ -65,9 +65,9 @@ def make(args = []):
     
     base.print_info('Build modules')
     if ("linux" == platform):
-    	base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '0', '--update-light', '0', '--clean', '0'] + args)
+    	base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
     else:
-    	base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '0', '--update-light', '0', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
+    	base.cmd_in_dir('../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
     	
     base.cmd_in_dir('../../', 'python', ['make.py'])
   

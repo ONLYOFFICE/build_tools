@@ -1159,3 +1159,8 @@ def get_mac_sdk_version_number():
     return 1000 * int(ver_arr[0])
   return 1000 * int(ver_arr[0]) + int(ver_arr[1])
 
+def get_android_sdk_home():
+  ndk_root_path = base.get_env("ANDROID_NDK_ROOT")
+  if (-1 != ndk_root_path.find("/ndk/")):
+    return ndk_root_path + "/../.."
+  return ndk_root_path + "/.."

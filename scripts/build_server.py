@@ -42,15 +42,12 @@ def make():
       base.copy_file(custom_public_key, server_build_dir + '/Common/sources')
 
   pkg_target = "node14"
-  pkg_example_target = "node10"
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"
-    pkg_example_target += "-linux"
 
   if ("windows" == base.host_platform()):
     pkg_target += "-win"
-    pkg_example_target += "-win"
 
   base.cmd_in_dir(server_build_dir + "/DocService", "pkg", [".", "-t", pkg_target, "--options", "max_old_space_size=4096", "-o", "docservice"])
   base.cmd_in_dir(server_build_dir + "/FileConverter", "pkg", [".", "-t", pkg_target, "-o", "converter"])
@@ -59,14 +56,7 @@ def make():
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.delete_dir(example_dir  + "/node_modules")
   base.cmd_in_dir(example_dir, "npm", ["install"])
-  sync_rpc_lib_dir = example_dir + "/node_modules/sync-rpc/lib"
-  patch_file = base.get_script_dir() + "/../tools/linux/sync-rpc.patch"
-  if ("linux" == base.host_platform()):  
-    base.cmd_in_dir(sync_rpc_lib_dir, "patch", ["-N", "-i", patch_file])
-  if ("windows" == base.host_platform()):
-    patch_exe_dir = base.git_dir() + "/usr/bin"
-    base.cmd_in_dir(patch_exe_dir, "patch.exe", ["-N", "-d", sync_rpc_lib_dir, "-i", patch_file])
-  base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_example_target, "-o", "example"])
+  base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
 
 def build_server_develop():
   server_dir = base.get_script_dir() + "/../../server"

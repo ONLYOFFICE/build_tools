@@ -9,10 +9,10 @@ include($$PWD/common.pri)
 CONFIG += ordered
 
 core_windows {
-	CONFIG += core_and_multimedia
+	desktop:CONFIG += core_and_multimedia
 }
 core_linux {
-	CONFIG += core_and_multimedia
+	desktop:CONFIG += core_and_multimedia
 }
 core_mac {
 	CONFIG += no_desktop_apps

@@ -56,6 +56,9 @@ def make():
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
 
+    if not base.is_file("v8/src/base/platform/wrappers.cc"):
+      base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
+
   os.chdir("v8")
   
   gn_args = ["v8_static_library=true",
@@ -79,19 +82,35 @@ def make():
 
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_64/debug", make_args(gn_args, "windows", True, True)])
-      base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
+      if not base.is_file("out.gn/win_64/debug/obj/v8_monolith.lib"):
+        base.cmd2("gn", ["gen", "out.gn/win_64/debug", make_args(gn_args, "windows", True, True)])
+        base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
 
-    base.cmd2("gn", ["gen", "out.gn/win_64/release", make_args(gn_args, "windows")])
-    base.cmd("ninja", ["-C", "out.gn/win_64/release"])
+    if not base.is_file("out.gn/win_64/release/obj/v8_monolith.lib"):
+      base.cmd2("gn", ["gen", "out.gn/win_64/release", make_args(gn_args, "windows")])
+      base.copy_file("./out.gn/win_64/release/obj/v8_wrappers.ninja", "./out.gn/win_64/release/obj/v8_wrappers.ninja.bak")
+      base.replaceInFile("./out.gn/win_64/release/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
+      base.replaceInFile("./out.gn/win_64/release/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
+      base.cmd("ninja", ["-C", "out.gn/win_64/release", "v8_wrappers"])
+      base.cmd("ninja", ["-C", "out.gn/win_64/release"])
+      base.delete_file("./out.gn/win_64/release/obj/v8_wrappers.ninja")
+      base.move_file("./out.gn/win_64/release/obj/v8_wrappers.ninja.bak", "./out.gn/win_64/release/obj/v8_wrappers.ninja")
 
   if config.check_option("platform", "win_32"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_32/debug", make_args(gn_args, "windows", False, True)])
-      base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
+      if not base.is_file("out.gn/win_32/debug/obj/v8_monolith.lib"):
+        base.cmd2("gn", ["gen", "out.gn/win_32/debug", make_args(gn_args, "windows", False, True)])
+        base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
 
-    base.cmd2("gn", ["gen", "out.gn/win_32/release", make_args(gn_args, "windows", False)])
-    base.cmd("ninja", ["-C", "out.gn/win_32/release"])
+    if not base.is_file("out.gn/win_32/release/obj/v8_monolith.lib"):
+      base.cmd2("gn", ["gen", "out.gn/win_32/release", make_args(gn_args, "windows", False)])
+      base.copy_file("./out.gn/win_32/release/obj/v8_wrappers.ninja", "./out.gn/win_32/release/obj/v8_wrappers.ninja.bak")
+      base.replaceInFile("./out.gn/win_32/release/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
+      base.replaceInFile("./out.gn/win_32/release/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
+      base.cmd("ninja", ["-C", "out.gn/win_32/release", "v8_wrappers"])
+      base.cmd("ninja", ["-C", "out.gn/win_32/release"])
+      base.delete_file("./out.gn/win_32/release/obj/v8_wrappers.ninja")
+      base.move_file("./out.gn/win_32/release/obj/v8_wrappers.ninja.bak", "./out.gn/win_32/release/obj/v8_wrappers.ninja")
 
   os.chdir(old_cur)
   os.environ.clear()

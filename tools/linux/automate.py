@@ -147,6 +147,7 @@ branch = get_branch_name("../..")
 
 array_args = sys.argv[1:]
 array_modules = []
+params = []
 
 config = {}
 for arg in array_args:
@@ -154,6 +155,8 @@ for arg in array_args:
     indexEq = arg.find("=")
     if (-1 != indexEq):
       config[arg[2:indexEq]] = arg[indexEq + 1:]
+      params.append(arg[:indexEq])
+      params.append(arg[indexEq + 1:])
   else:
     array_modules.append(arg)
 
@@ -175,7 +178,7 @@ print("---------------------------------------------")
 build_tools_params = ["--branch", branch, 
                       "--module", modules, 
                       "--update", "1",
-                      "--qt-dir", os.getcwd() + "/qt_build/Qt-5.9.9"]
+                      "--qt-dir", os.getcwd() + "/qt_build/Qt-5.9.9"] + params
 
 base.cmd_in_dir("../..", "./configure.py", build_tools_params)
 base.cmd_in_dir("../..", "./make.py")

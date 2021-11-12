@@ -101,8 +101,8 @@ def check_compiler(platform):
     return compiler
 
   if (0 == platform.find("win")):
-    compiler["compiler"] = "msvc2019"
-    compiler["compiler_64"] = "msvc2019_64"
+    compiler["compiler"] = "msvc" + options["vs-version"]
+    compiler["compiler_64"] = "msvc" + options["vs-version"] + "_64"
   elif (0 == platform.find("linux")):
     compiler["compiler"] = "gcc"
     compiler["compiler_64"] = "gcc_64"

@@ -1161,7 +1161,7 @@ def get_mac_sdk_version_number():
 def make_sln(directory, args, is_no_errors):
   programFilesDir = get_env("ProgramFiles")
   if ("" != get_env("ProgramFiles(x86)")):
-    programFilesDir = base.get_env("ProgramFiles(x86)")
+    programFilesDir = get_env("ProgramFiles(x86)")
   dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
   if ("2019" == config.option("vs-version")):
     dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE"

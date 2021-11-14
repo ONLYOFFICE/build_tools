@@ -1173,7 +1173,10 @@ def make_sln(directory, args, is_no_errors):
   old_env = dict(os.environ)
   os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
 
-  cmd_in_dir(directory, "devenv", args, is_no_errors)
+  old_cur = os.getcwd()
+  os.chdir(directory)
+  run_as_bat(["call devenv " + " ".join(args)], is_no_errors)
+  os.chdir(old_cur)
 
   os.environ.clear()
   os.environ.update(old_env)

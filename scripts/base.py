@@ -1158,3 +1158,23 @@ def get_mac_sdk_version_number():
     return 1000 * int(ver_arr[0])
   return 1000 * int(ver_arr[0]) + int(ver_arr[1])
 
+def make_sln(directory, args, is_no_errors):
+  programFilesDir = get_env("ProgramFiles")
+  if ("" != get_env("ProgramFiles(x86)")):
+    programFilesDir = base.get_env("ProgramFiles(x86)")
+  dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
+  if ("2019" == config.option("vs-version")):
+    dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Professional\\Common7\\IDE"
+
+  old_env = dict(os.environ)
+  os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
+
+  cmd_in_dir(directory, "devenv", args, is_no_errors)
+
+  os.environ.clear()
+  os.environ.update(old_env)
+  return

@@ -109,7 +109,8 @@ def make():
     # replace
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)
-    base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
+    base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com.sln", "/Rebuild", "Release|x64"], True)
+    base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com.sln", "/Rebuild", "Release|Win32"], True)
     # restore
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")

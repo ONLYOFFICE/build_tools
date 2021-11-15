@@ -1,0 +1,24 @@
+name: Update hard-coded version
+on: create
+jobs:
+  update-version:
+    if: >-
+      ${{ startsWith(github.event.ref, 'hotfix/') ||
+      startsWith(github.event.ref, 'release/') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+      - name: Set version
+        run: >-
+          echo "${{ github.event.ref }}" |
+          awk '{gsub(/(.+\/v)/,"version=");print;}' >> $GITHUB_ENV
+      - name: Save version
+        run: echo "${{ env.version }}" > version
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          author_name: github-actions[bot]
+          author_email: github-actions[bot]@users.noreply.github.com
+          message: Update hard-coded version to v${{ env.version }}
+          add: version

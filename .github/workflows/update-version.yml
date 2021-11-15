@@ -12,7 +12,7 @@ jobs:
       - name: Set version
         run: >-
           echo "${{ github.event.ref }}" |
-          awk '{gsub(/(.+\/v)/,"version=");print;}' >> $GITHUB_ENV
+          awk '{gsub(/.+\/v/,"version=");print;}' >> $GITHUB_ENV
       - name: Save version
         run: echo "${{ env.version }}" > version
       - name: Commit changes

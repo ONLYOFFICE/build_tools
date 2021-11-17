@@ -46,8 +46,24 @@ def make(packages):
         if file.endswith(".zip"):
           zip_name = os.path.splitext(file)[0]
           zip_ver = os.path.splitext(file)[0].split("-")[-1]
-          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html",   update_dir + "/" + zip_name + ".html")
-          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html", update_dir + "/" + zip_name + ".ru.html")
+
+          if base.is_exist(changes_dir + "/" + zip_ver + "/ReleaseNotes.html"):
+            cur_date = base.run_command("LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"")['stdout']
+            base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html",
+              update_dir + "/" + zip_name + ".html")
+            base.replaceInFileRE(update_dir + "/" + zip_name + ".html",
+              r"(<span class=\"releasedate\">).+(</span>)", "\\1 - " + cur_date + "\\2")
+          else:
+            base.writeFile(update_dir + "/" + zip_name + ".html", "placeholder")
+
+          if base.is_exist(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html"):
+            cur_date = base.run_command("LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"")['stdout']
+            base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html",
+              update_dir + "/" + zip_name + ".ru.html")
+            base.replaceInFileRE(update_dir + "/" + zip_name + ".ru.html",
+              r"(<span class=\"releasedate\">).+(</span>)", "\\1 - " + cur_date + "\\2")
+          else:
+            base.writeFile(update_dir + "/" + zip_name + ".ru.html", "placeholder")
 
       print("$ ./generate_appcast " + update_dir)
       base.cmd(macos_dir + "/Vendor/Sparkle/bin/generate_appcast", [update_dir])

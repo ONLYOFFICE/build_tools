@@ -103,6 +103,12 @@ def check_compiler(platform):
     compiler["compiler"] = platform
     compiler["compiler_64"] = platform
 
+  if base.host_platform() == "mac":
+    if not base.is_dir(options["qt-dir"] + "/" + compiler["compiler_64"]):
+      if base.is_dir(options["qt-dir"] + "/macos"):
+        compiler["compiler"] = "macos"
+        compiler["compiler_64"] = "macos"
+
   return compiler
 
 def check_option(name, value):

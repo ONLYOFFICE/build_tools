@@ -29,6 +29,20 @@ def make_args(args, platform, is_64=True, is_debug=False):
 
   return "--args=\"" + " ".join(args_copy) + "\""
 
+def ninja_windows_make(args, is_64=True, is_debug=False):
+  directory_out = "out.gn/"
+  directory_out += ("win_64/" if is_64 else "win_32/")
+  directory_out += ("debug" if is_debug else "release")
+
+  base.cmd2("gn", ["gen", directory_out, make_args(gn_args, "windows", is_64, is_debug)])
+  base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
+  base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
+  base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
+  base.cmd("ninja", ["-C", directory_out, "v8_wrappers"])
+  base.cmd("ninja", ["-C", directory_out])
+  base.delete_file("./" + directory_out + "/obj/v8_wrappers.ninja")
+  base.move_file("./" + directory_out + "/obj/v8_wrappers.ninja.bak", "./" + directory_out + "/obj/v8_wrappers.ninja")
+  return
 
 def make():
   old_env = dict(os.environ)
@@ -83,34 +97,18 @@ def make():
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
       if not base.is_file("out.gn/win_64/debug/obj/v8_monolith.lib"):
-        base.cmd2("gn", ["gen", "out.gn/win_64/debug", make_args(gn_args, "windows", True, True)])
-        base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
+        ninja_windows_make(gn_args, True, True)
 
     if not base.is_file("out.gn/win_64/release/obj/v8_monolith.lib"):
-      base.cmd2("gn", ["gen", "out.gn/win_64/release", make_args(gn_args, "windows")])
-      base.copy_file("./out.gn/win_64/release/obj/v8_wrappers.ninja", "./out.gn/win_64/release/obj/v8_wrappers.ninja.bak")
-      base.replaceInFile("./out.gn/win_64/release/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
-      base.replaceInFile("./out.gn/win_64/release/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
-      base.cmd("ninja", ["-C", "out.gn/win_64/release", "v8_wrappers"])
-      base.cmd("ninja", ["-C", "out.gn/win_64/release"])
-      base.delete_file("./out.gn/win_64/release/obj/v8_wrappers.ninja")
-      base.move_file("./out.gn/win_64/release/obj/v8_wrappers.ninja.bak", "./out.gn/win_64/release/obj/v8_wrappers.ninja")
+      ninja_windows_make(gn_args)
 
   if config.check_option("platform", "win_32"):
     if (-1 != config.option("config").lower().find("debug")):
       if not base.is_file("out.gn/win_32/debug/obj/v8_monolith.lib"):
-        base.cmd2("gn", ["gen", "out.gn/win_32/debug", make_args(gn_args, "windows", False, True)])
-        base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
+        ninja_windows_make(gn_args, False, True)
 
     if not base.is_file("out.gn/win_32/release/obj/v8_monolith.lib"):
-      base.cmd2("gn", ["gen", "out.gn/win_32/release", make_args(gn_args, "windows", False)])
-      base.copy_file("./out.gn/win_32/release/obj/v8_wrappers.ninja", "./out.gn/win_32/release/obj/v8_wrappers.ninja.bak")
-      base.replaceInFile("./out.gn/win_32/release/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
-      base.replaceInFile("./out.gn/win_32/release/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
-      base.cmd("ninja", ["-C", "out.gn/win_32/release", "v8_wrappers"])
-      base.cmd("ninja", ["-C", "out.gn/win_32/release"])
-      base.delete_file("./out.gn/win_32/release/obj/v8_wrappers.ninja")
-      base.move_file("./out.gn/win_32/release/obj/v8_wrappers.ninja.bak", "./out.gn/win_32/release/obj/v8_wrappers.ninja")
+      ninja_windows_make(gn_args, False)
 
   os.chdir(old_cur)
   os.environ.clear()

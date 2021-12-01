@@ -34,7 +34,7 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   directory_out += ("win_64/" if is_64 else "win_32/")
   directory_out += ("debug" if is_debug else "release")
 
-  base.cmd2("gn", ["gen", directory_out, make_args(gn_args, "windows", is_64, is_debug)])
+  base.cmd2("gn", ["gen", directory_out, make_args(args, "windows", is_64, is_debug)])
   base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")

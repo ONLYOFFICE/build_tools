@@ -47,6 +47,8 @@ addSubProject(htmlrenderer,	$$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro,\
 				kernel unicodeconverter graphics pdfwriter)
 addSubProject(pdfreader,	$$CORE_ROOT_DIR/PdfReader/PdfReader.pro,\
 				kernel unicodeconverter graphics pdfwriter htmlrenderer)
+addSubProject(docxrenderer,	$$CORE_ROOT_DIR/DocxRenderer/DocxRenderer.pro,\
+				kernel unicodeconverter graphics)
 addSubProject(htmlfile2,	$$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro,\
 				kernel unicodeconverter graphics network)
 addSubProject(doctrenderer,	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro,\

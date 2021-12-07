@@ -1,2 +1,3 @@
 sdkjs-plugin="photoeditor, macros, ocr, translator, thesaurus, youtube, highlightcode"
 sdkjs-plugin-server="speech, zotero, mendeley"
+sdkjs-addons="sdkjs-forms"

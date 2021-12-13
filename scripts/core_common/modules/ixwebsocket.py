@@ -94,7 +94,7 @@ def make():
    global CMAKE
 
    CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
-   CMAKE_DIR = base.get_env("ANDROID_NDK_ROOT") + "/../../cmake/"
+   CMAKE_DIR = base.get_android_sdk_home() + "/cmake/"
    CMAKE = CMAKE_DIR + find_last_version(os.listdir(CMAKE_DIR), CMAKE_DIR) + "/bin/cmake"
 
    def param_android(arch, api):

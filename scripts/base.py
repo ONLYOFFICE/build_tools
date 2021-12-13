@@ -740,7 +740,7 @@ def generate_plist(path):
     content += "\t<key>CFBundleGetInfoString</key>\n"
     content += "\t<string>Created by " + bundle_creator + "</string>\n"
     content += "\t<key>CFBundleIdentifier</key>\n"
-    content += "\t<string>" + bundle_id_url + name + "</string>\n"
+    content += "\t<string>" + bundle_id_url + correct_bundle_identifier(name) + "</string>\n"
     content += "\t<key>CFBundlePackageType</key>\n"
     content += "\t<string>FMWK</string>\n"
     content += "\t<key>CFBundleShortVersionString</key>\n"
@@ -763,6 +763,9 @@ def generate_plist(path):
     fileInfo.close()
       
   return
+
+def correct_bundle_identifier(bundle_identifier):
+  return re.sub("[^a-zA-Z0-9\.\-]", "-", bundle_identifier)
 
 def get_sdkjs_addons():
   result = {}
@@ -1182,3 +1185,9 @@ def make_sln(directory, args, is_no_errors):
   os.environ.clear()
   os.environ.update(old_env)
   return
+
+def get_android_sdk_home():
+  ndk_root_path = get_env("ANDROID_NDK_ROOT")
+  if (-1 != ndk_root_path.find("/ndk/")):
+    return ndk_root_path + "/../.."
+  return ndk_root_path + "/.."

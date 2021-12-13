@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import base
 import os
@@ -36,18 +36,34 @@ def make(packages):
 
       app_version = base.run_command("/usr/libexec/PlistBuddy -c 'print :CFBundleShortVersionString' " +
         macos_dir + "/build/ONLYOFFICE.app/Contents/Info.plist")['stdout']
-      macos_zip = macos_dir + "/build/" + scheme + "-" + app_version + ".zip"
+      zip_filename = scheme + "-" + app_version
+      macos_zip = macos_dir + "/build/" + zip_filename + ".zip"
       update_storage_dir = base.get_env("ARCHIVES_DIR") + "/" + scheme + "/_updates"
 
       base.create_dir(update_dir)
       base.copy_dir_content(update_storage_dir, update_dir, ".zip")
+      base.copy_dir_content(update_storage_dir, update_dir, ".html")
       base.copy_file(macos_zip, update_dir)
-      for file in os.listdir(update_dir):
-        if file.endswith(".zip"):
-          zip_name = os.path.splitext(file)[0]
-          zip_ver = os.path.splitext(file)[0].split("-")[-1]
-          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotes.html",   update_dir + "/" + zip_name + ".html")
-          base.copy_file(changes_dir + "/" + zip_ver + "/ReleaseNotesRU.html", update_dir + "/" + zip_name + ".ru.html")
+
+      notes_src = changes_dir + "/" + app_version + "/ReleaseNotes.html"
+      notes_dst = update_dir + "/" + zip_filename + ".html"
+      cur_date = base.run_command("LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"")['stdout']
+      if base.is_exist(notes_src):
+        base.copy_file(notes_src, notes_dst)
+        base.replaceInFileRE(notes_dst,
+          r"(<span class=\"releasedate\">).+(</span>)", "\\1 - " + cur_date + "\\2")
+      else:
+        base.writeFile(notes_dst, "placeholder\n")
+
+      notes_src = changes_dir + "/" + app_version + "/ReleaseNotesRU.html"
+      notes_dst = update_dir + "/" + zip_filename + ".ru.html"
+      cur_date = base.run_command("LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"")['stdout']
+      if base.is_exist(notes_src):
+        base.copy_file(notes_src, notes_dst)
+        base.replaceInFileRE(notes_dst,
+          r"(<span class=\"releasedate\">).+(</span>)", "\\1 - " + cur_date + "\\2")
+      else:
+        base.writeFile(notes_dst, "placeholder\n")
 
       print("$ ./generate_appcast " + update_dir)
       base.cmd(macos_dir + "/Vendor/Sparkle/bin/generate_appcast", [update_dir])

@@ -539,12 +539,27 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
+def get_prefix_cross_compiler_arm64():
+  cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+  if is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-gcc"):
+    return "aarch64-linux-gnu-"
+  if is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-gcc"):
+    return "aarch64-unknown-linux-gnu-"
+  return ""
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
   qt_dir = (qt_dir + "/" + compiler["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + compiler["compiler_64"])
   set_env("QT_DEPLOY", qt_dir + "/bin")
+
+  if ("linux_arm64" == platform):
+    cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+    if ("" != cross_compiler_arm64):
+      set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
+      set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
+
   return qt_dir  
 
 def qt_version():
@@ -570,6 +585,9 @@ def qt_config(platform):
     config_param += " support_web_socket"
   if (config.option("vs-version") == "2019"):
     config_param += " v8_version_89 vs2019"
+
+  if ("linux_arm64" == platform):
+    config_param += " v8_version_89 linux_arm64"
   return config_param
 
 def qt_major_version():

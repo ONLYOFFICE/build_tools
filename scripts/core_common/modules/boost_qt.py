@@ -40,6 +40,8 @@ def make(src_dir, modules, build_platform="android"):
     pro_file_content.append("")
     pro_file_content.append("SOURCES += $$files($$PWD/src/*.cpp, true)")
     pro_file_content.append("")
+    if (0 == platform.find("linux_")):
+      pro_file_content.append("QMAKE_PROJECT_DEPTH = 0")
     pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/" + build_platform + "/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
     build.make_pro_file(module_dir + "/makefiles", module_dir + "/" + module + ".pro")

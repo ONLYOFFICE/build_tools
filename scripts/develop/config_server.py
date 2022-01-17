@@ -64,9 +64,8 @@ def make():
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
 
-  if base.is_dir(git_dir + "/fonts"):
-    base.delete_dir(git_dir + "/fonts")
-  base.create_dir(git_dir + "/fonts")
+  if not base.is_dir(git_dir + "/fonts"):
+    base.create_dir(git_dir + "/fonts")
 
   if ("mac" == base.host_platform()):
     base.mac_correct_rpath_x2t("./")

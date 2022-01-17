@@ -3,6 +3,11 @@
 import config
 import base
 
+def exclude_arch(directory, frameworks):
+  for lib in frameworks:
+    base.cmd("lipo", ["-remove", "arm64", directory + "/" + lib + ".framework/" + lib, "-o", directory + "/" + lib + ".framework/" + lib])
+  return 
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -34,6 +39,7 @@ def make():
 
     # x2t
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfWriter")
@@ -50,6 +56,12 @@ def make():
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
     else:
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
+
+    if ("ios" == platform) and config.check_option("config", "bundle_dylibs") and config.check_option("config", "simulator"):
+      exclude_arch(root_dir, ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfWriter", 
+        "PdfReader", "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
+        "Fb2File", "EpubFile", "x2t"])
+
 
     # icu
     if (0 == platform.find("win")):

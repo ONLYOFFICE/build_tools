@@ -103,6 +103,12 @@ def check_compiler(platform):
     compiler["compiler"] = platform
     compiler["compiler_64"] = platform
 
+  if base.host_platform() == "mac":
+    if not base.is_dir(options["qt-dir"] + "/" + compiler["compiler_64"]):
+      if base.is_dir(options["qt-dir"] + "/macos"):
+        compiler["compiler"] = "macos"
+        compiler["compiler_64"] = "macos"
+
   return compiler
 
 def check_option(name, value):
@@ -129,6 +135,14 @@ def branding():
   if ("" == branding):
     branding = "onlyoffice"
   return branding
+
+def is_mobile_platform():
+  all_platforms = option("platform")
+  if (-1 != all_platforms.find("android")):
+    return True
+  if (-1 != all_platforms.find("ios")):
+    return True
+  return False
 
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"

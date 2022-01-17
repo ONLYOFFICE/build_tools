@@ -47,7 +47,7 @@ def make():
   
   # mobile
   if config.check_option("module", "mobile"):
-    build_sdk_native(base_dir + "/../sdkjs/build")
+    build_sdk_native(base_dir + "/../sdkjs/build", False)
     base.create_dir(out_dir + "/mobile")
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"
@@ -124,10 +124,10 @@ def build_sdk_builder(directory):
   _run_grunt(directory, get_build_param() + base.sdkjs_addons_param())
   return
 
-def build_sdk_native(directory):
+def build_sdk_native(directory, minimize=True):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, get_build_param() + ["--mobile=true"] + base.sdkjs_addons_param())
+  _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + base.sdkjs_addons_param())
   return
 
 def build_js_develop(root_dir):

@@ -52,7 +52,13 @@ for input_file in input_files:
   xml_convert += ("<m_sFontDir>" + directory_fonts + "</m_sFontDir>")
   xml_convert += "<m_sJsonParams>{&quot;spreadsheetLayout&quot;:{&quot;fitToWidth&quot;:1,&quot;fitToHeight&quot;:1}}</m_sJsonParams>"
   xml_convert += "<m_nDoctParams>1</m_nDoctParams>"
-  xml_convert += "<m_oThumbnail><first>false</first></m_oThumbnail>"
+  xml_convert += "<m_oThumbnail>"
+  xml_convert += "<first>false</first>"
+  if ((0 != th_width) and (0 != th_height)):
+    xml_convert += "<aspect>0</aspect>"
+    xml_convert += ("<width>" + str(th_width) + "</width>")
+    xml_convert += ("<height>" + str(th_height) + "</height>")
+  xml_convert += "</m_oThumbnail>"
   xml_convert += "<m_nDoctParams>1</m_nDoctParams>"
   xml_convert += ("<m_sTempDir>" + temp_dir + "</m_sTempDir>")
   xml_convert += "</TaskQueueDataConvert>"

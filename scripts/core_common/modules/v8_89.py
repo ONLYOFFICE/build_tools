@@ -70,6 +70,10 @@ def make():
 
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
+    if ("windows" == base.host_platform()):
+      os.chdir("v8")
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      os.chdir("../")
     base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
     base.cmd("gclient", ["sync", "--force"], True)
 

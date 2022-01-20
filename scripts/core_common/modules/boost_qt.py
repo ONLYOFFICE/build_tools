@@ -6,6 +6,7 @@ import config
 import base
 import os
 import build
+import platform
 
 def make(src_dir, modules, build_platform="android"):
   old_cur = os.getcwd()

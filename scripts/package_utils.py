@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import argparse
 import platform
@@ -83,7 +84,7 @@ def write_file(path, data):
     delete_file(path)
   log("- write file: " + path)
   with open(path, "w") as file:
-    file.write(data)
+    file.write(data.encode('utf-8'))
   return
 
 def delete_file(path):

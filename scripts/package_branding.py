@@ -8,6 +8,7 @@ desktop_dir = git_dir + "\\desktop-apps"
 
 onlyoffice = True
 company_name = "ONLYOFFICE"
+company_name_l = company_name.lower()
 publisher_name = "Ascensio System SIA"
 cert_name = "Ascensio System SIA"
 

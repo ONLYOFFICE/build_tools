@@ -18,8 +18,8 @@ vcredist_links = {
     "32": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
   },
   "2013": {
-    "64": "",
-    "32": ""
+    "64": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
+    "32": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
   }
 }
 
@@ -59,24 +59,43 @@ def set_cwd(dir):
 def host_platform():
   return platform.system().lower()
 
+def is_file(path):
+  return os.path.isfile(path)
+
+def is_dir(path):
+  return os.path.isdir(path)
+
+def is_exist(path):
+  if os.path.exists(path):
+    return True
+  return False
+
 def create_dir(path):
   log("- create dir: " + path)
-  if not os.path.exists(path):
+  if not is_exist(path):
     os.makedirs(path)
   else:
     log("! dir exist")
   return
 
+def write_file(path, data):
+  if is_file(path):
+    delete_file(path)
+  log("- write file: " + path)
+  with open(path, "w") as file:
+    file.write(data)
+  return
+
 def delete_file(path):
   log("- delete file: " + path)
-  if not os.path.isfile(path):
+  if not is_file(path):
     log("! file not exist")
     return
   return os.remove(path)
 
 def delete_dir(path):
   log("- delete dir: " + path)
-  if not os.path.isdir(path):
+  if not is_dir(path):
     log("! dir not exist")
     return
   shutil.rmtree(path, ignore_errors=True)
@@ -84,9 +103,9 @@ def delete_dir(path):
 
 def delete_files(src):
   for path in glob.glob(src):
-    if os.path.isfile(path):
+    if is_file(path):
       delete_file(path)
-    elif os.path.isdir(path):
+    elif is_dir(path):
       delete_dir(path)
   return
 
@@ -101,33 +120,14 @@ def cmd(prog, args=[], is_no_errors=False):
   return
 
 def powershell(self, cmd):
-  log("PWSH: " + cmd)
+  log("- pwsh: " + cmd)
   completed = subprocess.call(["powershell", "-Command", cmd], stderr=subprocess.STDOUT, shell=True)
   return completed
 
-def get_arch(target):
-  if (-1 != target.find("-x64")):
-    return "64"
-  elif (-1 != target.find("-x86")):
-    return "32"
-  return ""
-
-def get_xp(target):
-  return (-1 != target.find("-xp"))
-
-def get_win_suffix(target):
-  arch = get_arch(target)
-  ret = ""
-  ret = "x64" if (arch == "64") else ret
-  ret = "x86" if (arch == "32") else ret
-  ret += "_xp" if get_xp(target) else ""
-  return ret
-
 def get_platform(target):
-  if (host_platform() == "windows"):
-    ret = "win"
-  else:
-    return ""
-  ret += "_" + get_arch(target)
-  ret += "_xp" if get_xp(target) else ""
-  return ret
+  xp = (-1 != target.find("-xp"))
+  if (-1 != target.find("-x64")):
+    return { "machine": "64", "arch": "x64", "xp": xp }
+  elif (-1 != target.find("-x86")):
+    return { "machine": "32", "arch": "x86", "xp": xp }
+  return

@@ -4,18 +4,17 @@ import base
 import os
 import re
 import time
-from jinja2 import Template
 from package_utils import *
 from package_branding import *
 
 def make():
   set_cwd(desktop_dir)
 
-  if ("windows" == system):
+  if (system == "windows"):
     make_windows()
-  elif ("macos" == system):
+  elif (system == "darwin"):
     make_macos()
-  elif ("linux" == system):
+  elif (system == "linux"):
     if ("packages" in targets):
       set_cwd(desktop_dir)
       log("Clean")
@@ -27,18 +26,20 @@ def make():
   return
 
 def make_windows():
-  global source_dir, package_name, package_version, arch, xp, sign, iscc_args, \
-    vcredist_dir, \
-    innosetup_file, advinst_file, portable_zip_file, update_innosetup_file
+  global package_name, package_version, sign, machine, arch, xp, source_dir, \
+    innosetup_file, advinst_file, portable_zip_file, update_innosetup_file, \
+    vcredist_dir, iscc_args
 
   set_cwd(build_dir)
 
   if ("clean" in targets):
-    log("\nClean\n")
+    log("\n--- Clean\n")
     delete_dir("data\\vcredist")
     delete_dir("DesktopEditors-cache")
     delete_files("*.exe")
     delete_files("*.msi")
+    delete_files("*.aic")
+    delete_files("*.tmp")
     delete_files("*.zip")
     delete_files("update\\*.exe")
     delete_files("update\\*.xml")
@@ -52,22 +53,24 @@ def make_windows():
     if not (target.startswith("innosetup") or target.startswith("advinst") or target.startswith("portable")):
       continue
 
-    arch = get_arch(target)
-    xp = get_xp(target)
-    suffix = get_win_suffix(target)
-    source_dir = "%s\\%s\\%s\\%s" % (out_dir, get_platform(target), company_name, product_name_s)
+    machine = get_platform(target)["machine"]
+    arch = get_platform(target)["arch"]
+    xp = get_platform(target)["xp"]
+    suffix = arch + ("_xp" if xp else "")
+    source_prefix = "win_" + machine + ("_xp" if xp else "")
+    source_dir = "%s\\%s\\%s\\%s" % (out_dir, source_prefix, company_name_l, product_name_s)
 
     if target.startswith("innosetup"):
-      innosetup_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
-      update_innosetup_file = "editors_update_%s.exe" % suffix
-      update_appcast_file = "appcast.xml"
-      update_changes_dir = "update\\changes\\" + version
       vcredist_dir = "data\\vcredist"
-
       for year in vcredist_list:
         download_vcredist(year)
 
+      innosetup_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
       make_innosetup()
+
+      update_innosetup_file = "editors_update_%s.exe" % suffix
+      update_appcast_file = "appcast.xml"
+      update_changes_dir = "update\\changes\\" + version
 
       if ("winsparkle-update" in targets):
         make_innosetup_update()
@@ -86,20 +89,18 @@ def make_windows():
   return
 
 def download_vcredist(year):
-  xarch = ""
-  xarch = "x86" if (arch == "32") else xarch
-  xarch = "x64" if (arch == "64") else xarch
-  path = "%s\\vcredist_%s_%s.exe" % (vcredist_dir, year, xarch)
-  log("\nDownload vcredist " + year + "\n" + path + "\n")
-  if base.is_file(path):
+  path = "%s\\vcredist_%s_%s.exe" % (vcredist_dir, year, arch)
+  log("\n--- Download vcredist " + year + "\n--- " + path + "\n")
+  if is_file(path):
     log("! file exist, skip")
     return
   create_dir(vcredist_dir)
-  download(vcredist_links[year][arch], path)
+  download(vcredist_links[year][machine], path)
   return
 
 def make_innosetup():
-  log("\nBuild innosetup project\n" + innosetup_file + "\n")
+  log("\n--- Build innosetup project\n--- " + innosetup_file + "\n")
+  global iscc_args
   iscc_args = [
     "/Qp",
     # "/DsAppVersion=" + package_version,
@@ -107,7 +108,7 @@ def make_innosetup():
     "/DsAppBuildNumber=" + build,
     # "/DsBrandingFolder=" + branding_dir,
     "/DDEPLOY_PATH=" + source_dir,
-    "/D_ARCH=" + arch
+    "/D_ARCH=" + machine
   ]
   if onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
@@ -115,18 +116,17 @@ def make_innosetup():
     iscc_args.append("/D_WIN_XP=1")
   if sign:
     iscc_args.append("/DENABLE_SIGNING=1")
-    iscc_args.append("/S\"byparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " \\$f\"")
-
-  if base.is_file(innosetup_file):
-    log("! file exist")
+    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
+  if is_file(innosetup_file):
+    log("! file exist, skip")
     return
   cmd("iscc", iscc_args + ["common.iss"])
   return
 
 def make_innosetup_update():
-  log("\nBuild innosetup update project\n" + update_innosetup_file + "\n")
-  if base.is_file(update_innosetup_file):
-    log("! file exist")
+  log("\n--- Build innosetup update project\n--- update\\" + update_innosetup_file + "\n")
+  if is_file("update\\" + update_innosetup_file):
+    log("! file exist, skip")
     return
   cmd("iscc", iscc_args + ["/DTARGET_NAME=" + innosetup_file, "update_common.iss"])
   return
@@ -136,29 +136,29 @@ def make_winsparkle_files():
   return
 
 def make_advinst():
-  log("\nBuild advanced installer project\n" + advinst_file + "\n")
-  if base.is_file(advinst_file):
-    log("! file exist")
+  log("\n--- Build advanced installer project\n--- " + advinst_file + "\n")
+  if is_file(advinst_file):
+    log("! file exist, skip")
     return
-  xarch = ""
-  xarch = "x86" if (arch == "32") else xarch
-  xarch = "x64" if (arch == "64") else xarch
-  advinst_exe = "AdvancedInstaller.com"
-  advinst_args = ["/edit", "DesktopEditors.aip"]
-  if arch is "32":
-    cmd(advinst_exe, advinst_args + ["/SetPackageType", "x86"])
-  if not sign:
-    cmd(advinst_exe, advinst_args + ["/ResetSig"])
-  cmd(advinst_exe, advinst_args + ["/AddOsLc", "-buildname", "DefaultBuild", "-arch", xarch])
-  cmd(advinst_exe, advinst_args + ["/NewSync", "APPDIR", source_dir, "-existingfiles", "delete"])
-  cmd(advinst_exe, advinst_args + ["/UpdateFile", "APPDIR\\DesktopEditors.exe", source_dir + "\\DesktopEditors.exe"])
-  cmd(advinst_exe, advinst_args + ["/SetVersion", package_version])
-  # cmd(advinst_exe, advinst_args + ["/SetOutputLocation", "-buildname", "DefaultBuild", "-path", ""])
-  cmd(advinst_exe, advinst_args + ["/SetPackageName", advinst_file, "-buildname", "DefaultBuild"])
-  cmd(advinst_exe, ["/rebuild", "DesktopEditors.aip", "-buildslist", "DefaultBuild"])
+  aic_content = [
+    ";aic",
+    "AddOsLc -buildname DefaultBuild -arch " + arch,
+    "NewSync APPDIR " + source_dir + " -existingfiles delete",
+    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
+    "SetVersion " + package_version,
+    "SetPackageName " + advinst_file + " -buildname DefaultBuild",
+    "Rebuild"
+  ]
+  if not sign:        aic_content.insert(1, "ResetSig")
+  if machine is "32": aic_content.insert(1, "SetPackageType x86")
+  write_file("DesktopEditors.aic", "\n".join(aic_content))
+  cmd("AdvancedInstaller.com", ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
   return
 
 def make_win_portable():
-  log("\nBuild portable\n" + portable_zip_file + "\n")
+  log("\n--- Build portable\n--- " + portable_zip_file + "\n")
+  if is_file(portable_zip_file):
+    log("! file exist, skip")
+    return
   cmd("7z", ["a", "-y", portable_zip_file, source_dir + "\\*"])
   return

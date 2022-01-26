@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import packages_desktop
-import packages_server
-import packages_builder
+import package_desktop
+import package_server
+import package_builder
 
-def make(product, platform, targets):
-  if ("desktop" == product):
-    packages_desktop.make(platform, targets)
-  if ("server" == product):
-    packages_server.make(platform, targets)
-  if ("builder" == product):
-    packages_builder.make(platform, targets)
-  else:
-    exit(1)
+def make(product):
+  if (product == 'desktop'): package_desktop.make()
+  if (product == 'server'):  package_server.make()
+  if (product == 'builder'): package_builder.make()
+  else: exit(1)
   return

@@ -26,6 +26,10 @@ def make():
     exit(1)
   return
 
+###############
+### Windows ###
+###############
+
 def make_windows():
   global package_name, package_version, sign, machine, arch, xp, source_dir, \
     innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, \
@@ -86,34 +90,37 @@ def make_windows():
   return
 
 def download_vcredist(year):
+  log("\n--- Download vcredist " + year + "\n")
   vcredist = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
-  log("\n--- Download vcredist " + year + "\n--- " + vcredist + "\n")
+  log("-- " + vcredist)
   if is_file(vcredist):
     log("! file exist, skip")
     return
   create_dir(get_dirname(vcredist))
-  download(vcredist_links[year][machine], vcredist)
+  download_file(vcredist_links[year][machine], vcredist)
   return
 
 def make_innosetup():
-  log("\n--- Build innosetup project\n--- " + innosetup_file + "\n")
+  log("\n--- Build innosetup project\n")
   global iscc_args
   iscc_args = [
     "/Qp",
     "/DsAppVersion=" + package_version,
     "/DsAppVerShort=" + version,
     "/DsAppBuildNumber=" + build,
-    # "/DsBrandingFolder=" + branding_dir,
     "/DDEPLOY_PATH=" + source_dir,
     "/D_ARCH=" + machine
   ]
   if onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
+  if branding:
+    iscc_args.append("/DsBrandingFolder=" + desktop_branding_dir)
   if xp:
     iscc_args.append("/D_WIN_XP=1")
   if sign:
     iscc_args.append("/DENABLE_SIGNING=1")
     iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
+  log("-- " + innosetup_file)
   if is_file(innosetup_file):
     log("! file exist, skip")
     return
@@ -121,8 +128,8 @@ def make_innosetup():
   return
 
 def make_innosetup_update():
-  log("\n--- Build innosetup update project")
-  log("--- " + innosetup_update_file + "\n")
+  log("\n--- Build innosetup update project\n")
+  log("-- " + innosetup_update_file)
   if is_file(innosetup_update_file):
     log("! file exist, skip")
     return
@@ -130,10 +137,7 @@ def make_innosetup_update():
   return
 
 def make_winsparkle_files():
-  log("\n--- Build winsparkle files")
-
-  from jinja2 import Template
-
+  log("\n--- Build winsparkle files\n")
   template_vars = {
     "title": company_name + " " + product_name,
     "version": version,
@@ -143,26 +147,25 @@ def make_winsparkle_files():
   }
   update_appcast = "update\\appcast.xml"
   update_changes_dir = "update\\changes\\" + version
-  log("--- " + update_appcast + "\n")
+  log("-- " + update_appcast)
   if is_file(update_appcast):
     log("! file exist, skip")
   else:
-    template = Template(open(update_appcast + ".jinja").read().decode('utf-8'))
-    write_file(update_appcast, template.render(**template_vars))
+    write_template(update_appcast + ".jinja", update_appcast, **template_vars)
 
   for lang, base in update_changes_list.items():
     update_changes = "update\\" + base + ".html"
-    log("\n--- " + update_changes + "\n")
+    log("-- " + update_changes)
     if is_file(update_changes):
       log("! file exist, skip")
     else:
       template_vars["lang"] = lang
-      template = Template(open("update\\changes.html.jinja").read().decode('utf-8'))
-      write_file(update_changes, template.render(**template_vars))
+      write_template("update\\changes.html.jinja", update_changes, **template_vars)
   return
 
 def make_advinst():
-  log("\n--- Build advanced installer project\n--- " + advinst_file + "\n")
+  log("\n--- Build advanced installer project\n")
+  log("-- " + advinst_file)
   if is_file(advinst_file):
     log("! file exist, skip")
     return
@@ -201,7 +204,8 @@ def make_advinst():
   return
 
 def make_win_portable():
-  log("\n--- Build portable\n--- " + portable_zip_file + "\n")
+  log("\n--- Build portable\n")
+  log("-- " + portable_zip_file)
   if is_file(portable_zip_file):
     log("! file exist, skip")
     return

@@ -20,8 +20,6 @@ utils.parse()
 #     branding.export()
 
 # build
-import package_desktop
-if ("desktop" == utils.product):
-  package_desktop.make()
-else:
-  exit(1)
+import package
+
+package.make(utils.product)

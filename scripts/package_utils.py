@@ -9,6 +9,7 @@ import glob
 import shutil
 import subprocess
 import base
+from jinja2 import Template
 
 def parse():
   parser = argparse.ArgumentParser(description='Build packages.')
@@ -17,16 +18,16 @@ def parse():
   parser.add_argument("-T","--targets", dest="targets", type=str, nargs='+', action="store", help="Defines targets")
   parser.add_argument("-V","--version", dest="version", type=str, action="store", help="Defines version")
   parser.add_argument("-B","--build", dest="build", type=str, action="store", help="Defines build")
-  parser.add_argument("-R","--branding", dest="branding_dir", type=str, action="store", help="Provides branding path")
+  parser.add_argument("-R","--branding", dest="branding", type=str, action="store", help="Provides branding path")
   args = parser.parse_args()
   
-  global product, system, targets, version, build, branding_dir, sign, clean
+  global product, system, targets, version, build, branding, sign, clean
   product = args.product
-  system = args.system
+  system = args.system if (args.system is not None) else host_platform()
   targets = args.targets
-  version = args.version # base.get_env("PRODUCT_VERSION")
-  build = args.build # base.get_env("BUILD_NUMBER")
-  branding_dir = args.branding_dir # base.get_env("BRANDING_DIR")
+  version = args.version if (args.version is not None) else get_env("PRODUCT_VERSION", "0.0.0")
+  build = args.build if (args.build is not None) else get_env("BUILD_NUMBER", "0")
+  branding = args.branding
   return
 
 def host_platform():
@@ -39,6 +40,13 @@ def log(string, end='\n', bold=False):
     out = string + end
   sys.stdout.write(out)
   sys.stdout.flush()
+  return
+
+def get_env(name, default=""):
+  return os.getenv(name, default)
+
+def set_env(name, value):
+  os.environ[name] = value
   return
 
 def set_cwd(dir):
@@ -79,6 +87,15 @@ def write_file(path, data):
     file.write(data.encode('utf-8'))
   return
 
+def write_template(src, dst, **kwargs):
+  template = Template(open(src).read().decode('utf-8'))
+  if is_file(dst):
+    os.remove(dst)
+  log("- write template: " + dst + " < " + src)
+  with open(dst, "w") as file:
+    file.write(template.render(**kwargs).encode('utf-8'))
+  return
+
 def delete_file(path):
   log("- delete file: " + path)
   if not is_file(path):
@@ -102,9 +119,11 @@ def delete_files(src):
       delete_dir(path)
   return
 
-def download(url, path):
+def download_file(url, path):
   log("- download file: " + path + " < " + url)
-  base.download(url, path)
+  if is_file(path):
+    os.remove(path)
+  powershell([ "Invoke-WebRequest", url, "-OutFile", path ])
   return
 
 def cmd(prog, args=[], is_no_errors=False):
@@ -112,10 +131,13 @@ def cmd(prog, args=[], is_no_errors=False):
   base.cmd(prog, args, is_no_errors)
   return
 
-def powershell(self, cmd):
-  log("- pwsh: " + cmd)
-  completed = subprocess.call(["powershell", "-Command", cmd], stderr=subprocess.STDOUT, shell=True)
-  return completed
+def powershell(cmd):
+  log("- pwsh: " + ' '.join(cmd))
+  ret = subprocess.call(["powershell", "-Command", ] + cmd,
+    stderr=subprocess.STDOUT, shell=True)
+  if ret != 0:
+    sys.exit("! error: " + str(ret))
+  return ret
 
 def get_platform(target):
   xp = (-1 != target.find("-xp"))

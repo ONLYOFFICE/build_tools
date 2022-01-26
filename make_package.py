@@ -3,21 +3,16 @@
 
 import sys
 sys.path.append('scripts')
-import base
 import package_utils as utils
 
 # config
 utils.parse()
 
 # branding
-# if (None != config.branding_dir):
-#   branding_path = '../' + config.branding_dir + '/build_tools'
-#   if base.is_file(branding_path + '/package_branding.py'):
-#     del sys.modules['package_branding']
-#     sys.path.insert(0,branding_path)
-#     sys.modules['package_branding'] = __import__('package_branding')
-#     import package_branding as branding
-#     branding.export()
+if (None != utils.branding):
+  branding_dir = "..\\" + utils.branding
+  if utils.is_file(branding_dir + "\\build_tools\\scripts\\package_branding.py"):
+    sys.path.insert(-1,branding_dir + "\\build_tools\\scripts")
 
 # build
 import package

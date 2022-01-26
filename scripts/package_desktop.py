@@ -130,7 +130,35 @@ def make_innosetup_update():
   return
 
 def make_winsparkle_files():
-  log("Build winsparkle files")
+  log("\n--- Build winsparkle files")
+
+  from jinja2 import Template
+
+  template_vars = {
+    "title": company_name + " " + product_name,
+    "version": version,
+    "build": build,
+    "onlyoffice": onlyoffice,
+    "timestamp": time.time()
+  }
+  update_appcast = "update\\appcast.xml"
+  update_changes_dir = "update\\changes\\" + version
+  log("--- " + update_appcast + "\n")
+  if is_file(update_appcast):
+    log("! file exist, skip")
+  else:
+    template = Template(open(update_appcast + ".jinja").read().decode('utf-8'))
+    write_file(update_appcast, template.render(**template_vars))
+
+  for lang, base in update_changes_list.items():
+    update_changes = "update\\" + base + ".html"
+    log("\n--- " + update_changes + "\n")
+    if is_file(update_changes):
+      log("! file exist, skip")
+    else:
+      template_vars["lang"] = lang
+      template = Template(open("update\\changes.html.jinja").read().decode('utf-8'))
+      write_file(update_changes, template.render(**template_vars))
   return
 
 def make_advinst():

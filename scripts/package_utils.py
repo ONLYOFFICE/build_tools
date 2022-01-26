@@ -10,20 +10,6 @@ import shutil
 import subprocess
 import base
 
-global git_dir, tsa_server, vcredist_links
-git_dir = os.path.abspath(os.path.dirname(__file__) + "/../..")
-tsa_server = "http://timestamp.digicert.com"
-vcredist_links = {
-  "2015": {
-    "64": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
-    "32": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
-  },
-  "2013": {
-    "64": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
-    "32": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
-  }
-}
-
 def parse():
   parser = argparse.ArgumentParser(description='Build packages.')
   parser.add_argument("-P","--product", dest="product", type=str, action="store", help="Defines product")
@@ -43,6 +29,9 @@ def parse():
   branding_dir = args.branding_dir # base.get_env("BRANDING_DIR")
   return
 
+def host_platform():
+  return platform.system().lower()
+
 def log(string, end='\n', bold=False):
   if bold:
     out = "\033[1m" + string + "\033[0m" + end
@@ -57,8 +46,8 @@ def set_cwd(dir):
   os.chdir(dir)
   return
 
-def host_platform():
-  return platform.system().lower()
+def get_abs_path(path):
+  return os.path.abspath(path)
 
 def is_file(path):
   return os.path.isfile(path)
@@ -70,6 +59,9 @@ def is_exist(path):
   if os.path.exists(path):
     return True
   return False
+
+def get_dirname(path):
+  return os.path.dirname(path)
 
 def create_dir(path):
   log("- create dir: " + path)
@@ -132,3 +124,18 @@ def get_platform(target):
   elif (-1 != target.find("-x86")):
     return { "machine": "32", "arch": "x86", "xp": xp }
   return
+
+global git_dir, out_dir, tsa_server, vcredist_links
+git_dir = get_abs_path(get_dirname(__file__) + "/../..")
+out_dir = get_abs_path(get_dirname(__file__) + "/../out")
+tsa_server = "http://timestamp.digicert.com"
+vcredist_links = {
+  "2015": {
+    "64": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
+    "32": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
+  },
+  "2013": {
+    "64": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
+    "32": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
+  }
+}

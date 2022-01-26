@@ -28,8 +28,8 @@ def make():
 
 def make_windows():
   global package_name, package_version, sign, machine, arch, xp, source_dir, \
-    innosetup_file, advinst_file, portable_zip_file, update_innosetup_file, \
-    vcredist_dir, iscc_args
+    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, \
+    iscc_args
 
   set_cwd(build_dir)
 
@@ -62,18 +62,14 @@ def make_windows():
     source_dir = "%s\\%s\\%s\\%s" % (out_dir, source_prefix, company_name_l, product_name_s)
 
     if target.startswith("innosetup"):
-      vcredist_dir = "data\\vcredist"
       for year in vcredist_list:
         download_vcredist(year)
 
       innosetup_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
       make_innosetup()
 
-      update_innosetup_file = "editors_update_%s.exe" % suffix
-      update_appcast_file = "appcast.xml"
-      update_changes_dir = "update\\changes\\" + version
-
       if ("winsparkle-update" in targets):
+        innosetup_update_file = "update\\editors_update_%s.exe" % suffix
         make_innosetup_update()
 
       if ("winsparkle-files" in targets):
@@ -90,13 +86,13 @@ def make_windows():
   return
 
 def download_vcredist(year):
-  path = "%s\\vcredist_%s_%s.exe" % (vcredist_dir, year, arch)
-  log("\n--- Download vcredist " + year + "\n--- " + path + "\n")
-  if is_file(path):
+  vcredist = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
+  log("\n--- Download vcredist " + year + "\n--- " + vcredist + "\n")
+  if is_file(vcredist):
     log("! file exist, skip")
     return
-  create_dir(vcredist_dir)
-  download(vcredist_links[year][machine], path)
+  create_dir(get_dirname(vcredist))
+  download(vcredist_links[year][machine], vcredist)
   return
 
 def make_innosetup():
@@ -104,7 +100,7 @@ def make_innosetup():
   global iscc_args
   iscc_args = [
     "/Qp",
-    # "/DsAppVersion=" + package_version,
+    "/DsAppVersion=" + package_version,
     "/DsAppVerShort=" + version,
     "/DsAppBuildNumber=" + build,
     # "/DsBrandingFolder=" + branding_dir,
@@ -125,8 +121,9 @@ def make_innosetup():
   return
 
 def make_innosetup_update():
-  log("\n--- Build innosetup update project\n--- update\\" + update_innosetup_file + "\n")
-  if is_file("update\\" + update_innosetup_file):
+  log("\n--- Build innosetup update project")
+  log("--- " + innosetup_update_file + "\n")
+  if is_file(innosetup_update_file):
     log("! file exist, skip")
     return
   cmd("iscc", iscc_args + ["/DTARGET_NAME=" + innosetup_file, "update_common.iss"])
@@ -141,17 +138,36 @@ def make_advinst():
   if is_file(advinst_file):
     log("! file exist, skip")
     return
-  aic_content = [
-    ";aic",
+  aic_content = [ ";aic" ]
+  if not onlyoffice:
+    aic_content += [
+      "SetProperty ProductName=\"%s\"" % ProductName,
+      "SetProperty Manufacturer=\"%s\"" % Manufacturer,
+      "SetProperty ARPURLINFOABOUT=\"%s\"" % ARPURLINFOABOUT,
+      "SetProperty ARPURLUPDATEINFO=\"%s\"" % ARPURLUPDATEINFO,
+      "SetProperty ARPHELPLINK=\"%s\"" % ARPHELPLINK,
+      "SetProperty ARPHELPTELEPHONE=\"%s\"" % ARPHELPTELEPHONE,
+      "SetProperty ARPCONTACT=\"%s\"" % ARPCONTACT,
+      "DelLanguage 1029 -buildname DefaultBuild",
+      "DelLanguage 1031 -buildname DefaultBuild",
+      "DelLanguage 1041 -buildname DefaultBuild",
+      "DelLanguage 1046 -buildname DefaultBuild",
+      "DelLanguage 2070 -buildname DefaultBuild",
+      "DelLanguage 1060 -buildname DefaultBuild",
+      "DelLanguage 1036 -buildname DefaultBuild",
+      "DelLanguage 3082 -buildname DefaultBuild",
+      "DelLanguage 1033 -buildname DefaultBuild"
+    ]
+  if not sign:        aic_content.append("ResetSig")
+  if machine is "32": aic_content.append("SetPackageType x86")
+  aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
-    "Rebuild"
+    "Rebuild -buildslist DefaultBuild"
   ]
-  if not sign:        aic_content.insert(1, "ResetSig")
-  if machine is "32": aic_content.insert(1, "SetPackageType x86")
   write_file("DesktopEditors.aic", "\n".join(aic_content))
   cmd("AdvancedInstaller.com", ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
   return

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from package_utils import *
 
-out_dir = os.path.abspath(os.path.dirname(__file__) + "/../out")
 desktop_dir = git_dir + "\\desktop-apps"
 
 onlyoffice = True

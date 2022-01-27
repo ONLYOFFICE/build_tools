@@ -11,9 +11,8 @@ cert_name = "Ascensio System SIA"
 
 if (product == "desktop"):
   if (system == "windows"):
-    desktop_dir = git_dir + "\\desktop-apps"
-    build_dir = "win-linux\\package\\windows"
-    branding_dir = desktop_dir + "\\" + build_dir
+    build_dir = get_path('desktop-apps/win-linux/package/windows')
+    # branding_dir = get_path(branding, build_dir)
     product_name = "Desktop Editors"
     product_name_s = product_name.replace(" ","")
     vcredist_list = ["2015"]
@@ -23,10 +22,10 @@ if (product == "desktop"):
     }
 
   elif (system == "darwin"):
-    desktop_dir = git_dir + "/desktop-apps/macos"
-    branding_desktop_dir = desktop_dir
-    updates_dir = "build/update"
-    changes_dir = "ONLYOFFICE/update/updates/ONLYOFFICE/changes"
+    desktop_dir = get_path(git_dir + "/desktop-apps/macos")
+    branding_desktop_dir = get_path(desktop_dir)
+    updates_dir = get_path("build/update")
+    changes_dir = get_path("ONLYOFFICE/update/updates/ONLYOFFICE/changes")
     update_changes_list = {
       "en": "ReleaseNotes",
       "ru": "ReleaseNotesRU"

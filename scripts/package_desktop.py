@@ -9,8 +9,6 @@ from package_utils import *
 from package_branding import *
 
 def make():
-  set_cwd(desktop_dir)
-
   if (system == "windows"):
     make_windows()
   elif (system == "darwin"):
@@ -35,20 +33,20 @@ def make_windows():
     innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, \
     iscc_args
 
-  set_cwd(build_dir)
+  set_cwd(get_abspath(git_dir, build_dir))
 
   if ("clean" in targets):
     log("\n--- Clean\n")
-    delete_dir("data\\vcredist")
+    delete_dir(get_path("data/vcredist"))
     delete_dir("DesktopEditors-cache")
     delete_files("*.exe")
     delete_files("*.msi")
     delete_files("*.aic")
     delete_files("*.tmp")
     delete_files("*.zip")
-    delete_files("update\\*.exe")
-    delete_files("update\\*.xml")
-    delete_files("update\\*.html")
+    delete_files(get_path("update/*.exe"))
+    delete_files(get_path("update/*.xml"))
+    delete_files(get_path("update/*.html"))
 
   package_name = company_name + "_" + product_name_s
   package_version = version + "." + build
@@ -63,7 +61,7 @@ def make_windows():
     xp = get_platform(target)["xp"]
     suffix = arch + ("_xp" if xp else "")
     source_prefix = "win_" + machine + ("_xp" if xp else "")
-    source_dir = "%s\\%s\\%s\\%s" % (out_dir, source_prefix, company_name_l, product_name_s)
+    source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
 
     if target.startswith("innosetup"):
       for year in vcredist_list:
@@ -73,7 +71,7 @@ def make_windows():
       make_innosetup()
 
       if ("winsparkle-update" in targets):
-        innosetup_update_file = "update\\editors_update_%s.exe" % suffix
+        innosetup_update_file = get_path("update/editors_update_%s.exe" % suffix)
         make_innosetup_update()
 
       if ("winsparkle-files" in targets):
@@ -91,7 +89,7 @@ def make_windows():
 
 def download_vcredist(year):
   log("\n--- Download vcredist " + year + "\n")
-  vcredist = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
+  vcredist = get_path("data/vcredist/vcredist_%s_%s.exe" % (year, arch))
   log("-- " + vcredist)
   if is_file(vcredist):
     log("! file exist, skip")
@@ -113,8 +111,8 @@ def make_innosetup():
   ]
   if onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
-  if branding:
-    iscc_args.append("/DsBrandingFolder=" + desktop_branding_dir)
+  else:
+    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir))
   if xp:
     iscc_args.append("/D_WIN_XP=1")
   if sign:
@@ -145,22 +143,22 @@ def make_winsparkle_files():
     "onlyoffice": onlyoffice,
     "timestamp": time.time()
   }
-  update_appcast = "update\\appcast.xml"
-  update_changes_dir = "update\\changes\\" + version
+  update_appcast = get_path("update/appcast.xml")
+  update_changes_dir = get_path("update/changes", version)
   log("-- " + update_appcast)
   if is_file(update_appcast):
     log("! file exist, skip")
   else:
-    write_template(update_appcast + ".jinja", update_appcast, **template_vars)
+    write_template(get_path("update/appcast.xml.jinja"), update_appcast, **template_vars)
 
   for lang, base in update_changes_list.items():
-    update_changes = "update\\" + base + ".html"
+    update_changes = get_path("update/" + base + ".html")
     log("-- " + update_changes)
     if is_file(update_changes):
       log("! file exist, skip")
     else:
       template_vars["lang"] = lang
-      write_template("update\\changes.html.jinja", update_changes, **template_vars)
+      write_template(get_path("update/changes.html.jinja"), update_changes, **template_vars)
   return
 
 def make_advinst():
@@ -194,7 +192,7 @@ def make_advinst():
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
-    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
+    "UpdateFile APPDIR\\DesktopEditors.exe " + get_path(source_dir, "DesktopEditors.exe"),
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
@@ -209,7 +207,7 @@ def make_win_portable():
   if is_file(portable_zip_file):
     log("! file exist, skip")
     return
-  cmd("7z", ["a", "-y", portable_zip_file, source_dir + "\\*"])
+  cmd("7z", ["a", "-y", portable_zip_file, get_path(source_dir, "*")])
   return
 
 #############

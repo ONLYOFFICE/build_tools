@@ -54,8 +54,17 @@ def set_cwd(dir):
   os.chdir(dir)
   return
 
-def get_abs_path(path):
-  return os.path.abspath(path)
+def get_path(*paths):
+  arr = []
+  for path in paths:
+    arr += path.split('/')
+  return os.path.join(*arr)
+
+def get_abspath(*paths):
+  arr = []
+  for path in paths:
+    arr += path.split('/')
+  return os.path.abspath(os.path.join(*arr))
 
 def is_file(path):
   return os.path.isfile(path)
@@ -148,8 +157,8 @@ def get_platform(target):
   return
 
 global git_dir, out_dir, tsa_server, vcredist_links
-git_dir = get_abs_path(get_dirname(__file__) + "/../..")
-out_dir = get_abs_path(get_dirname(__file__) + "/../out")
+git_dir = get_abspath(get_dirname(__file__), "../..")
+out_dir = get_abspath(get_dirname(__file__), "../out")
 tsa_server = "http://timestamp.digicert.com"
 vcredist_links = {
   "2015": {

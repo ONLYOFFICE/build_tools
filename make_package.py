@@ -9,11 +9,10 @@ import package_utils as utils
 utils.parse()
 
 # branding
-if (None != utils.branding):
-  branding_dir = utils.get_path("../" + utils.branding)
-  sys.path.insert(-1, get_path(branding_dir + "/build_tools/scripts"))
+if utils.branding is not None:
+  branding_path = utils.get_path('..', utils.branding)
+  sys.path.insert(-1, utils.get_path(branding_path, 'build_tools/scripts'))
 
 # build
 import package
-
 package.make(utils.product)

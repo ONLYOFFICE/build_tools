@@ -112,7 +112,7 @@ def make_innosetup():
   if onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
   else:
-    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir))
+    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir, "desktop-apps"))
   if xp:
     iscc_args.append("/D_WIN_XP=1")
   if sign:

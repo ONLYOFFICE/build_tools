@@ -9,12 +9,12 @@ from package_utils import *
 from package_branding import *
 
 def make():
-  if (system == "windows"):
+  if system == 'windows':
     make_windows()
-  elif (system == "darwin"):
+  elif system == 'darwin':
     make_macos()
-  elif (system == "linux"):
-    if ("packages" in targets):
+  elif system == 'linux':
+    if 'packages' in targets:
       set_cwd(desktop_dir)
       log("Clean")
       base.cmd("make", ["clean"])
@@ -24,9 +24,9 @@ def make():
     exit(1)
   return
 
-###############
-### Windows ###
-###############
+#
+# Windows
+#
 
 def make_windows():
   global package_name, package_version, sign, machine, arch, xp, source_dir, \
@@ -35,7 +35,7 @@ def make_windows():
 
   set_cwd(get_abspath(git_dir, build_dir))
 
-  if ("clean" in targets):
+  if 'clean' in targets:
     log("\n--- Clean\n")
     delete_dir(get_path("data/vcredist"))
     delete_dir("DesktopEditors-cache")
@@ -48,40 +48,41 @@ def make_windows():
     delete_files(get_path("update/*.xml"))
     delete_files(get_path("update/*.html"))
 
-  package_name = company_name + "_" + product_name_s
-  package_version = version + "." + build
-  sign = "sign" in targets
+  package_name = company_name + '_' + product_name_s
+  package_version = version + '.' + build
+  sign = 'sign' in targets
 
   for target in targets:
-    if not (target.startswith("innosetup") or target.startswith("advinst") or target.startswith("portable")):
+    if not (target.startswith('innosetup') or target.startswith('advinst') or 
+            target.startswith('portable')):
       continue
 
-    machine = get_platform(target)["machine"]
-    arch = get_platform(target)["arch"]
-    xp = get_platform(target)["xp"]
+    machine = get_platform(target)['machine']
+    arch = get_platform(target)['arch']
+    xp = get_platform(target)['xp']
     suffix = arch + ("_xp" if xp else "")
     source_prefix = "win_" + machine + ("_xp" if xp else "")
     source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
 
-    if target.startswith("innosetup"):
+    if target.startswith('innosetup'):
       for year in vcredist_list:
         download_vcredist(year)
 
       innosetup_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
       make_innosetup()
 
-      if ("winsparkle-update" in targets):
+      if 'winsparkle-update' in targets:
         innosetup_update_file = get_path("update/editors_update_%s.exe" % suffix)
         make_innosetup_update()
 
-      if ("winsparkle-files" in targets):
+      if 'winsparkle-files' in targets:
         make_winsparkle_files()
 
-    if target.startswith("advinst"):
+    if target.startswith('advinst'):
       advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
       make_advinst()
 
-    if target.startswith("portable"):
+    if target.startswith('portable'):
       portable_zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
       make_win_portable()
 
@@ -137,7 +138,7 @@ def make_innosetup_update():
 def make_winsparkle_files():
   log("\n--- Build winsparkle files\n")
   template_vars = {
-    "title": company_name + " " + product_name,
+    "title": company_name + ' ' + product_name,
     "version": version,
     "build": build,
     "onlyoffice": onlyoffice,
@@ -167,7 +168,7 @@ def make_advinst():
   if is_file(advinst_file):
     log("! file exist, skip")
     return
-  aic_content = [ ";aic" ]
+  aic_content = [";aic"]
   if not onlyoffice:
     aic_content += [
       "SetProperty ProductName=\"%s\"" % ProductName,
@@ -188,7 +189,7 @@ def make_advinst():
       "DelLanguage 1033 -buildname DefaultBuild"
     ]
   if not sign:        aic_content.append("ResetSig")
-  if machine is "32": aic_content.append("SetPackageType x86")
+  if machine == '32': aic_content.append("SetPackageType x86")
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
@@ -210,30 +211,30 @@ def make_win_portable():
   cmd("7z", ["a", "-y", portable_zip_file, get_path(source_dir, "*")])
   return
 
-#############
-### macOS ###
-#############
+#
+# macOS
+#
 
 def make_macos():
   for target in targets:
-    if not target.startswith("diskimage"):
+    if not target.startswith('diskimage'):
       continue
 
-    if target.startswith("diskimage"):
+    if target.startswith('diskimage'):
       make_diskimage(target)
 
-      if ("sparkle-updates" in targets):
+      if ('sparkle-updates' in targets):
         make_sparkle_updates()
   return
 
 def make_diskimage(target):
   global suffix
-  if   (target == "diskimage-x64"):    suffix = "x86_64"
-  elif (target == "diskimage-x64-v8"): suffix = "v8"
-  elif (target == "diskimage-arm64"):  suffix = "arm"
+  if   (target == 'diskimage-x64'):    suffix = 'x86_64'
+  elif (target == 'diskimage-x64-v8'): suffix = 'v8'
+  elif (target == 'diskimage-arm64'):  suffix = 'arm'
   else: exit(1)
   lane = "release_" + suffix
-  scheme = package_name + "-" + suffix
+  scheme = package_name + '-' + suffix
   log("\n--- Build package " + scheme + "\n")
   log("$ bundler exec fastlane " + lane + " skip_git_bump:true")
   cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
@@ -245,9 +246,9 @@ def make_sparkle_updates():
   app_version = cmd("/usr/libexec/PlistBuddy \
     -c 'print :CFBundleShortVersionString' \
     build/" + package_name + ".app/Contents/Info.plist")['stdout']
-  zip_filename = scheme + "-" + app_version
+  zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
-  updates_storage_dir = get_env("ARCHIVES_DIR") + "/" + scheme + "/_updates"
+  updates_storage_dir = get_env('ARCHIVES_DIR') + '/' + scheme + "/_updates"
   create_dir(updates_dir)
   copy_dir_content(update_storage_dir, updates_dir, ".zip")
   copy_dir_content(update_storage_dir, updates_dir, ".html")
@@ -255,34 +256,37 @@ def make_sparkle_updates():
   for lang, base in update_changes_list.items():
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, base)
     notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if   lang == "en": encoding = "en_US.UTF-8"
-    elif lang == "ru": encoding = "ru_RU.UTF-8"
+    if   lang == 'en': encoding = 'en_US.UTF-8'
+    elif lang == 'ru': encoding = 'ru_RU.UTF-8'
     cur_date = cmd("LC_ALL=%s date -u \"%s\"" % (lang, encoding))['stdout']
     if is_file(notes_src):
       copy_file(notes_src, notes_dst)
       replaceInFileRE(notes_dst,
-        r"(<span class=\"releasedate\">).+(</span>)", "\\1 - " + cur_date + "\\2")
+                      r"(<span class=\"releasedate\">).+(</span>)",
+                      "\\1 - " + cur_date + "\\2")
     #else:
     #  write_file(notes_dst, "placeholder\n")
   log("$ ./generate_appcast " + updates_dir)
   cmd(desktop_dir + "/Vendor/Sparkle/bin/generate_appcast", [updates_dir])
 
   log("Edit Sparkle appcast links")
-  sparkle_base_url += "/" + suffix
+  sparkle_base_url += '/' + suffix
   update_appcast = "%s/%s.xml" % (updates_dir, company_name.lower())
   if (list(update_changes_list.values())[0] is not None):
     replaceInFileRE(update_appcast,
-      r("(<sparkle:releaseNotesLink>)(?:.+" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)"),
-      "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
+                    r("(<sparkle:releaseNotesLink>)(?:.+" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)"),
+                    "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
   if (list(update_changes_list.values())[1] is not None):
     replaceInFileRE(update_appcast,
-      r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-      "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
+                    r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+                    "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
   replaceInFileRE(update_appcast,
-    r"(url=\")(?:.+/)(" + company_name + ".+\")", "\\1" + sparkle_base_url + "/updates/\\2")
+                  r"(url=\")(?:.+/)(" + company_name + ".+\")",
+                  "\\1" + sparkle_base_url + "/updates/\\2")
 
   log("Delete unnecessary files")
   for file in os.listdir(updates_dir):
-    if (-1 == file.find(app_version)) and (file.endswith(".zip") or file.endswith(".html")):
-      base.delete_file(updates_dir + "/" + file)
+    if (-1 == file.find(app_version)) and (file.endswith(".zip") or
+          file.endswith(".html")):
+      base.delete_file(updates_dir + '/' + file)
   return

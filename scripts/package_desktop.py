@@ -4,7 +4,6 @@
 import base
 import os
 import re
-import time
 from package_utils import *
 from package_branding import *
 
@@ -138,29 +137,46 @@ def make_innosetup_update():
 
 def make_winsparkle_files():
   log("\n--- Build winsparkle files\n")
-  template_vars = {
-    "title": company_name + ' ' + product_name,
-    "version": version,
-    "build": build,
-    "onlyoffice": onlyoffice,
-    "timestamp": time.time()
-  }
-  update_appcast = get_path("update/appcast.xml")
-  update_changes_dir = get_path("update/changes", version)
-  log("-- " + update_appcast)
-  if is_file(update_appcast):
+
+  awk_branding = "update/branding.awk"
+  if not onlyoffice:
+    build_branding_dir = get_abspath(git_dir, branding_dir, "win-linux/package/windows")
+  else:
+    build_branding_dir = get_path(".")
+  awk_args = [
+    "-v", "Version=" + version,
+    "-v", "Build=" + build,
+    "-v", "Timestamp=" + timestamp,
+    "-i", get_path(build_branding_dir, awk_branding)
+  ]
+
+  appcast = get_path("update/appcast.xml")
+  log("-- " + appcast)
+  if is_file(appcast):
     log("! file exist, skip")
   else:
-    write_template(get_path("update/appcast.xml.jinja"), update_appcast, **template_vars)
+    command = "env LANG=en_US.UTF-8 awk " + ' '.join(awk_args) + \
+      " -f " + appcast + ".awk"
+    appcast_result = proc_open(command)
+    if appcast_result['stderr'] != "":
+      log("! error: " + appcast_result['stderr'])
+    write_file(appcast, appcast_result['stdout'])
 
+  changes_dir = get_path(build_branding_dir, "update/changes", version)
   for lang, base in update_changes_list.items():
-    update_changes = get_path("update/" + base + ".html")
-    log("-- " + update_changes)
-    if is_file(update_changes):
+    changes = get_path("update/" + base + ".html")
+    if   lang == 'en': encoding = 'en_US.UTF-8'
+    elif lang == 'ru': encoding = 'ru_RU.UTF-8'
+    log("-- " + changes)
+    if is_file(changes):
       log("! file exist, skip")
     else:
-      template_vars["lang"] = lang
-      write_template(get_path("update/changes.html.jinja"), update_changes, **template_vars)
+      command = "env LANG=" + encoding + " awk " + ' '.join(awk_args) + \
+        " -f update\\changes.html.awk " + changes_dir + "\\" + lang + ".html"
+      changes_result = proc_open(command)
+      if changes_result['stderr'] != "":
+        log("! error: " + changes_result['stderr'])
+      write_file(changes, changes_result['stdout'])
   return
 
 def make_advinst():

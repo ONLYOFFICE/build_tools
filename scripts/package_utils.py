@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import platform
-import os
-import sys
+import codecs
 import glob
+import os
+import platform
+import re
 import shutil
 import subprocess
-import codecs
+import sys
+import time
 import base
 from jinja2 import Template
 
@@ -191,10 +193,27 @@ def download_file(url, path):
   powershell(["Invoke-WebRequest", url, "-OutFile", path])
   return
 
-def cmd(prog, args=[], is_no_errors=False):
+def proc_open(command):
+  log("- open process: " + command)
+  popen = subprocess.Popen(command, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, shell=True)
+  ret = {'stdout' : '', 'stderr' : ''}
+  try:
+    stdout, stderr = popen.communicate()
+    popen.wait()
+    ret['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
+    ret['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
+  finally:
+    popen.stdout.close()
+    popen.stderr.close()
+  return ret
+
+def cmd(prog, args=[], is_no_errors=False):  
   log("- cmd: " + prog + " " + ' '.join(args))
-  base.cmd(prog, args, is_no_errors)
-  return
+  ret = subprocess.call([prog] + args[:], stderr=subprocess.STDOUT, shell=True)
+  if ret != 0 and True != is_no_errors:
+    sys.exit("! error (" + prog + "): " + str(ret))
+  return ret
 
 def powershell(cmd):
   log("- pwsh: " + ' '.join(cmd))
@@ -215,6 +234,7 @@ def get_platform(target):
 global git_dir, out_dir, tsa_server, vcredist_links
 git_dir = get_abspath(get_dirname(__file__), '../..')
 out_dir = get_abspath(get_dirname(__file__), '../out')
+timestamp = "%.f" % time.time()
 tsa_server = "http://timestamp.digicert.com"
 vcredist_links = {
   '2015': {

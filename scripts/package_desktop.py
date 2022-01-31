@@ -35,7 +35,7 @@ def make_windows():
   set_cwd(get_abspath(git_dir, build_dir))
 
   if 'clean' in targets:
-    log("\n--- Clean\n")
+    log("\n=== Clean\n")
     delete_dir(get_path("data/vcredist"))
     delete_dir("DesktopEditors-cache")
     delete_files("*.exe")
@@ -91,9 +91,9 @@ def make_windows():
   return
 
 def download_vcredist(year):
-  log("\n--- Download vcredist " + year + "\n")
+  log("\n=== Download vcredist " + year + "\n")
   vcredist = get_path("data/vcredist/vcredist_%s_%s.exe" % (year, arch))
-  log("-- " + vcredist)
+  log("--- " + vcredist)
   if is_file(vcredist):
     log("! file exist, skip")
     return
@@ -102,7 +102,7 @@ def download_vcredist(year):
   return
 
 def make_innosetup():
-  log("\n--- Build innosetup project\n")
+  log("\n=== Build innosetup project\n")
   global iscc_args
   iscc_args = [
     "/Qp",
@@ -119,7 +119,7 @@ def make_innosetup():
   if sign:
     iscc_args.append("/DENABLE_SIGNING=1")
     iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
-  log("-- " + innosetup_file)
+  log("--- " + innosetup_file)
   if is_file(innosetup_file):
     log("! file exist, skip")
     return
@@ -127,8 +127,8 @@ def make_innosetup():
   return
 
 def make_innosetup_update():
-  log("\n--- Build innosetup update project\n")
-  log("-- " + innosetup_update_file)
+  log("\n=== Build innosetup update project\n")
+  log("--- " + innosetup_update_file)
   if is_file(innosetup_update_file):
     log("! file exist, skip")
     return
@@ -136,7 +136,7 @@ def make_innosetup_update():
   return
 
 def make_winsparkle_files():
-  log("\n--- Build winsparkle files\n")
+  log("\n=== Build winsparkle files\n")
 
   awk_branding = "update/branding.awk"
   if not onlyoffice:
@@ -151,7 +151,7 @@ def make_winsparkle_files():
   ]
 
   appcast = get_path("update/appcast.xml")
-  log("-- " + appcast)
+  log("--- " + appcast)
   if is_file(appcast):
     log("! file exist, skip")
   else:
@@ -167,7 +167,7 @@ def make_winsparkle_files():
     changes = get_path("update/" + base + ".html")
     if   lang == 'en': encoding = 'en_US.UTF-8'
     elif lang == 'ru': encoding = 'ru_RU.UTF-8'
-    log("-- " + changes)
+    log("--- " + changes)
     if is_file(changes):
       log("! file exist, skip")
     else:
@@ -180,8 +180,8 @@ def make_winsparkle_files():
   return
 
 def make_advinst():
-  log("\n--- Build advanced installer project\n")
-  log("-- " + advinst_file)
+  log("\n=== Build advanced installer project\n")
+  log("--- " + advinst_file)
   if is_file(advinst_file):
     log("! file exist, skip")
     return
@@ -227,8 +227,8 @@ def make_advinst():
   return
 
 def make_win_portable():
-  log("\n--- Build portable\n")
-  log("-- " + portable_zip_file)
+  log("\n=== Build portable\n")
+  log("--- " + portable_zip_file)
   if is_file(portable_zip_file):
     log("! file exist, skip")
     return
@@ -259,13 +259,13 @@ def make_diskimage(target):
   else: exit(1)
   lane = "release_" + suffix
   scheme = package_name + '-' + suffix
-  log("\n--- Build package " + scheme + "\n")
+  log("\n=== Build package " + scheme + "\n")
   log("$ bundler exec fastlane " + lane + " skip_git_bump:true")
   cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
   return
 
 def make_sparkle_updates():
-  log("\n--- Build sparkle updates\n")
+  log("\n=== Build sparkle updates\n")
 
   app_version = cmd("/usr/libexec/PlistBuddy \
     -c 'print :CFBundleShortVersionString' \

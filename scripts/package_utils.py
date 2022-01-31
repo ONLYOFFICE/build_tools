@@ -8,6 +8,7 @@ import sys
 import glob
 import shutil
 import subprocess
+import codecs
 import base
 from jinja2 import Template
 
@@ -94,21 +95,70 @@ def create_dir(path):
     log("! dir exist")
   return
 
-def write_file(path, data):
+def write_file(path, data, encoding='utf-8'):
   if is_file(path):
     delete_file(path)
   log("- write file: " + path)
-  with open(path, 'w') as file:
-    file.write(data.encode('utf-8'))
+  with codecs.open(path, 'w', encoding) as file:
+    file.write(data)
   return
 
-def write_template(src, dst, **kwargs):
-  template = Template(open(src).read().decode('utf-8'))
+def write_template(src, dst, encoding='utf-8', **kwargs):
+  template = Template(open(src).read())
   if is_file(dst):
     os.remove(dst)
   log("- write template: " + dst + " < " + src)
-  with open(dst, 'w') as file:
-    file.write(template.render(**kwargs).encode('utf-8'))
+  with codecs.open(dst, 'w', encoding) as file:
+    file.write(template.render(**kwargs))
+  return
+
+def copy_file(src, dst):
+  if is_file(dst):
+    delete_file(dst)
+  if not is_file(src):
+    log("! file not exist: " + src)
+    return
+  return shutil.copy2(get_path(src), get_path(dst))
+
+def copy_files(src, dst, override=True):
+  for file in glob.glob(src):
+    file_name = os.path.basename(file)
+    if is_file(file):
+      if override and is_file(dst + "/" + file_name):
+        delete_file(dst + "/" + file_name)
+      if not is_file(dst + "/" + file_name):
+        copy_file(file, dst)
+    elif is_dir(file):
+      if not is_dir(dst + "/" + file_name):
+        create_dir(dst + "/" + file_name)
+      copy_files(file + "/*", dst + "/" + file_name, override)
+  return
+
+def copy_dir(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
+  try:
+    shutil.copytree(get_path(src), get_path(dst))    
+  except OSError as e:
+    log('! Directory not copied. Error: %s' % e)
+  return
+
+def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
+  log("- copy dir content: " + src + " " + dst + " " + filterInclude + " " + filterExclude)
+  src_folder = src
+  if ("/" != src[-1:]):
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    basename = os.path.basename(file)
+    if ("" != filterInclude) and (-1 == basename.find(filterInclude)):
+      continue
+    if ("" != filterExclude) and (-1 != basename.find(filterExclude)):
+      continue
+    if is_file(file):
+      copy_file(file, dst)
+    elif is_dir(file):
+      copy_dir(file, dst + "/" + basename)
   return
 
 def delete_file(path):

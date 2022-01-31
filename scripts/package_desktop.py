@@ -48,7 +48,10 @@ def make_windows():
     delete_files(get_path("update/*.xml"))
     delete_files(get_path("update/*.html"))
 
-  package_name = company_name + '_' + product_name_s
+  if onlyoffice:
+    package_name = company_name + '_' + product_name_s
+  else:
+    package_name = company_name
   package_version = version + '.' + build
   sign = 'sign' in targets
 
@@ -105,15 +108,13 @@ def make_innosetup():
   iscc_args = [
     "/Qp",
     "/DsAppVersion=" + package_version,
-    "/DsAppVerShort=" + version,
-    "/DsAppBuildNumber=" + build,
     "/DDEPLOY_PATH=" + source_dir,
     "/D_ARCH=" + machine
   ]
   if onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
   else:
-    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir, "desktop-apps"))
+    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir))
   if xp:
     iscc_args.append("/D_WIN_XP=1")
   if sign:
@@ -170,14 +171,20 @@ def make_advinst():
     return
   aic_content = [";aic"]
   if not onlyoffice:
+    copy_dir_content(
+      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
+      "data", ".bmp")
+    copy_dir_content(
+      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
+      "data", ".png")
     aic_content += [
-      "SetProperty ProductName=\"%s\"" % ProductName,
-      "SetProperty Manufacturer=\"%s\"" % Manufacturer,
-      "SetProperty ARPURLINFOABOUT=\"%s\"" % ARPURLINFOABOUT,
-      "SetProperty ARPURLUPDATEINFO=\"%s\"" % ARPURLUPDATEINFO,
-      "SetProperty ARPHELPLINK=\"%s\"" % ARPHELPLINK,
-      "SetProperty ARPHELPTELEPHONE=\"%s\"" % ARPHELPTELEPHONE,
-      "SetProperty ARPCONTACT=\"%s\"" % ARPCONTACT,
+      "SetProperty ProductName=\"%s\"" % product_name_full,
+      "SetProperty Manufacturer=\"%s\"" % publisher_name.replace('"', '""'),
+      "SetProperty ARPURLINFOABOUT=\"%s\"" % info_about_url,
+      "SetProperty ARPURLUPDATEINFO=\"%s\"" % update_info_url,
+      "SetProperty ARPHELPLINK=\"%s\"" % help_url,
+      "SetProperty ARPHELPTELEPHONE=\"%s\"" % help_phone,
+      "SetProperty ARPCONTACT=\"%s\"" % publisher_address,
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
       "DelLanguage 1041 -buildname DefaultBuild",
@@ -198,8 +205,9 @@ def make_advinst():
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
   ]
-  write_file("DesktopEditors.aic", "\n".join(aic_content))
-  cmd("AdvancedInstaller.com", ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
+  write_file("DesktopEditors.aic", "\r\n".join(aic_content), 'utf-8-sig')
+  cmd("AdvancedInstaller.com",
+      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
   return
 
 def make_win_portable():

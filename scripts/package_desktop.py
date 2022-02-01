@@ -258,7 +258,7 @@ def make_macos():
 def make_diskimage(target):
   log("\n=== Build package " + scheme + "\n")
   log("--- build/" + package_name + ".app")
-  #cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
+  cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
   return
 
 def make_sparkle_updates():
@@ -295,16 +295,20 @@ def make_sparkle_updates():
 
   log("\n=== Edit Sparkle appcast links\n")
   appcast_url = sparkle_base_url + "/" + suffix
-  update_appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
-  if (list(update_changes_list.values())[0] is not None):
-    replace_in_file(update_appcast,
-                    r"(<sparkle:releaseNotesLink>)(?:.+" + package_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-                    "\\1" + appcast_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
-  if (list(update_changes_list.values())[1] is not None):
-    replace_in_file(update_appcast,
-                    r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:" + package_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-                    "\\1" + appcast_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
-  replace_in_file(update_appcast,
+  appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
+
+  for lang, base in update_changes_list.items():
+    if base == "ReleaseNotes":
+      replace_in_file(appcast,
+        r"(<sparkle:releaseNotesLink>)(?:.+" + package_name + \
+        "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+        "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
+    else:
+      replace_in_file(appcast,
+        r"(<sparkle:releaseNotesLink xml:lang=\"" + lang + "\">)(?:" + package_name + \
+        "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+        "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
+  replace_in_file(appcast,
                   r"(url=\")(?:.+/)(" + package_name + ".+\")",
                   "\\1" + appcast_url + "/updates/\\2")
 

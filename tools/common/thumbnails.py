@@ -5,7 +5,6 @@ sys.path.append('../../scripts')
 import base
 import os
 import glob
-import time
 
 params = sys.argv[1:]
 
@@ -14,7 +13,7 @@ if (5 != len(params)):
   exit(0)
 
 cur_path = os.getcwd()
-#base.configure_common_apps()
+base.configure_common_apps()
 
 directory_x2t = params[0].replace("\\", "/")
 directory_input = params[1].replace("\\", "/")

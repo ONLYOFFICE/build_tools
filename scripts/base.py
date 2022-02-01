@@ -877,6 +877,12 @@ def extract(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
   return cmd_exe(app, ["x", "-y", src, "-o" + dst])
 
+def extract_unicode(src, dst):
+  if "windows" == host_platform():
+    run_as_bat_win_isolate([u"chcp 65001", u"call 7z.exe x -y \"" + src + u"\" \"-o" + dst + u"\"", u"exit"])
+    return
+  return extract(src, dst)
+
 def archive_folder(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
   return cmd_exe(app, ["a", "-r", dst, src])
@@ -940,6 +946,20 @@ def run_as_bat(lines, is_no_errors=False):
 
   cmd(name, [], is_no_errors)
   delete_file(name)
+  return
+
+def run_as_bat_win_isolate(lines, is_no_errors=False):
+  file = codecs.open("tmp.bat", "w", "utf-8")
+  file.write("\n".join(lines))
+  file.close()
+
+  file2 = codecs.open("tmp2.bat", "w", "utf-8")
+  file2.write("start /wait /min tmp.bat")
+  file2.close()
+
+  cmd("tmp2.bat", [], is_no_errors)
+  delete_file("tmp.bat")
+  delete_file("tmp2.bat")
   return
 
 def save_as_script(path, lines):

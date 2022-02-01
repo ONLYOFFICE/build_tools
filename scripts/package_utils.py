@@ -12,7 +12,6 @@ import subprocess
 import sys
 import time
 import base
-from jinja2 import Template
 
 def parse():
   parser = argparse.ArgumentParser(description="Build packages.")
@@ -20,14 +19,14 @@ def parse():
                       action='store', help="Defines product")
   parser.add_argument('-S', '--system', dest='system', type=str,
                       action='store', help="Defines system")
-  parser.add_argument('-T', '--targets', dest='targets', type=str, nargs='+',
-                      action='store', help="Defines targets")
+  parser.add_argument('-R', '--branding', dest='branding', type=str,
+                      action='store', help="Provides branding path")
   parser.add_argument('-V', '--version', dest='version', type=str,
                       action='store', help="Defines version")
   parser.add_argument('-B', '--build', dest='build', type=str,
                       action='store', help="Defines build")
-  parser.add_argument('-R', '--branding', dest='branding', type=str,
-                      action='store', help="Provides branding path")
+  parser.add_argument('-T', '--targets', dest='targets', type=str, nargs='+',
+                      action='store', help="Defines targets")
   args = parser.parse_args()
 
   global product, system, targets, version, build, branding, sign, clean

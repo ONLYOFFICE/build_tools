@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import base
 import os
-import re
 from package_utils import *
 from package_branding import *
 
@@ -14,11 +12,11 @@ def make():
     make_macos()
   elif system == 'linux':
     if 'packages' in targets:
-      set_cwd(desktop_dir)
+      set_cwd(build_dir)
       log("Clean")
-      base.cmd("make", ["clean"])
+      cmd("make", ["clean"])
       log("Build packages")
-      base.cmd("make", ["packages"])
+      cmd("make", ["packages"])
   else:
     exit(1)
   return
@@ -28,9 +26,8 @@ def make():
 #
 
 def make_windows():
-  global package_name, package_version, sign, machine, arch, xp, source_dir, \
-    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, \
-    iscc_args
+  global package_version, sign, machine, arch, xp, iscc_args, source_dir, \
+    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file
 
   set_cwd(get_abspath(git_dir, build_dir))
 
@@ -47,10 +44,6 @@ def make_windows():
     delete_files(get_path("update/*.xml"))
     delete_files(get_path("update/*.html"))
 
-  if onlyoffice:
-    package_name = company_name + '_' + product_name_s
-  else:
-    package_name = company_name
   package_version = version + '.' + build
   sign = 'sign' in targets
 

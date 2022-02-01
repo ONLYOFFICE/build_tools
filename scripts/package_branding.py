@@ -16,6 +16,7 @@ if product == 'desktop':
     # branding_dir = get_path(branding, build_dir)
     product_name = 'Desktop Editors'
     product_name_s = product_name.replace(' ','')
+    package_name = company_name + '_' + product_name_s
     vcredist_list = ['2015']
     update_changes_list = {
       'en': "changes",

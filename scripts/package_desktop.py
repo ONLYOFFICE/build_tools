@@ -233,11 +233,22 @@ def make_win_portable():
 #
 
 def make_macos():
+  global suffix, lane, scheme
+
+  set_cwd(git_dir + "/" + branding_build_dir)
+
   for target in targets:
     if not target.startswith('diskimage'):
       continue
 
     if target.startswith('diskimage'):
+      if   (target == 'diskimage-x64'):    suffix = 'x86_64'
+      elif (target == 'diskimage-x64-v8'): suffix = 'v8'
+      elif (target == 'diskimage-arm64'):  suffix = 'arm'
+      else: exit(1)
+      lane = "release_" + suffix
+      scheme = package_name + '-' + suffix
+
       make_diskimage(target)
 
       if ('sparkle-updates' in targets):
@@ -245,65 +256,61 @@ def make_macos():
   return
 
 def make_diskimage(target):
-  global suffix
-  if   (target == 'diskimage-x64'):    suffix = 'x86_64'
-  elif (target == 'diskimage-x64-v8'): suffix = 'v8'
-  elif (target == 'diskimage-arm64'):  suffix = 'arm'
-  else: exit(1)
-  lane = "release_" + suffix
-  scheme = package_name + '-' + suffix
   log("\n=== Build package " + scheme + "\n")
-  log("$ bundler exec fastlane " + lane + " skip_git_bump:true")
-  cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
+  log("--- build/" + package_name + ".app")
+  #cmd("bundler", ["exec", "fastlane", lane, "skip_git_bump:true"])
   return
 
 def make_sparkle_updates():
   log("\n=== Build sparkle updates\n")
 
-  app_version = cmd("/usr/libexec/PlistBuddy \
+  app_version = proc_open("/usr/libexec/PlistBuddy \
     -c 'print :CFBundleShortVersionString' \
     build/" + package_name + ".app/Contents/Info.plist")['stdout']
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
-  updates_storage_dir = get_env('ARCHIVES_DIR') + '/' + scheme + "/_updates"
+  updates_storage_dir = "%s/%s/_updates" % (get_env('ARCHIVES_DIR'), scheme)
   create_dir(updates_dir)
-  copy_dir_content(update_storage_dir, updates_dir, ".zip")
-  copy_dir_content(update_storage_dir, updates_dir, ".html")
+  copy_dir_content(updates_storage_dir, updates_dir, ".zip")
+  copy_dir_content(updates_storage_dir, updates_dir, ".html")
   copy_file(macos_zip, updates_dir)
+
   for lang, base in update_changes_list.items():
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, base)
     notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if   lang == 'en': encoding = 'en_US.UTF-8'
-    elif lang == 'ru': encoding = 'ru_RU.UTF-8'
-    cur_date = cmd("LC_ALL=%s date -u \"%s\"" % (lang, encoding))['stdout']
+    if lang == 'en':
+      encoding = 'en_US.UTF-8'
+      cur_date = proc_open("env LC_ALL=" + encoding + " date -u \"+%B %e, %Y\"")['stdout']
+    elif lang == 'ru':
+      encoding = 'ru_RU.UTF-8'
+      cur_date = proc_open("env LC_ALL=" + encoding + " date -u \"+%e %B %Y\"")['stdout']
     if is_file(notes_src):
       copy_file(notes_src, notes_dst)
-      replaceInFileRE(notes_dst,
+      replace_in_file(notes_dst,
                       r"(<span class=\"releasedate\">).+(</span>)",
                       "\\1 - " + cur_date + "\\2")
-    #else:
-    #  write_file(notes_dst, "placeholder\n")
-  log("$ ./generate_appcast " + updates_dir)
-  cmd(desktop_dir + "/Vendor/Sparkle/bin/generate_appcast", [updates_dir])
+    # else:
+    #   write_file(notes_dst, "placeholder\n")
+  cmd(git_dir + "/" + build_dir + "/Vendor/Sparkle/bin/generate_appcast", [updates_dir])
 
-  log("Edit Sparkle appcast links")
-  sparkle_base_url += '/' + suffix
-  update_appcast = "%s/%s.xml" % (updates_dir, company_name.lower())
+  log("\n=== Edit Sparkle appcast links\n")
+  appcast_url = sparkle_base_url + "/" + suffix
+  update_appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
   if (list(update_changes_list.values())[0] is not None):
-    replaceInFileRE(update_appcast,
-                    r("(<sparkle:releaseNotesLink>)(?:.+" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)"),
-                    "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
+    replace_in_file(update_appcast,
+                    r"(<sparkle:releaseNotesLink>)(?:.+" + package_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+                    "\\1" + appcast_url + "/updates/changes/\\2/ReleaseNotes.html\\3")
   if (list(update_changes_list.values())[1] is not None):
-    replaceInFileRE(update_appcast,
-                    r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:" + company_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-                    "\\1" + sparkle_base_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
-  replaceInFileRE(update_appcast,
-                  r"(url=\")(?:.+/)(" + company_name + ".+\")",
-                  "\\1" + sparkle_base_url + "/updates/\\2")
+    replace_in_file(update_appcast,
+                    r"(<sparkle:releaseNotesLink xml:lang=\"ru\">)(?:" + package_name + "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
+                    "\\1" + appcast_url + "/updates/changes/\\2/ReleaseNotesRU.html\\3")
+  replace_in_file(update_appcast,
+                  r"(url=\")(?:.+/)(" + package_name + ".+\")",
+                  "\\1" + appcast_url + "/updates/\\2")
 
-  log("Delete unnecessary files")
+  log("\n=== Delete unnecessary files\n")
   for file in os.listdir(updates_dir):
     if (-1 == file.find(app_version)) and (file.endswith(".zip") or
           file.endswith(".html")):
-      base.delete_file(updates_dir + '/' + file)
+      delete_file(updates_dir + '/' + file)
   return

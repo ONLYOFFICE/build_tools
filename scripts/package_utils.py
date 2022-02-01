@@ -65,7 +65,10 @@ def set_cwd(dir):
 def get_path(*paths):
   arr = []
   for path in paths:
-    arr += path.split('/')
+    if host_platform() == 'windows':
+      arr += path.split('/')
+    else:
+      arr += [path]
   return os.path.join(*arr)
 
 def get_abspath(*paths):
@@ -113,7 +116,21 @@ def write_template(src, dst, encoding='utf-8', **kwargs):
     file.write(template.render(**kwargs))
   return
 
+def replace_in_file(path, pattern, textReplace, encoding='utf-8'):
+  log("- replace in file: " + path + \
+      "\n  pattern: " + pattern + \
+      "\n  replace: " + textReplace)
+  filedata = ""
+  with codecs.open(get_path(path), "r", encoding) as file:
+    filedata = file.read()
+  filedata = re.sub(pattern, textReplace, filedata)
+  delete_file(path)
+  with codecs.open(get_path(path), "w", encoding) as file:
+    file.write(filedata)
+  return
+
 def copy_file(src, dst):
+  log("- copy file: " + dst + " < " + src)
   if is_file(dst):
     delete_file(dst)
   if not is_file(src):
@@ -122,6 +139,7 @@ def copy_file(src, dst):
   return shutil.copy2(get_path(src), get_path(dst))
 
 def copy_files(src, dst, override=True):
+  log("- copy files: " + dst + " < " + src)
   for file in glob.glob(src):
     file_name = os.path.basename(file)
     if is_file(file):
@@ -209,7 +227,16 @@ def proc_open(command):
 
 def cmd(prog, args=[], is_no_errors=False):  
   log("- cmd: " + prog + " " + ' '.join(args))
-  ret = subprocess.call([prog] + args[:], stderr=subprocess.STDOUT, shell=True)
+  ret = 0
+  if host_platform() == 'windows':
+    sub_args = args[:]
+    sub_args.insert(0, get_path(prog))
+    ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
+  else:
+    command = prog
+    for arg in args:
+      command += (" \"%s\"" % arg)
+    ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
   if ret != 0 and True != is_no_errors:
     sys.exit("! error (" + prog + "): " + str(ret))
   return ret

@@ -24,13 +24,13 @@ if product == 'desktop':
     }
 
   elif system == 'darwin':
-    desktop_dir = get_path(git_dir + "/desktop-apps/macos")
-    branding_desktop_dir = get_path(desktop_dir)
-    updates_dir = get_path("build/update")
-    changes_dir = get_path("ONLYOFFICE/update/updates/ONLYOFFICE/changes")
+    build_dir = "desktop-apps/macos"
+    branding_build_dir = "desktop-apps/macos"
+    package_name = company_name
+    updates_dir = "build/update"
+    changes_dir = "ONLYOFFICE/update/updates/ONLYOFFICE/changes"
     update_changes_list = {
       'en': "ReleaseNotes",
       'ru': "ReleaseNotesRU"
     }
-    dateformat = '+%B %e, %Y'
     sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"

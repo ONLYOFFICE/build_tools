@@ -53,38 +53,56 @@ def make():
     os.chdir(old_cur)
     return
 
-  platform = ""
   if ("linux" == base.host_platform()):
-    platform = "linux_64"
-    if not base.is_dir(platform + "/build"):
-      base.replaceInFile("./icu/source/i18n/digitlst.cpp", "xlocale", "locale")      
+    if not base.is_file("./icu/source/i18n/digitlst.cpp.bak"):
+      base.copy_file("./icu/source/i18n/digitlst.cpp", "./icu/source/i18n/digitlst.cpp.bak")
+      base.replaceInFile("./icu/source/i18n/digitlst.cpp", "xlocale", "locale")
+      if base.is_dir(base_dir + "/linux_64"):
+        base.delete_dir(base_dir + "/linux_64")
+      if base.is_dir(base_dir + "/linux_arm64"):
+        base.delete_dir(base_dir + "/linux_arm64")
+
+    if not base.is_dir(base_dir + "/linux_64"):
+      base.create_dir(base_dir + "/icu/cross_build")
+      os.chdir("icu/cross_build")
+      base.cmd("./../source/runConfigureICU", ["Linux", "--prefix=" + base_dir + "/icu/cross_build_install"])
+      base.cmd("make", ["-j4"])
+      base.cmd("make", ["install"], True)
+      base.create_dir(base_dir + "/linux_64")
+      base.create_dir(base_dir + "/linux_64/build")
+      base.copy_file(base_dir + "/icu/cross_build_install/lib/libicudata.so." + icu_major + "." + icu_minor, base_dir + "/linux_64/build/libicudata.so." + icu_major)
+      base.copy_file(base_dir + "/icu/cross_build_install/lib/libicuuc.so." + icu_major + "." + icu_minor, base_dir + "/linux_64/build/libicuuc.so." + icu_major)
+      base.copy_dir(base_dir + "/icu/cross_build_install/include", base_dir + "/linux_64/build/include")
+      
+    if config.check_option("platform", "linux_arm64") and not base.is_os_arm():
+      base.create_dir(base_dir + "/icu/linux_arm64")
+      os.chdir(base_dir + "/icu/linux_arm64")
+      base_arm_tool_dir = base.get_prefix_cross_compiler_arm64()
+      base.cmd("./../source/configure", ["--host=arm-linux", "--prefix=" + base_dir + "/icu/linux_arm64_install", "--with-cross-build=" + base_dir + "/icu/cross_build",
+        "CC=" + base_arm_tool_dir + "gcc", "CXX=" + base_arm_tool_dir + "g++", "AR=" + base_arm_tool_dir + "ar", "RANLIB=" + base_arm_tool_dir + "ranlib"])
+      base.cmd("make", ["-j4"])
+      base.cmd("make", ["install"], True)
+      base.create_dir(base_dir + "/linux_arm64")
+      base.create_dir(base_dir + "/linux_arm64/build")
+      base.copy_file(base_dir + "/icu/linux_arm64_install/lib/libicudata.so." + icu_major + "." + icu_minor, base_dir + "/linux_arm64/build/libicudata.so." + icu_major)
+      base.copy_file(base_dir + "/icu/linux_arm64_install/lib/libicuuc.so." + icu_major + "." + icu_minor, base_dir + "/linux_arm64/build/libicuuc.so." + icu_major)
+      base.copy_dir(base_dir + "/icu/linux_arm64_install/include", base_dir + "/linux_arm64/build/include")
+
+      os.chdir("../..")
 
   if ("mac" == base.host_platform()):
-    platform = "mac_64"
-    if not base.is_dir(platform + "/build"):
+    if not base.is_file("./icu/source/tools/pkgdata/pkgdata.cpp.bak"):
+      base.copy_file("./icu/source/tools/pkgdata/pkgdata.cpp", "./icu/source/tools/pkgdata/pkgdata.cpp.bak")
       base.replaceInFile("./icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
 
-  if (-1 != config.option("platform").find("ios")):
-    if not base.is_dir("build"):
-      base.bash("./icu_ios")
-  elif (platform == "mac_64") and not base.is_dir(platform + "/build"):
-    base.cmd_in_dir(base_dir + "/../../../../build_tools/scripts/core_common/modules", "python", ["icu_mac.py"])
-  elif ("" != platform) and not base.is_dir(platform + "/build"):
-    base.create_dir(platform)
-    os.chdir("icu/source")
-    base.cmd("./runConfigureICU", ["Linux"])
-    old_dest_dir = base.get_env("DESTDIR")
-    base.set_env("DESTDIR", base_dir + "/" + platform)
-    base.cmd("make", ["install"])
-    if ("" == old_dest_dir):
-      os.environ.pop("DESTDIR")
-    else:
-      base.set_env("DEST_DIR", old_dest_dir)
-    os.chdir("../..")
-    base.create_dir(platform + "/build")
-    if ("linux_64" == platform):
-      base.copy_file("icu/source/lib/libicudata.so." + icu_major + "." + icu_minor, platform + "/build/libicudata.so." + icu_major)
-      base.copy_file("icu/source/lib/libicuuc.so." + icu_major + "." + icu_minor, platform + "/build/libicuuc.so." + icu_major)
+    # mac
+    if (-1 != config.option("platform").find("mac_")) and not base.is_dir("mac_64/build"):
+      base.cmd_in_dir(base_dir + "/../../../../build_tools/scripts/core_common/modules", "python", ["icu_mac.py"])
+
+    # ios
+    if (-1 != config.option("platform").find("ios")):
+      if not base.is_dir("build"):
+        base.bash("./icu_ios")
       
   os.chdir(old_cur)
   return

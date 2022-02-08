@@ -553,7 +553,7 @@ def qt_setup(platform):
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
   qt_dir = (qt_dir + "/" + compiler["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + compiler["compiler_64"])
 
-  if (0 == platform.find("linux_arm")) and not base.is_dir(qt_dir):
+  if (0 == platform.find("linux_arm")) and not is_dir(qt_dir):
     if ("gcc_arm64" == compiler):
       qt_dir = config.option("qt-dir") + "/gcc_64"
     if ("gcc_arm" == compiler):

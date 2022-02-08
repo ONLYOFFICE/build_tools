@@ -74,7 +74,7 @@ def make():
       base.copy_file(base_dir + "/icu/cross_build_install/lib/libicuuc.so." + icu_major + "." + icu_minor, base_dir + "/linux_64/build/libicuuc.so." + icu_major)
       base.copy_dir(base_dir + "/icu/cross_build_install/include", base_dir + "/linux_64/build/include")
       
-    if config.check_option("platform", "linux_arm64") and not base.is_os_arm():
+    if config.check_option("platform", "linux_arm64") and not base.is_dir(base_dir + "/linux_arm64") and not base.is_os_arm():
       base.create_dir(base_dir + "/icu/linux_arm64")
       os.chdir(base_dir + "/icu/linux_arm64")
       base_arm_tool_dir = base.get_prefix_cross_compiler_arm64()

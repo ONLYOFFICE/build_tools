@@ -34,3 +34,11 @@ if product == 'desktop':
       'ru': "ReleaseNotesRU"
     }
     sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"
+
+if product == 'builder':
+
+  if system == 'windows':
+    build_dir = "document-builder-package"
+    product_name = 'Document Builder'
+    product_name_s = product_name.replace(' ','')
+    package_name = company_name + '_' + product_name_s

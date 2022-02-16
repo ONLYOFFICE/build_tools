@@ -90,7 +90,10 @@ def parse():
   if not "sdkjs-plugin" in options:
     options["sdkjs-plugin"] = "default"
   if not "sdkjs-plugin-server" in options:
-    options["sdkjs-plugin-server"] = "default"  
+    options["sdkjs-plugin-server"] = "default"
+
+  if not "arm64-toolchain-bin" in options:
+    options["arm64-toolchain-bin"] = "/usr/bin"
 
   return
 

@@ -594,7 +594,9 @@ def qt_config(platform):
     config_param += " v8_version_89 vs2019"
 
   if ("linux_arm64" == platform):
-    config_param += " v8_version_89 linux_arm64"
+    config_param += " linux_arm64"
+  if config.check_option("platform", "linux_arm64"):
+    config_param += " v8_version_89"
   return config_param
 
 def qt_major_version():

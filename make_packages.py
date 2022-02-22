@@ -27,7 +27,7 @@ if ("" != branding):
   if base.is_file(branding_dir + "/build_tools/make_packages.py"):
     base.check_build_version(branding_dir + "/build_tools")
     base.cmd_in_dir(branding_dir + "/build_tools",
-      "python", ["make_packages.py",
+      "python3", ["make_packages.py",
       '--product', product,
       '--package', package_list
     ])

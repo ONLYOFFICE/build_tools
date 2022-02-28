@@ -13,6 +13,8 @@ def change_icu_defs(current_dir, arch):
   if arch == "arm64":
     param = "-arch arm64 -isysroot " + base.find_mac_sdk()
 
+  param += " -mmacosx-version-min=10.12"
+
   base.copy_file(icudef_file, icudef_file_old)
 
   base.replaceInFile(icudef_file, "CFLAGS = ", "CFLAGS = " + param + " ")

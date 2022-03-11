@@ -263,6 +263,10 @@ out_dir = get_abspath(get_dirname(__file__), '../out')
 timestamp = "%.f" % time.time()
 tsa_server = "http://timestamp.digicert.com"
 vcredist_links = {
+  '2022': {
+    '64': "https://aka.ms/vs/17/release/vc_redist.x64.exe",
+    '32': "https://aka.ms/vs/17/release/vc_redist.x86.exe"
+  },
   '2015': {
     '64': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
     '32': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"

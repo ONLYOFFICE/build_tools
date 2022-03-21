@@ -1219,3 +1219,15 @@ def get_android_sdk_home():
   if (-1 != ndk_root_path.find("/ndk/")):
     return ndk_root_path + "/../.."
   return ndk_root_path + "/.."
+
+def readFileLicence(path):
+  content = readFile(path)
+  index = content.find("*/")
+  if index >= 0:
+    return content[0:index+2]
+  return ""
+
+def replaceFileLicence(path, license):
+  old_licence = readFileLicence(path)
+  replaceInFile(path, old_licence, license)
+  return

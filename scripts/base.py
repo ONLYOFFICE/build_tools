@@ -539,12 +539,35 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
+def get_prefix_cross_compiler_arm64():
+  cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+  if is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-gcc"):
+    return "aarch64-linux-gnu-"
+  if is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-gcc"):
+    return "aarch64-unknown-linux-gnu-"
+  return ""
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
-  qt_dir = (qt_dir + "/" + compiler["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + compiler["compiler_64"])
+  compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
+  qt_dir = qt_dir + "/" + compiler_platform
+
+  if (0 == platform.find("linux_arm")) and not is_dir(qt_dir):
+    if ("gcc_arm64" == compiler_platform):
+      qt_dir = config.option("qt-dir") + "/gcc_64"
+    if ("gcc_arm" == compiler_platform):
+      qt_dir = config.option("qt-dir") + "/gcc"
+
   set_env("QT_DEPLOY", qt_dir + "/bin")
+
+  if ("linux_arm64" == platform):
+    cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+    if ("" != cross_compiler_arm64):
+      set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
+      set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
+
   return qt_dir  
 
 def qt_version():
@@ -568,6 +591,13 @@ def qt_config(platform):
     config_param += " apple_silicon use_javascript_core"
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
+  if (config.option("vs-version") == "2019"):
+    config_param += " v8_version_89 vs2019"
+
+  if ("linux_arm64" == platform):
+    config_param += " linux_arm64"
+  if config.check_option("platform", "linux_arm64"):
+    config_param += " v8_version_89"
   return config_param
 
 def qt_major_version():
@@ -857,6 +887,12 @@ def extract(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
   return cmd_exe(app, ["x", "-y", src, "-o" + dst])
 
+def extract_unicode(src, dst):
+  if "windows" == host_platform():
+    run_as_bat_win_isolate([u"chcp 65001", u"call 7z.exe x -y \"" + src + u"\" \"-o" + dst + u"\"", u"exit"])
+    return
+  return extract(src, dst)
+
 def archive_folder(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
   return cmd_exe(app, ["a", "-r", dst, src])
@@ -922,6 +958,20 @@ def run_as_bat(lines, is_no_errors=False):
   delete_file(name)
   return
 
+def run_as_bat_win_isolate(lines, is_no_errors=False):
+  file = codecs.open("tmp.bat", "w", "utf-8")
+  file.write("\n".join(lines))
+  file.close()
+
+  file2 = codecs.open("tmp2.bat", "w", "utf-8")
+  file2.write("start /wait /min tmp.bat")
+  file2.close()
+
+  cmd("tmp2.bat", [], is_no_errors)
+  delete_file("tmp.bat")
+  delete_file("tmp2.bat")
+  return
+
 def save_as_script(path, lines):
   content = "\n".join(lines)
 
@@ -983,9 +1033,10 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
+  mac_correct_rpath_library("DocxRenderer", ["kernel", "UnicodeConverter", "graphics"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer"])
+  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
@@ -1158,6 +1209,30 @@ def get_mac_sdk_version_number():
   if 1 == len(ver_arr):
     return 1000 * int(ver_arr[0])
   return 1000 * int(ver_arr[0]) + int(ver_arr[1])
+
+def make_sln(directory, args, is_no_errors):
+  programFilesDir = get_env("ProgramFiles")
+  if ("" != get_env("ProgramFiles(x86)")):
+    programFilesDir = get_env("ProgramFiles(x86)")
+  dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
+  if ("2019" == config.option("vs-version")):
+    dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Professional\\Common7\\IDE"
+
+  old_env = dict(os.environ)
+  os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
+
+  old_cur = os.getcwd()
+  os.chdir(directory)
+  run_as_bat(["call devenv " + " ".join(args)], is_no_errors)
+  os.chdir(old_cur)
+
+  os.environ.clear()
+  os.environ.update(old_env)
+  return
 
 def get_android_sdk_home():
   ndk_root_path = get_env("ANDROID_NDK_ROOT")

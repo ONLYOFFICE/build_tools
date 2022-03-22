@@ -28,7 +28,7 @@ def make(src_dir, modules, build_platform="android"):
     pro_file_content.append("PWD_ROOT_DIR = $$PWD")
     pro_file_content.append("include($$PWD/../../../../../base.pri)")
     pro_file_content.append("")
-    pro_file_content.append("MAKEFILE=$$PWD/makefiles/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX")
+    pro_file_content.append("MAKEFILE=$$PWD/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX")
     pro_file_content.append("core_debug:MAKEFILE=$$join(MAKEFILE, MAKEFILE, \"\", \"_debug_\")")
     pro_file_content.append("build_xp:MAKEFILE=$$join(MAKEFILE, MAKEFILE, \"\", \"_xp\")")
     pro_file_content.append("OO_BRANDING_SUFFIX = $$(OO_BRANDING)")
@@ -42,7 +42,8 @@ def make(src_dir, modules, build_platform="android"):
     pro_file_content.append("")
     pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/" + build_platform + "/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
-    build.make_pro_file(module_dir + "/makefiles", module_dir + "/" + module + ".pro")
+    os.chdir(module_dir)
+    build.make_pro_file("./", module + ".pro")
   
   os.chdir(old_cur)
   return

@@ -39,6 +39,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "EpubFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DocxRenderer")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2t")
 
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", archive_dir + "/sdkjs")

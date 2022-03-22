@@ -75,18 +75,22 @@ def check_dependencies():
   checksResult = CDependencies()
 
   checksResult.append(check_git())
-  checksResult.append(check_nodejs())
   if (host_platform == 'linux'):
-    checksResult.append(check_npm())
     checksResult.append(check_curl())
+    checksResult.append(check_nodejs())
+    checksResult.append(check_npm())
     checksResult.append(check_7z())
+
   checksResult.append(check_java())
   checksResult.append(check_erlang())
   checksResult.append(check_rabbitmq())
   checksResult.append(check_gruntcli())
+
   if (host_platform == 'windows'):
+    checksResult.append(check_nodejs())
     checksResult.append(check_buildTools())
-  if (config.option("sql-type") == 'mysql'):
+
+  if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
     checksResult.append(check_mysqlServer())
   else:
     checksResult.append(check_postgreSQL())
@@ -106,11 +110,11 @@ def check_dependencies():
     if (host_platform == 'windows'):
       code = libwindows.sudo(unicode(sys.executable), install_args)
     elif (host_platform == 'linux'):
-      base.cmd('python', install_args, False)
       get_updates()
-  
+      base.cmd('python', install_args, False)
+
   check_npmPath()
-  if (config.option("sql-type") == 'mysql'):
+  if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
     return check_MySQLConfig(checksResult.sqlPath)
   return check_postgreConfig(checksResult.sqlPath)
 
@@ -156,13 +160,16 @@ def check_nodejs():
   nodejs_version = base.run_command('node -v')['stdout']
   if (nodejs_version == ''):
     print('Node.js not found')
-    dependence.append_install('Node.js')
+    if (host_platform == 'windows'):
+      dependence.append_install('Node.js')
+    elif (host_platform == 'linux'):
+      dependence.append_install('NodeJs')
     return dependence
 
   nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
   nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
   print('Installed Node.js version: ' + nodejs_version[1:])
-  nodejs_min_version = '10.20'
+  nodejs_min_version = '14.14'
   nodejs_min_version_minor  = 0
   major_minor_min_version = nodejs_min_version.split('.')
   nodejs_min_version_major = int(major_minor_min_version[0])
@@ -176,7 +183,7 @@ def check_nodejs():
     nodejs_max_version_minor = int(major_minor_max_version[1])
 
   if (nodejs_min_version_major > nodejs_cur_version_major or nodejs_cur_version_major > nodejs_max_version_major):
-    print('Installed Node.js version must be 10.20 to 14.x')
+    print('Installed Node.js version must be 14.14 to 14.x')
     isNeedReinstall = True
   elif (nodejs_min_version_major == nodejs_cur_version_major):
     if (nodejs_min_version_minor > nodejs_cur_version_minor):
@@ -186,12 +193,14 @@ def check_nodejs():
       isNeedReinstall = True
 
   if (True == isNeedReinstall):
-    print('Installed Node.js version must be 10.20 to 14.x')
+    print('Installed Node.js version must be 14.14 to 14.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
+      dependence.append_install('Node.js')
     elif (host_platform == 'linux'):
       dependence.append_uninstall('nodejs')
-    dependence.append_install('Node.js')
+      dependence.append_install('NodeJs')
+
     return dependence
 
   print('Installed Node.js is valid')
@@ -228,7 +237,7 @@ def check_erlang():
 
   erlangBitness = ""
   erlang_path_home = get_erlang_path_to_bin()
-  if base.is_exist(erlang_path_home) == False:
+  if base.is_exist(erlang_path_home) == False and host_platform == 'windows':
     dependence.append_uninstall('Erlang')
     dependence.append_uninstall('RabbitMQ')
     return dependence
@@ -889,10 +898,17 @@ def install_postgresql():
 
   return code
 
+def install_nodejs():
+  os.system('curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -')
+  base.print_info("Install node.js...")
+  install_command = 'yes | sudo apt install nodejs'
+  print(install_command)
+  return os.system(install_command)
+
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-    'Node.js': 'https://nodejs.org/download/release/v14.15.1/node-v14.15.1-x64.msi',
+    'Node.js': 'https://nodejs.org/download/release/v14.17.2/node-v14.17.2-x64.msi',
     'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',
@@ -904,7 +920,6 @@ downloads_list = {
   },
   'Linux': {
     'Git': 'git',
-    'Node.js': 'nodejs',
     'Npm': 'npm',
     'Java': 'openjdk-11-jdk',
     'RabbitMQ': 'rabbitmq-server',
@@ -916,6 +931,7 @@ downloads_list = {
   }
 }
 install_special = {
+  'NodeJs': install_nodejs,
   'GruntCli': install_gruntcli,
   'MySQLServer': install_mysqlserver,
   'RedisServer' : install_redis,

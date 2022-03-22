@@ -25,7 +25,7 @@ def parse():
   # all platforms
   global platforms
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
-               "linux_64", "linux_32", 
+               "linux_64", "linux_32", "linux_arm64",
                "mac_64", "mac_arm64",
                "ios", 
                "android_arm64_v8a", "android_armv7", "android_x86", "android_x86_64"]
@@ -53,9 +53,15 @@ def parse():
     else:
       options["platform"] += (" mac_" + bits)
 
-  if ("mac" == host_platform) and check_option("platform", "mac_arm64") and (platform.machine() != "arm64"):
+  if ("mac" == host_platform) and check_option("platform", "mac_arm64") and not base.is_os_arm():
     if not check_option("platform", "mac_64"):
       options["platform"] = "mac_64 " + options["platform"]
+
+  if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
+    if not check_option("platform", "linux_64"):
+      # linux_64 binaries need only for desktop
+      if check_option("module", "desktop"):
+        options["platform"] = "linux_64 " + options["platform"]
 
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
@@ -63,17 +69,33 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
+  # check vs-version
+  if ("" == option("vs-version")):
+    options["vs-version"] = "2015"
+
   # check vs-path
-  if ("windows" == host_platform):
-    options["vs-path"] = base.get_env("ProgramFiles") + "/Microsoft Visual Studio 14.0/VC"
+  if ("windows" == host_platform) and ("" == option("vs-path")):
+    programFilesDir = base.get_env("ProgramFiles")
     if ("" != base.get_env("ProgramFiles(x86)")):
-      options["vs-path"] = base.get_env("ProgramFiles(x86)") + "/Microsoft Visual Studio 14.0/VC"
+      programFilesDir = base.get_env("ProgramFiles(x86)")
+    if ("2015" == options["vs-version"]):
+      options["vs-path"] = programFilesDir + "/Microsoft Visual Studio 14.0/VC"
+    elif ("2019" == options["vs-version"]):
+      if base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"):
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"
+      elif base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"):
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"
+      else:
+        options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build"
 
   # check sdkjs-plugins
   if not "sdkjs-plugin" in options:
     options["sdkjs-plugin"] = "default"
   if not "sdkjs-plugin-server" in options:
-    options["sdkjs-plugin-server"] = "default"  
+    options["sdkjs-plugin-server"] = "default"
+
+  if not "arm64-toolchain-bin" in options:
+    options["arm64-toolchain-bin"] = "/usr/bin"
 
   return
 
@@ -88,11 +110,14 @@ def check_compiler(platform):
     return compiler
 
   if (0 == platform.find("win")):
-    compiler["compiler"] = "msvc2015"
-    compiler["compiler_64"] = "msvc2015_64"
+    compiler["compiler"] = "msvc" + options["vs-version"]
+    compiler["compiler_64"] = "msvc" + options["vs-version"] + "_64"
   elif (0 == platform.find("linux")):
     compiler["compiler"] = "gcc"
     compiler["compiler_64"] = "gcc_64"
+    if (0 == platform.find("linux_arm")) and not base.is_os_arm():
+      compiler["compiler"] = "gcc_arm"
+      compiler["compiler_64"] = "gcc_arm64"
   elif (0 == platform.find("mac")):
     compiler["compiler"] = "clang"
     compiler["compiler_64"] = "clang_64"

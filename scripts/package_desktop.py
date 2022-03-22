@@ -27,7 +27,8 @@ def make():
 
 def make_windows():
   global package_version, sign, machine, arch, xp, iscc_args, source_dir, \
-    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, portable_bat_file
+    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file, \
+    portable_bat_file
 
   set_cwd(get_abspath(git_dir, build_dir))
 

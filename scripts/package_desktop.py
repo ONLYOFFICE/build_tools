@@ -27,7 +27,7 @@ def make():
 
 def make_windows():
   global package_version, sign, machine, arch, xp, iscc_args, source_dir, \
-    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file
+    innosetup_file, innosetup_update_file, advinst_file, portable_bat_file
 
   set_cwd(get_abspath(git_dir, build_dir))
 
@@ -78,7 +78,7 @@ def make_windows():
       make_advinst()
 
     if target.startswith('portable'):
-      portable_zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
+      portable_bat_file = "portable_%s.bat" % (source_prefix)
       make_win_portable()
 
   return
@@ -221,11 +221,8 @@ def make_advinst():
 
 def make_win_portable():
   log("\n=== Build portable\n")
-  log("--- " + portable_zip_file)
-  if is_file(portable_zip_file):
-    log("! file exist, skip")
-    return
-  cmd("7z", ["a", "-y", portable_zip_file, get_path(source_dir, "*")])
+  log("--- " + portable_bat_file)
+  cmd('start', ["%s\%s" % (get_abspath(git_dir, build_dir), portable_bat_file)])
   return
 
 #

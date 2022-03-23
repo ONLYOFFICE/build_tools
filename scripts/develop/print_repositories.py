@@ -3,25 +3,30 @@
 import sys
 sys.path.append('../')
 
-import optparse
+import argparse
 import config
 import base
 import os
 
-arguments = sys.argv[1:]
+parser = argparse.ArgumentParser(description="Print repositories list.")
+parser.add_argument('-P', '--platform', type=str, dest='platform',
+                    action='store', default="native", help="Defines platform")
+parser.add_argument('-M', '--module', type=str, dest='module',
+                    action='store', default="core desktop builder server",
+                    help="Defines modules")
+parser.add_argument('-B', '--branding', type=str, dest='branding',
+                    action='store', help="Defines branding path")
+args = parser.parse_args()
 
-parser = optparse.OptionParser()
-parser.add_option("--module", action="store", type="string", dest="module", default="core desktop builder server", help="defines modules")
-parser.add_option("--platform", action="store", type="string", dest="platform", default="native", help="defines platform")
-parser.add_option("--branding", action="store", type="string", dest="branding", default="onlyoffice", help="provides branding path")
+config_args = [
+  'configure.py',
+  '--platform', args.platform,
+  '--module',   args.module
+]
+if args.branding != None:
+  config_args += ['--branding', args.branding]
 
-(options, args) = parser.parse_args(arguments)
-configOptions = vars(options)
-
-base.cmd_in_dir('../../', 'python',['configure.py',
-  '--module', configOptions["module"],
-  '--platform', configOptions["platform"],
-  '--branding', configOptions["branding"]])
+base.cmd_in_dir('../../', 'python', config_args)
 
 # parse configuration
 config.parse()

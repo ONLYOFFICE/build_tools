@@ -1,22 +1,31 @@
 name: Update hard-coded version
-on: create
+
+on: workflow_dispatch
+
 jobs:
+
   update-version:
     if: >-
-      ${{ startsWith(github.event.ref, 'hotfix/') ||
-      startsWith(github.event.ref, 'release/') }}
+      ${{ contains(github.ref, 'refs/heads/hotfix/v') ||
+          contains(github.ref, 'refs/heads/release/v') }}
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PUSH_TOKEN }}
+
       - name: Set version
         run: >-
-          echo "${{ github.event.ref }}" |
+          echo "${{ github.ref_name }}" |
           awk '{gsub(/.+\/v/,"version=");print;}' >> $GITHUB_ENV
+
       - name: Save version
         run: echo "${{ env.version }}" > version
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v7
+
+      - name: Commit & push changes
+        uses: EndBug/add-and-commit@v8
         with:
           author_name: github-actions[bot]
           author_email: github-actions[bot]@users.noreply.github.com

@@ -45,6 +45,8 @@ def make():
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"
+    if (-1 != config.option("platform").find("linux_arm64")):
+      pkg_target += "-arm64"
 
   if ("windows" == base.host_platform()):
     pkg_target += "-win"

@@ -40,6 +40,10 @@ directory_fonts = directory_x2t + "/sdkjs/common"
 if not base.is_file(directory_fonts + "/AllFonts.js"):
   base.cmd_in_dir(directory_x2t, "docbuilder", [], True)
 
+json_params = "{'spreadsheetLayout':{'fitToWidth':1,'fitToHeight':1},"
+json_params += "'documentLayout':{'drawPlaceHolders':true,'drawFormHighlight':true,'isPrint':true}}"
+json_params = json_params.replace("'", "&quot;")
+
 output_len = len(input_files)
 output_cur = 1
 for input_file in input_files:
@@ -51,8 +55,8 @@ for input_file in input_files:
   xml_convert += (u"<m_sFileTo>" + output_file + u".zip</m_sFileTo>")
   xml_convert += u"<m_nFormatTo>1029</m_nFormatTo>"
   xml_convert += (u"<m_sAllFontsPath>" + directory_fonts + u"/AllFonts.js</m_sAllFontsPath>")
-  xml_convert += (u"<m_sFontDir>" + directory_fonts + "</m_sFontDir>")
-  xml_convert += u"<m_sJsonParams>{&quot;spreadsheetLayout&quot;:{&quot;fitToWidth&quot;:1,&quot;fitToHeight&quot;:1}}</m_sJsonParams>"
+  xml_convert += (u"<m_sFontDir>" + directory_fonts + u"</m_sFontDir>")
+  xml_convert += (u"<m_sJsonParams>" + json_params + u"</m_sJsonParams>")
   xml_convert += u"<m_nDoctParams>1</m_nDoctParams>"
   xml_convert += u"<m_oThumbnail>"
   xml_convert += u"<first>false</first>"

@@ -372,8 +372,8 @@ def check_npm():
 def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
-  if (len(get_programUninstalls('Microsoft Visual C++ 2015-2019 Redistributable (x64)')) == 0):
-    print('Microsoft Visual C++ 2015-2019 Redistributable (x64) not found')
+  if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0):
+    print('Microsoft Visual C++ 2015-20** Redistributable (x64) not found')
     result = installProgram('VC2019x64') and result
 
   print('Installed Visual C++ components is valid')
@@ -912,7 +912,7 @@ downloads_list = {
     'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',
-    'VC2019x64': 'https://aka.ms/vs/16/release/vc_redist.x64.exe',
+    'VC2019x64': 'https://aka.ms/vs/17/release/vc_redist.x64.exe',
     'MySQLInstaller': 'https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-web-community-8.0.21.0.msi',
     'BuildTools': 'https://download.visualstudio.microsoft.com/download/pr/11503713/e64d79b40219aea618ce2fe10ebd5f0d/vs_BuildTools.exe',
     'Redis': 'https://github.com/tporadowski/redis/releases/download/v5.0.9/Redis-x64-5.0.9.msi',

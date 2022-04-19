@@ -6,6 +6,7 @@ import config
 import base
 import os
 import subprocess
+import platform
 
 def clean():
   if base.is_dir("depot_tools"):
@@ -94,6 +95,9 @@ def make():
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
+  if "ppc64" in platform.machine():
+    os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
+
   if not base.is_dir("v8/out.gn"):
     base.cmd("gclient")
 
@@ -124,6 +128,8 @@ def make():
     if ("linux" == base.host_platform()):
       if base.is_dir("v8/third_party/binutils/Linux_x64/Release"):
         base.delete_dir("v8/third_party/binutils/Linux_x64/Release")
+      if base.is_dir("v8/third_party/binutils/Linux_ppc64/Release"):
+        base.delete_dir("v8/third_party/binutils/Linux_ppc64/Release")
       if base.is_dir("v8/third_party/binutils/Linux_ia32/Release"):
         base.delete_dir("v8/third_party/binutils/Linux_ia32/Release")
 
@@ -135,6 +141,13 @@ def make():
           if ("ld.gold" != name):
             base.cmd("mv", ["v8/third_party/binutils/Linux_x64/Release/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/old_" + name])
             base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_x64/Release/bin/" + name])
+
+      if base.is_dir("v8/third_party/binutils/Linux_ppc64/Release/bin"):
+        for file in os.listdir("v8/third_party/binutils/Linux_ppc64/Release/bin"):
+          name = file.split("/")[-1]
+          if ("ld.gold" != name):
+            base.cmd("mv", ["v8/third_party/binutils/Linux_ppc64/Release/bin/" + name, "v8/third_party/binutils/Linux_ppc64/Release/bin/old_" + name])
+            base.cmd("ln", ["-s", "/usr/bin/" + name, "v8/third_party/binutils/Linux_ppc64/Release/bin/" + name])
 
       if base.is_dir("v8/third_party/binutils/Linux_ia32/Release/bin"):
         for file in os.listdir("v8/third_party/binutils/Linux_ia32/Release/bin"):
@@ -154,11 +167,31 @@ def make():
         base.delete_dir("v8/third_party/llvm-build/Release+Asserts/include")
         base.replaceInFile("v8/build/config/mac/BUILD.gn", "\"-mmacosx-version-min=$mac_deployment_target\",", "\"-mmacosx-version-min=$mac_deployment_target\",\n    \"-Wno-deprecated-declarations\",")
 
+  if "ppc64" in platform.machine():
+    # Google's gn and ninja binaries won't work, they're x86 only by Google fiat.
+    # Remove them and use the system binaries...
+    try:
+      os.remove(base_dir + "/depot_tools/gn")
+    except:
+      pass
+    try:
+      os.remove(base_dir + "/depot_tools/ninja")
+    except:
+      pass
+
+    # Apply ppc64-specific build system patches
+    base.cmd_in_dir("./v8", "git", ["reset", "--hard", "HEAD"])
+    base.cmd_in_dir("./v8", "patch", ["-p1", "-i", "../v8_ppc64/add_clang_target.diff"])
+
   # --------------------------------------------------------------------------
   # build
   os.chdir("v8")
 
   base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  if "ppc64le" in platform.machine():
+    base_args64 = "target_cpu=\\\"ppc64\\\" v8_target_cpu=\\\"ppc64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false clang_base_path=\\\"/usr\\\" clang_use_chrome_plugins=false"
+  else:
+    base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
   base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
   if config.check_option("platform", "linux_64"):

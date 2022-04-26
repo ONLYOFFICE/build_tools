@@ -226,6 +226,7 @@ def make():
       base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params)
       base.delete_file(root_dir + "/converter/AllFonts.js")
       base.delete_file(root_dir + "/converter/font_selection.bin")
+      base.delete_file(root_dir + "/converter/fonts.log")
 
     base.delete_exe(root_dir + "/converter/allfontsgen")
     base.delete_exe(root_dir + "/converter/allthemesgen")

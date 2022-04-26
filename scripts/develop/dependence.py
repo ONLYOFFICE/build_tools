@@ -88,7 +88,6 @@ def check_dependencies():
 
   if (host_platform == 'windows'):
     checksResult.append(check_nodejs())
-    checksResult.append(check_buildTools())
 
   if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
     checksResult.append(check_mysqlServer())

@@ -1231,3 +1231,26 @@ def replaceFileLicence(path, license):
   old_licence = readFileLicence(path)
   replaceInFile(path, old_licence, license)
   return
+
+def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
+  if (-1 != config.option("config").find("use_javascript_core")):
+    return
+  directory_v8 = core_dir + "/Common/3dParty"
+  if is_xp:
+    directory_v8 += "/v8/v8_xp/"
+  elif (-1 != config.option("config").lower().find("v8_version_89")):
+    directory_v8 += "/v8_89/v8/out.gn/"
+  if (config.option("vs-version") == "2019"):
+    directory_v8 += "/v8_89/v8/out.gn/"
+  else:
+    directory_v8 += "/v8/v8/out.gn/"
+
+  if is_xp:
+    copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
+    return
+
+  if (0 == platform.find("win")):
+    copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
+  else:
+    copy_file(directory_v8 + platform + "/icudtl.dat", deploy_dir + "/icudtl.dat")
+  return

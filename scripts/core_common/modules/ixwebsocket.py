@@ -180,12 +180,16 @@ def make():
       os.chdir(current_dir_old)
       return
 
+    vsVersion = "14 2015"
+    if (config.option("vs-version") == "2019"):
+      vsVersion = "16 2019"
+
     if (-1 != config.option("platform").find("win_32")):
-      build_arch("windows", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"])
-      build_arch("windows_debug", "win_32", ["-G","Visual Studio 14 2015", "-A", "Win32"], True)      
+      build_arch("windows", "win_32", ["-G","Visual Studio " + vsVersion, "-A", "Win32"])
+      build_arch("windows_debug", "win_32", ["-G","Visual Studio" + vsVersion, "-A", "Win32"], True)      
     if (-1 != config.option("platform").find("win_64")):
-      build_arch("windows", "win_64", ["-G","Visual Studio 14 2015 Win64"])
-      build_arch("windows_debug", "win_64", ["-G","Visual Studio 14 2015 Win64"], True)
+      build_arch("windows", "win_64", ["-G","Visual Studio " + vsVersion + " Win64"])
+      build_arch("windows_debug", "win_64", ["-G","Visual Studio " + vsVersion + " Win64"], True)
 
   os.chdir(current_dir_old)
   return

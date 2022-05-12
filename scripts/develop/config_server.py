@@ -130,6 +130,15 @@ def make():
   json_file = git_dir + "/server/Common/config/local-development-" + base.host_platform() + ".json"
   base.writeFile(json_file, json.dumps({"services": {"CoAuthoring": {"server": server_config, "sql": sql}}}, indent=2))
 
+  #site url
+  example_config = {}
+  example_config["port"] = 80
+  example_config["siteUrl"] = "http://" + config.option("siteUrl") + ":8000/"
+  example_config["apiUrl"] = "web-apps/apps/api/documents/api.js"
+  example_config["preloaderUrl"] = "web-apps/apps/api/documents/cache-scripts.html"
+  json_file = git_dir + "/document-server-integration/web/documentserver-example/nodejs/config/local-development-" + base.host_platform() + ".json"
+  base.writeFile(json_file, json.dumps({"server": example_config}, indent=2))
+  
   os.chdir(old_cur)
   return
 

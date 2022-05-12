@@ -67,6 +67,8 @@ def make_pro_file(makefiles_dir, pro_file):
         base.cmd_and_return_cwd(base.app_make(), ["clean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
         base.cmd_and_return_cwd(base.app_make(), ["distclean", "-f", makefiles_dir + "/build.makefile_" + file_suff], True)
         base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)
+        if not base.is_file(pro_file):
+          base.cmd(qt_dir + "/bin/qmake", ["-nocache", pro_file, "CONFIG+=" + config_param] + qmake_addon)
       if ("0" != config.option("multiprocess")):
         base.cmd_and_return_cwd(base.app_make(), ["-f", makefiles_dir + "/build.makefile_" + file_suff, "-j" + str(multiprocessing.cpu_count())])
       else:
@@ -82,6 +84,7 @@ def make_pro_file(makefiles_dir, pro_file):
       if ("1" == config.option("clean")):
         qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)
         qmake_bat.append("call nmake distclean -f " + makefiles_dir + "/build.makefile_" + file_suff)
+        qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache " + pro_file + " \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
       if ("0" != config.option("multiprocess")):
         qmake_bat.append("set CL=/MP")
       qmake_bat.append("call nmake -f " + makefiles_dir + "/build.makefile_" + file_suff)
@@ -106,7 +109,12 @@ def make():
     # replace
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, "../../../build/lib/", replace_path_lib)
-    base.bash("../core/DesktopEditor/doctrenderer/docbuilder.com/build")
+    if ("2019" == config.option("vs-version")):
+      base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com_2019.sln", "/Rebuild", "\"Release|x64\""], True)
+      base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com_2019.sln", "/Rebuild", "\"Release|Win32\""], True)
+    else:
+      base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com.sln", "/Rebuild", "\"Release|x64\""], True)
+      base.make_sln("../core/DesktopEditor/doctrenderer/docbuilder.com", ["docbuilder.com.sln", "/Rebuild", "\"Release|Win32\""], True)
     # restore
     if (replace_path_lib != ""):
       base.replaceInFile(replace_path_lib_file, replace_path_lib, "../../../build/lib/")

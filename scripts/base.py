@@ -539,12 +539,35 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
+def get_prefix_cross_compiler_arm64():
+  cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+  if is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-gcc"):
+    return "aarch64-linux-gnu-"
+  if is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-gcc"):
+    return "aarch64-unknown-linux-gnu-"
+  return ""
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
-  qt_dir = (qt_dir + "/" + compiler["compiler"]) if platform_is_32(platform) else (qt_dir + "/" + compiler["compiler_64"])
+  compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
+  qt_dir = qt_dir + "/" + compiler_platform
+
+  if (0 == platform.find("linux_arm")) and not is_dir(qt_dir):
+    if ("gcc_arm64" == compiler_platform):
+      qt_dir = config.option("qt-dir") + "/gcc_64"
+    if ("gcc_arm" == compiler_platform):
+      qt_dir = config.option("qt-dir") + "/gcc"
+
   set_env("QT_DEPLOY", qt_dir + "/bin")
+
+  if ("linux_arm64" == platform):
+    cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+    if ("" != cross_compiler_arm64):
+      set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
+      set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
+
   return qt_dir  
 
 def qt_version():
@@ -568,6 +591,13 @@ def qt_config(platform):
     config_param += " apple_silicon use_javascript_core"
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
+  if (config.option("vs-version") == "2019"):
+    config_param += " v8_version_89 vs2019"
+
+  if ("linux_arm64" == platform):
+    config_param += " linux_arm64"
+  if config.check_option("platform", "linux_arm64"):
+    config_param += " v8_version_89"
   return config_param
 
 def qt_major_version():
@@ -983,9 +1013,10 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
+  mac_correct_rpath_library("DocxRenderer", ["kernel", "UnicodeConverter", "graphics"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer"])
+  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
@@ -1159,8 +1190,67 @@ def get_mac_sdk_version_number():
     return 1000 * int(ver_arr[0])
   return 1000 * int(ver_arr[0]) + int(ver_arr[1])
 
+def make_sln(directory, args, is_no_errors):
+  programFilesDir = get_env("ProgramFiles")
+  if ("" != get_env("ProgramFiles(x86)")):
+    programFilesDir = get_env("ProgramFiles(x86)")
+  dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
+  if ("2019" == config.option("vs-version")):
+    dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\IDE"
+    if not is_dir(dev_path):
+      dev_path = programFilesDir + "\\Microsoft Visual Studio\\2019\\Professional\\Common7\\IDE"
+
+  old_env = dict(os.environ)
+  os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
+
+  old_cur = os.getcwd()
+  os.chdir(directory)
+  run_as_bat(["call devenv " + " ".join(args)], is_no_errors)
+  os.chdir(old_cur)
+
+  os.environ.clear()
+  os.environ.update(old_env)
+  return
+
 def get_android_sdk_home():
   ndk_root_path = get_env("ANDROID_NDK_ROOT")
   if (-1 != ndk_root_path.find("/ndk/")):
     return ndk_root_path + "/../.."
   return ndk_root_path + "/.."
+
+def readFileLicence(path):
+  content = readFile(path)
+  index = content.find("*/")
+  if index >= 0:
+    return content[0:index+2]
+  return ""
+
+def replaceFileLicence(path, license):
+  old_licence = readFileLicence(path)
+  replaceInFile(path, old_licence, license)
+  return
+
+def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
+  if (-1 != config.option("config").find("use_javascript_core")):
+    return
+  directory_v8 = core_dir + "/Common/3dParty"
+  if is_xp:
+    directory_v8 += "/v8/v8_xp/"
+  elif (-1 != config.option("config").lower().find("v8_version_89")):
+    directory_v8 += "/v8_89/v8/out.gn/"
+  if (config.option("vs-version") == "2019"):
+    directory_v8 += "/v8_89/v8/out.gn/"
+  else:
+    directory_v8 += "/v8/v8/out.gn/"
+
+  if is_xp:
+    copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
+    return
+
+  if (0 == platform.find("win")):
+    copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
+  else:
+    copy_file(directory_v8 + platform + "/icudtl.dat", deploy_dir + "/icudtl.dat")
+  return

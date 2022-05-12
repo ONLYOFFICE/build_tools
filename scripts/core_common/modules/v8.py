@@ -6,6 +6,7 @@ import config
 import base
 import os
 import subprocess
+import v8_89
 
 def clean():
   if base.is_dir("depot_tools"):
@@ -25,7 +26,7 @@ def clean():
 def is_main_platform():
   if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
     return True
-  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32")):
+  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32") or config.check_option("platform", "linux_arm64")):
     return True
   if config.check_option("platform", "mac_64"):
     return True
@@ -68,6 +69,18 @@ def make():
       return
 
   if ("mac" == base.host_platform()) and (-1 == config.option("config").find("use_v8")):
+    return
+
+  use_v8_89 = False
+  if (-1 != config.option("config").lower().find("v8_version_89")):
+    use_v8_89 = True
+  if ("windows" == base.host_platform()) and (config.option("vs-version") == "2019"):
+    use_v8_89 = True
+  if config.check_option("platform", "linux_arm64"):
+    use_v8_89 = True
+
+  if (use_v8_89):
+    v8_89.make()
     return
 
   print("[fetch & build]: v8")

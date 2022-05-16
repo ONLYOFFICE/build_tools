@@ -4,6 +4,25 @@ import config
 import base
 import os
 
+def correct_sdkjs_licence(directory):
+  branding = config.option("branding")
+  if "" == branding or "onlyoffice" == branding:
+    return
+  license = base.readFileLicence(directory + "/word/sdk-all-min.js")
+  base.replaceFileLicence(directory + "/common/Charts/ChartStyles.js", license)
+  base.replaceFileLicence(directory + "/common/hash/hash/engine.js", license)
+  base.replaceFileLicence(directory + "/common/hash/hash/engine_ie.js", license)
+  base.replaceFileLicence(directory + "/common/Native/native.js", license)
+  base.replaceFileLicence(directory + "/common/Native/native_graphics.js", license)
+  base.replaceFileLicence(directory + "/common/spell/spell/spell.js", license)
+  base.replaceFileLicence(directory + "/common/spell/spell/spell_ie.js", license)
+  base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile.js", license)
+  base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile_ie.js", license)
+  base.replaceInFile(directory + "/word/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
+  base.replaceInFile(directory + "/slide/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
+  base.replaceInFile(directory + "/cell/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
+  return
+
 # make build.pro
 def make():
   if ("1" == base.get_env("OO_NO_BUILD_JS")):
@@ -25,12 +44,14 @@ def make():
   base.create_dir(out_dir + "/builder")
   base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
   base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
+  correct_sdkjs_licence(out_dir + "/builder/sdkjs")
 
   # desktop
   if config.check_option("module", "desktop"):
     build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
+    correct_sdkjs_licence(out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
     if not base.is_file(out_dir + "/desktop/sdkjs/common/AllFonts.js"):
       base.copy_file(base_dir + "/../sdkjs/common/HtmlFileInternal/AllFonts.js", out_dir + "/desktop/sdkjs/common/AllFonts.js")

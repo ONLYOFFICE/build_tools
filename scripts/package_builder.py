@@ -25,15 +25,13 @@ def make():
 def make_windows():
   global package_version, machine, arch, source_dir, base_dir, \
     innosetup_file, portable_zip_file
-  base_dir = "base"
+  base_dir = "build/base"
 
   set_cwd(get_abspath(git_dir, build_dir))
 
   if clean:
     log("\n=== Clean\n")
-    delete_dir(base_dir)
-    delete_files("exe/*.exe")
-    delete_files("zip/*.zip")
+    delete_dir("build")
 
   package_version = version + '.' + build
 
@@ -52,11 +50,11 @@ def make_windows():
     copy_dir_content(source_dir, base_dir + '\\')
 
     if target.startswith('innosetup'):
-      innosetup_file = "exe/%s_%s_%s.exe" % (package_name, package_version, suffix)
+      innosetup_file = "build/exe/%s_%s_%s.exe" % (package_name, package_version, suffix)
       make_innosetup()
 
     if target.startswith('portable'):
-      portable_zip_file = "zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
+      portable_zip_file = "build/zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
       make_win_portable()
   return
 

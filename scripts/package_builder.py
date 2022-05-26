@@ -24,16 +24,14 @@ def make():
 
 def make_windows():
   global package_version, sign, machine, arch, source_dir, base_dir, \
-    innosetup_file, portable_zip_file, isxdl_file
+    innosetup_file, portable_zip_file
   base_dir = "base"
-  isxdl_file = "exe/scripts/isxdl/isxdl.dll"
 
   set_cwd(get_abspath(git_dir, build_dir))
 
   if 'clean' in targets:
     log("\n=== Clean\n")
     delete_dir(base_dir)
-    delete_files(isxdl_file)
     delete_files("exe/*.exe")
     delete_files("zip/*.zip")
 
@@ -55,23 +53,12 @@ def make_windows():
     copy_dir_content(source_dir, base_dir + '\\')
 
     if target.startswith('innosetup'):
-      download_isxdl()
       innosetup_file = "exe/%s_%s_%s.exe" % (package_name, package_version, suffix)
       make_innosetup()
 
     if target.startswith('portable'):
       portable_zip_file = "zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
       make_win_portable()
-  return
-
-def download_isxdl():
-  log("\n=== Download isxdl\n")
-  log("--- " + isxdl_file)
-  if is_file(isxdl_file):
-    log("! file exist, skip")
-    return
-  create_dir(get_dirname(isxdl_file))
-  download_file(isxdl_link, isxdl_file)
   return
 
 def make_innosetup():

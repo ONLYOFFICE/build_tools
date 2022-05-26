@@ -23,20 +23,19 @@ def make():
 #
 
 def make_windows():
-  global package_version, sign, machine, arch, source_dir, base_dir, \
+  global package_version, machine, arch, source_dir, base_dir, \
     innosetup_file, portable_zip_file
   base_dir = "base"
 
   set_cwd(get_abspath(git_dir, build_dir))
 
-  if 'clean' in targets:
+  if clean:
     log("\n=== Clean\n")
     delete_dir(base_dir)
     delete_files("exe/*.exe")
     delete_files("zip/*.zip")
 
   package_version = version + '.' + build
-  sign = 'sign' in targets
 
   for target in targets:
     if not (target.startswith('innosetup') or target.startswith('portable')):

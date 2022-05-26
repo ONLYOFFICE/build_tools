@@ -29,13 +29,17 @@ def parse():
                       action='store', help="Defines targets")
   args = parser.parse_args()
 
-  global product, system, targets, version, build, branding, sign, clean
+  global product, system, targets, version, build, branding, clean, sign, deploy
   product = args.product
   system = args.system if (args.system is not None) else host_platform()
   targets = args.targets
   version = args.version if (args.version is not None) else get_env('PRODUCT_VERSION', '0.0.0')
   build = args.build if (args.build is not None) else get_env('BUILD_NUMBER', '0')
   branding = args.branding
+
+  clean = 'clean' in targets
+  sign = 'sign' in targets
+  deploy = 'deploy' in targets
   return
 
 def host_platform():

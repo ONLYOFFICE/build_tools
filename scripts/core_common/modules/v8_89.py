@@ -114,10 +114,10 @@ def make():
     shutil.rmtree("customnin")
     print("--- arm64 ninja done ---")
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
-    base.cmd("git", ["checkout", "23d22bcaa71666e872a31fd3ec363727f305417e"], False)
     # in v8 dir
     os.chdir("customgn")
     # in v8/customgn
+    base.cmd("git", ["checkout", "23d22bcaa71666e872a31fd3ec363727f305417e"], False)
     base.cmd("sed", ["-i", "-e", "\"s/-Wl,--icf=all//\"", "build/gen.py"], False)
     base.cmd("python", ["build/gen.py"], False)
     base.cmd("ninja", ["-C", "out"])

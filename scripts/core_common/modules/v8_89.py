@@ -103,6 +103,16 @@ def make():
     print("--- Into the arm if ---")
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
     print("--- 1 done ---")
+    base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)
+    # v8
+    os.chdir("customnin")
+    # v8/customnin
+    base.cmd2("./configure.py", ["--bootstrap"])
+    os.chdir("../")
+    # v8
+    base.cmd2("mv", ["-v", "customnin/ninja", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
+    shutil.rmtree("customnin")
+    print("--- arm64 ninja done ---")
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
     # in v8 dir
     os.chdir("customgn")
@@ -115,7 +125,7 @@ def make():
     #now in v8 again
     base.cmd("cp", ["./customgn/out/gn", "./buildtools/linux64/gn"])
     shutil.rmtree("customgn") # pick up my trash
-    print("--- my gn done ---")
+    print("--- arm64 gn done ---")
     base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
     print("--- 2 done ---")
     base.cmd("ninja", ["-C", "out.gn/linux_arm64"])  

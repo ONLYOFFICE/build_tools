@@ -76,7 +76,7 @@ def make():
     use_v8_89 = True
   if ("windows" == base.host_platform()) and (config.option("vs-version") == "2019"):
     use_v8_89 = True
-  if config.check_option("platform", "linux_arm64"):
+  if config.check_option("platform", "linux_arm64") or os.uname().machine.startswith('a'):
     use_v8_89 = True
 
   if (use_v8_89):
@@ -171,10 +171,14 @@ def make():
   # build
   os.chdir("v8")
 
-  base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
-  base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  if os.uname().machine.startswith('a'):
+    base_args64 = "target_cpu=\\\"arm64\\\" v8_target_cpu=\\\"arm64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+    base_args32 = "target_cpu=\\\"arm\\\" v8_target_cpu=\\\"arm\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  else:
+    base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+    base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
-  if config.check_option("platform", "linux_64"):
+  if config.check_option("platform", "linux_64") or os.uname().machine.startswith('a'): # this is a failsafe
     base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 

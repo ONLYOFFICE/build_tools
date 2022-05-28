@@ -67,7 +67,8 @@ def install_deps():
     base.cmd("sudo", ["npm", "install", "-g", "npm@6"])
   else:
     print("OK")
-    base.cmd("sudo", ["apt-get", "-y", "install", "npm", "yarn"], True)
+    if not os.uname().machine.startswith('a'):
+        base.cmd("sudo", ["apt-get", "-y", "install", "npm", "yarn"], True)
   base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
   base.cmd("sudo", ["npm", "install", "-g", "pkg"])
 

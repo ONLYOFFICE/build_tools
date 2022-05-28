@@ -6,6 +6,7 @@ import base
 import os
 import subprocess
 import deps
+import shutil
 
 def get_branch_name(directory):
   cur_dir = os.getcwd()
@@ -100,6 +101,9 @@ build_tools_params = ["--branch", branch,
                       "--module", modules, 
                       "--update", "1",
                       "--qt-dir", os.getcwd() + "/qt_build/Qt-5.9.9"] + params
+
+shutil.rmtree("/build_tools/tools/linux/qt-everywhere-opensource-src-5.9.9")
+os.remove("/build_tools/tools/linux/qt_source_5.9.9.tar.xz")
 
 base.cmd_in_dir("../..", "./configure.py", build_tools_params)
 base.cmd_in_dir("../..", "./make.py")

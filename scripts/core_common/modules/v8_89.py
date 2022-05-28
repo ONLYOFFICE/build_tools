@@ -9,19 +9,20 @@ import subprocess
 
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
-  if is_64:
-    args_copy.append("target_cpu=\\\"x64\\\"") 
-    args_copy.append("v8_target_cpu=\\\"x64\\\"")
-  else:
-    args_copy.append("target_cpu=\\\"x86\\\"") 
-    args_copy.append("v8_target_cpu=\\\"x86\\\"")
-
-  if (platform == "linux_arm64"):
-    args_copy = args[:]
-    args_copy.append("target_cpu=\\\"arm64\\\"")
-    args_copy.append("v8_target_cpu=\\\"arm64\\\"")
-    args_copy.append("use_sysroot=true")
   
+  if os.uname().machine.startswith('a'):
+    if is_64:
+        args_copy.append("target_cpu=\\\"x64\\\"") 
+        args_copy.append("v8_target_cpu=\\\"x64\\\"")
+    else:
+        args_copy.append("target_cpu=\\\"x86\\\"") 
+        args_copy.append("v8_target_cpu=\\\"x86\\\"")
+  else:
+        args_copy = args[:]
+        args_copy.append("target_cpu=\\\"arm64\\\"")
+        args_copy.append("v8_target_cpu=\\\"arm64\\\"")
+        args_copy.append("use_sysroot=true")
+    
   if is_debug:
     args_copy.append("is_debug=true")
   else:
@@ -29,7 +30,8 @@ def make_args(args, platform, is_64=True, is_debug=False):
   
   if (platform == "linux"):
     args_copy.append("is_clang=true")
-    args_copy.append("use_sysroot=false")
+    if not os.uname().machine.startswith('a'):
+        args_copy.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")    
 
@@ -92,18 +94,17 @@ def make():
              "use_custom_libcxx=false",
              "treat_warnings_as_errors=false"]
 
-  if config.check_option("platform", "linux_64"):
+  if os.uname().machine.startswith('a'):
+    base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
+    base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
+    base.cmd("ninja", ["-C", "out.gn/linux_arm64"])  
+  elif config.check_option("platform", "linux_64"): # it will try to do x64 if it's arm
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
-
-  if config.check_option("platform", "linux_arm64"):
-    base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
-    base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
-    base.cmd("ninja", ["-C", "out.gn/linux_arm64"])
 
   if config.check_option("platform", "mac_64"):
     base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])

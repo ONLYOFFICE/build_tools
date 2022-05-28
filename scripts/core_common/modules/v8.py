@@ -80,7 +80,9 @@ def make():
     use_v8_89 = True
 
   if (use_v8_89):
+    print("--- Starting v8_89.make ---")
     v8_89.make()
+    print("--- Done with v8_89.make ---")
     return
 
   print("[fetch & build]: v8")
@@ -96,6 +98,7 @@ def make():
   base.common_check_version("v8", "1", clean)
 
   if not base.is_dir("v8/out.gn"):
+    print("--- Cleaned? ---")
     clean()
 
   if not base.is_dir("depot_tools"):
@@ -114,8 +117,10 @@ def make():
   # fetch
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
+    print("--- Done with fetch ---")
     os.chdir(base_dir + "/v8")
     base.cmd("git", ["checkout", "-b", "6.0", "branch-heads/6.0"], True)
+    print("--- Done with checkout ---")
     os.chdir(base_dir)
 
   # --------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import config
 import base
 import os
 import subprocess
+import shutil
 
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
@@ -63,6 +64,7 @@ def make():
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+    print("--- Clone complete ---")
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
@@ -71,11 +73,13 @@ def make():
     base.set_env("GYP_MSVS_VERSION", config.option("vs-version"))
 
   if not base.is_dir("v8"):
+    print("--- Running fetch? ---")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     if ("windows" == base.host_platform()):
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
+    print("--- gclient sync -r? ---")
     base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
     base.cmd("gclient", ["sync", "--force"], True)
 
@@ -86,6 +90,7 @@ def make():
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
 
   os.chdir("v8")
+  print("--- into v8 dir ---")
   
   gn_args = ["v8_static_library=true",
              "is_component_build=false",
@@ -95,9 +100,26 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if os.uname().machine.startswith('a'):
+    print("--- Into the arm if ---")
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
+    print("--- 1 done ---")
+    base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
+    # in v8 dir
+    os.chdir("customgn")
+    # in v8/customgn
+    base.cmd("sed", ["-i", "-e", "\"s/-Wl,--icf=all//\"", "build/gen.py"], False)
+    base.cmd("python", ["build/gen.py"], False)
+    base.cmd("ninja", ["-C", "out"])
+    # binary in v8/customgn/out/gn
+    os.chdir("../")
+    #now in v8 again
+    base.cmd("cp", ["./customgn/out/gn", "./buildtools/linux64/gn"])
+    shutil.rmtree("customgn") # pick up my trash
+    print("--- my gn done ---")
     base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
+    print("--- 2 done ---")
     base.cmd("ninja", ["-C", "out.gn/linux_arm64"])  
+    print("--- 3 done ---")
   elif config.check_option("platform", "linux_64"): # it will try to do x64 if it's arm
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])

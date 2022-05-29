@@ -11,7 +11,7 @@ import shutil
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
   
-  if os.uname().machine.startswith('a'):
+  if os.uname()[len(os.uname())-1]:
     if is_64:
         args_copy.append("target_cpu=\\\"x64\\\"") 
         args_copy.append("v8_target_cpu=\\\"x64\\\"")
@@ -31,7 +31,7 @@ def make_args(args, platform, is_64=True, is_debug=False):
   
   if (platform == "linux"):
     args_copy.append("is_clang=true")
-    if not os.uname().machine.startswith('a'):
+    if not os.uname()[len(os.uname())-1]:
         args_copy.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")    
@@ -95,7 +95,7 @@ def make():
              "use_custom_libcxx=false",
              "treat_warnings_as_errors=false"]
 
-  if os.uname().machine.startswith('a'):
+  if os.uname()[len(os.uname())-1]:
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
     
     base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])

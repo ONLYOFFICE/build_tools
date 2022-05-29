@@ -36,6 +36,9 @@ def make():
   cef.make()
   icu.make()
   openssl.make()
+  return
+
+def make_p2():
   v8.make()
   html2.make()
   hunspell.make(False)

@@ -1,0 +1,4 @@
+FROM onlyoffice-part1:latest
+
+CMD cd tools/linux && \
+    python3 ./automate_p2.py desktop

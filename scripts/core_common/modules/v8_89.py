@@ -64,7 +64,6 @@ def make():
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
-    print("--- Clone complete ---")
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
@@ -73,13 +72,11 @@ def make():
     base.set_env("GYP_MSVS_VERSION", config.option("vs-version"))
 
   if not base.is_dir("v8"):
-    print("--- Running fetch? ---")
     base.cmd("./depot_tools/fetch", ["v8"], True)
     if ("windows" == base.host_platform()):
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
-    print("--- gclient sync -r? ---")
     base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
     base.cmd("gclient", ["sync", "--force"], True)
 
@@ -90,7 +87,6 @@ def make():
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
 
   os.chdir("v8")
-  print("--- into v8 dir ---")
   
   gn_args = ["v8_static_library=true",
              "is_component_build=false",
@@ -100,46 +96,54 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if os.uname().machine.startswith('a'):
-    print("--- Into the arm if ---")
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
-    print("--- 1 done ---")
+    
+    base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])
+    base.cmd("tar", ["-xf", "clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz", "-C", "./"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang", "third_party/llvm-build/Release+Asserts/bin/clang"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang++", "third_party/llvm-build/Release+Asserts/bin/clang++"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang-cl", "third_party/llvm-build/Release+Asserts/bin/clang-cl"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld.lld", "third_party/llvm-build/Release+Asserts/bin/ld.lld"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld64.lld", "third_party/llvm-build/Release+Asserts/bin/ld64.lld"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/lld", "third_party/llvm-build/Release+Asserts/bin/lld"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/lld-link", "third_party/llvm-build/Release+Asserts/bin/lld-link"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-ar", "third_party/llvm-build/Release+Asserts/bin/llvm-ar"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-objcopy", "third_party/llvm-build/Release+Asserts/bin/llvm-objcopy"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-pdbutil", "third_party/llvm-build/Release+Asserts/bin/llvm-pdbutil"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-synbolizer", "third_party/llvm-build/Release+Asserts/bin/llvm-synbolizer"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-undname", "third_party/llvm-build/Release+Asserts/bin/llvm-undname"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld64.lld.darwinnew", "third_party/llvm-build/Release+Asserts/bin/ld64.lld.darwinnew"])
+    shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
+    
     base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)
-    # v8
     os.chdir("customnin")
-    # v8/customnin
     base.cmd2("./configure.py", ["--bootstrap"])
     os.chdir("../")
-    # v8
-    base.cmd2("mv", ["-v", "customnin/ninja", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
+    base.cmd2("cp", ["-v", "customnin/ninja", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
     shutil.rmtree("customnin")
-    print("--- arm64 ninja done ---")
+    
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
-    # in v8 dir
     os.chdir("customgn")
-    # in v8/customgn
     base.cmd("git", ["checkout", "23d22bcaa71666e872a31fd3ec363727f305417e"], False)
     base.cmd("sed", ["-i", "-e", "\"s/-Wl,--icf=all//\"", "build/gen.py"], False)
     base.cmd("python", ["build/gen.py"], False)
     base.cmd("ninja", ["-C", "out"])
-    # binary in v8/customgn/out/gn
     os.chdir("../")
-    #now in v8 again
     base.cmd("cp", ["./customgn/out/gn", "./buildtools/linux64/gn"])
-    shutil.rmtree("customgn") # pick up my trash
-    print("--- arm64 gn done ---")
+    shutil.rmtree("customgn")
+    
     base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
-    print("--- 2 done ---")
-    base.cmd("ninja", ["-C", "out.gn/linux_arm64"])  
-    print("--- 3 done ---")
-  elif config.check_option("platform", "linux_64"): # it will try to do x64 if it's arm
+    base.cmd("ninja", ["-C", "out.gn/linux_arm64"])
+
+  elif config.check_option("platform", "linux_64"): # it will try to do x64 even if it's arm64
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
-  if config.check_option("platform", "linux_32"):
+  elif config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
-  if config.check_option("platform", "mac_64"):
+  elif config.check_option("platform", "mac_64"):
     base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 

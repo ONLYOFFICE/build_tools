@@ -98,28 +98,27 @@ def make():
   if os.uname()[len(os.uname())-1]:
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
     
-    base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])
-    base.cmd("tar", ["-xf", "clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz", "-C", "./"])
+    #base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])
+    #base.cmd("tar", ["-xf", "clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz", "-C", "./"])
     
+    #for i in [
+    #    "clang", "clang++", "clang-cl", "ld.lld", "ld64.lld",
+    #    "lld", "lld-link", "llvm-ar", "llvm-objcopy",
+    #    "llvm-pdbutil", "llvm-symbolizer", "llvm-undname",
+    #    "ld64.lld.darwinnew"
+    #]:
+    #    base.cmd("cp", ["-v", "clang+llvm-12.0.0-aarch64-linux-gnu/bin/{}".format(i), "/bin/{}".format(i)])
     
-    for i in [
-        "clang", "clang++", "clang-cl", "ld.lld", "ld64.lld",
-        "lld", "lld-link", "llvm-ar", "llvm-objcopy",
-        "llvm-pdbutil", "llvm-symbolizer", "llvm-undname",
-        "ld64.lld.darwinnew"
-    ]:
-        base.cmd("cp", ["-v", "clang+llvm-12.0.0-aarch64-linux-gnu/bin/{}".format(i), "/bin/{}".format(i)])
-        base.cmd("chmod", ["-v", "+x", "/bin/{}".format(i)])
-    
-    shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
+    #shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
     
     base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)
     os.chdir("customnin")
     base.cmd("./configure.py", ["--bootstrap"])
     os.chdir("../")
     base.cmd("cp", ["-v", "customnin/ninja", "/bin/ninja"])
-    base.cmd("chmod", ["-v", "+x", "/bin/ninja"])
+    base.cmd("rm", ["-v", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
     shutil.rmtree("customnin")
+    
     
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
     os.chdir("customgn")

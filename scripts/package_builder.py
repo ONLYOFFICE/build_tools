@@ -60,19 +60,19 @@ def make_windows():
 
 def make_innosetup():
   log("\n=== Build innosetup project\n")
-  iscc_args = ["/DVERSION=" + package_version]
+  args = ["-Version " + version,
+          "-Build " + build]
   if not onlyoffice:
-    iscc_args.append("/DBRANDING_DIR=" + get_abspath(git_dir, branding, build_dir, "exe"))
+    args.append("-Branding " + get_abspath(git_dir, branding, build_dir, "exe"))
   if sign:
-    iscc_args.append("/DSIGN")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
+    args.append("-Sign")
+    args.append("-CertName " + cert_name)
+  args.append("-Force")
   log("--- " + innosetup_file)
   if is_file(innosetup_file):
     log("! file exist, skip")
     return
-  set_cwd("exe")
-  cmd("iscc", iscc_args + ["builder.iss"])
-  set_cwd("..")
+  cmd("powershell", ["exe\\make.ps1"] + args)
   return
 
 def make_win_portable():

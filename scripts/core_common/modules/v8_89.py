@@ -128,22 +128,21 @@ def make():
     base.cmd("ninja", ["-C", "out"])
     os.chdir("../")
     base.cmd("cp", ["./customgn/out/gn", "./buildtools/linux64/gn"])
-    base.cmd("chmod", ["-v", "+x", "./buildtools/linux64/gn"])
     shutil.rmtree("customgn")
     
-    base.cmd("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
+    base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_arm64"])
 
   elif config.check_option("platform", "linux_64"): # it will try to do x64 even if it's arm64
-    base.cmd("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
+    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   elif config.check_option("platform", "linux_32"):
-    base.cmd("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
+    base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   elif config.check_option("platform", "mac_64"):
-    base.cmd("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
+    base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 
   if config.check_option("platform", "win_64"):

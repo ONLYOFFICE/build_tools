@@ -16,4 +16,7 @@ ln -vs /usr/bin/python2 /usr/bin/python
 ADD . /build_tools
 WORKDIR /build_tools
 
-RUN cd tools/linux && python3 ./automate.py desktop
+RUN cd tools/linux && \
+python3 ./automate.py desktop && \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/*

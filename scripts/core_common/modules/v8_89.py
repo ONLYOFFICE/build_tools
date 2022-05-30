@@ -43,7 +43,7 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   directory_out += ("win_64/" if is_64 else "win_32/")
   directory_out += ("debug" if is_debug else "release")
 
-  base.cmd2("gn", ["gen", directory_out, make_args(args, "windows", is_64, is_debug)])
+  base.cmd("gn", ["gen", directory_out, make_args(args, "windows", is_64, is_debug)])
   base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
@@ -108,16 +108,17 @@ def make():
         "llvm-pdbutil", "llvm-symbolizer", "llvm-undname",
         "ld64.lld.darwinnew"
     ]:
-        base.cmd("cp", ["-v", f"clang+llvm-12.0.0-aarch64-linux-gnu/bin/{i}", f"third_party/llvm-build/Release+Asserts/bin/{i}"])
-        base.cmd("chmod", ["+x", f"third_party/llvm-build/Release+Asserts/bin/{i}"])
+        base.cmd("cp", ["-v", "clang+llvm-12.0.0-aarch64-linux-gnu/bin/{}".format(i), "/bin/{}".format(i)])
+        base.cmd("chmod", ["-v", "+x", "/bin/{}".format(i)])
     
     shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
     
     base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)
     os.chdir("customnin")
-    base.cmd2("./configure.py", ["--bootstrap"])
+    base.cmd("./configure.py", ["--bootstrap"])
     os.chdir("../")
-    base.cmd2("cp", ["-v", "customnin/ninja", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
+    base.cmd("cp", ["-v", "customnin/ninja", "/bin/ninja"])
+    base.cmd("chmod", ["-v", "+x", "/bin/ninja"])
     shutil.rmtree("customnin")
     
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
@@ -128,21 +129,22 @@ def make():
     base.cmd("ninja", ["-C", "out"])
     os.chdir("../")
     base.cmd("cp", ["./customgn/out/gn", "./buildtools/linux64/gn"])
+    base.cmd("chmod", ["-v", "+x", "./buildtools/linux64/gn"])
     shutil.rmtree("customgn")
     
-    base.cmd2("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
+    base.cmd("gn", ["gen", "out.gn/linux_arm64", make_args(gn_args, "linux_arm64", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_arm64"])
 
   elif config.check_option("platform", "linux_64"): # it will try to do x64 even if it's arm64
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
+    base.cmd("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   elif config.check_option("platform", "linux_32"):
-    base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
+    base.cmd("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   elif config.check_option("platform", "mac_64"):
-    base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
+    base.cmd("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 
   if config.check_option("platform", "win_64"):

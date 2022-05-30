@@ -110,7 +110,7 @@ def make():
     base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-ar", "third_party/llvm-build/Release+Asserts/bin/llvm-ar"])
     base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-objcopy", "third_party/llvm-build/Release+Asserts/bin/llvm-objcopy"])
     base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-pdbutil", "third_party/llvm-build/Release+Asserts/bin/llvm-pdbutil"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-synbolizer", "third_party/llvm-build/Release+Asserts/bin/llvm-synbolizer"])
+    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-symbolizer", "third_party/llvm-build/Release+Asserts/bin/llvm-symbolizer"])
     base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-undname", "third_party/llvm-build/Release+Asserts/bin/llvm-undname"])
     base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld64.lld.darwinnew", "third_party/llvm-build/Release+Asserts/bin/ld64.lld.darwinnew"])
     shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")

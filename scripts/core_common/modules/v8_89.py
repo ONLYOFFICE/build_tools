@@ -100,19 +100,17 @@ def make():
     
     base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])
     base.cmd("tar", ["-xf", "clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz", "-C", "./"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang", "third_party/llvm-build/Release+Asserts/bin/clang"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang++", "third_party/llvm-build/Release+Asserts/bin/clang++"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/clang-cl", "third_party/llvm-build/Release+Asserts/bin/clang-cl"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld.lld", "third_party/llvm-build/Release+Asserts/bin/ld.lld"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld64.lld", "third_party/llvm-build/Release+Asserts/bin/ld64.lld"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/lld", "third_party/llvm-build/Release+Asserts/bin/lld"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/lld-link", "third_party/llvm-build/Release+Asserts/bin/lld-link"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-ar", "third_party/llvm-build/Release+Asserts/bin/llvm-ar"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-objcopy", "third_party/llvm-build/Release+Asserts/bin/llvm-objcopy"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-pdbutil", "third_party/llvm-build/Release+Asserts/bin/llvm-pdbutil"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-symbolizer", "third_party/llvm-build/Release+Asserts/bin/llvm-symbolizer"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/llvm-undname", "third_party/llvm-build/Release+Asserts/bin/llvm-undname"])
-    base.cmd("cp -v", ["clang+llvm-12.0.0-aarch64-linux-gnu/bin/ld64.lld.darwinnew", "third_party/llvm-build/Release+Asserts/bin/ld64.lld.darwinnew"])
+    
+    
+    for i in [
+        "clang", "clang++", "clang-cl", "ld.lld", "ld64.lld",
+        "lld", "lld-link", "llvm-ar", "llvm-objcopy",
+        "llvm-pdbutil", "llvm-symbolizer", "llvm-undname",
+        "ld64.lld.darwinnew"
+    ]:
+        base.cmd("cp", ["-v", f"clang+llvm-12.0.0-aarch64-linux-gnu/bin/{i}", f"third_party/llvm-build/Release+Asserts/bin/{i}"])
+        base.cmd("chmod", ["+x", f"third_party/llvm-build/Release+Asserts/bin/{i}"])
+    
     shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
     
     base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)

@@ -5,4 +5,4 @@ ADD ./scripts/core_common/modules/v8.py /build_tools/scripts/core_common/modules
 ADD ./scripts/core_common/modules/v8_89.py /build_tools/scripts/core_common/modules/v8_89.py
 
 RUN cd tools/linux && \
-    python3 ./automate_p2.py desktop
+    python3 -u ./automate_p2.py desktop

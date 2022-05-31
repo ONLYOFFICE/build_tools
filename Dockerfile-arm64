@@ -9,14 +9,84 @@ apt-get upgrade -y && \
 apt-get -y install curl && \
 curl -sL https://deb.nodesource.com/setup_10.x | bash -
 
-RUN apt-get -y install nodejs python python3 clang wget sudo x11-utils apt-utils && \
+RUN apt-get -y install nodejs python python3 clang-10 wget sudo x11-utils apt-utils && \
 rm -v /usr/bin/python && \
+mv -v /usr/bin/clang-10 /usr/bin/clang && \
+mv -v /usr/bin/clang-cpp-10 /usr/bin/clang-cpp && \
+mv -v /usr/bin/clang++-10 /usr/bin/clang++ && \
+mv -v /usr/bin/dsymutil-10 /usr/bin/dsymutil && \
+mv -v /usr/bin/llc-10 /usr/bin/llc && \
+mv -v /usr/bin/lli-10 /usr/bin/lli && \
+mv -v /usr/bin/lli-child-target-10 /usr/bin/lli-child-target && \
+mv -v /usr/bin/llvm-PerfectShuffle-10 /usr/bin/llvm-PerfectShuffle && \
+mv -v /usr/bin/llvm-addr2line-10 /usr/bin/llvm-addr2line && \
+mv -v /usr/bin/llvm-ar-10 /usr/bin/llvm-ar && \
+mv -v /usr/bin/llvm-as-10 /usr/bin/llvm-as && \
+mv -v /usr/bin/llvm-bcanalyzer-10 /usr/bin/llvm-bcanalyzer && \
+mv -v /usr/bin/llvm-c-test-10 /usr/bin/llvm-c-test && \
+mv -v /usr/bin/llvm-cat-10 /usr/bin/llvm-cat && \
+mv -v /usr/bin/llvm-cfi-verify-10 /usr/bin/llvm-cfi-verify && \
+mv -v /usr/bin/llvm-config-10 /usr/bin/llvm-config && \
+mv -v /usr/bin/llvm-cov-10 /usr/bin/llvm-cov && \
+mv -v /usr/bin/llvm-cvtres-10 /usr/bin/llvm-cvtres && \
+mv -v /usr/bin/llvm-cxxdump-10 /usr/bin/llvm-cxxdump && \
+mv -v /usr/bin/llvm-cxxfilt-10 /usr/bin/llvm-cxxfilt && \
+mv -v /usr/bin/llvm-cxxmap-10 /usr/bin/llvm-cxxmap && \
+mv -v /usr/bin/llvm-diff-10 /usr/bin/llvm-diff && \
+mv -v /usr/bin/llvm-dis-10 /usr/bin/llvm-dis && \
+mv -v /usr/bin/llvm-dlltool-10 /usr/bin/llvm-dlltool && \
+mv -v /usr/bin/llvm-dwarfdump-10 /usr/bin/llvm-dwarfdump && \
+mv -v /usr/bin/llvm-dwp-10 /usr/bin/llvm-dwp && \
+mv -v /usr/bin/llvm-elfabi-10 /usr/bin/llvm-elfabi && \
+mv -v /usr/bin/llvm-exegesis-10 /usr/bin/llvm-exegesis && \
+mv -v /usr/bin/llvm-extract-10 /usr/bin/llvm-extract && \
+mv -v /usr/bin/llvm-ifs-10 /usr/bin/llvm-ifs && \
+mv -v /usr/bin/llvm-install-name-tool-10 /usr/bin/llvm-install-name-tool && \
+mv -v /usr/bin/llvm-jitlink-10 /usr/bin/llvm-jitlink && \
+mv -v /usr/bin/llvm-lib-10 /usr/bin/llvm-lib && \
+mv -v /usr/bin/llvm-link-10 /usr/bin/llvm-link && \
+mv -v /usr/bin/llvm-lipo-10 /usr/bin/llvm-lipo && \
+mv -v /usr/bin/llvm-lto-10 /usr/bin/llvm-lto && \
+mv -v /usr/bin/llvm-lto2-10 /usr/bin/llvm-lto2 && \
+mv -v /usr/bin/llvm-mc-10 /usr/bin/llvm-mc && \
+mv -v /usr/bin/llvm-mca-10 /usr/bin/llvm-mca && \
+mv -v /usr/bin/llvm-modextract-10 /usr/bin/llvm-modextract && \
+mv -v /usr/bin/llvm-mt-10 /usr/bin/llvm-mt && \
+mv -v /usr/bin/llvm-nm-10 /usr/bin/llvm-nm && \
+mv -v /usr/bin/llvm-objcopy-10 /usr/bin/llvm-objcopy && \
+mv -v /usr/bin/llvm-objdump-10 /usr/bin/llvm-objdump && \
+mv -v /usr/bin/llvm-opt-report-10 /usr/bin/llvm-opt-report && \
+mv -v /usr/bin/llvm-pdbutil-10 /usr/bin/llvm-pdbutil && \
+mv -v /usr/bin/llvm-profdata-10 /usr/bin/llvm-profdata && \
+mv -v /usr/bin/llvm-ranlib-10 /usr/bin/llvm-ranlib && \
+mv -v /usr/bin/llvm-rc-10 /usr/bin/llvm-rc && \
+mv -v /usr/bin/llvm-readelf-10 /usr/bin/llvm-readelf && \
+mv -v /usr/bin/llvm-readobj-10 /usr/bin/llvm-readobj && \
+mv -v /usr/bin/llvm-reduce-10 /usr/bin/llvm-reduce && \
+mv -v /usr/bin/llvm-rtdyld-10 /usr/bin/llvm-rtdyld && \
+mv -v /usr/bin/llvm-size-10 /usr/bin/llvm-size && \
+mv -v /usr/bin/llvm-split-10 /usr/bin/llvm-split && \
+mv -v /usr/bin/llvm-stress-10 /usr/bin/llvm-stress && \
+mv -v /usr/bin/llvm-strings-10 /usr/bin/llvm-strings && \
+mv -v /usr/bin/llvm-strip-10 /usr/bin/llvm-strip && \
+mv -v /usr/bin/llvm-symbolizer-10 /usr/bin/llvm-symbolizer && \
+mv -v /usr/bin/llvm-tblgen-10 /usr/bin/llvm-tblgen && \
+mv -v /usr/bin/llvm-undname-10 /usr/bin/llvm-undname && \
+mv -v /usr/bin/llvm-xray-10 /usr/bin/llvm-xray && \
+mv -v /usr/bin/not-10 /usr/bin/not && \
+mv -v /usr/bin/obj2yaml-10 /usr/bin/obj2yaml && \
+mv -v /usr/bin/opt-10 /usr/bin/opt && \
+mv -v /usr/bin/sanstats-10 /usr/bin/sanstats && \
+mv -v /usr/bin/verify-uselistorder-10 /usr/bin/verify-uselistorder && \
+mv -v /usr/bin/yaml-bench-10 /usr/bin/yaml-bench && \
+mv -v /usr/bin/yaml2obj-10 /usr/bin/yaml2obj && \
+ls -l /usr/bin && \
 ln -vs /usr/bin/python2 /usr/bin/python
 
 ADD . /build_tools
 WORKDIR /build_tools
 
 RUN cd tools/linux && \
-python3 ./automate.py desktop && \
+python3 -u ./automate.py desktop && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/*

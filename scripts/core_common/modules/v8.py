@@ -80,9 +80,7 @@ def make():
     use_v8_89 = True
 
   if (use_v8_89):
-    print("--- Starting v8_89.make ---")
     v8_89.make()
-    print("--- Done with v8_89.make ---")
     return
 
   print("[fetch & build]: v8")

@@ -11,7 +11,7 @@ import shutil
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
   
-  if os.uname()[len(os.uname())-1]:
+  if not os.uname()[len(os.uname())-1]:
     if is_64:
         args_copy.append("target_cpu=\\\"x64\\\"") 
         args_copy.append("v8_target_cpu=\\\"x64\\\"")
@@ -93,23 +93,13 @@ def make():
              "v8_monolithic=true",
              "v8_use_external_startup_data=false",
              "use_custom_libcxx=false",
-             "treat_warnings_as_errors=false"]
+             "treat_warnings_as_errors=false"
+  ]
 
   if os.uname()[len(os.uname())-1]:
+    gn_args.append("clang_base_path=\\\"/usr/\\\"")
+    gn_args.append("clang_use_chrome_plugins=false")
     base.cmd("build/linux/sysroot_scripts/install-sysroot.py", ["--arch=arm64"], False)
-    
-    #base.cmd("wget", ["https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz"])
-    #base.cmd("tar", ["-xf", "clang+llvm-12.0.0-aarch64-linux-gnu.tar.xz", "-C", "./"])
-    
-    #for i in [
-    #    "clang", "clang++", "clang-cl", "ld.lld", "ld64.lld",
-    #    "lld", "lld-link", "llvm-ar", "llvm-objcopy",
-    #    "llvm-pdbutil", "llvm-symbolizer", "llvm-undname",
-    #    "ld64.lld.darwinnew"
-    #]:
-    #    base.cmd("cp", ["-v", "clang+llvm-12.0.0-aarch64-linux-gnu/bin/{}".format(i), "/bin/{}".format(i)])
-    
-    #shutil.rmtree("clang+llvm-12.0.0-aarch64-linux-gnu")
     
     base.cmd("git", ["clone", "https://github.com/ninja-build/ninja.git", "-b", "v1.8.2", "customnin"], False)
     os.chdir("customnin")
@@ -118,7 +108,6 @@ def make():
     base.cmd("cp", ["-v", "customnin/ninja", "/bin/ninja"])
     base.cmd("rm", ["-v", "/core/Common/3dParty/v8_89/depot_tools/ninja"])
     shutil.rmtree("customnin")
-    
     
     base.cmd("git", ["clone", "https://gn.googlesource.com/gn", "customgn"], False)
     os.chdir("customgn")

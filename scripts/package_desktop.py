@@ -242,8 +242,8 @@ def make_macos():
       continue
 
     if target.startswith('diskimage'):
-      if   (target == 'diskimage-x64'):    suffix = 'x86_64'
-      elif (target == 'diskimage-x64-v8'): suffix = 'v8'
+      if   (target == 'diskimage-x86_64'):    suffix = 'x86_64'
+      elif (target == 'diskimage-x86_64-v8'): suffix = 'v8'
       elif (target == 'diskimage-arm64'):  suffix = 'arm'
       else: exit(1)
       lane = "release_" + suffix

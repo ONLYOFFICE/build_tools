@@ -271,7 +271,7 @@ def get_platform(target):
     return {'machine': "32", 'arch': "x86", 'xp': xp}
   return
 
-global git_dir, out_dir, tsa_server, vcredist_links
+global git_dir, out_dir, tsa_server, vcredist_links, tasks
 git_dir = get_abspath(get_dirname(__file__), '../..')
 out_dir = get_abspath(get_dirname(__file__), '../out')
 timestamp = "%.f" % time.time()
@@ -290,3 +290,4 @@ vcredist_links = {
     '32': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
   }
 }
+tasks = []

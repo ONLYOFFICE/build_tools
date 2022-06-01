@@ -16,6 +16,20 @@ def make():
       cmd("make", ["packages"])
   else:
     exit(1)
+
+  log("\n=== Build results\n")
+  general_status = True
+  for task in tasks:
+    if task['rc'] == 0:
+      line = "[ ok ] " + task['name']
+    else:
+      line = "[fail] " + task['name']
+      general_status = False
+    log(line)
+
+  if general_status is False:
+    exit(1)
+
   return
 
 #
@@ -74,7 +88,7 @@ def make_innosetup():
 
   log("--- " + innosetup_file)
   ret = run_ps1("exe\\make.ps1", args, True)
-  print(ret)
+  tasks.append({name: "innosetup build", rc: ret})
   return
 
 def make_win_portable():

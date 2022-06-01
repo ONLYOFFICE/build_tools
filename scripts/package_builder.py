@@ -71,7 +71,8 @@ def make_innosetup():
   if is_file(innosetup_file):
     log("! file exist, skip")
     return
-  cmd("powershell", ["exe\\make.ps1"] + args)
+  ret = run_ps1("exe\\make.ps1", args)
+  print(ret)
   return
 
 def make_win_portable():

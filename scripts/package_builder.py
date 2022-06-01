@@ -21,9 +21,9 @@ def make():
   general_status = True
   for task in tasks:
     if task['rc'] == 0:
-      line = "[ ok ] " + task['name']
+      line = "[  OK  ] " + task['name']
     else:
-      line = "[fail] " + task['name']
+      line = "[FAILED] " + task['name']
       general_status = False
     log(line)
 

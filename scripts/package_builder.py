@@ -60,18 +60,20 @@ def make_windows():
 
 def make_innosetup():
   log("\n=== Build innosetup project\n")
-  args = ["-Version " + version,
-          "-Build " + build]
-  if not onlyoffice:
-    args.append("-Branding '" + get_abspath(git_dir, branding, build_dir, "exe") + "'")
-  if sign:
-    args.append("-Sign")
-    args.append("-CertName '" + cert_name + "'")
-  log("--- " + innosetup_file)
+
   if is_file(innosetup_file):
     log("! file exist, skip")
     return
-  ret = run_ps1("exe\\make.ps1", args)
+
+  args = ["-Version " + version, "-Build " + build]
+  if not onlyoffice:
+    args.append("-Branding '%s'" % get_abspath(git_dir, branding, build_dir, "exe"))
+  if sign:
+    args.append("-Sign")
+    args.append("-CertName '%s'" % cert_name)
+
+  log("--- " + innosetup_file)
+  ret = run_ps1("exe\\make.ps1", args, True)
   print(ret)
   return
 

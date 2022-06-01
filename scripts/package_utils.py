@@ -245,12 +245,14 @@ def cmd(prog, args=[], is_no_errors=False):
     sys.exit("! error (" + prog + "): " + str(ret))
   return ret
 
-def run_ps1(file, args=[]):
-  log("- powershell script: " + file + " " + ' '.join(args))
+def run_ps1(file, args=[], verbose=False):
+  if verbose:
+    log("- powershell script: %s %s" % (file, ' '.join(args)))
   ret = subprocess.call(['powershell', file] + args,
-                        stderr=subprocess.STDOUT, shell=True)
-  if ret != 0:
-    sys.exit("! error: " + str(ret))
+                        stderr=subprocess.STDOUT,
+                        shell=True)
+  # if ret != 0:
+  #   sys.exit("! error: " + str(ret))
   return ret
 
 def powershell(cmd):

@@ -271,6 +271,10 @@ def get_platform(target):
     return {'machine': "32", 'arch': "x86", 'xp': xp}
   return
 
+def add_task(name, rc):
+  tasks.append({"name": name, "rc": rc})
+  return
+
 global git_dir, out_dir, tsa_server, vcredist_links, tasks
 git_dir = get_abspath(get_dirname(__file__), '../..')
 out_dir = get_abspath(get_dirname(__file__), '../out')

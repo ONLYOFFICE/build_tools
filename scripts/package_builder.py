@@ -63,11 +63,10 @@ def make_innosetup():
   args = ["-Version " + version,
           "-Build " + build]
   if not onlyoffice:
-    args.append("-Branding " + get_abspath(git_dir, branding, build_dir, "exe"))
+    args.append("-Branding '" + get_abspath(git_dir, branding, build_dir, "exe") + "'")
   if sign:
     args.append("-Sign")
-    args.append("-CertName " + cert_name)
-  args.append("-Force")
+    args.append("-CertName '" + cert_name + "'")
   log("--- " + innosetup_file)
   if is_file(innosetup_file):
     log("! file exist, skip")

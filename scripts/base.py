@@ -711,20 +711,7 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
     vendor_dir = root + vendor_dir + "/vendor/"
 
   content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
-  content += ("<fonts>" + root + "sdkjs/common/libfont/engine</fonts>\n")
-
-  content += "<DoctSdk>\n"
-  content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>\n")  
-  content += ("<file>" + root + "sdkjs/word/sdk-all.js</file>\n")
-  content += "</DoctSdk>\n"
-  content += "<PpttSdk>\n"
-  content += ("<file>" + root + "sdkjs/slide/sdk-all-min.js</file>\n")
-  content += ("<file>" + root + "sdkjs/slide/sdk-all.js</file>\n")
-  content += "</PpttSdk>\n"
-  content += "<XlstSdk>\n"
-  content += ("<file>" + root + "sdkjs/cell/sdk-all-min.js</file>\n")
-  content += ("<file>" + root + "sdkjs/cell/sdk-all.js</file>\n")
-  content += "</XlstSdk>\n"
+  content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
 
   if (False): # old html file
     content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")

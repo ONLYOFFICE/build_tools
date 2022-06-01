@@ -88,7 +88,7 @@ def make_innosetup():
 
   log("--- " + innosetup_file)
   ret = run_ps1("exe\\make.ps1", args, True)
-  tasks.append({name: "innosetup build", rc: ret})
+  tasks.append({"name": "innosetup build", "rc": ret})
   return
 
 def make_win_portable():

@@ -701,9 +701,9 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
   content += ("<file>" + root + "sdkjs/common/Native/jquery_native.js</file>\n")
 
   if ("server" != product):
-    content += ("<file>" + root + "sdkjs/common/AllFonts.js</file>\n")
+    content += ("<allfonts>" + root + "sdkjs/common/AllFonts.js</allfonts>\n")
   else:
-    content += ("<file>./AllFonts.js</file>\n")
+    content += ("<allfonts>./AllFonts.js</allfonts>\n")
 
   vendor_dir = vendor
   if ("" == vendor_dir):
@@ -711,27 +711,13 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
     vendor_dir = root + vendor_dir + "/vendor/"
 
   content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
-  content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")
+  content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
 
-  content += "<DoctSdk>\n"
-  content += ("<file>" + root + "sdkjs/word/sdk-all-min.js</file>\n")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
-  content += ("<file>" + root + "sdkjs/word/sdk-all.js</file>\n")
-  content += "</DoctSdk>\n"
-  content += "<PpttSdk>\n"
-  content += ("<file>" + root + "sdkjs/slide/sdk-all-min.js</file>\n")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
-  content += ("<file>" + root + "sdkjs/slide/sdk-all.js</file>\n")
-  content += "</PpttSdk>\n"
-  content += "<XlstSdk>\n"
-  content += ("<file>" + root + "sdkjs/cell/sdk-all-min.js</file>\n")
-  content += ("<file>" + root + "sdkjs/common/libfont/js/fonts.js</file>\n")
-  content += ("<file>" + root + "sdkjs/cell/sdk-all.js</file>\n")
-  content += "</XlstSdk>\n"
-
-  if ("desktop" == product):
-    content += "<htmlnoxvfb/>\n"
-    content += "<htmlfileinternal>./../</htmlfileinternal>\n"
+  if (False): # old html file
+    content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")
+    if ("desktop" == product):
+      content += "<htmlnoxvfb/>\n"
+      content += "<htmlfileinternal>./../</htmlfileinternal>\n"
 
   content += "</Settings>"
 

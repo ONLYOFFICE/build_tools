@@ -89,6 +89,11 @@ def make_innosetup():
   log("--- " + innosetup_file)
   ret = run_ps1("exe\\make.ps1", args, True)
   add_task("innosetup build", ret)
+
+  log("\n=== Deploy innosetup project\n")
+  ret = s3_copy(innosetup_file,
+                "s3://repo-doc-onlyoffice-com/onlyoffice/experimental/windows/builder/%s/%s/" % (version, build))
+  add_task("innosetup deploy", ret)
   return
 
 def make_win_portable():

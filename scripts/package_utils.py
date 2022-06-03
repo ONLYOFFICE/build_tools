@@ -263,6 +263,14 @@ def powershell(cmd):
     sys.exit("! error: " + str(ret))
   return ret
 
+def s3_copy(src, dst):
+  log("- cmd: aws s3 cp --acl public-read --no-progress %s %s" % (src, dst))
+  ret = subprocess.call(["aws", "s3", "cp", "--acl public-read",
+                         "--no-progress", src, dst],
+                        stderr=subprocess.STDOUT,
+                        shell=True)
+  return ret
+
 def get_platform(target):
   xp = (-1 != target.find('-xp'))
   if (-1 != target.find('-x64')):

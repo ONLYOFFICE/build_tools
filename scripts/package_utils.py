@@ -265,7 +265,7 @@ def powershell(cmd):
 
 def s3_copy(src, dst):
   log("- cmd: aws s3 cp --acl public-read --no-progress %s %s" % (src, dst))
-  ret = subprocess.call(["aws", "s3", "cp", "--acl public-read",
+  ret = subprocess.call(["aws", "s3", "cp", "--acl", "public-read",
                          "--no-progress", src, dst],
                         stderr=subprocess.STDOUT,
                         shell=True)

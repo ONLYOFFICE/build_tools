@@ -42,7 +42,10 @@ def deploy_core(target, platform):
   prefix = branding.packages[platform][target]["prefix"]
   company = branding.company_name.lower()
   branch = utils.get_env("BRANCH_NAME")
-  version = common.version + "." + common.build
+  if platform == "windows":
+    version = common.version + "." + common.build
+  else:
+    version = common.version + "-" + common.build
   arch = branding.packages[platform][target]["arch"]
   src = "build_tools/out/%s/%s/core/core.7z"
   dest = "s3://" + common.s3_bucket + "/%s/core/%s/%s/%s/"

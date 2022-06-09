@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import codecs
 import glob
 import os
@@ -11,75 +10,62 @@ import shutil
 import subprocess
 import sys
 import time
-import base
-
-def parse():
-  parser = argparse.ArgumentParser(description="Build packages.")
-  parser.add_argument('-P', '--product', dest='product', type=str,
-                      action='store', help="Defines product")
-  parser.add_argument('-S', '--system', dest='system', type=str,
-                      action='store', help="Defines system")
-  parser.add_argument('-R', '--branding', dest='branding', type=str,
-                      action='store', help="Provides branding path")
-  parser.add_argument('-V', '--version', dest='version', type=str,
-                      action='store', help="Defines version")
-  parser.add_argument('-B', '--build', dest='build', type=str,
-                      action='store', help="Defines build")
-  parser.add_argument('-T', '--targets', dest='targets', type=str, nargs='+',
-                      action='store', help="Defines targets")
-  args = parser.parse_args()
-
-  global product, system, targets, version, build, branding, clean, sign, deploy
-  product = args.product
-  system = args.system if (args.system is not None) else host_platform()
-  targets = args.targets
-  version = args.version if (args.version is not None) else get_env('PRODUCT_VERSION', '0.0.0')
-  build = args.build if (args.build is not None) else get_env('BUILD_NUMBER', '0')
-  branding = args.branding
-
-  clean = 'clean' in targets
-  sign = 'sign' in targets
-  deploy = 'deploy' in targets
-  return
 
 def host_platform():
   return platform.system().lower()
 
-def log(string, end='\n', bold=False):
-  if bold:
-    out = '\033[1m' + string + '\033[0m' + end
-  else:
-    out = string + end
-  sys.stdout.write(out)
+def is_windows():
+  return host_platform() == "windows"
+
+def is_macos():
+  return host_platform() == "darwin"
+
+def is_linux():
+  return host_platform() == "linux"
+
+def log(string, end='\n'):
+  sys.stdout.write(string + end)
   sys.stdout.flush()
   return
 
-def get_env(name, default=''):
-  return os.getenv(name, default)
-
-def set_env(name, value):
-  os.environ[name] = value
+def log_h1(string):
+  line = "-" * (len(string) + 8)
+  log(line + "\n--- " + string + " ---\n" + line)
   return
 
-def set_cwd(dir):
-  log("- change working dir: " + dir)
-  os.chdir(dir)
+def log_h2(string):
+  log("--- " + string)
   return
 
-def get_path(*paths):
-  arr = []
-  for path in paths:
-    if host_platform() == 'windows':
-      arr += path.split('/')
-    else:
-      arr += [path]
-  return os.path.join(*arr)
+def get_timestamp():
+  return "%.f" % time.time()
 
-def get_abspath(*paths):
-  arr = []
-  for path in paths:
-    arr += path.split('/')
-  return os.path.abspath(os.path.join(*arr))
+def get_env(key, default=None):
+  return os.getenv(key, default)
+
+def set_env(key, value):
+  os.environ[key] = value
+  return
+
+def get_cwd():
+  return os.getcwd()
+
+def set_cwd(path, verbose=True):
+  if verbose:
+    log_h2("change working dir: " + path)
+  os.chdir(path)
+  return
+
+def get_path(path):
+  if is_windows():
+    return path.replace("/", "\\")
+  return path
+
+def get_abspath(path):
+  return os.path.abspath(get_path(path))
+
+def get_dirname(path):
+  return os.path.dirname(path)
 
 def is_file(path):
   return os.path.isfile(path)
@@ -91,9 +77,6 @@ def is_exist(path):
   if os.path.exists(path):
     return True
   return False
-
-def get_dirname(path):
-  return os.path.dirname(path)
 
 def create_dir(path):
   log("- create dir: " + path)
@@ -207,6 +190,20 @@ def delete_files(src):
       delete_dir(path)
   return
 
+def win_command(*args, **kwargs):
+  if kwargs["verbose"]:
+    log_h2("cmd: " + " ".join(args))
+  return subprocess.call(
+      [item for item in args], stderr=subprocess.STDOUT, shell=True
+  )
+
+def win_command_output(*args, **kwargs):
+  if kwargs["verbose"]:
+    log_h2("cmd output: " + " ".join(args))
+  return subprocess.check_output(
+      [item for item in args], stderr=subprocess.STDOUT, shell=True
+  )
+
 def download_file(url, path):
   log("- download file: " + path + " < " + url)
   if is_file(path):
@@ -262,44 +259,3 @@ def powershell(cmd):
   if ret != 0:
     sys.exit("! error: " + str(ret))
   return ret
-
-def s3_copy(src, dst):
-  log("- cmd: aws s3 cp --acl public-read --no-progress %s %s" % (src, dst))
-  ret = subprocess.call(["aws", "s3", "cp", "--acl", "public-read",
-                         "--no-progress", src, dst],
-                        stderr=subprocess.STDOUT,
-                        shell=True)
-  return ret
-
-def get_platform(target):
-  xp = (-1 != target.find('-xp'))
-  if (-1 != target.find('-x64')):
-    return {'machine': "64", 'arch': "x64", 'xp': xp}
-  elif (-1 != target.find('-x86')):
-    return {'machine': "32", 'arch': "x86", 'xp': xp}
-  return
-
-def add_task(name, rc):
-  tasks.append({"name": name, "rc": rc})
-  return
-
-global git_dir, out_dir, tsa_server, vcredist_links, tasks
-git_dir = get_abspath(get_dirname(__file__), '../..')
-out_dir = get_abspath(get_dirname(__file__), '../out')
-timestamp = "%.f" % time.time()
-tsa_server = "http://timestamp.digicert.com"
-vcredist_links = {
-  '2022': {
-    '64': "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-    '32': "https://aka.ms/vs/17/release/vc_redist.x86.exe"
-  },
-  '2015': {
-    '64': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
-    '32': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
-  },
-  '2013': {
-    '64': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
-    '32': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
-  }
-}
-tasks = []

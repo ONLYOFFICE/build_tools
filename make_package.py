@@ -38,6 +38,11 @@ parser.add_argument("-B", "--build",
 args = parser.parse_args()
 
 # vars
+import os
+print("__file__ " + __file__)
+print("realpath(__file__) " + os.path.realpath(__file__))
+print("get_dirname(__file__) " + utils.get_dirname(os.path.realpath(__file__)))
+print("get_abspath(__file__)" + utils.get_abspath(utils.get_dirname(__file__)))
 common.workspace_dir = utils.get_abspath(utils.get_dirname(__file__) + "/..")
 common.os_family = utils.host_platform()
 common.targets = args.targets
@@ -50,15 +55,15 @@ common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.summary = {}
 utils.log("workspace_dir: " + common.workspace_dir)
-utils.log("os_family: " + common.os_family)
-utils.log("targets: " + str(common.targets))
-utils.log("clean: " + str(common.clean))
-utils.log("sign: " + str(common.sign))
-utils.log("deploy: " + str(common.deploy))
-utils.log("version: " + common.version)
-utils.log("build: " + common.build)
-utils.log("branding: " + str(common.branding))
-utils.log("timestamp: " + common.timestamp)
+utils.log("os_family:     " + common.os_family)
+utils.log("targets:       " + str(common.targets))
+utils.log("clean:         " + str(common.clean))
+utils.log("sign:          " + str(common.sign))
+utils.log("deploy:        " + str(common.deploy))
+utils.log("version:       " + common.version)
+utils.log("build:         " + common.build)
+utils.log("branding:      " + str(common.branding))
+utils.log("timestamp:     " + common.timestamp)
 utils.set_cwd(common.workspace_dir, verbose=True)
 
 # branding

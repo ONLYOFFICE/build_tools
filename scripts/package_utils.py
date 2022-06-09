@@ -67,6 +67,9 @@ def get_abspath(path):
 def get_dirname(path):
   return os.path.dirname(path)
 
+def get_script_dir(path):
+  return get_dirname(os.path.realpath(path))
+
 def is_file(path):
   return os.path.isfile(path)
 

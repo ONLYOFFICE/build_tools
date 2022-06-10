@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+platforms = {
+  "windows_x64":      { "title": "Windows x64",     "prefix": "win_64",      "arch": "x64" },
+  "windows_x64_xp":   { "title": "Windows x64 XP",  "prefix": "win_64_xp",   "arch": None  },
+  "windows_x86":      { "title": "Windows x86",     "prefix": "win_32",      "arch": "x86" },
+  "windows_x86_xp":   { "title": "Windows x86 XP",  "prefix": "win_32_xp",   "arch": None  },
+  "darwin_x86_64":    { "title": "macOS x86_64",    "prefix": "mac_64",      "arch": "x64" },
+  "darwin_x86_64_v8": { "title": "macOS x86_64 V8", "prefix": "mac_64",      "arch": None  },
+  "darwin_arm64":     { "title": "macOS arm64",     "prefix": "mac_arm64",   "arch": None  },
+  "linux_x86_64":     { "title": "Linux x86_64",    "prefix": "linux_64",    "arch": "x64" },
+  "linux_aarch64":    { "title": "Linux aarch64",   "prefix": "linux_arm64", "arch": None  },
+  "android":          { "title": "Android" }
+}
+
 out_dir = "build_tools/out"
 # s3_bucket = "repo-doc-onlyoffice-com"
 s3_bucket = "deploytest-static.teamlab.com"

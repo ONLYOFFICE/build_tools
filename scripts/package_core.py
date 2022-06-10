@@ -6,49 +6,32 @@ import package_common as common
 import package_branding as branding
 
 def make():
-  if utils.is_windows():
-    make_windows()
-  elif utils.is_macos():
-    make_macos()
-  elif utils.is_linux():
-    make_linux()
-  else:
-    exit("Unknown host os")
+  if not (utils.is_windows() or utils.is_macos() or utils.is_linux()):
+    utils.log("Unsupported host OS")
+    return
+  if common.deploy and ("core" in common.targets):
+    deploy_core()
   return
 
-def make_windows():
-  for target in common.targets:
-    if target in ["core-x64", "core-x86"]:
-      deploy_core(target, "windows")
-  return
-
-def make_macos():
-  for target in common.targets:
-    if target in ["core-x86_64"]:
-      deploy_core(target, "macos")
-  return
-
-def make_linux():
-  for target in common.targets:
-    if target in ["core-x86_64"]:
-      deploy_core(target, "linux")
-  return
-
-def deploy_core(target, platform):
-  task = target + " deploy"
+def deploy_core():
+  task = "core deploy"
   common.summary[task] = 1
   utils.log_h1(task)
 
-  prefix = branding.packages[platform][target]["prefix"]
+  prefix = common.platforms[common.platform]["prefix"]
   company = branding.company_name.lower()
+  if common.platform.startswith("windows"):  platform = "windows"
+  elif common.platform.startswith("darwin"): platform = "macos"
+  elif common.platform.startswith("linux"):  platform = "linux"
   branch = utils.get_env("BRANCH_NAME")
-  if platform == "windows":
+  arch = common.platforms[common.platform]["arch"]
+  if utils.is_windows():
     version = common.version + "." + common.build
   else:
     version = common.version + "-" + common.build
-  arch = branding.packages[platform][target]["arch"]
-  src = "build_tools/out/%s/%s/core/core.7z"
-  dest = "s3://" + common.s3_bucket + "/%s/core/%s/%s/%s/"
+  src = "build_tools/out/%s/%s/core/core.7z" % (prefix, company)
+  dest = "s3://" + common.s3_bucket + "/" + platform + "/core/" \
+      + branch + "/%s/" + arch + "/"
 
   if branch is None:
     utils.log("BRANCH_NAME variable is empty")
@@ -56,20 +39,15 @@ def deploy_core(target, platform):
 
   ret = utils.win_command(
       "aws", "s3", "cp",
-      "--acl", "public-read",
-      "--no-progress",
-      utils.get_path(src % (prefix, company)),
-      dest % (platform, branch, version, arch),
+      "--acl", "public-read", "--no-progress",
+      utils.get_path(src), dest % version,
       verbose=True
   )
   if ret == 0:
     ret = utils.win_command(
         "aws", "s3", "sync",
-        "--delete",
-        "--acl", "public-read",
-        "--no-progress",
-        dest % (platform, branch, version, arch),
-        dest % (platform, branch, "latest", arch),
+        "--delete", "--acl", "public-read", "--no-progress",
+        dest % version, dest % "latest",
         verbose=True
     )
   common.summary[task] = ret

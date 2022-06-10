@@ -4,20 +4,31 @@
 import package_utils as utils
 
 onlyoffice = True
-company_name = 'ONLYOFFICE'
+company_name = "ONLYOFFICE"
 company_name_l = company_name.lower()
-publisher_name = 'Ascensio System SIA'
-cert_name = 'Ascensio System SIA'
+publisher_name = "Ascensio System SIA"
+cert_name = "Ascensio System SIA"
 
 packages = {
-  "windows": {
-    "core-x64":    { "prefix": "win_64",   "arch": "x64" },
-    "core-x86":    { "prefix": "win_32",   "arch": "x86" }
-  },
-  "darwin": {
-    "core-x86_64": { "prefix": "mac_64",   "arch": "x64" }
-  },
-  "linux": {
-    "core-x86_64": { "prefix": "linux_64", "arch": "x64" }
-  }
+  "windows_x64":      [
+    "core",
+    "builder-portable",
+    "builder-innosetup"
+  ],
+  "windows_x64_xp":   [
+    "core",
+    "builder-portable",
+    "builder-innosetup"
+  ],
+  "windows_x86":      [],
+  "windows_x86_xp":   [],
+  "darwin_x86_64":    [
+    "core"
+  ],
+  "darwin_x86_64_v8": [],
+  "darwin_arm64":     [],
+  "linux_x86_64":     [
+    "core"
+  ],
+  "linux_aarch64":    []
 }

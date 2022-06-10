@@ -30,12 +30,9 @@ common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.os_family = utils.host_platform()
 common.platform = args.platform
 common.targets = args.targets
-# common.clean = "clean" in args.targets
-# common.sign = "sign" in args.targets
-# common.deploy = "deploy" in args.targets
-common.clean = True
-common.sign = True
-common.deploy = True
+common.clean = "clean" in args.targets
+common.sign = "sign" in args.targets
+common.deploy = "deploy" in args.targets
 common.version = args.version if (args.version is not None) else utils.get_env("PRODUCT_VERSION", "1.0.0")
 common.build = args.build if (args.build is not None) else utils.get_env("BUILD_NUMBER", "1")
 common.branding = args.branding
@@ -59,6 +56,9 @@ if common.branding is not None:
   sys.path.insert(-1, utils.get_path(common.branding + "/build_tools/scripts"))
 
 # build
+if not (common.platform.startswith(common.os_family) \
+    and (common.platform in common.platforms)):
+  exit("Unsupported platform on " + common.os_family)
 package_core.make()
 # package_desktop.make()
 # package_builder.make()

@@ -80,7 +80,6 @@ mv -v /usr/bin/sanstats-10 /usr/bin/sanstats && \
 mv -v /usr/bin/verify-uselistorder-10 /usr/bin/verify-uselistorder && \
 mv -v /usr/bin/yaml-bench-10 /usr/bin/yaml-bench && \
 mv -v /usr/bin/yaml2obj-10 /usr/bin/yaml2obj && \
-ls -l /usr/bin && \
 ln -vs /usr/bin/python2 /usr/bin/python
 
 ADD . /build_tools
@@ -90,3 +89,11 @@ RUN cd tools/linux && \
 python3 -u ./automate.py desktop && \
 apt-get clean && \
 rm -rf /var/lib/apt/lists/*
+
+RUN rm -v /build_tools/scripts/core_common/modules/v8.py /build_tools/scripts/core_common/modules/v8_89.py
+
+ADD ./scripts/core_common/modules/v8.py /build_tools/scripts/core_common/modules/v8.py
+ADD ./scripts/core_common/modules/v8_89.py /build_tools/scripts/core_common/modules/v8_89.py
+
+RUN cd tools/linux && \
+    python3 -u ./automate_p2.py desktop

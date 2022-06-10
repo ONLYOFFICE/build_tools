@@ -1,4 +1,4 @@
-FROM onlyoffice-part1:latest
+FROM desktopeditors:latest
 
 RUN rm -v /build_tools/scripts/core_common/modules/v8.py /build_tools/scripts/core_common/modules/v8_89.py
 ADD ./scripts/core_common/modules/v8.py /build_tools/scripts/core_common/modules/v8.py

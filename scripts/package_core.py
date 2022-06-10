@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# import os
 import package_utils as utils
 import package_common as common
 import package_branding as branding
@@ -9,14 +8,15 @@ def make():
   if not (utils.is_windows() or utils.is_macos() or utils.is_linux()):
     utils.log("Unsupported host OS")
     return
-  if common.deploy and ("core" in common.targets):
+  if "core" in common.targets:
     deploy_core()
   return
 
 def deploy_core():
-  task = "core deploy"
-  common.summary[task] = 1
-  utils.log_h1(task)
+  if not common.deploy:
+    return
+  utils.log_h1("core deploy")
+  common.summary["core deploy"] = 1
 
   prefix = common.platforms[common.platform]["prefix"]
   company = branding.company_name.lower()
@@ -50,5 +50,5 @@ def deploy_core():
         dest % version, dest % "latest",
         verbose=True
     )
-  common.summary[task] = ret
+  common.summary["core deploy"] = ret
   return

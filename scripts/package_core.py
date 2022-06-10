@@ -5,6 +5,7 @@ import package_common as common
 import package_branding as branding
 
 def make():
+  utils.log_h1("core")
   if not (utils.is_windows() or utils.is_macos() or utils.is_linux()):
     utils.log("Unsupported host OS")
     return

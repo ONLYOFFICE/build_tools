@@ -5,6 +5,7 @@ import package_common as common
 import package_branding as branding
 
 def make():
+  utils.log_h1("builder")
   if utils.is_windows():
     make_windows()
   elif utils.is_linux():
@@ -23,7 +24,7 @@ def make_windows():
   prefix = common.platforms[common.platform]["prefix"]
   company = branding.company_name.lower()
   product = branding.builder_product_name.replace(" ","").lower()
-  source_dir = "%s\\build_tools\\out\\%s\\%s\\%s" % (workspace_dir, prefix, company, product)
+  source_dir = "%s\\build_tools\\out\\%s\\%s\\%s" % (common.workspace_dir, prefix, company, product)
 
   utils.log_h1("copy arifacts")
   utils.create_dir("build\\base")
@@ -68,11 +69,11 @@ def make_innosetup():
 
   branding_path = "%s\\%s\\document-builder-package\\exe" % (common.workspace_dir, common.branding)
   args = ["-Version " + common.version, "-Build " + common.build]
-  if not onlyoffice:
+  if not branding.onlyoffice:
     args.append("-Branding '%s'" % branding_path)
-  if sign:
+  if common.sign:
     args.append("-Sign")
-    args.append("-CertName '%s'" % cert_name)
+    args.append("-CertName '%s'" % branding.cert_name)
 
   utils.log(innosetup_file)
   ret = utils.run_ps1("exe\\make.ps1", args, verbose=True)

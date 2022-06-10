@@ -66,15 +66,12 @@ package_builder.make()
 
 # summary
 utils.log_h1("Build summary")
-perfect = True
+exitcode = 0
 for task, rc in common.summary.items():
   if rc == 0:
     utils.log("[  OK  ] " + task)
   else:
     utils.log("[FAILED] " + task)
-    perfect = False
+    exitcode = 1
 
-if perfect:
-  sys.exit(0)
-else:
-  sys.exit(1)
+exit(exitcode)

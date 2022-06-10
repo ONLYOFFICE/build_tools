@@ -9,6 +9,8 @@ company_name_l = company_name.lower()
 publisher_name = "Ascensio System SIA"
 cert_name = "Ascensio System SIA"
 
+builder_product_name = "Document Builder"
+
 packages = {
   "windows_x64":      [
     "core",

@@ -61,7 +61,7 @@ if not (common.platform.startswith(common.os_family) \
   exit("Unsupported platform on " + common.os_family)
 package_core.make()
 # package_desktop.make()
-# package_builder.make()
+package_builder.make()
 # package_server.make()
 
 # summary

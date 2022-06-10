@@ -1,9 +1,33 @@
 #!/usr/bin/env python
 
-import config
 import base
-import os
 import build_js
+import config
+import optparse
+import sys
+
+arguments = sys.argv[1:]
+parser = optparse.OptionParser()
+parser.add_option("--output", 
+                  action="store", type="string", dest="output",
+                  help="Directory for output the build result")
+parser.add_option("--write-version",
+                  action="store_true", dest="write_version", default=False,
+                  help="Create version file of build")
+(options, args) = parser.parse_args(arguments)
+
+def write_version_files(output_dir):
+  if (base.is_dir(output_dir)):
+    last_version_tag = base.run_command('git describe --abbrev=0 --tags')['stdout']
+    version_numbers=last_version_tag.replace('v', '').split('.')
+    major=(version_numbers[0:1] or ('0',))[0]
+    minor=(version_numbers[1:2] or ('0',))[0]
+    maintenance=(version_numbers[2:3] or ('0',))[0]
+    build=(version_numbers[3:4] or ('0',))[0]
+    full_version='%s.%s.%s.%s' % (major, minor, maintenance, build)
+
+    for name in ['word', 'cell', 'slide']:
+      base.writeFile(output_dir + '/%s/sdk.version' % name, full_version)
 
 # parse configuration
 config.parse()
@@ -15,6 +39,10 @@ if ("" == branding):
 
 base_dir = base.get_script_dir() + "/.."
 out_dir = base_dir + "/../native-sdk/examples/win-linux-mac/build/sdkjs"
+
+if (options.output):
+  out_dir = options.output
+
 base.create_dir(out_dir)
 
 build_js.build_sdk_native(base_dir + "/../sdkjs/build")
@@ -52,4 +80,7 @@ base.join_scripts([out_dir + "/banners_slide.js", sdk_dir_src + "slide/sdk-all-m
 base.delete_file(out_dir + "/banners_word.js")
 base.delete_file(out_dir + "/banners_cell.js")
 base.delete_file(out_dir + "/banners_slide.js")
-  
+
+# Write sdk version mark file if needed
+if (options.write_version):
+  write_version_files(out_dir)

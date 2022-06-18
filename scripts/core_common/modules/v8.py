@@ -42,16 +42,13 @@ def is_xp_platform():
   return False
 
 def is_use_clang():
-  gcc_version = 4
-  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
-  if (gcc_version_str != ""):
-    gcc_version = int(gcc_version_str.split(".")[0])
+  gcc_version = base.get_gcc_version()  
     
   is_clang = "false"
-  if (gcc_version >= 6):
+  if (gcc_version >= 6000):
     is_clang = "true"
 
-  print("gcc major version: " + str(gcc_version) + ", use clang:" + is_clang)
+  print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)
   return is_clang
 
 def make():

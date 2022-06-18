@@ -547,6 +547,20 @@ def get_prefix_cross_compiler_arm64():
     return "aarch64-unknown-linux-gnu-"
   return ""
 
+def get_gcc_version():
+  gcc_version_major = 4
+  gcc_version_minor = 0
+  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  if (gcc_version_str != ""):
+    try:
+      gcc_ver = gcc_version_str.split(".")
+      gcc_version_major = int(gcc_ver[0])
+      gcc_version_minor = int(gcc_ver[1])
+    except Exception as e:
+      gcc_version_major = 4
+      gcc_version_minor = 0
+  return gcc_version_major * 1000 + gcc_version_minor
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)

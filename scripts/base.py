@@ -547,6 +547,20 @@ def get_prefix_cross_compiler_arm64():
     return "aarch64-unknown-linux-gnu-"
   return ""
 
+def get_gcc_version():
+  gcc_version_major = 4
+  gcc_version_minor = 0
+  gcc_version_str = run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  if (gcc_version_str != ""):
+    try:
+      gcc_ver = gcc_version_str.split(".")
+      gcc_version_major = int(gcc_ver[0])
+      gcc_version_minor = int(gcc_ver[1])
+    except Exception as e:
+      gcc_version_major = 4
+      gcc_version_minor = 0
+  return gcc_version_major * 1000 + gcc_version_minor
+
 # qmake -------------------------------------------------
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
@@ -591,13 +605,10 @@ def qt_config(platform):
     config_param += " apple_silicon use_javascript_core"
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
-  if (config.option("vs-version") == "2019"):
-    config_param += " v8_version_89 vs2019"
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
-  if config.check_option("platform", "linux_arm64"):
-    config_param += " v8_version_89"
+
   return config_param
 
 def qt_major_version():
@@ -1243,10 +1254,9 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     return
   directory_v8 = core_dir + "/Common/3dParty"
   if is_xp:
-    directory_v8 += "/v8/v8_xp/"
-  elif (-1 != config.option("config").lower().find("v8_version_89")):
-    directory_v8 += "/v8_89/v8/out.gn/"
-  if (config.option("vs-version") == "2019"):
+    directory_v8 += "/v8/v8_xp"
+  
+  if (-1 != config.option("config").lower().find("v8_version_89")) and not is_xp:
     directory_v8 += "/v8_89/v8/out.gn/"
   else:
     directory_v8 += "/v8/v8/out.gn/"
@@ -1258,5 +1268,5 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (0 == platform.find("win")):
     copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
   else:
-    copy_file(directory_v8 + platform + "/icudtl.dat", deploy_dir + "/icudtl.dat")
+    copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return

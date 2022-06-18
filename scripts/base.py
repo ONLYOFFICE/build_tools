@@ -550,7 +550,7 @@ def get_prefix_cross_compiler_arm64():
 def get_gcc_version():
   gcc_version_major = 4
   gcc_version_minor = 0
-  gcc_version_str = base.run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  gcc_version_str = run_command("gcc -dumpfullversion -dumpversion")['stdout']
   if (gcc_version_str != ""):
     try:
       gcc_ver = gcc_version_str.split(".")

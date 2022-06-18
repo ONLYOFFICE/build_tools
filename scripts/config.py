@@ -74,7 +74,7 @@ def parse():
     options["vs-version"] = "2015"
 
   # enable v8 8.9 version, if compiler support sources
-  if ("linux" == host_platform) and (5004 < base.get_gcc_version()) and not check_option("platform", "android"):
+  if ("linux" == host_platform) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
     extend_option("config", "v8_version_89")
 
   # check vs-path

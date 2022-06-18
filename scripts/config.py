@@ -77,6 +77,13 @@ def parse():
   if ("linux" == host_platform) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
     extend_option("config", "v8_version_89")
 
+  if ("windows" == host_platform) and ("2019" == option("vs-version")):
+    extend_option("config", "v8_version_89")
+    extend_option("config", "vs2019")
+
+  if check_option("platform", "linux_arm64"):
+    extend_option("config", "v8_version_89")
+
   # check vs-path
   if ("windows" == host_platform) and ("" == option("vs-path")):
     programFilesDir = base.get_env("ProgramFiles")

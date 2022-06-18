@@ -605,13 +605,10 @@ def qt_config(platform):
     config_param += " apple_silicon use_javascript_core"
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
-  if (config.option("vs-version") == "2019"):
-    config_param += " v8_version_89 vs2019"
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
-  if config.check_option("platform", "linux_arm64"):
-    config_param += " v8_version_89"
+
   return config_param
 
 def qt_major_version():
@@ -1257,10 +1254,9 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     return
   directory_v8 = core_dir + "/Common/3dParty"
   if is_xp:
-    directory_v8 += "/v8/v8_xp/"
-  elif (-1 != config.option("config").lower().find("v8_version_89")):
-    directory_v8 += "/v8_89/v8/out.gn/"
-  if (config.option("vs-version") == "2019"):
+    directory_v8 += "/v8/v8_xp"
+  
+  if (-1 != config.option("config").lower().find("v8_version_89")) and not is_xp:
     directory_v8 += "/v8_89/v8/out.gn/"
   else:
     directory_v8 += "/v8/v8/out.gn/"

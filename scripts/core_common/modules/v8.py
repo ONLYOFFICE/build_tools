@@ -71,10 +71,6 @@ def make():
   use_v8_89 = False
   if (-1 != config.option("config").lower().find("v8_version_89")):
     use_v8_89 = True
-  if ("windows" == base.host_platform()) and (config.option("vs-version") == "2019"):
-    use_v8_89 = True
-  if config.check_option("platform", "linux_arm64"):
-    use_v8_89 = True
 
   if (use_v8_89):
     v8_89.make()

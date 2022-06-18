@@ -1268,5 +1268,5 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (0 == platform.find("win")):
     copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
   else:
-    copy_file(directory_v8 + platform + "/icudtl.dat", deploy_dir + "/icudtl.dat")
+    copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return

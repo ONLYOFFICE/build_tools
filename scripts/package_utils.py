@@ -193,72 +193,49 @@ def delete_files(src):
       delete_dir(path)
   return
 
-def win_command(*args, **kwargs):
-  if kwargs["verbose"]:
+def cmd(*args, **kwargs):
+  if "verbose" in kwargs:
     log_h2("cmd: " + " ".join(args))
-  return subprocess.call(
+  if "creates" in kwargs and is_exist(kwargs["creates"]):
+    return 0
+  if "chdir" in kwargs and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"])
+  ret = subprocess.call(
       [item for item in args], stderr=subprocess.STDOUT, shell=True
   )
+  if oldcwd:
+    set_cwd(oldcwd)
+  return ret
 
-def win_command_output(*args, **kwargs):
+def cmd_output(*args, **kwargs):
   if kwargs["verbose"]:
     log_h2("cmd output: " + " ".join(args))
   return subprocess.check_output(
       [item for item in args], stderr=subprocess.STDOUT, shell=True
   )
 
-def download_file(url, path):
-  log("- download file: " + path + " < " + url)
-  if is_file(path):
-    os.remove(path)
-  powershell(["Invoke-WebRequest", url, "-OutFile", path])
-  return
+# def powershell(*args, **kwargs):
+#   if kwargs["verbose"]:
+#     log_h2("powershell: " + " ".join(args))
+#   return cmd("powershell", "-Command", args, verbose=False)
 
-def proc_open(command):
-  log("- open process: " + command)
-  popen = subprocess.Popen(command, stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, shell=True)
-  ret = {'stdout' : '', 'stderr' : ''}
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    ret['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
-    ret['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
-  return ret
+def ps1(file, *args, **kwargs):
+  if kwargs["verbose"]:
+    log_h2("powershell cmdlet: " + file + " " + " ".join(args))
+  return cmd("powershell", file, args, verbose=False)
 
-def cmd(prog, args=[], is_no_errors=False):  
-  log("- cmd: " + prog + " " + ' '.join(args))
-  ret = 0
-  if host_platform() == 'windows':
-    sub_args = args[:]
-    sub_args.insert(0, get_path(prog))
-    ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
-  else:
-    command = prog
-    for arg in args:
-      command += (" \"%s\"" % arg)
-    ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
-  if ret != 0 and True != is_no_errors:
-    sys.exit("! error (" + prog + "): " + str(ret))
-  return ret
+# def download_file(url, path):
+#   log("- download file: " + path + " < " + url)
+#   if is_file(path):
+#     os.remove(path)
+#   powershell(["Invoke-WebRequest", url, "-OutFile", path])
+#   return
 
-def run_ps1(file, args=[], verbose=False):
-  if verbose:
-    log("- powershell script: %s %s" % (file, ' '.join(args)))
-  ret = subprocess.call(['powershell', file] + args,
-                        stderr=subprocess.STDOUT,
-                        shell=True)
-  # if ret != 0:
-  #   sys.exit("! error: " + str(ret))
-  return ret
-
-def powershell(cmd):
-  log("- pwsh: " + ' '.join(cmd))
-  ret = subprocess.call(['powershell', '-Command'] + cmd,
-                        stderr=subprocess.STDOUT, shell=True)
-  if ret != 0:
-    sys.exit("! error: " + str(ret))
-  return ret
+def sh(*args, **kwargs):
+  if kwargs["verbose"]:
+    log_h2("sh: " + " ".join(args))
+  # command = prog
+  # for arg in args:
+  #   command += (" \"%s\"" % arg)
+  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)

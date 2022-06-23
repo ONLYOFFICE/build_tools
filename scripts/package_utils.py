@@ -204,7 +204,7 @@ def cmd(*args, **kwargs):
   ret = subprocess.call(
       [item for item in args], stderr=subprocess.STDOUT, shell=True
   )
-  if oldcwd:
+  if "chdir" in kwargs and oldcwd:
     set_cwd(oldcwd)
   return ret
 

@@ -91,7 +91,7 @@ def make_inno():
   if common.sign:
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
-  ret = utils.run_ps1("exe\\make.ps1", args, verbose=True)
+  ret = utils.ps1("exe\\make.ps1", args, verbose=True)
   common.summary["inno build"] = ret
 
   common.summary["inno deploy"] = 1

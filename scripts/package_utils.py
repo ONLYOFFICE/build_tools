@@ -221,9 +221,11 @@ def cmd_output(*args, **kwargs):
 #   return cmd("powershell", "-Command", args, verbose=False)
 
 def ps1(file, *args, **kwargs):
-  if kwargs["verbose"]:
+  if "verbose" in kwargs:
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
-  return cmd("powershell", file, args, verbose=False)
+  args = ["powershell", file] + args
+  ret = cmd(*args, verbose=False)
+  return ret
 
 # def download_file(url, path):
 #   log("- download file: " + path + " < " + url)

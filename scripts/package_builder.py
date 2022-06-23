@@ -15,82 +15,92 @@ def make():
   return
 
 def make_windows():
+  global inno_file, zip_file
   utils.set_cwd("document-builder-package")
+
+  prefix = common.platforms[common.platform]["prefix"]
+  company = branding.company_name.lower()
+  product = branding.builder_product_name.replace(" ","").lower()
+  source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  package_name = company + "_" + product
+  package_version = common.version + "." + common.build
+  if "windows_x64" == common.platform:   suffix = "x64"
+  elif "windows_x86" == common.platform: suffix = "x86"
+  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
 
   if common.clean:
     utils.log_h1("clean")
     utils.delete_dir("build")
 
-  prefix = common.platforms[common.platform]["prefix"]
-  company = branding.company_name.lower()
-  product = branding.builder_product_name.replace(" ","").lower()
-  source_dir = "%s\\build_tools\\out\\%s\\%s\\%s" % (common.workspace_dir, prefix, company, product)
-
   utils.log_h1("copy arifacts")
-  utils.create_dir("build\\base")
-  utils.copy_dir_content(source_dir, "build\\base\\")
+  utils.create_dir("build\\data")
+  utils.copy_dir_content(source_dir, "build\\data\\")
 
-  global innosetup_file, portable_zip_file
+  if "builder-zip" in common.targets:
+    make_zip()
 
-  # if "builder-portable" in common.targets:
-  #   portable_zip_file = "build/zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
-  #   make_portable()
+  if "builder-inno" in common.targets:
+    make_inno()
 
-  if "builder-innosetup" in common.targets:
-    package_name = "onlyoffice_documentbuilder"
-    package_version = common.version + "." + common.build
-    suffix = "x64"
-    innosetup_file = "build\\exe\\%s_%s_%s.exe" % (package_name, package_version, suffix)
-    make_innosetup()
-
+  utils.set_cwd(common.workspace_dir)
   return
 
-# def make_macos():
-#   return
-
 # def make_linux():
-#   set_cwd(build_dir)
-#   log("Clean")
-#   cmd("make", ["clean"])
-#   log("Build packages")
-#   cmd("make", ["packages"])
+#   utils.set_cwd("document-builder-package")
+#   utils.sh("make", "clean")
+#   utils.sh("make", "packages")
+#   utils.set_cwd(common.workspace_dir)
 #   return
 
-def make_innosetup():
-  common.summary["innosetup build"] = 1
-  if not common.deploy:
-    common.summary["innosetup deploy"] = 1
+def make_zip():
+  dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+      + common.version + "/" + common.build + "/"
 
-  utils.log_h1("innosetup build")
+  common.summary["zip build"] = 1
+  utils.log_h1("zip build " + zip_file)
+  ret = utils.cmd("7z", "a", "-y", zip_file, "data\\*",
+      chdir="build", creates="build\\" + zip_file, verbose=True)
+  common.summary["zip build"] = ret
 
-  # if utils.is_file(innosetup_file):
+  common.summary["zip deploy"] = 1
+  if ret == 0:
+    utils.log_h1("zip deploy " + zip_file)
+    ret = utils.cmd(
+        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+        "build\\" + zip_file, dest,
+        verbose=True
+    )
+    common.summary["zip deploy"] = ret
+  return
+
+def make_inno():
+  dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+      + common.version + "/" + common.build + "/"
+
+  common.summary["inno build"] = 1
+  # if not common.deploy:
+  #   common.summary["inno deploy"] = 1
+  utils.log_h1("inno build " + inno_file)
+  # if utils.is_file(inno_file):
   #   utils.log("! file exist, skip")
   #   return
-
-  branding_path = "%s\\%s\\document-builder-package\\exe" % (common.workspace_dir, common.branding)
   args = ["-Version " + common.version, "-Build " + common.build]
   if not branding.onlyoffice:
-    args.append("-Branding '%s'" % branding_path)
+    args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
   if common.sign:
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
-
-  utils.log(innosetup_file)
   ret = utils.run_ps1("exe\\make.ps1", args, verbose=True)
-  common.summary["innosetup build"] = ret
+  common.summary["inno build"] = ret
 
-  utils.log_h1("innosetup deploy")
-  # ret = s3_copy(innosetup_file,
-  #   "s3://repo-doc-onlyoffice-com/onlyoffice/experimental/windows/builder/%s/%s/" % (version, build))
-  ret = 1
-  common.summary["innosetup deploy"] = ret
+  common.summary["inno deploy"] = 1
+  if ret == 0:
+    utils.log_h1("inno deploy " + inno_file)
+    ret = utils.cmd(
+        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+        "build\\" + inno_file, dest,
+        verbose=True
+    )
+    common.summary["inno deploy"] = ret
   return
-
-# def make_win_portable():
-#   log("\n=== Build portable\n")
-#   log("--- " + portable_zip_file)
-#   if is_file(portable_zip_file):
-#     log("! file exist, skip")
-#     return
-#   cmd("7z", ["a", "-y", portable_zip_file, get_path(base_dir, "*")])
-#   return

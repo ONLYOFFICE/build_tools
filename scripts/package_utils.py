@@ -67,6 +67,9 @@ def get_abspath(path):
 def get_dirname(path):
   return os.path.dirname(path)
 
+def get_file_size(path):
+  return os.path.getsize(path)
+
 def get_script_dir(path):
   return get_dirname(os.path.realpath(path))
 
@@ -202,7 +205,7 @@ def cmd(*args, **kwargs):
     oldcwd = get_cwd()
     set_cwd(kwargs["chdir"])
   ret = subprocess.call(
-      [item for item in args], stderr=subprocess.STDOUT, shell=True
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
   )
   if "chdir" in kwargs and oldcwd:
     set_cwd(oldcwd)
@@ -212,19 +215,29 @@ def cmd_output(*args, **kwargs):
   if kwargs["verbose"]:
     log_h2("cmd output: " + " ".join(args))
   return subprocess.check_output(
-      [item for item in args], stderr=subprocess.STDOUT, shell=True
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
   )
 
-# def powershell(*args, **kwargs):
-#   if kwargs["verbose"]:
-#     log_h2("powershell: " + " ".join(args))
-#   return cmd("powershell", "-Command", args, verbose=False)
+def powershell(*args, **kwargs):
+  if "verbose" in kwargs:
+    log_h2("powershell: " + " ".join(args))
+  if "creates" in kwargs and is_exist(kwargs["creates"]):
+    return 0
+  args = ["powershell", "-Command"] + args
+  ret = subprocess.call(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  )
+  return ret
 
 def ps1(file, *args, **kwargs):
   if "verbose" in kwargs:
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
+  if "creates" in kwargs and is_exist(kwargs["creates"]):
+    return 0
   args = ["powershell", file] + args
-  ret = cmd(*args, verbose=False)
+  ret = subprocess.call(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  )
   return ret
 
 # def download_file(url, path):

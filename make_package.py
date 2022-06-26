@@ -38,6 +38,7 @@ common.build = args.build if (args.build is not None) else utils.get_env("BUILD_
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.summary = {}
+common.deploy_list = []
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))

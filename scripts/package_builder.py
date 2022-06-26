@@ -5,7 +5,11 @@ import package_common as common
 import package_branding as branding
 
 def make():
-  utils.log_h1("builder")
+  if len([t for t in common.targets if t.startswith("builder")]):
+    utils.log_h1("builder")
+  else:
+    return
+
   if utils.is_windows():
     make_windows()
   elif utils.is_linux():
@@ -91,7 +95,7 @@ def make_inno():
   if common.sign:
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
-  ret = utils.ps1("exe\\make.ps1", args, verbose=True)
+  ret = utils.ps1("make_inno.ps1", args, verbose=True)
   common.summary["inno build"] = ret
 
   common.summary["inno deploy"] = 1

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import package_utils as utils
 import package_common as common
@@ -99,9 +100,19 @@ def make_inno():
   #   common.summary["inno deploy"] = rc
   return
 
-# def make_linux():
-#   utils.set_cwd("document-builder-package")
-#   utils.sh("make", "clean")
-#   utils.sh("make", "packages")
-#   utils.set_cwd(common.workspace_dir)
-#   return
+def make_linux():
+  utils.set_cwd("document-builder-package")
+
+  rc = utils.sh("make clean", verbose=True)
+  common.summary["builder clean"] = rc
+
+  args = []
+  if common.platform == "linux_aarch64":
+    args += ["-e", "UNAME_M=aarch64"]
+  if not branding.onlyoffice:
+    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  rc = utils.sh("make packages " + " ".join(args), verbose=True)
+  common.summary["builder build"] = rc
+
+  utils.set_cwd(common.workspace_dir)
+  return

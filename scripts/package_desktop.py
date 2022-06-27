@@ -2,23 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-from package_utils import *
-from package_branding import *
+import base
+import package_utils as utils
+import package_common as common
+import package_branding as branding
 
 def make():
-  if system == 'windows':
+  utils.log_h1("DESKTOP")
+  if utils.is_windows():
     make_windows()
-  elif system == 'darwin':
+  elif utils.is_macos():
     make_macos()
-  elif system == 'linux':
-    if 'packages' in targets:
-      set_cwd(build_dir)
-      log("Clean")
-      cmd("make", ["clean"])
-      log("Build packages")
-      cmd("make", ["packages"])
+  elif utils.is_linux():
+    make_linux()
   else:
-    exit(1)
+    utils.log("Unsupported host OS")
   return
 
 #
@@ -317,4 +315,25 @@ def make_sparkle_updates():
     if (-1 == file.find(app_version)) and (file.endswith(".zip") or
           file.endswith(".html")):
       delete_file(updates_dir + '/' + file)
+  return
+
+#
+# Linux
+#
+
+def make_linux():
+  utils.set_cwd("desktop-apps/win-linux/package/linux")
+
+  rc = utils.cmd("make", "clean", verbose=True)
+  common.summary["desktop clean"] = rc
+
+  args = []
+  if common.platform == "linux_aarch64":
+    args += ["-e", "UNAME_M=aarch64"]
+  if not branding.onlyoffice:
+    args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
+  rc = utils.cmd("make", "packages", *args, verbose=True)
+  common.summary["desktop build"] = rc
+
+  utils.set_cwd(common.workspace_dir)
   return

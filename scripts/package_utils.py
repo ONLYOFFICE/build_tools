@@ -246,10 +246,14 @@ def ps1(file, args=[], **kwargs):
 #   powershell(["Invoke-WebRequest", url, "-OutFile", path])
 #   return
 
-def sh(*args, **kwargs):
-  if kwargs["verbose"]:
-    log_h2("sh: " + " ".join(args))
-  # command = prog
-  # for arg in args:
-  #   command += (" \"%s\"" % arg)
+def sh(command, **kwargs):
+  if "verbose" in kwargs:
+    log_h2("sh: " + command)
   return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
+
+def sh_output(command, **kwargs):
+  if "verbose" in kwargs:
+    log_h2("sh output: " + command)
+  return subprocess.check_output(
+      command, stderr=subprocess.STDOUT, shell=True
+  )

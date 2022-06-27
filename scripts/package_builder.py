@@ -5,17 +5,13 @@ import package_common as common
 import package_branding as branding
 
 def make():
-  if len([t for t in common.targets if t.startswith("builder")]):
-    utils.log_h1("builder")
-  else:
-    return
-
+  utils.log_h1("BUILDER")
   if utils.is_windows():
     make_windows()
   elif utils.is_linux():
     make_linux()
   else:
-    utils.log("Unsupported builder on host OS")
+    utils.log("Unsupported host OS")
   return
 
 def make_windows():
@@ -28,8 +24,13 @@ def make_windows():
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
   package_name = company + "_" + product
   package_version = common.version + "." + common.build
-  if "windows_x64" == common.platform:   suffix = "x64"
-  elif "windows_x86" == common.platform: suffix = "x86"
+  suffixes = {
+    "windows_x64": "x64",
+    "windows_x86": "x86",
+    "windows_x64_xp": "x64_xp",
+    "windows_x86_xp": "x86_xp"
+  }
+  suffix = suffixes[common.platform]
   zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
 
@@ -38,53 +39,39 @@ def make_windows():
     utils.delete_dir("build")
 
   utils.log_h1("copy arifacts")
-  utils.create_dir("build\\data")
-  utils.copy_dir_content(source_dir, "build\\data\\")
+  utils.create_dir("build\\app")
+  utils.copy_dir_content(source_dir, "build\\app\\")
 
-  if "builder-zip" in common.targets:
-    make_zip()
-
-  if "builder-inno" in common.targets:
-    make_inno()
+  # if "builder-zip" in common.targets:
+  make_zip()
+  # if "builder-inno" in common.targets:
+  make_inno()
 
   utils.set_cwd(common.workspace_dir)
   return
 
-# def make_linux():
-#   utils.set_cwd("document-builder-package")
-#   utils.sh("make", "clean")
-#   utils.sh("make", "packages")
-#   utils.set_cwd(common.workspace_dir)
-#   return
-
 def make_zip():
-  dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
-      + common.version + "/" + common.build + "/"
-
-  common.summary["zip build"] = 1
+  common.summary["builder zip build"] = 1
   utils.log_h1("zip build " + zip_file)
-  ret = utils.cmd("7z", "a", "-y", zip_file, "data\\*",
-      chdir="build", creates="build\\" + zip_file, verbose=True)
-  common.summary["zip build"] = ret
+  rc = utils.cmd("7z", "a", "-y", "..\\" + zip_file, ".\\*",
+      chdir="build\\app", creates="build\\" + zip_file, verbose=True)
+  common.summary["builder zip build"] = rc
 
-  common.summary["zip deploy"] = 1
-  if ret == 0:
-    utils.log_h1("zip deploy " + zip_file)
-    ret = utils.cmd(
-        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-        "build\\" + zip_file, dest,
-        verbose=True
-    )
-    common.summary["zip deploy"] = ret
+  # common.summary["zip deploy"] = 1
+  # if rc == 0:
+  #   utils.log_h1("zip deploy " + zip_file)
+  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+  #       + common.version + "/" + common.build + "/"
+  #   rc = utils.cmd(
+  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+  #       "build\\" + zip_file, dest,
+  #       verbose=True
+  #   )
+  #   common.summary["zip deploy"] = rc
   return
 
 def make_inno():
-  dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
-      + common.version + "/" + common.build + "/"
-
-  common.summary["inno build"] = 1
-  # if not common.deploy:
-  #   common.summary["inno deploy"] = 1
+  common.summary["builder inno build"] = 1
   utils.log_h1("inno build " + inno_file)
   # if utils.is_file(inno_file):
   #   utils.log("! file exist, skip")
@@ -95,16 +82,26 @@ def make_inno():
   if common.sign:
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
-  ret = utils.ps1("make_inno.ps1", args, verbose=True)
-  common.summary["inno build"] = ret
+  rc = utils.ps1(".\\make_inno.ps1", args,
+      creates="build\\" + inno_file, verbose=True)
+  common.summary["builder inno build"] = rc
 
-  common.summary["inno deploy"] = 1
-  if ret == 0:
-    utils.log_h1("inno deploy " + inno_file)
-    ret = utils.cmd(
-        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-        "build\\" + inno_file, dest,
-        verbose=True
-    )
-    common.summary["inno deploy"] = ret
+  # common.summary["inno deploy"] = 1
+  # if rc == 0:
+  #   utils.log_h1("inno deploy " + inno_file)
+  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+  #       + common.version + "/" + common.build + "/"
+  #   rc = utils.cmd(
+  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+  #       "build\\" + inno_file, dest,
+  #       verbose=True
+  #   )
+  #   common.summary["inno deploy"] = rc
   return
+
+# def make_linux():
+#   utils.set_cwd("document-builder-package")
+#   utils.sh("make", "clean")
+#   utils.sh("make", "packages")
+#   utils.set_cwd(common.workspace_dir)
+#   return

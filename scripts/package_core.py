@@ -5,27 +5,22 @@ import package_common as common
 import package_branding as branding
 
 def make():
-  if len([t for t in common.targets if t.startswith("core")]):
-    utils.log_h1("CORE")
-  else:
-    return
-
+  utils.log_h1("CORE")
   if not (utils.is_windows() or utils.is_macos() or utils.is_linux()):
     utils.log("Unsupported host OS")
     return
-
-  deploy_core()
+  if common.deploy:
+    make_core()
   return
 
-def deploy_core():
-  if not common.deploy:
-    return
-
+def make_core():
   prefix = common.platforms[common.platform]["prefix"]
   company = branding.company_name.lower()
-  if common.platform.startswith("windows"):  platform = "windows"
-  elif common.platform.startswith("darwin"): platform = "macos"
-  elif common.platform.startswith("linux"):  platform = "linux"
+  repos = {
+    "windows": "windows",
+    "darwin": "mac",
+    "linux": "linux"
+  }
   branch = utils.get_env("BRANCH_NAME")
   if branch is None:
     utils.log("BRANCH_NAME variable is undefined")
@@ -36,7 +31,7 @@ def deploy_core():
   else:
     version = common.version + "-" + common.build
   src = "build_tools/out/%s/%s/core/core.7z" % (prefix, company)
-  dest = common.s3_bucket + "/" + platform + "/core/" \
+  dest = common.s3_bucket + "/" + repos[common.os_family] + "/core/" \
       + branch + "/%s/" + arch + "/"
 
   utils.log_h1("core deploy")

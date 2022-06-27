@@ -223,20 +223,19 @@ def powershell(*args, **kwargs):
     log_h2("powershell: " + " ".join(args))
   if "creates" in kwargs and is_exist(kwargs["creates"]):
     return 0
-  args = ["powershell", "-Command"] + args
+  args = ["powershell", "-Command"] + [i for i in args]
   ret = subprocess.call(
-      [i for i in args], stderr=subprocess.STDOUT, shell=True
+      args, stderr=subprocess.STDOUT, shell=True
   )
   return ret
 
-def ps1(file, *args, **kwargs):
+def ps1(file, args=[], **kwargs):
   if "verbose" in kwargs:
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
   if "creates" in kwargs and is_exist(kwargs["creates"]):
     return 0
-  args = ["powershell", file] + args
   ret = subprocess.call(
-      [i for i in args], stderr=subprocess.STDOUT, shell=True
+      ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
   )
   return ret
 

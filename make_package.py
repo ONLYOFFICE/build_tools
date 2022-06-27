@@ -57,13 +57,20 @@ if common.branding is not None:
   sys.path.insert(-1, utils.get_path(common.branding + "/build_tools/scripts"))
 
 # build
-if not (common.platform.startswith(common.os_family) \
-    and (common.platform in common.platforms)):
-  exit("Unsupported platform on " + common.os_family)
-package_core.make()
-# package_desktop.make()
-package_builder.make()
-# package_server.make()
+if "core" in common.targets:
+  package_core.make()
+if "desktop" in common.targets:
+  package_desktop.make()
+if "builder" in common.targets:
+  package_builder.make()
+if "server-ce" in common.targets:
+  package_server.make("community")
+if "server-ee" in common.targets:
+  package_server.make("enterprise")
+if "server-de" in common.targets:
+  package_server.make("developer")
+# if "mobile" in common.targets:
+#   package_mobile.make()
 
 # summary
 utils.log_h1("Build summary")

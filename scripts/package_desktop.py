@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import base
 import package_utils as utils
 import package_common as common
 import package_branding as branding
@@ -24,174 +23,192 @@ def make():
 #
 
 def make_windows():
-  global package_version, sign, machine, arch, xp, iscc_args, source_dir, \
-    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file
+  global package_version, iscc_args, source_dir, arch_list, inno_arch_list, \
+    inno_file, inno_update_file, msi_file, zip_file
+  utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
-  set_cwd(get_abspath(git_dir, build_dir))
+  prefix = common.platforms[common.platform]["prefix"]
+  company = branding.company_name.lower()
+  product = branding.desktop_product_name.replace(" ","").lower()
+  package_name = branding.desktop_package_name
+  package_version = common.version + "." + common.build
+  source_dir = "..\\..\\..\\..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  arch_list = {
+    "windows_x64":    "x64",
+    "windows_x64_xp": "x64",
+    "windows_x86":    "x86",
+    "windows_x86_xp": "x86"
+  }
+  inno_arch_list = {
+    "windows_x64":    "64",
+    "windows_x86":    "32",
+    "windows_x64_xp": "64",
+    "windows_x86_xp": "32"
+  }
+  suffix = arch_list[common.platform]
+  if common.platform.endswith("_xp"): suffix += "_xp"
+  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
+  inno_update_file = "update\\editors_update_%s.exe" % suffix
+  msi_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
 
-  if 'clean' in targets:
-    log("\n=== Clean\n")
-    delete_dir(get_path("data/vcredist"))
-    delete_dir("DesktopEditors-cache")
-    delete_files("*.exe")
-    delete_files("*.msi")
-    delete_files("*.aic")
-    delete_files("*.tmp")
-    delete_files("*.zip")
-    delete_files(get_path("update/*.exe"))
-    delete_files(get_path("update/*.xml"))
-    delete_files(get_path("update/*.html"))
+  if common.clean:
+    utils.log_h2("desktop clean")
+    utils.delete_dir("data\\vcredist")
+    utils.delete_dir("DesktopEditors-cache")
+    utils.delete_files("*.exe")
+    utils.delete_files("*.msi")
+    utils.delete_files("*.aic")
+    utils.delete_files("*.tmp")
+    utils.delete_files("*.zip")
+    utils.delete_files("update\\*.exe")
+    utils.delete_files("update\\*.xml")
+    utils.delete_files("update\\*.html")
 
-  package_version = version + '.' + build
-  sign = 'sign' in targets
+  make_zip()
 
-  for target in targets:
-    if not (target.startswith('innosetup') or target.startswith('advinst') or 
-            target.startswith('portable')):
-      continue
+  for year in branding.desktop_vcredist_list:
+    download_vcredist(year)
 
-    machine = get_platform(target)['machine']
-    arch = get_platform(target)['arch']
-    xp = get_platform(target)['xp']
-    suffix = arch + ("_xp" if xp else "")
-    source_prefix = "win_" + machine + ("_xp" if xp else "")
-    source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
+  if vcredist_status != 0:
+    common.summary["desktop inno build"] = 1
+    common.summary["desktop inno update build"] = 1
+    common.summary["desktop advinst build"] = 1
+    return
 
-    if target.startswith('innosetup'):
-      for year in vcredist_list:
-        download_vcredist(year)
+  make_inno()
+  make_inno_update()
 
-      innosetup_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
-      make_innosetup()
+  if common.platform == "windows_x64":
+    make_winsparkle_files()
 
-      if 'winsparkle-update' in targets:
-        innosetup_update_file = get_path("update/editors_update_%s.exe" % suffix)
-        make_innosetup_update()
+  if common.platform in ["windows_x64", "windows_x86"]:
+    make_msi()
+  return
 
-      if 'winsparkle-files' in targets:
-        make_winsparkle_files()
-
-    if target.startswith('advinst'):
-      advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
-      make_advinst()
-
-    if target.startswith('portable'):
-      portable_zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
-      make_win_portable()
-
+def make_zip():
+  utils.log_h1("desktop zip build")
+  utils.log_h2(zip_file)
+  rc = utils.cmd("7z", "a", "-y", zip_file, source_dir + "\\*",
+                 creates=zip_file, verbose=True)
+  common.summary["desktop zip build"] = rc
   return
 
 def download_vcredist(year):
-  log("\n=== Download vcredist " + year + "\n")
-  vcredist = get_path("data/vcredist/vcredist_%s_%s.exe" % (year, arch))
-  log("--- " + vcredist)
-  if is_file(vcredist):
-    log("! file exist, skip")
-    return
-  create_dir(get_dirname(vcredist))
-  download_file(vcredist_links[year][machine], vcredist)
+  global vcredist_status
+  utils.log_h1("download vcredist " + year)
+
+  arch = arch_list[common.platform]
+  link = common.vcredist_links[year][arch]["url"]
+  checksum = common.vcredist_links[year][arch]["checksum"]
+  vcredist_file = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
+
+  utils.log_h2(vcredist_file)
+  utils.create_dir(utils.get_dirname(vcredist_file))
+  rc = utils.download_file(link, vcredist_file, checksum)
+  vcredist_status = rc
+  common.summary["desktop vcredist download"] = rc
   return
 
-def make_innosetup():
-  log("\n=== Build innosetup project\n")
+def make_inno():
   global iscc_args
+  utils.log_h1("innosetup project build")
+  utils.log_h2(inno_file)
+
   iscc_args = [
-    "/Qp",
+    # "/Qp",
     "/DsAppVersion=" + package_version,
     "/DDEPLOY_PATH=" + source_dir,
-    "/D_ARCH=" + machine
+    "/D_ARCH=" + inno_arch_list[common.platform]
   ]
-  if onlyoffice:
+  if branding.onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
   else:
-    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir))
-  if xp:
+    iscc_args.append("/DsBrandingFolder=..\\..\\..\\..\\" + common.branding + \
+        "\\desktop-apps\\win-linux\\package\\windows")
+  if common.platform in ["windows_x64_xp", "windows_x86_xp"]:
     iscc_args.append("/D_WIN_XP=1")
-  if sign:
+  if common.sign:
     iscc_args.append("/DENABLE_SIGNING=1")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
-  log("--- " + innosetup_file)
-  if is_file(innosetup_file):
-    log("! file exist, skip")
-    return
-  cmd("iscc", iscc_args + ["common.iss"])
+    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
+        branding.cert_name + "$q /t " + common.tsa_server + " $f")
+  args = ["iscc"] + iscc_args + ["common.iss"]
+  rc = utils.cmd(*args, creates=inno_file, verbose=True)
+  common.summary["desktop inno build"] = rc
   return
 
-def make_innosetup_update():
-  log("\n=== Build innosetup update project\n")
-  log("--- " + innosetup_update_file)
-  if is_file(innosetup_update_file):
-    log("! file exist, skip")
-    return
-  cmd("iscc", iscc_args + ["/DTARGET_NAME=" + innosetup_file, "update_common.iss"])
+def make_inno_update():
+  utils.log_h1("build innosetup update project")
+  utils.log_h2(inno_update_file)
+
+  args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
+  rc = utils.cmd(*args, creates=inno_update_file, verbose=True)
+  common.summary["desktop inno update build"] = rc
   return
 
 def make_winsparkle_files():
-  log("\n=== Build winsparkle files\n")
+  utils.log_h1("winsparkle files build")
 
-  awk_branding = "update/branding.awk"
-  if not onlyoffice:
-    build_branding_dir = get_abspath(git_dir, branding_dir, "win-linux/package/windows")
+  if branding.onlyoffice:
+    awk_branding = "update/branding.awk"
   else:
-    build_branding_dir = get_path(".")
+    awk_branding = "../../../../" + common.branding + \
+        "/desktop-apps/win-linux/package/windows/update/branding.awk"
   awk_args = [
-    "-v", "Version=" + version,
-    "-v", "Build=" + build,
-    "-v", "Timestamp=" + timestamp,
-    "-i", get_path(build_branding_dir, awk_branding)
+    "-v", "Version=" + common.version,
+    "-v", "Build=" + common.build,
+    "-v", "Timestamp=" + common.timestamp,
+    "-i", awk_branding
   ]
 
-  appcast = get_path("update/appcast.xml")
-  log("--- " + appcast)
-  if is_file(appcast):
-    log("! file exist, skip")
-  else:
-    command = "env LANG=en_US.UTF-8 awk " + ' '.join(awk_args) + \
-      " -f " + appcast + ".awk"
-    appcast_result = proc_open(command)
-    if appcast_result['stderr'] != "":
-      log("! error: " + appcast_result['stderr'])
-    write_file(appcast, appcast_result['stdout'])
+  appcast = "update/appcast.xml"
+  utils.log_h2(appcast)
+  args = ["env", "LANG=en_US.UTF-8", "awk"] + awk_args + ["-f", appcast + ".awk"]
+  appcast_result = utils.cmd_output(*args, verbose=True)
+  utils.write_file(appcast, appcast_result)
 
-  changes_dir = get_path(build_branding_dir, "update/changes", version)
-  for lang, base in update_changes_list.items():
-    changes = get_path("update/" + base + ".html")
-    if   lang == 'en': encoding = 'en_US.UTF-8'
-    elif lang == 'ru': encoding = 'ru_RU.UTF-8'
-    log("--- " + changes)
-    if is_file(changes):
-      log("! file exist, skip")
+  if branding.onlyoffice:
+    changes_dir = "update/changes/" + common.version
+  else:
+    changes_dir = "../../../../" + common.branding + \
+        "/desktop-apps/win-linux/package/windows/update/changes/" + common.version
+  for lang, base in branding.desktop_update_changes_list.items():
+    changes = "update/%s.html" % base
+    if   lang == "en": encoding = "en_US.UTF-8"
+    elif lang == "ru": encoding = "ru_RU.UTF-8"
+    utils.log_h2(changes)
+    changes_file = "%s/%s.html" % (changes_dir, lang)
+    args = ["env", "LANG=" + encoding, "awk"] + awk_args + \
+      ["-f", "update/changes.html.awk", changes_file]
+
+    if utils.is_exist(changes_file):
+      changes_result = utils.cmd_output(*args, verbose=True)
+      print(changes_result)
+      utils.write_file(changes, changes_result)
     else:
-      command = "env LANG=" + encoding + " awk " + ' '.join(awk_args) + \
-        " -f update\\changes.html.awk " + changes_dir + "\\" + lang + ".html"
-      changes_result = proc_open(command)
-      if changes_result['stderr'] != "":
-        log("! error: " + changes_result['stderr'])
-      write_file(changes, changes_result['stdout'])
+      utils.log("! file not exist: " + changes_file)
   return
 
-def make_advinst():
-  log("\n=== Build advanced installer project\n")
-  log("--- " + advinst_file)
-  if is_file(advinst_file):
-    log("! file exist, skip")
-    return
+def make_msi():
+  utils.log_h1("advanced installer project build")
+  utils.log_h2(msi_file)
+
+  arch = arch_list[common.platform]
+
   aic_content = [";aic"]
-  if not onlyoffice:
-    copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".bmp")
-    copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".png")
+  if not branding.onlyoffice:
+    utils.copy_dir_content("..\\..\\..\\..\\" + common.branding + \
+        "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".bmp")
+    utils.copy_dir_content("..\\..\\..\\..\\" + common.branding + \
+        "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".png")
     aic_content += [
-      "SetProperty ProductName=\"%s\"" % product_name_full,
-      "SetProperty Manufacturer=\"%s\"" % publisher_name.replace('"', '""'),
-      "SetProperty ARPURLINFOABOUT=\"%s\"" % info_about_url,
-      "SetProperty ARPURLUPDATEINFO=\"%s\"" % update_info_url,
-      "SetProperty ARPHELPLINK=\"%s\"" % help_url,
-      "SetProperty ARPHELPTELEPHONE=\"%s\"" % help_phone,
-      "SetProperty ARPCONTACT=\"%s\"" % publisher_address,
+      "SetProperty ProductName=\"%s\"" % branding.desktop_product_name_full,
+      "SetProperty Manufacturer=\"%s\"" % branding.desktop_publisher_name.replace('"', '""'),
+      "SetProperty ARPURLINFOABOUT=\"%s\"" % branding.desktop_info_about_url,
+      "SetProperty ARPURLUPDATEINFO=\"%s\"" % branding.desktop_update_info_url,
+      "SetProperty ARPHELPLINK=\"%s\"" % branding.desktop_help_url,
+      "SetProperty ARPHELPTELEPHONE=\"%s\"" % branding.desktop_help_phone,
+      "SetProperty ARPCONTACT=\"%s\"" % branding.desktop_publisher_address,
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
       "DelLanguage 1041 -buildname DefaultBuild",
@@ -202,28 +219,20 @@ def make_advinst():
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild"
     ]
-  if not sign:        aic_content.append("ResetSig")
-  if machine == '32': aic_content.append("SetPackageType x86")
+  if not common.sign: aic_content.append("ResetSig")
+  if arch == "x86": aic_content.append("SetPackageType x86")
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
-    "UpdateFile APPDIR\\DesktopEditors.exe " + get_path(source_dir, "DesktopEditors.exe"),
+    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
-    "SetPackageName " + advinst_file + " -buildname DefaultBuild",
+    "SetPackageName " + msi_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
   ]
-  write_file("DesktopEditors.aic", "\r\n".join(aic_content), 'utf-8-sig')
-  cmd("AdvancedInstaller.com",
-      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
-  return
-
-def make_win_portable():
-  log("\n=== Build portable\n")
-  log("--- " + portable_zip_file)
-  if is_file(portable_zip_file):
-    log("! file exist, skip")
-    return
-  cmd("7z", ["a", "-y", portable_zip_file, get_path(source_dir, "*")])
+  utils.write_file("DesktopEditors.aic", "\r\n".join(aic_content), "utf-8-sig")
+  rc = utils.cmd("AdvancedInstaller.com", "/execute", \
+    "DesktopEditors.aip", "DesktopEditors.aic", "-nofail")
+  common.summary["desktop advinst build"] = rc
   return
 
 #

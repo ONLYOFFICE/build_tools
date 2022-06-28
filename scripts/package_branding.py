@@ -9,28 +9,26 @@ company_name_l = company_name.lower()
 publisher_name = "Ascensio System SIA"
 cert_name = "Ascensio System SIA"
 
-builder_product_name = "Document Builder"
+if utils.is_windows():
+  desktop_product_name = "Desktop Editors"
+  desktop_product_name_s = desktop_product_name.replace(" ","")
+  desktop_package_name = company_name + "_" + desktop_product_name_s
+  desktop_vcredist_list = ["2022"]
+  desktop_update_changes_list = {
+    "en": "changes",
+    "ru": "changes_ru"
+  }
 
-packages = {
-  "windows_x64":      [
-    "core",
-    "builder-portable",
-    "builder-innosetup"
-  ],
-  "windows_x64_xp":   [
-    "core",
-    "builder-portable",
-    "builder-innosetup"
-  ],
-  "windows_x86":      [],
-  "windows_x86_xp":   [],
-  "darwin_x86_64":    [
-    "core"
-  ],
-  "darwin_x86_64_v8": [],
-  "darwin_arm64":     [],
-  "linux_x86_64":     [
-    "core"
-  ],
-  "linux_aarch64":    []
-}
+if utils.is_macos():
+  desktop_package_name = "ONLYOFFICE"
+  desktop_build_dir = "desktop-apps/macos"
+  desktop_branding_dir = "desktop-apps/macos"
+  desktop_updates_dir = "build/update"
+  desktop_changes_dir = "ONLYOFFICE/update/updates/ONLYOFFICE/changes"
+  desktop_update_changes_list = {
+    "en": "ReleaseNotes",
+    "ru": "ReleaseNotesRU"
+  }
+  sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"
+
+builder_product_name = "Document Builder"

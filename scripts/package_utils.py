@@ -216,7 +216,7 @@ def cmd_output(*args, **kwargs):
     log_h2("cmd output: " + " ".join(args))
   return subprocess.check_output(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
-  )
+  ).decode("utf-8")
 
 def powershell(*args, **kwargs):
   if "verbose" in kwargs:
@@ -239,12 +239,21 @@ def ps1(file, args=[], **kwargs):
   )
   return ret
 
-# def download_file(url, path):
-#   log("- download file: " + path + " < " + url)
-#   if is_file(path):
-#     os.remove(path)
-#   powershell(["Invoke-WebRequest", url, "-OutFile", path])
-#   return
+def download_file(url, path, checksum, verbose=False):
+  if verbose:
+    log("download file: " + path + " < " + url)
+  ret = powershell("Invoke-WebRequest", url, "-OutFile", path)
+  if not is_file(path):
+    return 1
+  # if is_file(path):
+  #   exists_checksum = get_checksum(path)
+  #   if exists_checksum == checksum:
+  #     log("file exist (" + checksum + ")")
+  #     return True
+  #   else:
+  #     log("wrong checksum (" + checksum + "), delete")
+  #     os.remove(path)
+  return ret
 
 def sh(command, **kwargs):
   if "verbose" in kwargs:
@@ -256,4 +265,4 @@ def sh_output(command, **kwargs):
     log_h2("sh output: " + command)
   return subprocess.check_output(
       command, stderr=subprocess.STDOUT, shell=True
-  )
+  ).decode("utf-8")

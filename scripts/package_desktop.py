@@ -84,6 +84,8 @@ def make_windows():
 
   if common.platform in ["windows_x64", "windows_x86"]:
     make_msi()
+
+  utils.set_cwd(common.workspace_dir)
   return
 
 def make_zip():

@@ -105,7 +105,7 @@ def download_vcredist(year):
 
   utils.log_h2(vcredist_file)
   utils.create_dir(utils.get_dirname(vcredist_file))
-  rc = utils.download_file(link, vcredist_file, checksum)
+  rc = utils.download_file(link, vcredist_file, checksum, verbose=True)
   vcredist_status = rc
   common.summary["desktop vcredist download"] = rc
   return

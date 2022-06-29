@@ -242,7 +242,7 @@ def ps1(file, args=[], **kwargs):
 def download_file(url, path, checksum, verbose=False):
   if verbose:
     log("download file: " + path + " < " + url)
-  ret = powershell("Invoke-WebRequest", url, "-OutFile", path)
+  ret = powershell("Invoke-WebRequest", url, "-OutFile", path, verbose=verbose)
   if not is_file(path):
     return 1
   # if is_file(path):

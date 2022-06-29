@@ -163,14 +163,15 @@ def make_winsparkle_files():
 
   appcast = "update/appcast.xml"
   utils.log_h2(appcast)
-  args = ["env", "LANG=en_US.UTF-8", "awk"] + awk_args + ["-f", appcast + ".awk"]
+  args = ["env", "LANG=en_US.UTF-8", "awk"] + \
+      awk_args + ["-f update/appcast.xml.awk"]
   appcast_result = utils.cmd_output(*args, verbose=True)
   utils.write_file(appcast, appcast_result)
 
   appcast_prod = "update/appcast-prod.xml"
   utils.log_h2(appcast_prod)
-  args = ["env", "LANG=en_US.UTF-8", "awk"] + awk_args + \
-    ["-v", "Prod=1", "-f", appcast_prod + ".awk"]
+  args = ["env", "LANG=en_US.UTF-8", "awk", "-v", "Prod=1"] + \
+      awk_args + ["-f update/appcast.xml.awk"]
   appcast_result = utils.cmd_output(*args, verbose=True)
   utils.write_file(appcast, appcast_result)
 

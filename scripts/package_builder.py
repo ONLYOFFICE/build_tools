@@ -54,8 +54,8 @@ def make_windows():
 def make_zip():
   common.summary["builder zip build"] = 1
   utils.log_h1("zip build " + zip_file)
-  rc = utils.cmd("7z", "a", "-y", "..\\" + zip_file, ".\\*",
-      chdir="build\\app", creates="build\\" + zip_file, verbose=True)
+  rc = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
+      chdir="build", creates="build\\" + zip_file, verbose=True)
   common.summary["builder zip build"] = rc
 
   # common.summary["zip deploy"] = 1

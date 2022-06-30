@@ -22,31 +22,31 @@ vcredist_links = {
   "2022": {
     "x64": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "checksum": ""
+      "md5": "cdce5d5ee259d8071fa82f522c5c7d6e"
     },
     "x86": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "checksum": ""
+      "md5": "dd89ae7bc09cad5648524905d0f53214"
     }
   },
   "2015": {
     "x64": {
       "url": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
-      "checksum": ""
+      "md5": "27b141aacc2777a82bb3fa9f6e5e5c1c"
     },
     "x86": {
       "url": "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe",
-      "checksum": ""
+      "md5": "1a15e6606bac9647e7ad3caa543377cf"
     }
   },
   "2013": {
     "x64": {
       "url": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
-      "checksum": ""
+      "md5": "96b61b8e069832e6b809f24ea74567ba"
     },
     "x86": {
       "url": "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe",
-      "checksum": ""
+      "md5": "0fc525b6b7b96a87523daa7a0013c69d"
     }
   }
 }

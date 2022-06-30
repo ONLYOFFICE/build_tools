@@ -3,6 +3,7 @@
 
 import codecs
 import glob
+import hashlib
 import os
 import platform
 import re
@@ -83,6 +84,13 @@ def is_exist(path):
   if os.path.exists(path):
     return True
   return False
+
+def get_md5(path):
+  if os.path.exists(path):
+    md5_hash = hashlib.md5()
+    md5_hash.update(open(path, "rb").read())
+    return md5_hash.hexdigest()
+  return
 
 def create_dir(path):
   log("- create dir: " + path)
@@ -239,20 +247,19 @@ def ps1(file, args=[], **kwargs):
   )
   return ret
 
-def download_file(url, path, checksum, verbose=False):
+def download_file(url, path, md5, verbose=False):
   if verbose:
-    log("download file: " + path + " < " + url)
-  ret = powershell("Invoke-WebRequest", url, "-OutFile", path, verbose=verbose)
-  if not is_file(path):
+    log("download file: %s < %s (%s)" % (path, url, md5))
+  if is_file(path):
+    if get_md5(path) == md5:
+      log("! file already exist (match checksum)")
+      return 0
+    else:
+      log("! wrong checksum (%s), delete" % md5)
+      os.remove(path)
+  ret = powershell("(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path), verbose=True)
+  if get_md5(path) != md5:
     return 1
-  # if is_file(path):
-  #   exists_checksum = get_checksum(path)
-  #   if exists_checksum == checksum:
-  #     log("file exist (" + checksum + ")")
-  #     return True
-  #   else:
-  #     log("wrong checksum (" + checksum + "), delete")
-  #     os.remove(path)
   return ret
 
 def sh(command, **kwargs):

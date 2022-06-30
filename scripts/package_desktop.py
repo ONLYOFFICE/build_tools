@@ -54,7 +54,7 @@ def make_windows():
 
   if common.clean:
     utils.log_h2("desktop clean")
-    utils.delete_dir("data\\vcredist")
+    # utils.delete_dir("data\\vcredist")
     utils.delete_dir("DesktopEditors-cache")
     utils.delete_files("*.exe")
     utils.delete_files("*.msi")
@@ -67,10 +67,12 @@ def make_windows():
 
   make_zip()
 
+  vc_total = True
   for year in branding.desktop_vcredist_list:
-    download_vcredist(year)
+    if download_vcredist(year) != 0:
+      vc_total = False
 
-  if vcredist_status != 0:
+  if vc_total:
     common.summary["desktop inno build"] = 1
     common.summary["desktop inno update build"] = 1
     common.summary["desktop advinst build"] = 1
@@ -97,20 +99,18 @@ def make_zip():
   return
 
 def download_vcredist(year):
-  global vcredist_status
   utils.log_h1("download vcredist " + year)
 
   arch = arch_list[common.platform]
   link = common.vcredist_links[year][arch]["url"]
-  checksum = common.vcredist_links[year][arch]["checksum"]
+  md5 = common.vcredist_links[year][arch]["md5"]
   vcredist_file = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
 
   utils.log_h2(vcredist_file)
   utils.create_dir(utils.get_dirname(vcredist_file))
-  rc = utils.download_file(link, vcredist_file, checksum, verbose=True)
-  vcredist_status = rc
+  rc = utils.download_file(link, vcredist_file, md5, verbose=True)
   common.summary["desktop vcredist download"] = rc
-  return
+  return rc
 
 def make_inno():
   global iscc_args

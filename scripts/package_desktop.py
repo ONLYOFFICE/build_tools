@@ -343,7 +343,7 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/win-linux/package/linux")
 
-  rc = utils.cmd("make", "clean", verbose=True)
+  rc = utils.sh("make clean", verbose=True)
   common.summary["desktop clean"] = rc
 
   args = []
@@ -351,7 +351,7 @@ def make_linux():
     args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
-  rc = utils.cmd("make", "packages", *args, verbose=True)
+  rc = utils.sh("make packages " + " ".join(args), verbose=True)
   common.summary["desktop build"] = rc
 
   utils.set_cwd(common.workspace_dir)

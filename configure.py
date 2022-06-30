@@ -40,6 +40,7 @@ parser.add_option("--features", action="store", type="string", dest="features", 
 parser.add_option("--vs-version", action="store", type="string", dest="vs-version", default="2015", help="version of visual studio")
 parser.add_option("--vs-path", action="store", type="string", dest="vs-path", default="", help="path to vcvarsall")
 parser.add_option("--siteUrl", action="store", type="string", dest="siteUrl", default="127.0.0.1", help="site url")
+parser.add_option("--multiprocess", action="store", type="string", dest="multiprocess", default="1", help="provides ability to specify single process for make")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

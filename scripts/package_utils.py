@@ -31,7 +31,7 @@ def log(string, end='\n'):
 
 def log_h1(string):
   line = "-" * (len(string) + 8)
-  log(line + "\n--- " + string + " ---\n" + line)
+  log("\n" + line + "\n--- " + string + " ---\n" + line + "\n")
   return
 
 def log_h2(string):

@@ -148,12 +148,24 @@ def make_winsparkle_files():
   if is_file(appcast):
     log("! file exist, skip")
   else:
-    command = "env LANG=en_US.UTF-8 awk " + ' '.join(awk_args) + \
-      " -f " + appcast + ".awk"
+    command = "env LANG=en_US.UTF-8 awk " + \
+        ' '.join(awk_args) + " -f update/appcast.xml.awk"
     appcast_result = proc_open(command)
     if appcast_result['stderr'] != "":
       log("! error: " + appcast_result['stderr'])
     write_file(appcast, appcast_result['stdout'])
+
+  appcast_prod = get_path("update/appcast-prod.xml")
+  log("--- " + appcast_prod)
+  if is_file(appcast_prod):
+    log("! file exist, skip")
+  else:
+    command = "env LANG=en_US.UTF-8 awk -v Prod=1 " + \
+        ' '.join(awk_args) + " -f update/appcast.xml.awk"
+    appcast_result = proc_open(command)
+    if appcast_result['stderr'] != "":
+      log("! error: " + appcast_result['stderr'])
+    write_file(appcast_prod, appcast_result['stdout'])
 
   changes_dir = get_path(build_branding_dir, "update/changes", version)
   for lang, base in update_changes_list.items():

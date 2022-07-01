@@ -205,31 +205,31 @@ def delete_files(src):
   return
 
 def cmd(*args, **kwargs):
-  if "verbose" in kwargs:
+  if kwargs.get("verbose"):
     log_h2("cmd: " + " ".join(args))
-  if "creates" in kwargs and is_exist(kwargs["creates"]):
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return 0
-  if "chdir" in kwargs and is_dir(kwargs["chdir"]):
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
     oldcwd = get_cwd()
     set_cwd(kwargs["chdir"])
   ret = subprocess.call(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
   )
-  if "chdir" in kwargs and oldcwd:
+  if kwargs.get("chdir") and oldcwd:
     set_cwd(oldcwd)
   return ret
 
 def cmd_output(*args, **kwargs):
-  if kwargs["verbose"]:
+  if kwargs.get("verbose"):
     log_h2("cmd output: " + " ".join(args))
   return subprocess.check_output(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
   ).decode("utf-8")
 
 def powershell(*args, **kwargs):
-  if "verbose" in kwargs:
+  if kwargs.get("verbose"):
     log_h2("powershell: " + " ".join(args))
-  if "creates" in kwargs and is_exist(kwargs["creates"]):
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return 0
   args = ["powershell", "-Command"] + [i for i in args]
   ret = subprocess.call(
@@ -238,9 +238,9 @@ def powershell(*args, **kwargs):
   return ret
 
 def ps1(file, args=[], **kwargs):
-  if "verbose" in kwargs:
+  if kwargs.get("verbose"):
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
-  if "creates" in kwargs and is_exist(kwargs["creates"]):
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return 0
   ret = subprocess.call(
       ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
@@ -263,12 +263,12 @@ def download_file(url, path, md5, verbose=False):
   return ret
 
 def sh(command, **kwargs):
-  if "verbose" in kwargs:
+  if kwargs.get("verbose"):
     log_h2("sh: " + command)
   return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
 
 def sh_output(command, **kwargs):
-  if "verbose" in kwargs:
+  if kwargs.get("verbose"):
     log_h2("sh output: " + command)
   return subprocess.check_output(
       command, stderr=subprocess.STDOUT, shell=True

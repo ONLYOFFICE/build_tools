@@ -293,7 +293,8 @@ def make_macos():
 def make_dmg():
   utils.log_h1(scheme + " build")
   utils.log_h2("build/" + package_name + ".app")
-  rc = utils.sh("bundler exec fastlane " + lane + " skip_git_bump:true", verbose=True)
+  rc = utils.sh("bundler exec fastlane " + lane + \
+      " git_bump:false notarization:false", verbose=True)
   common.summary["desktop build"] = rc
   return
 

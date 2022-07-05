@@ -1,101 +1,118 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from package_utils import *
-from package_branding import *
+import package_utils as utils
+import package_common as common
+import package_branding as branding
 
 def make():
-  if system == 'windows':
+  utils.log_h1("BUILDER")
+  if utils.is_windows():
     make_windows()
-  elif system == 'linux':
-    if 'packages' in targets:
-      set_cwd(build_dir)
-      log("Clean")
-      cmd("make", ["clean"])
-      log("Build packages")
-      cmd("make", ["packages"])
+  elif utils.is_linux():
+    make_linux()
   else:
-    exit(1)
+    utils.log("Unsupported host OS")
   return
-
-#
-# Windows
-#
 
 def make_windows():
-  global package_version, sign, machine, arch, source_dir, base_dir, \
-    innosetup_file, portable_zip_file, isxdl_file
-  base_dir = "base"
-  isxdl_file = "exe/scripts/isxdl/isxdl.dll"
+  global inno_file, zip_file
+  utils.set_cwd("document-builder-package")
 
-  set_cwd(get_abspath(git_dir, build_dir))
+  prefix = common.platforms[common.platform]["prefix"]
+  company = branding.company_name.lower()
+  product = branding.builder_product_name.replace(" ","").lower()
+  source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  package_name = company + "_" + product
+  package_version = common.version + "." + common.build
+  suffixes = {
+    "windows_x64": "x64",
+    "windows_x86": "x86",
+    "windows_x64_xp": "x64_xp",
+    "windows_x86_xp": "x86_xp"
+  }
+  suffix = suffixes[common.platform]
+  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
 
-  if 'clean' in targets:
-    log("\n=== Clean\n")
-    delete_dir(base_dir)
-    delete_files(isxdl_file)
-    delete_files("exe/*.exe")
-    delete_files("zip/*.zip")
+  if common.clean:
+    utils.log_h1("clean")
+    utils.delete_dir("build")
 
-  package_version = version + '.' + build
-  sign = 'sign' in targets
+  utils.log_h1("copy arifacts")
+  utils.create_dir("build\\app")
+  utils.copy_dir_content(source_dir, "build\\app\\")
 
-  for target in targets:
-    if not (target.startswith('innosetup') or target.startswith('portable')):
-      continue
+  # if "builder-zip" in common.targets:
+  make_zip()
+  # if "builder-inno" in common.targets:
+  make_inno()
 
-    machine = get_platform(target)['machine']
-    arch = get_platform(target)['arch']
-    suffix = arch
-    source_prefix = "win_" + machine
-    source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
-
-    log("\n=== Copy arifacts\n")
-    create_dir(base_dir)
-    copy_dir_content(source_dir, base_dir + '\\')
-
-    if target.startswith('innosetup'):
-      download_isxdl()
-      innosetup_file = "exe/%s_%s_%s.exe" % (package_name, package_version, suffix)
-      make_innosetup()
-
-    if target.startswith('portable'):
-      portable_zip_file = "zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
-      make_win_portable()
+  utils.set_cwd(common.workspace_dir)
   return
 
-def download_isxdl():
-  log("\n=== Download isxdl\n")
-  log("--- " + isxdl_file)
-  if is_file(isxdl_file):
-    log("! file exist, skip")
-    return
-  create_dir(get_dirname(isxdl_file))
-  download_file(isxdl_link, isxdl_file)
+def make_zip():
+  common.summary["builder zip build"] = 1
+  utils.log_h1("zip build " + zip_file)
+  rc = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
+      chdir="build", creates="build\\" + zip_file, verbose=True)
+  common.summary["builder zip build"] = rc
+
+  # common.summary["zip deploy"] = 1
+  # if rc == 0:
+  #   utils.log_h1("zip deploy " + zip_file)
+  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+  #       + common.version + "/" + common.build + "/"
+  #   rc = utils.cmd(
+  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+  #       "build\\" + zip_file, dest,
+  #       verbose=True
+  #   )
+  #   common.summary["zip deploy"] = rc
   return
 
-def make_innosetup():
-  log("\n=== Build innosetup project\n")
-  iscc_args = ["/DVERSION=" + package_version]
-  if not onlyoffice:
-    iscc_args.append("/DBRANDING_DIR=" + get_abspath(git_dir, branding, build_dir, "exe"))
-  if sign:
-    iscc_args.append("/DSIGN")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
-  log("--- " + innosetup_file)
-  if is_file(innosetup_file):
-    log("! file exist, skip")
-    return
-  set_cwd("exe")
-  cmd("iscc", iscc_args + ["builder.iss"])
-  set_cwd("..")
+def make_inno():
+  common.summary["builder inno build"] = 1
+  utils.log_h1("inno build " + inno_file)
+  # if utils.is_file(inno_file):
+  #   utils.log("! file exist, skip")
+  #   return
+  args = ["-Version " + common.version, "-Build " + common.build]
+  if not branding.onlyoffice:
+    args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
+  if common.sign:
+    args.append("-Sign")
+    args.append("-CertName '%s'" % branding.cert_name)
+  rc = utils.ps1(".\\make_inno.ps1", args,
+      creates="build\\" + inno_file, verbose=True)
+  common.summary["builder inno build"] = rc
+
+  # common.summary["inno deploy"] = 1
+  # if rc == 0:
+  #   utils.log_h1("inno deploy " + inno_file)
+  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
+  #       + common.version + "/" + common.build + "/"
+  #   rc = utils.cmd(
+  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+  #       "build\\" + inno_file, dest,
+  #       verbose=True
+  #   )
+  #   common.summary["inno deploy"] = rc
   return
 
-def make_win_portable():
-  log("\n=== Build portable\n")
-  log("--- " + portable_zip_file)
-  if is_file(portable_zip_file):
-    log("! file exist, skip")
-    return
-  cmd("7z", ["a", "-y", portable_zip_file, get_path(base_dir, "*")])
+def make_linux():
+  utils.set_cwd("document-builder-package")
+
+  rc = utils.sh("make clean", verbose=True)
+  common.summary["builder clean"] = rc
+
+  args = []
+  if common.platform == "linux_aarch64":
+    args += ["-e", "UNAME_M=aarch64"]
+  if not branding.onlyoffice:
+    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  rc = utils.sh("make packages " + " ".join(args), verbose=True)
+  common.summary["builder build"] = rc
+
+  utils.set_cwd(common.workspace_dir)
   return

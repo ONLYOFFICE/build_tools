@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import codecs
 import glob
+import hashlib
 import os
 import platform
 import re
@@ -11,71 +11,68 @@ import shutil
 import subprocess
 import sys
 import time
-import base
-
-def parse():
-  parser = argparse.ArgumentParser(description="Build packages.")
-  parser.add_argument('-P', '--product', dest='product', type=str,
-                      action='store', help="Defines product")
-  parser.add_argument('-S', '--system', dest='system', type=str,
-                      action='store', help="Defines system")
-  parser.add_argument('-R', '--branding', dest='branding', type=str,
-                      action='store', help="Provides branding path")
-  parser.add_argument('-V', '--version', dest='version', type=str,
-                      action='store', help="Defines version")
-  parser.add_argument('-B', '--build', dest='build', type=str,
-                      action='store', help="Defines build")
-  parser.add_argument('-T', '--targets', dest='targets', type=str, nargs='+',
-                      action='store', help="Defines targets")
-  args = parser.parse_args()
-
-  global product, system, targets, version, build, branding, sign, clean
-  product = args.product
-  system = args.system if (args.system is not None) else host_platform()
-  targets = args.targets
-  version = args.version if (args.version is not None) else get_env('PRODUCT_VERSION', '0.0.0')
-  build = args.build if (args.build is not None) else get_env('BUILD_NUMBER', '0')
-  branding = args.branding
-  return
 
 def host_platform():
   return platform.system().lower()
 
-def log(string, end='\n', bold=False):
-  if bold:
-    out = '\033[1m' + string + '\033[0m' + end
-  else:
-    out = string + end
-  sys.stdout.write(out)
+def is_windows():
+  return host_platform() == "windows"
+
+def is_macos():
+  return host_platform() == "darwin"
+
+def is_linux():
+  return host_platform() == "linux"
+
+def log(string, end='\n'):
+  sys.stdout.write(string + end)
   sys.stdout.flush()
   return
 
-def get_env(name, default=''):
-  return os.getenv(name, default)
-
-def set_env(name, value):
-  os.environ[name] = value
+def log_h1(string):
+  line = "-" * (len(string) + 8)
+  log("\n" + line + "\n--- " + string + " ---\n" + line + "\n")
   return
 
-def set_cwd(dir):
-  log("- change working dir: " + dir)
-  os.chdir(dir)
+def log_h2(string):
+  log("--- " + string)
   return
 
-def get_path(*paths):
-  arr = []
-  for path in paths:
-    if host_platform() == 'windows':
-      arr += path.split('/')
-    else:
-      arr += [path]
-  return os.path.join(*arr)
+def get_timestamp():
+  return "%.f" % time.time()
 
-def get_abspath(*paths):
-  arr = []
-  for path in paths:
-    arr += path.split('/')
-  return os.path.abspath(os.path.join(*arr))
+def get_env(key, default=None):
+  return os.getenv(key, default)
+
+def set_env(key, value):
+  os.environ[key] = value
+  return
+
+def get_cwd():
+  return os.getcwd()
+
+def set_cwd(path, verbose=True):
+  if verbose:
+    log_h2("change working dir: " + path)
+  os.chdir(path)
+  return
+
+def get_path(path):
+  if is_windows():
+    return path.replace("/", "\\")
+  return path
+
+def get_abspath(path):
+  return os.path.abspath(get_path(path))
+
+def get_dirname(path):
+  return os.path.dirname(path)
+
+def get_file_size(path):
+  return os.path.getsize(path)
+
+def get_script_dir(path):
+  return get_dirname(os.path.realpath(path))
 
 def is_file(path):
   return os.path.isfile(path)
@@ -88,8 +85,12 @@ def is_exist(path):
     return True
   return False
 
-def get_dirname(path):
-  return os.path.dirname(path)
+def get_md5(path):
+  if os.path.exists(path):
+    md5_hash = hashlib.md5()
+    md5_hash.update(open(path, "rb").read())
+    return md5_hash.hexdigest()
+  return
 
 def create_dir(path):
   log("- create dir: " + path)
@@ -203,77 +204,72 @@ def delete_files(src):
       delete_dir(path)
   return
 
-def download_file(url, path):
-  log("- download file: " + path + " < " + url)
+def cmd(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("cmd: " + " ".join(args))
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    return 0
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"])
+  ret = subprocess.call(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  )
+  if kwargs.get("chdir") and oldcwd:
+    set_cwd(oldcwd)
+  return ret
+
+def cmd_output(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("cmd output: " + " ".join(args))
+  return subprocess.check_output(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  ).decode("utf-8")
+
+def powershell(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("powershell: " + " ".join(args))
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    return 0
+  args = ["powershell", "-Command"] + [i for i in args]
+  ret = subprocess.call(
+      args, stderr=subprocess.STDOUT, shell=True
+  )
+  return ret
+
+def ps1(file, args=[], **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("powershell cmdlet: " + file + " " + " ".join(args))
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    return 0
+  ret = subprocess.call(
+      ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
+  )
+  return ret
+
+def download_file(url, path, md5, verbose=False):
+  if verbose:
+    log("download file: %s < %s (%s)" % (path, url, md5))
   if is_file(path):
-    os.remove(path)
-  powershell(["Invoke-WebRequest", url, "-OutFile", path])
-  return
-
-def proc_open(command):
-  log("- open process: " + command)
-  popen = subprocess.Popen(command, stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, shell=True)
-  ret = {'stdout' : '', 'stderr' : ''}
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    ret['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
-    ret['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+    if get_md5(path) == md5:
+      log("! file already exist (match checksum)")
+      return 0
+    else:
+      log("! wrong checksum (%s), delete" % md5)
+      os.remove(path)
+  ret = powershell("(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path), verbose=True)
+  if get_md5(path) != md5:
+    return 1
   return ret
 
-def cmd(prog, args=[], is_no_errors=False):  
-  log("- cmd: " + prog + " " + ' '.join(args))
-  ret = 0
-  if host_platform() == 'windows':
-    sub_args = args[:]
-    sub_args.insert(0, get_path(prog))
-    ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
-  else:
-    command = prog
-    for arg in args:
-      command += (" \"%s\"" % arg)
-    ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
-  if ret != 0 and True != is_no_errors:
-    sys.exit("! error (" + prog + "): " + str(ret))
-  return ret
+def sh(command, **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("sh: " + command)
+  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
 
-def powershell(cmd):
-  log("- pwsh: " + ' '.join(cmd))
-  ret = subprocess.call(['powershell', '-Command'] + cmd,
-                        stderr=subprocess.STDOUT, shell=True)
-  if ret != 0:
-    sys.exit("! error: " + str(ret))
-  return ret
-
-def get_platform(target):
-  xp = (-1 != target.find('-xp'))
-  if (-1 != target.find('-x64')):
-    return {'machine': "64", 'arch': "x64", 'xp': xp}
-  elif (-1 != target.find('-x86')):
-    return {'machine': "32", 'arch': "x86", 'xp': xp}
-  return
-
-global git_dir, out_dir, tsa_server, vcredist_links
-git_dir = get_abspath(get_dirname(__file__), '../..')
-out_dir = get_abspath(get_dirname(__file__), '../out')
-timestamp = "%.f" % time.time()
-tsa_server = "http://timestamp.digicert.com"
-vcredist_links = {
-  '2022': {
-    '64': "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-    '32': "https://aka.ms/vs/17/release/vc_redist.x86.exe"
-  },
-  '2015': {
-    '64': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
-    '32': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
-  },
-  '2013': {
-    '64': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
-    '32': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
-  }
-}
-isxdl_link = "https://raw.githubusercontent.com/jrsoftware/ispack/is-5_6_1/isxdlfiles/isxdl.dll"
+def sh_output(command, **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("sh output: " + command)
+  return subprocess.check_output(
+      command, stderr=subprocess.STDOUT, shell=True
+  ).decode("utf-8")

@@ -46,7 +46,7 @@ def log(string, end='\n', bold=False):
     out = '\033[1m' + string + '\033[0m' + end
   else:
     out = string + end
-  sys.stdout.write(out)
+  sys.stdout.write(out.encode("utf-8"))
   sys.stdout.flush()
   return
 

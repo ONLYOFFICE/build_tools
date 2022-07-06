@@ -292,10 +292,10 @@ def make_sparkle_updates():
     notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if lang == 'en':
       encoding = 'en_US.UTF-8'
-      cur_date = proc_open("env LC_ALL=" + encoding + " date -u \"+%B %e, %Y\"")['stdout']
+      cur_date = sh_output("env LC_ALL=" + encoding + " date -u \"+%B %e, %Y\"", verbose=True)
     elif lang == 'ru':
       encoding = 'ru_RU.UTF-8'
-      cur_date = proc_open("env LC_ALL=" + encoding + " date -u \"+%e %B %Y\"")['stdout']
+      cur_date = sh_output("env LC_ALL=" + encoding + " date -u \"+%e %B %Y\"", verbose=True)
     if is_file(notes_src):
       copy_file(notes_src, notes_dst)
       replace_in_file(notes_dst,

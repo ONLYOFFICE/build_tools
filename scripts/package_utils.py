@@ -258,7 +258,9 @@ def download_file(url, path, md5, verbose=False):
       log("! wrong checksum (%s), delete" % md5)
       os.remove(path)
   ret = powershell("(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path), verbose=True)
-  if get_md5(path) != md5:
+  md5_new = get_md5(path)
+  if md5 != md5_new:
+    log("! checksum didn't match (%s != %s)" % (md5, md5_new))
     return 1
   return ret
 

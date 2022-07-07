@@ -72,10 +72,11 @@ def make_windows():
     if download_vcredist(year) != 0:
       vc_total = False
 
-  if vc_total:
+  if not vc_total:
     common.summary["desktop inno build"] = 1
     common.summary["desktop inno update build"] = 1
     common.summary["desktop advinst build"] = 1
+    utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()

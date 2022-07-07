@@ -126,8 +126,8 @@ def make_inno():
   if branding.onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
   else:
-    iscc_args.append("/DsBrandingFolder=..\\..\\..\\..\\" + common.branding + \
-        "\\desktop-apps\\win-linux\\package\\windows")
+    iscc_args.append("/DsBrandingFolder=" + \
+        utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
   if common.platform in ["windows_x64_xp", "windows_x86_xp"]:
     iscc_args.append("/D_WIN_XP=1")
   if common.sign:
@@ -213,12 +213,12 @@ def make_msi():
         "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".png")
     aic_content += [
       "SetProperty ProductName=\"%s\"" % branding.desktop_product_name_full,
-      "SetProperty Manufacturer=\"%s\"" % branding.desktop_publisher_name.replace('"', '""'),
-      "SetProperty ARPURLINFOABOUT=\"%s\"" % branding.desktop_info_about_url,
-      "SetProperty ARPURLUPDATEINFO=\"%s\"" % branding.desktop_update_info_url,
-      "SetProperty ARPHELPLINK=\"%s\"" % branding.desktop_help_url,
-      "SetProperty ARPHELPTELEPHONE=\"%s\"" % branding.desktop_help_phone,
-      "SetProperty ARPCONTACT=\"%s\"" % branding.desktop_publisher_address,
+      "SetProperty Manufacturer=\"%s\"" % branding.publisher_name.replace('"', '""'),
+      "SetProperty ARPURLINFOABOUT=\"%s\"" % branding.info_about_url,
+      "SetProperty ARPURLUPDATEINFO=\"%s\"" % branding.update_info_url,
+      "SetProperty ARPHELPLINK=\"%s\"" % branding.help_url,
+      "SetProperty ARPHELPTELEPHONE=\"%s\"" % branding.help_phone,
+      "SetProperty ARPCONTACT=\"%s\"" % branding.publisher_address,
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
       "DelLanguage 1041 -buildname DefaultBuild",

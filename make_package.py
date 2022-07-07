@@ -6,10 +6,6 @@ sys.path.append("scripts")
 import argparse
 import package_common as common
 import package_utils as utils
-import package_core
-import package_desktop
-import package_server
-import package_builder
 
 # parse
 parser = argparse.ArgumentParser(description="Build packages.")
@@ -55,6 +51,11 @@ utils.set_cwd(common.workspace_dir, verbose=True)
 # branding
 if common.branding is not None:
   sys.path.insert(-1, utils.get_path(common.branding + "/build_tools/scripts"))
+
+import package_core
+import package_desktop
+import package_server
+import package_builder
 
 # build
 if "core" in common.targets:

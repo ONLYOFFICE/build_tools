@@ -51,7 +51,7 @@ def make_pro_file(makefiles_dir, pro_file):
     # qmake ADDON
     qmake_addon = []
     if ("" != config.option("qmake_addon")):
-      qmake_addon.append(config.option("qmake_addon"))
+      qmake_addon = config.option("qmake_addon").split()
 
     if not base.is_file(qt_dir + "/bin/qmake") and not base.is_file(qt_dir + "/bin/qmake.exe"):
       print("THIS PLATFORM IS NOT SUPPORTED")
@@ -79,7 +79,8 @@ def make_pro_file(makefiles_dir, pro_file):
       qmake_bat.append("if exist ./" + makefiles_dir + "/build.makefile_" + file_suff + " del /F ./" + makefiles_dir + "/build.makefile_" + file_suff)
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
-        qmake_addon_string = " \"" + config.option("qmake_addon") + "\""
+        qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
+
       qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache " + pro_file + " \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
       if ("1" == config.option("clean")):
         qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)

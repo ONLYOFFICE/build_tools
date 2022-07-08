@@ -46,11 +46,11 @@ utils.log("version:       " + common.version)
 utils.log("build:         " + common.build)
 utils.log("branding:      " + str(common.branding))
 utils.log("timestamp:     " + common.timestamp)
-utils.set_cwd(common.workspace_dir, verbose=True)
 
 # branding
 if common.branding is not None:
-  sys.path.insert(-1, utils.get_path(common.branding + "/build_tools/scripts"))
+  sys.path.insert(-1, \
+      utils.get_path("../" + common.branding + "/build_tools/scripts"))
 
 import package_core
 import package_desktop
@@ -58,6 +58,7 @@ import package_server
 import package_builder
 
 # build
+utils.set_cwd(common.workspace_dir, verbose=True)
 if "core" in common.targets:
   package_core.make()
 if "desktop" in common.targets:

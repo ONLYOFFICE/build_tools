@@ -73,7 +73,7 @@ make_common.make()
 if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):
   config.extend_option("config", "updmodule")
   config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
-  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://download.onlyoffice.com/install/desktop/editors/help/v7.2.0-1/apps")
+  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://download.onlyoffice.com/install/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "-1/apps")
 
   if not base.is_file(base_dir + "/tools/WinSparkle-0.7.0.zip"):
   	base.cmd("curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "/tools/WinSparkle-0.7.0.zip"])

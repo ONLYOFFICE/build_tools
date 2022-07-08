@@ -80,7 +80,6 @@ def make_pro_file(makefiles_dir, pro_file):
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
         qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
-
       qmake_bat.append("call \"" + qt_dir + "/bin/qmake\" -nocache " + pro_file + " \"CONFIG+=" + config_param + "\"" + qmake_addon_string)
       if ("1" == config.option("clean")):
         qmake_bat.append("call nmake clean -f " + makefiles_dir + "/build.makefile_" + file_suff)

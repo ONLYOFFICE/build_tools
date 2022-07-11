@@ -6,7 +6,7 @@ but don't want to compile pretty compilcated core product to make those changes.
 
 ## Installing ONLYOFFICE Docs
 
-## How to use - Linux
+## How to use - Linux or macOS
 
 **Note**: You need the latest Docker version installed.
 
@@ -38,6 +38,9 @@ docker build -t documentserver-develop .
 To connect external folders to the container,
 you need to pass the "-v" parameter
 along with the relative paths to the required folders.
+
+* `sdkjs` repo is located [here](https://github.com/ONLYOFFICE/sdkjs/)
+* `web-apps` repo is located [here](https://github.com/ONLYOFFICE/web-apps/)
 
 **For example, let's connect the external folders "sdkjs" and "web-apps" to the container:**
 

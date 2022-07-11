@@ -23,9 +23,11 @@ docker pull onlyoffice/documentserver
 ### Create develop image
 
 To create a image with the ability to include external non-minified sdkjs code,
-use the following command from the dockerfile directory:
+use the following command:
 
 ```bash
+git clone https://github.com/ONLYOFFICE/build_tools.git
+cd build_tools/develop
 docker build -t documentserver-develop .
 ```
 

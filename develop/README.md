@@ -38,11 +38,10 @@ docker build -t documentserver-develop .
 To connect external folders to the container,
 you need to pass the "-v" parameter
 along with the relative paths to the required folders.
+The folders `sdkjs` and `web-apps` are required for proper development workflow
 
 * `sdkjs` repo is located [here](https://github.com/ONLYOFFICE/sdkjs/)
 * `web-apps` repo is located [here](https://github.com/ONLYOFFICE/web-apps/)
-
-**For example, let's connect the external folders "sdkjs" and "web-apps" to the container:**
 
 ```bash
 docker run -i -t -d -p 80:80 --restart=always \

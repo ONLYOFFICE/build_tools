@@ -49,7 +49,8 @@ docker run -i -t -d -p 80:80 --restart=always \
     -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
 ```
 
-On windows systems you may need to escape current directory so mount param looks like this:
+On windows systems you may need to escape current
+directory so mount param looks like this:
 
 ```shell
  -v "/$(pwd)"/sdkjs:/var/www/onlyoffice/documentserver/sdkjs

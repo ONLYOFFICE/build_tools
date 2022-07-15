@@ -1270,3 +1270,28 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   else:
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
+
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
+  old_cur = os.getcwd()
+  os.chdir(out_dir)
+  git_update("onlyoffice.github.io", False, True)
+  os.chdir(old_cur)
+
+  dst_dir_name = "marketplace"
+  if is_name_as_guid:
+    config_content = readFile(out_dir + "/onlyoffice.github.io/store/plugin/config.json")
+    index_start = config_content.find("\"asc.{")
+    index_start += 5
+    index_end = config_content.find("}", index_start)
+    index_end += 1
+    guid = config_content[index_start:index_end]
+    dst_dir_name = guid
+
+  dst_dir_path = out_dir + "/" + dst_dir_name
+
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+
+  copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
+  delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  return

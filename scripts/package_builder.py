@@ -115,4 +115,26 @@ def make_linux():
   common.summary["builder build"] = rc
 
   utils.set_cwd(common.workspace_dir)
+
+  make_appimage()
+  return
+
+def make_appimage():
+  if not onlyoffice:
+    return
+  if not utils.is_file("document-builder-package/deb/onlyoffice-documentbuilder_%s-%s_amd64.deb" % (common.version, common.build))
+    return
+
+  utils.set_cwd("appimage-documentbuilder")
+
+  rc = utils.sh("make clean", verbose=True)
+  common.summary["builder appimage clean"] = rc
+
+  # args = []
+  # if common.platform == "linux_aarch64":
+  #   args += ["-e", "UNAME_M=aarch64"]
+  rc = utils.sh("make testing", verbose=True)
+  common.summary["builder appimage build"] = rc
+
+  utils.set_cwd(common.workspace_dir)
   return

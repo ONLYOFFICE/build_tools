@@ -1026,7 +1026,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics"])
+  mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics", "kernel_network"])
   mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
   mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
   mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])

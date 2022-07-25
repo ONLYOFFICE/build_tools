@@ -106,7 +106,7 @@ def make():
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
-    base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
+    base.copy_dir(git_dir + "/document-templates/new/en-US", root_dir + "/empty")
 
     # js
     js_dir = root_dir

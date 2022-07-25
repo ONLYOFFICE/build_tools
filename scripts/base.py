@@ -454,7 +454,7 @@ def get_repositories():
   result["dictionaries"] = [False, False]
 
   if config.check_option("module", "builder"):
-    result["DocumentBuilder"] = [False, False]
+    result["document-templates"] = [False, False]
 
   if config.check_option("module", "desktop"):
     result["desktop-sdk"] = [False, False]

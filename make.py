@@ -70,21 +70,23 @@ if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
 make_common.make()
 
 # build updmodule for desktop (only for windows version)
-if ("windows" == base.host_platform()) and (config.check_option("module", "desktop")):
-  config.extend_option("config", "updmodule")
-  config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
+if config.check_option("module", "desktop"):
   config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://download.onlyoffice.com/install/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "-1/apps")
 
-  if not base.is_file(base_dir + "/tools/WinSparkle-0.7.0.zip"):
-  	base.cmd("curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "/tools/WinSparkle-0.7.0.zip"])
- 
-  if not base.is_dir(base_dir + "/tools/WinSparkle-0.7.0"):
-  	base.cmd("7z.exe", ["x", base_dir + "/tools/WinSparkle-0.7.0.zip", "-otools"])
+  if "windows" == base.host_platform():
+    config.extend_option("config", "updmodule")
+    config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
 
-  base.create_dir(base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle")
-  #base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/include", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/include")
-  base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_32")
-  base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/x64/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_64")
+    if not base.is_file(base_dir + "/tools/WinSparkle-0.7.0.zip"):
+      base.cmd("curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "/tools/WinSparkle-0.7.0.zip"])
+
+    if not base.is_dir(base_dir + "/tools/WinSparkle-0.7.0"):
+      base.cmd("7z.exe", ["x", base_dir + "/tools/WinSparkle-0.7.0.zip", "-otools"])
+
+    base.create_dir(base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle")
+    #base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/include", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/include")
+    base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_32")
+    base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/x64/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_64")
 
 # build
 build.make()

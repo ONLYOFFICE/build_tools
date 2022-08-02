@@ -240,6 +240,9 @@ def copy_exe(src, dst, name):
   return
 
 def replaceInFile(path, text, textReplace):
+  if not is_file(path):
+    print("[replaceInFile] file not exist: " + path)
+    return
   filedata = ""
   with open(get_path(path), "r") as file:
     filedata = file.read()
@@ -249,6 +252,9 @@ def replaceInFile(path, text, textReplace):
     file.write(filedata)
   return
 def replaceInFileRE(path, pattern, textReplace):
+  if not is_file(path):
+    print("[replaceInFile] file not exist: " + path)
+    return
   filedata = ""
   with open(get_path(path), "r") as file:
     filedata = file.read()

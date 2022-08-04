@@ -198,14 +198,14 @@ def make_advinst():
     copy_dir_content(
       get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
       "data", ".png")
+    copy_dir_content(
+      get_abspath(git_dir, branding_dir, "win-linux/extras/projicons/res"),
+      get_path(".") + "/../../extras/projicons/res", ".ico")
+    copy_file(get_abspath(git_dir, branding_dir, "win-linux/package/windows/dictionary.ail"), get_path(".") + "/dictionary.ail")
+    move_file(get_abspath(git_dir, branding_dir, "common/package/license/eula_r7.rtf"), get_path(".") + "/../../../common/package/license/agpl-3.0.rtf")
+    move_file(get_abspath(git_dir, branding_dir, "../multimedia/videoplayer/icons/r7.ico"), get_path(".") + "/../../extras/projicons/res/media.ico")
+    move_file(get_abspath(git_dir, branding_dir, "../multimedia/imageviewer/icons/ico/r7.ico"), get_path(".") + "/../../extras/projicons/res/gallery.ico")
     aic_content += [
-      "SetProperty ProductName=\"%s\"" % product_name_full,
-      "SetProperty Manufacturer=\"%s\"" % publisher_name.replace('"', '""'),
-      "SetProperty ARPURLINFOABOUT=\"%s\"" % info_about_url,
-      "SetProperty ARPURLUPDATEINFO=\"%s\"" % update_info_url,
-      "SetProperty ARPHELPLINK=\"%s\"" % help_url,
-      "SetProperty ARPHELPTELEPHONE=\"%s\"" % help_phone,
-      "SetProperty ARPCONTACT=\"%s\"" % publisher_address,
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
       "DelLanguage 1041 -buildname DefaultBuild",
@@ -214,10 +214,21 @@ def make_advinst():
       "DelLanguage 1060 -buildname DefaultBuild",
       "DelLanguage 1036 -buildname DefaultBuild",
       "DelLanguage 3082 -buildname DefaultBuild",
-      "DelLanguage 1033 -buildname DefaultBuild"
+      "DelLanguage 1033 -buildname DefaultBuild",
+      "NewSync CUSTOM_PATH " + source_dir + "/../MediaViewer",
+      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + get_path(source_dir + "/../MediaViewer", "ImageViewer.exe"),
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + get_path(source_dir + "/../MediaViewer", "VideoPlayer.exe")
     ]
   if not sign:        aic_content.append("ResetSig")
-  if machine == '32': aic_content.append("SetPackageType x86")
+  if machine == '32': 
+    aic_content.append("SetPackageType x86")
+    aic_content.append("SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]")
+    aic_content.append("DelPrerequisite Microsoft Visual C++ 2015-2022 Redistributable (x64)")
+  if machine == '64': 
+    aic_content.append("DelPrerequisite Microsoft Visual C++ 2015-2022 Redistributable (x86)")
+  if onlyoffice: 
+    aic_content.append("DelPrerequisite Microsoft Visual C++ 2013 Redistributable (x86)")
+    aic_content.append("DelPrerequisite Microsoft Visual C++ 2013 Redistributable (x64)")
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",

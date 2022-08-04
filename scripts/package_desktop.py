@@ -192,19 +192,26 @@ def make_advinst():
     return
   aic_content = [";aic"]
   if not onlyoffice:
+    branding_path = get_abspath(git_dir, branding_dir) # r7/desktop-apps
     copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".bmp")
+      branding_path + "\\win-linux\\package\\windows\\data", "data", ".bmp")
     copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".png")
+      branding_path + "\\win-linux\\package\\windows\\data", "data", ".png")
     copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/extras/projicons/res"),
-      get_path(".") + "/../../extras/projicons/res", ".ico")
-    copy_file(get_abspath(git_dir, branding_dir, "win-linux/package/windows/dictionary.ail"), get_path(".") + "/dictionary.ail")
-    move_file(get_abspath(git_dir, branding_dir, "common/package/license/eula_r7.rtf"), get_path(".") + "/../../../common/package/license/agpl-3.0.rtf")
-    move_file(get_abspath(git_dir, branding_dir, "../multimedia/videoplayer/icons/r7.ico"), get_path(".") + "/../../extras/projicons/res/media.ico")
-    move_file(get_abspath(git_dir, branding_dir, "../multimedia/imageviewer/icons/ico/r7.ico"), get_path(".") + "/../../extras/projicons/res/gallery.ico")
+      branding_path + "\\win-linux\\extras\\projicons\\res",
+      "..\\..\\extras\\projicons\\res", ".ico")
+    copy_file(
+      branding_path + "\\win-linux\\package\\windows\\dictionary.ail",
+      "dictionary.ail")
+    copy_file(
+      branding_path + "\\common\\package\\license\\eula_r7.rtf",
+      "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
+    copy_file(
+      branding_path + "\\..\\multimedia\\videoplayer\\icons\\r7.ico",
+      "..\\..\\extras\\projicons\\res\\media.ico")
+    copy_file(
+      branding_path + "\\..\\multimedia\\imageviewer\\icons\\ico\\r7.ico",
+      "..\\..\\extras\\projicons\\res\\gallery.ico")
     aic_content += [
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",

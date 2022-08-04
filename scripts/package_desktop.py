@@ -190,7 +190,6 @@ def make_advinst():
   if is_file(advinst_file):
     log("! file exist, skip")
     return
-  aic_content = [";aic"]
   if not onlyoffice:
     branding_path = get_abspath(git_dir, branding_dir) # r7/desktop-apps
     copy_dir_content(
@@ -212,6 +211,28 @@ def make_advinst():
     copy_file(
       branding_path + "\\..\\multimedia\\imageviewer\\icons\\ico\\r7.ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
+  aic_content = [";aic"]
+  if not sign:
+    aic_content += [
+      "ResetSig"
+    ]
+  if machine == '32': 
+    aic_content += [
+      "SetPackageType x86",
+      "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"'
+    ]
+  if machine == '64': 
+    aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"'
+    ]
+  if onlyoffice: 
+    aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"',
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"',
+      "DelFolder CUSTOM_PATH"
+    ]
+  else:
     aic_content += [
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
@@ -222,24 +243,14 @@ def make_advinst():
       "DelLanguage 1036 -buildname DefaultBuild",
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild",
-      "NewSync CUSTOM_PATH " + source_dir + "/../MediaViewer",
-      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + get_path(source_dir + "/../MediaViewer", "ImageViewer.exe"),
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + get_path(source_dir + "/../MediaViewer", "VideoPlayer.exe")
+      "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
+      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
     ]
-  if not sign:        aic_content.append("ResetSig")
-  if machine == '32': 
-    aic_content.append("SetPackageType x86")
-    aic_content.append("SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]")
-    aic_content.append("DelPrerequisite Microsoft Visual C++ 2015-2022 Redistributable (x64)")
-  if machine == '64': 
-    aic_content.append("DelPrerequisite Microsoft Visual C++ 2015-2022 Redistributable (x86)")
-  if onlyoffice: 
-    aic_content.append("DelPrerequisite Microsoft Visual C++ 2013 Redistributable (x86)")
-    aic_content.append("DelPrerequisite Microsoft Visual C++ 2013 Redistributable (x64)")
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
-    "UpdateFile APPDIR\\DesktopEditors.exe " + get_path(source_dir, "DesktopEditors.exe"),
+    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"

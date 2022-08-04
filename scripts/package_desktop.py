@@ -222,9 +222,17 @@ def make_advinst():
       "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
       'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"'
     ]
+    if not onlyoffice:
+      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
+    ]
   if machine == '64': 
     aic_content += [
       'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"'
+    ]
+    if not onlyoffice:
+      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
     ]
   if onlyoffice: 
     aic_content += [

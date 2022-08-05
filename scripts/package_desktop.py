@@ -191,7 +191,7 @@ def make_advinst():
     log("! file exist, skip")
     return
   if not onlyoffice:
-    branding_path = get_abspath(git_dir, branding_dir) # r7/desktop-apps
+    branding_path = get_abspath(git_dir, branding_dir)
     copy_dir_content(
       branding_path + "\\win-linux\\package\\windows\\data", "data", ".bmp")
     copy_dir_content(
@@ -234,7 +234,7 @@ def make_advinst():
       aic_content += [
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
     ]
-  if onlyoffice: 
+  if onlyoffice:
     aic_content += [
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"',
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"',
@@ -265,7 +265,7 @@ def make_advinst():
   ]
   write_file("DesktopEditors.aic", "\r\n".join(aic_content), 'utf-8-sig')
   cmd("AdvancedInstaller.com",
-      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
+      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic"])
   return
 
 def make_win_portable():

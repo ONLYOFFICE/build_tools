@@ -203,13 +203,13 @@ def make_advinst():
       branding_path + "\\win-linux\\package\\windows\\dictionary.ail",
       "dictionary.ail")
     copy_file(
-      branding_path + "\\common\\package\\license\\eula_r7.rtf",
+      branding_path + "\\common\\package\\license\\eula_" + branding + ".rtf",
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     copy_file(
-      branding_path + "\\..\\multimedia\\videoplayer\\icons\\r7.ico",
+      branding_path + "\\..\\multimedia\\videoplayer\\icons\\" + branding + ".ico",
       "..\\..\\extras\\projicons\\res\\media.ico")
     copy_file(
-      branding_path + "\\..\\multimedia\\imageviewer\\icons\\ico\\r7.ico",
+      branding_path + "\\..\\multimedia\\imageviewer\\icons\\ico\\" + branding + ".ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
   aic_content = [";aic"]
   if not sign:

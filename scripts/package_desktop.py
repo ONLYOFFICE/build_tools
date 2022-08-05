@@ -265,7 +265,7 @@ def make_advinst():
   ]
   write_file("DesktopEditors.aic", "\r\n".join(aic_content), 'utf-8-sig')
   cmd("AdvancedInstaller.com",
-      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
+      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic"])
   return
 
 def make_win_portable():

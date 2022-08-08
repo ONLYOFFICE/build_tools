@@ -190,22 +190,58 @@ def make_advinst():
   if is_file(advinst_file):
     log("! file exist, skip")
     return
-  aic_content = [";aic"]
   if not onlyoffice:
+    branding_path = get_abspath(git_dir, branding_dir)
     copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".bmp")
+      branding_path + "\\win-linux\\package\\windows\\data", "data", ".bmp")
     copy_dir_content(
-      get_abspath(git_dir, branding_dir, "win-linux/package/windows/data"),
-      "data", ".png")
+      branding_path + "\\win-linux\\package\\windows\\data", "data", ".png")
+    copy_dir_content(
+      branding_path + "\\win-linux\\extras\\projicons\\res",
+      "..\\..\\extras\\projicons\\res", ".ico")
+    copy_file(
+      branding_path + "\\win-linux\\package\\windows\\dictionary.ail",
+      "dictionary.ail")
+    copy_file(
+      branding_path + "\\common\\package\\license\\eula_" + branding + ".rtf",
+      "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
+    copy_file(
+      branding_path + "\\..\\multimedia\\videoplayer\\icons\\" + branding + ".ico",
+      "..\\..\\extras\\projicons\\res\\media.ico")
+    copy_file(
+      branding_path + "\\..\\multimedia\\imageviewer\\icons\\ico\\" + branding + ".ico",
+      "..\\..\\extras\\projicons\\res\\gallery.ico")
+  aic_content = [";aic"]
+  if not sign:
     aic_content += [
-      "SetProperty ProductName=\"%s\"" % product_name_full,
-      "SetProperty Manufacturer=\"%s\"" % publisher_name.replace('"', '""'),
-      "SetProperty ARPURLINFOABOUT=\"%s\"" % info_about_url,
-      "SetProperty ARPURLUPDATEINFO=\"%s\"" % update_info_url,
-      "SetProperty ARPHELPLINK=\"%s\"" % help_url,
-      "SetProperty ARPHELPTELEPHONE=\"%s\"" % help_phone,
-      "SetProperty ARPCONTACT=\"%s\"" % publisher_address,
+      "ResetSig"
+    ]
+  if machine == '32': 
+    aic_content += [
+      "SetPackageType x86",
+      "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"'
+    ]
+    if not onlyoffice:
+      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
+    ]
+  if machine == '64': 
+    aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"'
+    ]
+    if not onlyoffice:
+      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
+    ]
+  if onlyoffice:
+    aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"',
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"',
+      "DelFolder CUSTOM_PATH"
+    ]
+  else:
+    aic_content += [
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",
       "DelLanguage 1041 -buildname DefaultBuild",
@@ -214,21 +250,22 @@ def make_advinst():
       "DelLanguage 1060 -buildname DefaultBuild",
       "DelLanguage 1036 -buildname DefaultBuild",
       "DelLanguage 3082 -buildname DefaultBuild",
-      "DelLanguage 1033 -buildname DefaultBuild"
+      "DelLanguage 1033 -buildname DefaultBuild",
+      "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
+      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
     ]
-  if not sign:        aic_content.append("ResetSig")
-  if machine == '32': aic_content.append("SetPackageType x86")
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
     "NewSync APPDIR " + source_dir + " -existingfiles delete",
-    "UpdateFile APPDIR\\DesktopEditors.exe " + get_path(source_dir, "DesktopEditors.exe"),
+    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
   ]
   write_file("DesktopEditors.aic", "\r\n".join(aic_content), 'utf-8-sig')
   cmd("AdvancedInstaller.com",
-      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic", "-nofail"])
+      ["/execute", "DesktopEditors.aip", "DesktopEditors.aic"])
   return
 
 def make_win_portable():

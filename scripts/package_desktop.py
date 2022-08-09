@@ -257,7 +257,7 @@ def make_advinst():
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
-    "NewSync APPDIR " + source_dir + " -existingfiles delete",
+    "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",

@@ -4,6 +4,7 @@
 import codecs
 import glob
 import hashlib
+import json
 import os
 import platform
 import re
@@ -11,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+import package_common as common
 
 def host_platform():
   return platform.system().lower()
@@ -248,6 +250,23 @@ def delete_files(src, verbose=True):
       os.remove(path)
     elif is_dir(path):
       shutil.rmtree(path, ignore_errors=True)
+  return
+
+def set_summary(target, status):
+  common.summary.append({target: status})
+  return
+
+def add_deploy_data(product, ptype, src, dst):
+  common.deploy_data.append({
+    "platform": common.platforms[common.platform]["title"],
+    "product": product,
+    "type": ptype,
+    # "local": get_path(src),
+    "size": get_file_size(get_path(src)),
+    "remote": dst
+  })
+  f = open(get_path(common.workspace_dir + "/deploy.json"), "wb")
+  f.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))
   return
 
 def cmd(*args, **kwargs):

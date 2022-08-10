@@ -139,6 +139,7 @@ def make_winsparkle_files():
   awk_args = [
     "-v", "Version=" + version,
     "-v", "Build=" + build,
+    "-v", "Branch=" + get_env("RELEASE_BRANCH"),
     "-v", "Timestamp=" + timestamp,
     "-i", get_path(build_branding_dir, awk_branding)
   ]

@@ -76,6 +76,9 @@ def get_path(path):
 def get_abspath(path):
   return os.path.abspath(get_path(path))
 
+def get_basename(path):
+  return os.path.basename(path)
+
 def get_dirname(path):
   return os.path.dirname(path)
 
@@ -95,6 +98,14 @@ def is_exist(path):
   if os.path.exists(path):
     return True
   return False
+
+def glob_path(path):
+  return glob.glob(path)
+
+def glob_file(path):
+  if glob.glob(path) and is_file(glob.glob(path)[0]):
+    return glob.glob(path)[0]
+  return
 
 def get_md5(path):
   if os.path.exists(path):

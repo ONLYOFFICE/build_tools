@@ -31,6 +31,7 @@ common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
 common.version = args.version if (args.version is not None) else utils.get_env("PRODUCT_VERSION", "1.0.0")
 common.build = args.build if (args.build is not None) else utils.get_env("BUILD_NUMBER", "1")
+common.release_branch = utils.get_env("RELEASE_BRANCH", "experimental")
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.summary = []
@@ -59,6 +60,7 @@ import package_builder
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
+utils.delete_file("deploy.json")
 if "core" in common.targets:
   package_core.make()
 if "desktop" in common.targets:

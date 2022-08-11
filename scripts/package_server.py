@@ -54,7 +54,7 @@ def make_windows(edition):
     utils.log_h2("server " + edition + " inno deploy")
     inno_file = utils.glob_file("exe/*.exe")
     inno_key = key_prefix + "/" + utils.get_basename(inno_file)
-    rc = aws_s3_upload(inno_file, inno_key, edition, "Portable")
+    rc = aws_s3_upload(inno_file, inno_key, edition, "Installer")
   utils.set_summary("server " + edition + " inno deploy", rc == 0)
 
   utils.set_cwd(common.workspace_dir)

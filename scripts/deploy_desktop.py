@@ -66,6 +66,7 @@ def make():
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/converter/icuuc58.dll")
+      base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
 
     if (0 == platform.find("linux")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/converter/libicudata.so.58")
@@ -159,6 +160,11 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
+
+    # remove help from install until web-apps containes help
+    base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")
+    base.delete_dir(root_dir + "/editors/web-apps/apps/presentationeditor/main/resources/help")
+    base.delete_dir(root_dir + "/editors/web-apps/apps/spreadsheeteditor/main/resources/help")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)

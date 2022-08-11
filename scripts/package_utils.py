@@ -136,15 +136,6 @@ def write_file(path, data, encoding='utf-8', verbose=True):
     file.write(data)
   return
 
-def write_template(src, dst, encoding='utf-8', **kwargs):
-  template = Template(open(src).read())
-  if is_file(dst):
-    os.remove(dst)
-  log("- write template: " + dst + " < " + src)
-  with codecs.open(dst, 'w', encoding) as file:
-    file.write(template.render(**kwargs))
-  return
-
 def replace_in_file(path, pattern, text_replace, encoding='utf-8', verbose=True):
   if verbose:
     log_h3("replace_in_file:")

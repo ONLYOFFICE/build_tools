@@ -67,11 +67,11 @@ if "desktop" in common.targets:
   package_desktop.make()
 if "builder" in common.targets:
   package_builder.make()
-if "server-ce" in common.targets:
+if "server-community" in common.targets:
   package_server.make("community")
-if "server-ee" in common.targets:
+if "server-enterprise" in common.targets:
   package_server.make("enterprise")
-if "server-de" in common.targets:
+if "server-developer" in common.targets:
   package_server.make("developer")
 # if "mobile" in common.targets:
 #   package_mobile.make()

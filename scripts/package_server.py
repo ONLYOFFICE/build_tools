@@ -83,6 +83,10 @@ def make_linux(edition):
   utils.set_summary("server " + edition + " build", rc == 0)
 
   key_prefix = branding.company_name_l + "/" + common.release_branch
+  if common.platform == "linux_x86_64":
+    rpm_arch = "x86_64"
+  elif common.platform == "linux_aarch64":
+    rpm_arch = "aarch64"
   if rc == 0:
     utils.log_h2("server " + edition + " tar deploy")
     tar_file = utils.glob_file("*.tar.gz")
@@ -97,13 +101,13 @@ def make_linux(edition):
     utils.set_summary("server " + edition + " deb deploy", rc == 0)
 
     utils.log_h2("server " + edition + " rpm deploy")
-    rpm_file = utils.glob_file("rpm/**/*.rpm")
+    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
     rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
     rc = aws_s3_upload(rpm_file, rpm_key, edition, "CentOS")
     utils.set_summary("server " + edition + " rpm deploy", rc == 0)
 
     utils.log_h2("server " + edition + " apt-rpm deploy")
-    alt_rpm_file = utils.glob_file("apt-rpm/**/*.rpm")
+    alt_rpm_file = utils.glob_file("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
     alt_rpm_key = key_prefix + "/altlinux/" + utils.get_basename(alt_rpm_file)
     rc = aws_s3_upload(alt_rpm_file, alt_rpm_key, edition, "AltLinux")
     utils.set_summary("server " + edition + " apt-rpm deploy", rc == 0)

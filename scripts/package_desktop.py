@@ -531,9 +531,15 @@ def make_linux():
   utils.set_summary("desktop build", rc == 0)
 
   key_prefix = branding.company_name_l + "/" + common.release_branch
+  if common.platform == "linux_x86_64":
+    tar_arch = "x64"
+    rpm_arch = "x86_64"
+  elif common.platform == "linux_aarch64":
+    tar_arch = "aarch64"
+    rpm_arch = "aarch64"
   if rc == 0:
     utils.log_h2("desktop tar deploy")
-    tar_file = utils.glob_file("tar/**/*.tar.gz")
+    tar_file = utils.glob_file("tar/" + tar_arch + "/*.tar.gz")
     tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
     rc = aws_s3_upload(tar_file, tar_key, "Portable")
     utils.set_summary("desktop tar deploy", rc == 0)
@@ -545,28 +551,28 @@ def make_linux():
     utils.set_summary("desktop deb deploy", rc == 0)
 
     utils.log_h2("desktop rpm deploy")
-    rpm_file = utils.glob_file("rpm/**/*.rpm")
+    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
     rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
     rc = aws_s3_upload(rpm_file, rpm_key, "CentOS")
     utils.set_summary("desktop rpm deploy", rc == 0)
 
     utils.log_h2("desktop apt-rpm deploy")
-    apt_rpm_file = utils.glob_file("apt-rpm/**/*.rpm")
+    apt_rpm_file = utils.glob_file("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
     apt_rpm_key = key_prefix + "/altlinux/" + utils.get_basename(apt_rpm_file)
     rc = aws_s3_upload(apt_rpm_file, apt_rpm_key, "AltLinux")
     utils.set_summary("desktop apt-rpm deploy", rc == 0)
 
     utils.log_h2("desktop urpmi deploy")
-    urpmi_file = utils.glob_file("urpmi/**/*.rpm")
+    urpmi_file = utils.glob_file("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm")
     urpmi_key = key_prefix + "/rosa/" + utils.get_basename(urpmi_file)
     rc = aws_s3_upload(urpmi_file, urpmi_key, "Rosa")
     utils.set_summary("desktop urpmi deploy", rc == 0)
 
-    utils.log_h2("desktop suse-rpm deploy")
-    suse_rpm_file = utils.glob_file("suse-rpm/**/*.rpm")
-    suse_rpm_key = key_prefix + "/suse/" + utils.get_basename(suse_rpm_file)
-    rc = aws_s3_upload(suse_rpm_file, suse_rpm_key, "SUSE Linux")
-    utils.set_summary("desktop suse-rpm deploy", rc == 0)
+    # utils.log_h2("desktop suse-rpm deploy")
+    # suse_rpm_file = utils.glob_file("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
+    # suse_rpm_key = key_prefix + "/suse/" + utils.get_basename(suse_rpm_file)
+    # rc = aws_s3_upload(suse_rpm_file, suse_rpm_key, "SUSE Linux")
+    # utils.set_summary("desktop suse-rpm deploy", rc == 0)
 
     if not branding.onlyoffice:
       utils.log_h2("desktop deb-astra deploy")

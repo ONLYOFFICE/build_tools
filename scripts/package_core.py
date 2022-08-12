@@ -38,21 +38,21 @@ def make_core():
     return
 
   utils.log_h2("core deploy")
-  rc = utils.cmd(
-      "aws", "s3", "cp",
-      "--acl", "public-read", "--no-progress",
-      core_7z,
-      "s3://" + common.s3_bucket + "/" + dest_version + "core.7z",
-      verbose=True
-  )
+  args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+          core_7z, "s3://" + common.s3_bucket + "/" + dest_version + "core.7z"]
+  if common.os_family == "windows":
+    rc = utils.cmd(*args, verbose=True)
+  else:
+    rc = utils.sh(" ".join(args), verbose=True)
   if rc == 0:
     utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
-    rc = utils.cmd(
-        "aws", "s3", "sync",
-        "--delete", "--acl", "public-read", "--no-progress",
-        "s3://" + common.s3_bucket + "/" + dest_version,
-        "s3://" + common.s3_bucket + "/" + dest_latest,
-        verbose=True
-    )
+    args = ["aws", "s3", "sync", "--delete",
+            "--acl", "public-read", "--no-progress",
+            "s3://" + common.s3_bucket + "/" + dest_version,
+            "s3://" + common.s3_bucket + "/" + dest_latest]
+    if common.os_family == "windows":
+      rc = utils.cmd(*args, verbose=True)
+    else:
+      rc = utils.sh(" ".join(args), verbose=True)
   utils.set_summary("core deploy", rc == 0)
   return

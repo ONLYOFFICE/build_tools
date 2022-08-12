@@ -118,6 +118,10 @@ def make_linux():
   utils.set_summary("builder build", rc == 0)
 
   key_prefix = branding.company_name_l + "/" + common.release_branch
+  if common.platform == "linux_x86_64":
+    rpm_arch = "x86_64"
+  elif common.platform == "linux_aarch64":
+    rpm_arch = "aarch64"
   if rc == 0:
     # utils.log_h2("builder tar deploy")
     # tar_file = utils.glob_file("tar/*.tar.gz")
@@ -132,7 +136,7 @@ def make_linux():
     utils.set_summary("builder deb deploy", rc == 0)
 
     utils.log_h2("builder rpm deploy")
-    rpm_file = utils.glob_file("rpm/**/*.rpm")
+    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
     rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
     rc = aws_s3_upload(rpm_file, rpm_key, "CentOS")
     utils.set_summary("builder rpm deploy", rc == 0)

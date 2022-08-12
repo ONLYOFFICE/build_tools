@@ -15,7 +15,7 @@ def make():
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(local, key, ptype = None):
+def aws_s3_upload(local, key, ptype=None):
   if common.os_family == "windows":
     rc = utils.cmd(
         "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
@@ -119,11 +119,11 @@ def make_linux():
 
   key_prefix = branding.company_name_l + "/" + common.release_branch
   if rc == 0:
-    utils.log_h2("builder tar deploy")
-    tar_file = utils.glob_file("tar/*.tar.gz")
-    tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
-    rc = aws_s3_upload(tar_file, tar_key, "Portable")
-    utils.set_summary("builder tar deploy", rc == 0)
+    # utils.log_h2("builder tar deploy")
+    # tar_file = utils.glob_file("tar/*.tar.gz")
+    # tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
+    # rc = aws_s3_upload(tar_file, tar_key, "Portable")
+    # utils.set_summary("builder tar deploy", rc == 0)
 
     utils.log_h2("builder deb deploy")
     deb_file = utils.glob_file("deb/*.deb")

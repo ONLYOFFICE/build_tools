@@ -267,8 +267,8 @@ def add_deploy_data(product, ptype, src, dst):
     "size": get_file_size(get_path(src)),
     "remote": dst
   })
-  f = open(get_path(common.workspace_dir + "/deploy.json"), "wb")
-  f.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))
+  file = open(get_path(common.workspace_dir + "/deploy.json"), 'w', encoding='utf-8')
+  file.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))
   return
 
 def cmd(*args, **kwargs):

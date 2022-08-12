@@ -18,7 +18,7 @@ def make():
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(local, key, ptype = None):
+def aws_s3_upload(local, key, ptype=None):
   if common.os_family == "windows":
     rc = utils.cmd(
         "aws", "s3", "cp", "--acl", "public-read", "--no-progress",

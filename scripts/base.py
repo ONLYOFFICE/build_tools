@@ -1237,6 +1237,16 @@ def make_sln(directory, args, is_no_errors):
   os.environ.update(old_env)
   return
 
+def make_sln_project(directory, sln_path):
+  args = []
+  args.append(sln_path)
+  args.append("/Rebuild")
+  if (config.check_option("platform", "win_64")):
+    make_sln(directory, args + ["\"Release|x64\""], True)
+  if True:#(config.check_option("platform", "win_32")):
+    make_sln(directory, args + ["\"Release|Win32\""], True)
+  return
+
 def get_android_sdk_home():
   ndk_root_path = get_env("ANDROID_NDK_ROOT")
   if (-1 != ndk_root_path.find("/ndk/")):
@@ -1300,4 +1310,27 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
   delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  return
+
+def correctPathForBuilder(path):
+  replace_value = "../../../build/"
+  if (config.option("branding") != ""):
+    replace_value += (config.option("branding") + "/")
+  replace_value += "lib/"
+  if (config.check_option("config", "debug")):
+    replace_value += ("debug/")
+  if (replace_value == "../../../build/lib/"):
+    return ""
+  new_path = path + ".bak"
+  copy_file(path, new_path)
+  replaceInFile(path, "../../../build/lib/", replace_value)
+  return new_path
+
+def restorePathForBuilder(new_path):
+  if ("" == new_path):
+    return
+  old_path = new_path[:-4]
+  delete_file(old_path)
+  copy_file(new_path, old_path)
+  delete_file(new_path);
   return

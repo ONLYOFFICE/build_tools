@@ -154,7 +154,29 @@ def make():
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
+      if ("" != base.get_env("VIDEO_PLAYER_VLC_DIR")):
+        vlc_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/videoplayerlib/vlc/"
+        if (0 == platform.find("win")):
+          base.copy_file(vlc_dir + platform + "/bin/libvlc.dll", out_dir + "/libvlc.dll")
+          base.copy_file(vlc_dir + platform + "/bin/libvlccore.dll", out_dir + "/libvlccore.dll")
+          base.copy_file(vlc_dir + platform + "/bin/VLCQtCore.dll", out_dir + "/VLCQtCore.dll")
+          base.copy_file(vlc_dir + platform + "/bin/VLCQtWidgets.dll", out_dir + "/VLCQtWidgets.dll")
+        else:
+          base.copy_file(vlc_dir + platform + "/bin/libvlc.so", out_dir + "/libvlc.so")
+          base.copy_file(vlc_dir + platform + "/bin/libvlc.so.5", out_dir + "/libvlc.so.5")
+          base.copy_file(vlc_dir + platform + "/bin/libvlccore.so", out_dir + "/libvlccore.so")
+          base.copy_file(vlc_dir + platform + "/bin/libvlccore.so.8", out_dir + "/libvlccore.so.8")
+          base.copy_file(vlc_dir + platform + "/bin/VLCQtCore.so", out_dir + "/VLCQtCore.so")
+          base.copy_file(vlc_dir + platform + "/bin/VLCQtWidgets.so", out_dir + "/VLCQtWidgets.so")
+
+        if isWindowsXP:
+          base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer/xp", out_dir, "videoplayer")
+        else:
+          base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer", out_dir, "videoplayer")
+
+        base.copy_dir(vlc_dir + platform + "/bin/plugins", out_dir + "/plugins")
+      else:
+        base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
     base.create_dir(root_dir + "/editors")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")

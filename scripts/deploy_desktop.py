@@ -183,10 +183,11 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
-    # remove help from install until web-apps containes help
-    base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")
-    base.delete_dir(root_dir + "/editors/web-apps/apps/presentationeditor/main/resources/help")
-    base.delete_dir(root_dir + "/editors/web-apps/apps/spreadsheeteditor/main/resources/help")
+    if ("1" != config.option("preinstalled-help")):
+      # remove help from install until web-apps containes help
+      base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")
+      base.delete_dir(root_dir + "/editors/web-apps/apps/presentationeditor/main/resources/help")
+      base.delete_dir(root_dir + "/editors/web-apps/apps/spreadsheeteditor/main/resources/help")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)

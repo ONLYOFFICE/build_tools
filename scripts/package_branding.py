@@ -17,7 +17,7 @@ if product == 'desktop':
     product_name = 'Desktop Editors'
     product_name_s = product_name.replace(' ','')
     package_name = company_name + '_' + product_name_s
-    vcredist_list = ['2022']
+    vcredist_list = ['2022', '2013']
     update_changes_list = {
       'en': "changes",
       'ru': "changes_ru"

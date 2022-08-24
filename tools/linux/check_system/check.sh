@@ -5,5 +5,5 @@ DIR_X2T=$SCRIPTPATH/..
 $("$DIR_X2T/x2t" &>/dev/null)
 status=$?
 
-[ $status -ne 0 ] && $(cp "$SCRIPTPATH/libstdc++.so.6" "$DIR_X2T/libstdc++.so.6")
+[ $status -ne 88 ] && $(cp "$SCRIPTPATH/libstdc++.so.6" "$DIR_X2T/libstdc++.so.6")
 

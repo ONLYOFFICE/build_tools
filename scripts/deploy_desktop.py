@@ -62,6 +62,9 @@ def make():
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "x2t")
 
+    if (native_platform == "linux_64"):
+      base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
+
     # icu
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")

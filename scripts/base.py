@@ -1334,3 +1334,9 @@ def restorePathForBuilder(new_path):
   copy_file(new_path, old_path)
   delete_file(new_path);
   return
+
+def generate_check_linux_system(build_tools_dir, out_dir):
+  create_dir(out_dir + "/.system")
+  copy_file(build_tools_dir + "/tools/linux/check_system/check.sh", out_dir + "/.system/check.sh")
+  copy_file(build_tools_dir + "/tools/linux/check_system/libstdc++.so.6", out_dir + "/.system/libstdc++.so.6")
+  return

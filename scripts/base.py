@@ -1012,7 +1012,7 @@ def get_file_last_modified_url(url):
 
 def mac_correct_rpath_binary(path, libs):
   for lib in libs:
-    cmd("install_name_tool", ["-change", "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib", path])
+    cmd("install_name_tool", ["-change", "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib", path], True)
   return
 
 def mac_correct_rpath_library(name, libs):
@@ -1048,6 +1048,15 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer"])
+  os.chdir(cur_dir)
+  return
+
+def mac_correct_rpath_docbuilder(dir):
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  cmd("chmod", ["-v", "+x", "./docbuilder"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
+  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
   os.chdir(cur_dir)
   return
 

@@ -186,6 +186,15 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
+    # desktopeditors-help
+    root_help_dir = root_dir + "-help"
+    if (base.is_dir(root_help_dir)):
+      base.delete_dir(root_help_dir)
+    for i in ["documenteditor", "presentationeditor", "spreadsheeteditor"]:
+      base.copy_dir(
+          base_dir + "/js/" + branding + "/desktop/web-apps/apps/%s/main/resources/help" % i,
+          root_help_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
+
     if ("1" != config.option("preinstalled-help")):
       # remove help from install until web-apps containes help
       base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")

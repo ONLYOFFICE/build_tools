@@ -59,15 +59,16 @@ def make_windows():
     source_prefix = "win_" + machine + ("_xp" if xp else "")
     source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
 
-    copy_file(
-      source_dir + "\\..\\Editors\\UnicodeConverter.dll",
-      source_dir + "\\..\\MediaViewer\\UnicodeConverter.dll")
-    copy_file(
-      source_dir + "\\..\\Editors\\icudt58.dll",
-      source_dir + "\\..\\MediaViewer\\icudt58.dll")
-    copy_file(
-      source_dir + "\\..\\Editors\\icuuc58.dll",
-      source_dir + "\\..\\MediaViewer\\icuuc58.dll")
+    if not onlyoffice:
+      copy_file(
+        source_dir + "\\..\\Editors\\UnicodeConverter.dll",
+        source_dir + "\\..\\MediaViewer\\UnicodeConverter.dll")
+      copy_file(
+        source_dir + "\\..\\Editors\\icudt58.dll",
+        source_dir + "\\..\\MediaViewer\\icudt58.dll")
+      copy_file(
+        source_dir + "\\..\\Editors\\icuuc58.dll",
+        source_dir + "\\..\\MediaViewer\\icuuc58.dll")
 
     if target.startswith('innosetup'):
       for year in vcredist_list:

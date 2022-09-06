@@ -453,8 +453,7 @@ def get_repositories():
   result["core"] = [False, False]
   result["sdkjs"] = [False, False]
   result.update(get_sdkjs_addons())
-  result.update(get_sdkjs_plugins())
-  result.update(get_sdkjs_plugins_server())
+  result["onlyoffice.github.io"] = [False, False]
   result["web-apps"] = [False, False]
   result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
@@ -830,22 +829,6 @@ def get_web_apps_addons():
     result[name] = [True, False]
   return result
 
-def get_plugins(plugins_list=""):
-  result = {}
-  if ("" == plugins_list):
-    return result
-  plugins_list = plugins_list.rsplit(", ")
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  for name in plugins_list:
-    result["plugin-" + name] = [True, plugins_dir]
-  return result
-
-def get_sdkjs_plugins():
-  return get_plugins(config.option("sdkjs-plugin"))
-
-def get_sdkjs_plugins_server():
-  return get_plugins(config.option("sdkjs-plugin-server"))
-
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
     return []
@@ -1103,7 +1086,7 @@ def common_check_version(name, good_version, clean_func):
   return
 
 def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_local=False):
-  src_dir_path = src_dir + "/plugin-" + name
+  src_dir_path = src_dir + "/" + name
   if not is_dir(src_dir_path):
     src_dir_path = src_dir + "/" + name
   if not is_file(src_dir_path + "/config.json"):
@@ -1139,7 +1122,7 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
@@ -1149,7 +1132,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   return
 
 def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
     return

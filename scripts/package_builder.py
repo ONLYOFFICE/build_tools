@@ -76,7 +76,11 @@ def download_isxdl():
 
 def make_innosetup():
   log("\n=== Build innosetup project\n")
-  iscc_args = ["/DVERSION=" + package_version]
+  iscc_args = [
+    "/Qp",
+    "/DVERSION=" + package_version,
+    "/DARCH=" + machine
+  ]
   if not onlyoffice:
     iscc_args.append("/DBRANDING_DIR=" + get_abspath(git_dir, branding, build_dir, "exe"))
   if sign:

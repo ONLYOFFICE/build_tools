@@ -79,7 +79,7 @@ def make_innosetup():
   iscc_args = [
     "/Qp",
     "/DVERSION=" + package_version,
-    "/DARCH=" + machine
+    "/DARCH=" + arch
   ]
   if not onlyoffice:
     iscc_args.append("/DBRANDING_DIR=" + get_abspath(git_dir, branding, build_dir, "exe"))

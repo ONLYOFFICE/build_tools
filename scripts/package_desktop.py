@@ -279,6 +279,11 @@ def make_macos():
 
   set_cwd(git_dir + "/" + branding_build_dir)
 
+  if 'clean' in targets:
+    log("\n=== Clean\n")
+    delete_dir(get_env("HOME") + "/Library/Developer/Xcode/Archives")
+    delete_dir(get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
+
   for target in targets:
     if not target.startswith('diskimage'):
       continue

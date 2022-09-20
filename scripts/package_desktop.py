@@ -365,11 +365,11 @@ def make_sparkle_updates():
     if base == "ReleaseNotes":
       replace_in_file(appcast,
         r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
-        "\\1" + base + "\\3")
+        "\\1" + base + "\\2")
     else:
       replace_in_file(appcast,
         r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
-        "\\1" + base + "\\3")
+        "\\1" + base + "\\2")
 
   log("\n=== Delete unnecessary files\n")
   for file in os.listdir(updates_dir):

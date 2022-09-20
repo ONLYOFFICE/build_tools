@@ -319,26 +319,43 @@ def make_sparkle_updates():
   updates_storage_dir = "%s/%s/_updates" % (get_env('ARCHIVES_DIR'), scheme)
   create_dir(updates_dir)
   copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  copy_dir_content(updates_storage_dir, updates_dir, ".html")
+  # copy_dir_content(updates_storage_dir, updates_dir, ".html")
   copy_file(macos_zip, updates_dir)
 
-  for lang, base in update_changes_list.items():
-    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, base)
-    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if lang == 'en':
-      encoding = 'en_US.UTF-8'
-      cur_date = sh_output("env LC_ALL=" + encoding + " date -u \"+%B %e, %Y\"", verbose=True)
-    elif lang == 'ru':
-      encoding = 'ru_RU.UTF-8'
-      cur_date = sh_output("env LC_ALL=" + encoding + " date -u \"+%e %B %Y\"", verbose=True)
+  if "en" in update_changes_list:
+    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
     if is_file(notes_src):
+      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       copy_file(notes_src, notes_dst)
+      cur_date = sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       replace_in_file(notes_dst,
                       r"(<span class=\"releasedate\">).+(</span>)",
                       "\\1 - " + cur_date + "\\2")
-    # else:
-    #   write_file(notes_dst, "placeholder\n")
-  cmd(git_dir + "/" + build_dir + "/Vendor/Sparkle/bin/generate_appcast", [updates_dir])
+    else:
+      write_file(notes_dst, '<html></html>\n')
+
+  if "ru" in update_changes_list:
+    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
+    if is_file(notes_src):
+      if update_changes_list["ru"] != "ReleaseNotes":
+        notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
+      else:
+        notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
+      copy_file(notes_src, notes_dst)
+      cur_date = sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
+      replace_in_file(notes_dst,
+                      r"(<span class=\"releasedate\">).+(</span>)",
+                      "\\1 - " + cur_date + "\\2")
+    else:
+      write_file(notes_dst, '<html></html>\n')
+
+  sparkle_download_url = "%s/%s/updates/" % (sparkle_base_url, suffix)
+  sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (sparkle_base_url, suffix, app_version)
+  cmd(git_dir + "/" + build_dir + "/Vendor/Sparkle/bin/generate_appcast", [
+      updates_dir,
+      "--download-url-prefix " + sparkle_download_url,
+      "--release-notes-url-prefix " + sparkle_release_notes_url
+    ])
 
   log("\n=== Edit Sparkle appcast links\n")
   appcast_url = sparkle_base_url + "/" + suffix
@@ -347,17 +364,12 @@ def make_sparkle_updates():
   for lang, base in update_changes_list.items():
     if base == "ReleaseNotes":
       replace_in_file(appcast,
-        r"(<sparkle:releaseNotesLink>)(?:.+" + package_name + \
-        "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
+        r"(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)",
+        "\\1" + base + "\\3")
     else:
       replace_in_file(appcast,
-        r"(<sparkle:releaseNotesLink xml:lang=\"" + lang + "\">)(?:" + package_name + \
-        "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-        "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
-  replace_in_file(appcast,
-                  r"(url=\")(?:.+/)(" + package_name + ".+\")",
-                  "\\1" + appcast_url + "/updates/\\2")
+        r"(<sparkle:releaseNotesLink xml:lang=\"" + lang + r"\">).+(\.html</sparkle:releaseNotesLink>)",
+        "\\1" + base + "\\3")
 
   log("\n=== Delete unnecessary files\n")
   for file in os.listdir(updates_dir):

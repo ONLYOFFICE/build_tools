@@ -364,11 +364,11 @@ def make_sparkle_updates():
   for lang, base in update_changes_list.items():
     if base == "ReleaseNotes":
       replace_in_file(appcast,
-        r"(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)",
+        r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
         "\\1" + base + "\\3")
     else:
       replace_in_file(appcast,
-        r"(<sparkle:releaseNotesLink xml:lang=\"" + lang + r"\">).+(\.html</sparkle:releaseNotesLink>)",
+        r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
         "\\1" + base + "\\3")
 
   log("\n=== Delete unnecessary files\n")

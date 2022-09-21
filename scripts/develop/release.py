@@ -39,8 +39,6 @@ config.parse_defaults()
 
 repositories = base.get_repositories()
 
-# Add other plugins
-repositories.update(base.get_plugins('autocomplete, easybib, glavred, wordpress'))
 # Add other repositories
 repositories['core-ext'] = [True, False]
 

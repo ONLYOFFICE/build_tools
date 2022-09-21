@@ -87,6 +87,9 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DocxRenderer")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "x2t")
 
+    if (native_platform == "linux_64"):
+      base.generate_check_linux_system(git_dir + "/build_tools", converter_dir)
+
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
 
     # icu

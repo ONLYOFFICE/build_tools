@@ -83,12 +83,11 @@ def make_windows():
 
   make_zip()
 
-  vc_total = True
-  for year in branding.desktop_vcredist_list:
-    if download_vcredist(year) != 0:
-      vc_total = False
+  vcdl = True
+  vcdl &= download_vcredist("2013")
+  vcdl &= download_vcredist("2022")
 
-  if not vc_total:
+  if not vcdl:
     utils.set_summary("desktop inno build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
@@ -135,7 +134,7 @@ def download_vcredist(year):
   utils.create_dir(utils.get_dirname(vcredist_file))
   rc = utils.download_file(link, vcredist_file, md5, verbose=True)
   utils.set_summary("vcredist " + year + " download", rc == 0)
-  return rc
+  return rc == 0
 
 def make_inno():
   global iscc_args
@@ -294,24 +293,16 @@ def make_msi():
     aic_content += [
       "SetPackageType x86",
       "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"'
-    ]
-    if not branding.onlyoffice:
-      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if arch == "x64": 
     aic_content += [
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"'
-    ]
-    if not branding.onlyoffice:
-      aic_content += [
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"',
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
     ]
   if branding.onlyoffice:
     aic_content += [
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"',
       "DelFolder CUSTOM_PATH"
     ]
   else:
@@ -375,6 +366,11 @@ def make_macos():
 
   utils.set_cwd(build_dir)
 
+  if 'clean' in targets:
+    utils.log("\n=== Clean\n")
+    utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
+    utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
+
   script = '''
     appcast=$(curl -s ''' + branding.sparkle_base_url + '''/''' + suffix + '''/onlyoffice.xml 2> /dev/null)
     echo -n \"RELEASE_MACOS_VERSION=\"
@@ -430,46 +426,57 @@ def make_sparkle_updates():
   updates_storage_dir = "%s/%s/_updates" % (get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
+  # utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
   utils.copy_file(macos_zip, updates_dir)
 
-  for lang, base in update_changes_list.items():
-    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, base)
-    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if lang == 'en':
-      encoding = 'en_US.UTF-8'
-      cur_date = utils.sh_output("env LC_ALL=" + encoding + " date -u \"+%B %e, %Y\"")
-    elif lang == 'ru':
-      encoding = 'ru_RU.UTF-8'
-      cur_date = utils.sh_output("env LC_ALL=" + encoding + " date -u \"+%e %B %Y\"")
+  if "en" in update_changes_list:
+    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
     if utils.is_file(notes_src):
+      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       utils.copy_file(notes_src, notes_dst)
+      cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
-          r"(<span class=\"releasedate\">).+(</span>)",
-          "\\1 - " + cur_date + "\\2")
-    # else:
-    #   write_file(notes_dst, "placeholder\n")
-  utils.sh(common.workspace_dir + \
-      "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " + updates_dir)
+                      r"(<span class=\"releasedate\">).+(</span>)",
+                      "\\1 - " + cur_date + "\\2")
+    else:
+      utils.write_file(notes_dst, '<html></html>\n')
+
+  if "ru" in update_changes_list:
+    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
+    if utils.is_file(notes_src):
+      if update_changes_list["ru"] != "ReleaseNotes":
+        notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
+      else:
+        notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
+      utils.copy_file(notes_src, notes_dst)
+      cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
+      utils.replace_in_file(notes_dst,
+                      r"(<span class=\"releasedate\">).+(</span>)",
+                      "\\1 - " + cur_date + "\\2")
+    else:
+      utils.write_file(notes_dst, '<html></html>\n')
+
+  sparkle_download_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
+  sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (branding.sparkle_base_url, suffix, app_version)
+  utils.sh(common.workspace_dir \
+      + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
+      + updates_dir \
+      + " --download-url-prefix " + sparkle_download_url \
+      + " --release-notes-url-prefix " + sparkle_release_notes_url)
 
   utils.log_h3("edit sparkle appcast links")
-  appcast_url = sparkle_base_url + "/" + suffix
+  appcast_url = branding.sparkle_base_url + "/" + suffix
   appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
 
   for lang, base in update_changes_list.items():
     if base == "ReleaseNotes":
       utils.replace_in_file(appcast,
-          r"(<sparkle:releaseNotesLink>)(?:.+" + package_name + \
-          "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-          "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
+          r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
+          "\\1" + base + "\\2")
     else:
       utils.replace_in_file(appcast,
-          r"(<sparkle:releaseNotesLink xml:lang=\"" + lang + "\">)(?:" + package_name + \
-          "-(?:x86|x86_64|v8|arm)-([0-9.]+)\..+)(</sparkle:releaseNotesLink>)",
-          "\\1" + appcast_url + "/updates/changes/\\2/" + base + ".html\\3")
-  utils.replace_in_file(appcast,
-      r"(url=\")(?:.+/)(" + package_name + ".+\")",
-      "\\1" + appcast_url + "/updates/\\2")
+          r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
+          "\\1" + base + "\\2")
 
   utils.log_h3("delete unnecessary files")
   for file in os.listdir(updates_dir):

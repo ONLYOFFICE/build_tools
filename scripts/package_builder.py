@@ -30,7 +30,7 @@ def aws_s3_upload(local, key, ptype=None):
   return rc
 
 def make_windows():
-  global inno_file, zip_file, key_prefix
+  global inno_file, zip_file, suffix, key_prefix
   utils.set_cwd("document-builder-package")
 
   prefix = common.platforms[common.platform]["prefix"]
@@ -84,7 +84,11 @@ def make_zip():
 def make_inno():
   utils.log_h2("builder inno build")
   utils.log_h2(inno_file)
-  args = ["-Version " + common.version, "-Build " + common.build]
+  args = [
+    "-Arch " + suffix,
+    "-Version " + common.version,
+    "-Build " + common.build
+  ]
   if not branding.onlyoffice:
     args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
   if common.sign:

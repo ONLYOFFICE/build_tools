@@ -88,6 +88,9 @@ if config.check_option("module", "desktop"):
     base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_32")
     base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/x64/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_64")
 
+    if ("windows" == base.host_platform()):
+      base.set_env("VIDEO_PLAYER_VLC_DIR", base_dir + "/../desktop-sdk/ChromiumBasedEditors/videoplayerlib/vlc")
+
 # build
 build.make()
 

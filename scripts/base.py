@@ -453,8 +453,7 @@ def get_repositories():
   result["core"] = [False, False]
   result["sdkjs"] = [False, False]
   result.update(get_sdkjs_addons())
-  result.update(get_sdkjs_plugins())
-  result.update(get_sdkjs_plugins_server())
+  result["onlyoffice.github.io"] = [False, False]
   result["web-apps"] = [False, False]
   result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
@@ -830,22 +829,6 @@ def get_web_apps_addons():
     result[name] = [True, False]
   return result
 
-def get_plugins(plugins_list=""):
-  result = {}
-  if ("" == plugins_list):
-    return result
-  plugins_list = plugins_list.rsplit(", ")
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
-  for name in plugins_list:
-    result["plugin-" + name] = [True, plugins_dir]
-  return result
-
-def get_sdkjs_plugins():
-  return get_plugins(config.option("sdkjs-plugin"))
-
-def get_sdkjs_plugins_server():
-  return get_plugins(config.option("sdkjs-plugin-server"))
-
 def sdkjs_addons_param():
   if ("" == config.option("sdkjs-addons")):
     return []
@@ -1012,7 +995,7 @@ def get_file_last_modified_url(url):
 
 def mac_correct_rpath_binary(path, libs):
   for lib in libs:
-    cmd("install_name_tool", ["-change", "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib", path])
+    cmd("install_name_tool", ["-change", "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib", path], True)
   return
 
 def mac_correct_rpath_library(name, libs):
@@ -1023,20 +1006,20 @@ def mac_correct_rpath_x2t(dir):
   os.chdir(dir)
   mac_correct_rpath_library("icudata.58", [])
   mac_correct_rpath_library("icuuc.58", ["icudata.58"])
-  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58", "kernel"])
-  mac_correct_rpath_library("kernel", [])
-  mac_correct_rpath_library("kernel_network", ["kernel"])
+  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58"])
+  mac_correct_rpath_library("kernel", ["UnicodeConverter"])
+  mac_correct_rpath_library("kernel_network", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "kernel_network", "graphics"])
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "kernel_network", "graphics"])
-  mac_correct_rpath_library("EpubFile", ["kernel", "HtmlFile2", "graphics"])
+  mac_correct_rpath_library("EpubFile", ["UnicodeConverter", "kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfWriter", ["UnicodeConverter", "kernel", "graphics", "kernel_network"])
-  mac_correct_rpath_library("DjVuFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
-  mac_correct_rpath_library("PdfReader", ["kernel", "UnicodeConverter", "graphics", "PdfWriter", "HtmlRenderer"])
-  mac_correct_rpath_library("XpsFile", ["kernel", "UnicodeConverter", "graphics", "PdfWriter"])
-  mac_correct_rpath_library("DocxRenderer", ["kernel", "UnicodeConverter", "graphics"])
+  mac_correct_rpath_library("DjVuFile", ["UnicodeConverter", "kernel", "graphics", "PdfWriter"])
+  mac_correct_rpath_library("PdfReader", ["UnicodeConverter", "kernel", "graphics", "PdfWriter", "HtmlRenderer"])
+  mac_correct_rpath_library("XpsFile", ["UnicodeConverter", "kernel", "graphics", "PdfWriter"])
+  mac_correct_rpath_library("DocxRenderer", ["UnicodeConverter", "kernel", "graphics"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
   mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])
@@ -1048,6 +1031,15 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer"])
+  os.chdir(cur_dir)
+  return
+
+def mac_correct_rpath_docbuilder(dir):
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  cmd("chmod", ["-v", "+x", "./docbuilder"])
+  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
+  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfWriter", "HtmlRenderer", "PdfReader", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
   os.chdir(cur_dir)
   return
 
@@ -1094,7 +1086,7 @@ def common_check_version(name, good_version, clean_func):
   return
 
 def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_local=False):
-  src_dir_path = src_dir + "/plugin-" + name
+  src_dir_path = src_dir + "/" + name
   if not is_dir(src_dir_path):
     src_dir_path = src_dir + "/" + name
   if not is_file(src_dir_path + "/config.json"):
@@ -1130,7 +1122,7 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
@@ -1140,7 +1132,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   return
 
 def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../sdkjs-plugins"
+  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
     return
@@ -1237,6 +1229,16 @@ def make_sln(directory, args, is_no_errors):
   os.environ.update(old_env)
   return
 
+def make_sln_project(directory, sln_path):
+  args = []
+  args.append(sln_path)
+  args.append("/Rebuild")
+  if (config.check_option("platform", "win_64")):
+    make_sln(directory, args + ["\"Release|x64\""], True)
+  if True:#(config.check_option("platform", "win_32")):
+    make_sln(directory, args + ["\"Release|Win32\""], True)
+  return
+
 def get_android_sdk_home():
   ndk_root_path = get_env("ANDROID_NDK_ROOT")
   if (-1 != ndk_root_path.find("/ndk/")):
@@ -1300,4 +1302,33 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
   delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  return
+
+def correctPathForBuilder(path):
+  replace_value = "../../../build/"
+  if (config.option("branding") != ""):
+    replace_value += (config.option("branding") + "/")
+  replace_value += "lib/"
+  if (config.check_option("config", "debug")):
+    replace_value += ("debug/")
+  if (replace_value == "../../../build/lib/"):
+    return ""
+  new_path = path + ".bak"
+  copy_file(path, new_path)
+  replaceInFile(path, "../../../build/lib/", replace_value)
+  return new_path
+
+def restorePathForBuilder(new_path):
+  if ("" == new_path):
+    return
+  old_path = new_path[:-4]
+  delete_file(old_path)
+  copy_file(new_path, old_path)
+  delete_file(new_path);
+  return
+
+def generate_check_linux_system(build_tools_dir, out_dir):
+  create_dir(out_dir + "/.system")
+  copy_file(build_tools_dir + "/tools/linux/check_system/check.sh", out_dir + "/.system/check.sh")
+  copy_file(build_tools_dir + "/tools/linux/check_system/libstdc++.so.6", out_dir + "/.system/libstdc++.so.6")
   return

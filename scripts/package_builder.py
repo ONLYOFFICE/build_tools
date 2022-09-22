@@ -15,8 +15,22 @@ def make():
     utils.log("Unsupported host OS")
   return
 
+def aws_s3_upload(local, key, ptype=None):
+  if common.os_family == "windows":
+    rc = utils.cmd(
+        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+        local, "s3://" + common.s3_bucket + "/" + key,
+        verbose=True
+    )
+  else:
+    rc = utils.sh("aws s3 cp --acl public-read --no-progress " \
+        + local + " s3://" + common.s3_bucket + "/" + key, verbose=True)
+  if rc == 0 and ptype is not None:
+    utils.add_deploy_data("builder", ptype, local, key)
+  return rc
+
 def make_windows():
-  global inno_file, zip_file
+  global inno_file, zip_file, suffix, key_prefix
   utils.set_cwd("document-builder-package")
 
   prefix = common.platforms[common.platform]["prefix"]
@@ -34,9 +48,11 @@ def make_windows():
   suffix = suffixes[common.platform]
   zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
+  key_prefix = "%s/%s/windows/builder/%s/%s" % (branding.company_name_l, \
+      common.release_branch, common.version, common.build)
 
   if common.clean:
-    utils.log_h1("clean")
+    utils.log_h2("builder clean")
     utils.delete_dir("build")
 
   utils.log_h1("copy arifacts")
@@ -52,32 +68,27 @@ def make_windows():
   return
 
 def make_zip():
-  common.summary["builder zip build"] = 1
-  utils.log_h1("zip build " + zip_file)
+  utils.log_h2("builder zip build")
+  utils.log_h2(zip_file)
   rc = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
       chdir="build", creates="build\\" + zip_file, verbose=True)
-  common.summary["builder zip build"] = rc
+  utils.set_summary("builder zip build", rc == 0)
 
-  # common.summary["zip deploy"] = 1
-  # if rc == 0:
-  #   utils.log_h1("zip deploy " + zip_file)
-  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
-  #       + common.version + "/" + common.build + "/"
-  #   rc = utils.cmd(
-  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-  #       "build\\" + zip_file, dest,
-  #       verbose=True
-  #   )
-  #   common.summary["zip deploy"] = rc
+  if rc == 0:
+    utils.log_h2("builder zip deploy")
+    zip_key = key_prefix + "/" + zip_file
+    rc = aws_s3_upload("build\\" + zip_file, zip_key, "Portable")
+  utils.set_summary("builder zip deploy", rc == 0)
   return
 
 def make_inno():
-  common.summary["builder inno build"] = 1
-  utils.log_h1("inno build " + inno_file)
-  # if utils.is_file(inno_file):
-  #   utils.log("! file exist, skip")
-  #   return
-  args = ["-Version " + common.version, "-Build " + common.build]
+  utils.log_h2("builder inno build")
+  utils.log_h2(inno_file)
+  args = [
+    "-Arch " + suffix,
+    "-Version " + common.version,
+    "-Build " + common.build
+  ]
   if not branding.onlyoffice:
     args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
   if common.sign:
@@ -85,34 +96,59 @@ def make_inno():
     args.append("-CertName '%s'" % branding.cert_name)
   rc = utils.ps1(".\\make_inno.ps1", args,
       creates="build\\" + inno_file, verbose=True)
-  common.summary["builder inno build"] = rc
+  utils.set_summary("builder inno build", rc == 0)
 
-  # common.summary["inno deploy"] = 1
-  # if rc == 0:
-  #   utils.log_h1("inno deploy " + inno_file)
-  #   dest = "s3://" + common.s3_bucket + "/onlyoffice/experimental/windows/builder/" \
-  #       + common.version + "/" + common.build + "/"
-  #   rc = utils.cmd(
-  #       "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-  #       "build\\" + inno_file, dest,
-  #       verbose=True
-  #   )
-  #   common.summary["inno deploy"] = rc
+  if rc == 0:
+    utils.log_h2("builder inno deploy")
+    inno_key = key_prefix + "/" + inno_file
+    rc = aws_s3_upload("build\\" + inno_file, inno_key, "Installer")
+  utils.set_summary("builder inno deploy", rc == 0)
   return
 
 def make_linux():
   utils.set_cwd("document-builder-package")
 
+  utils.log_h2("builder clean")
   rc = utils.sh("make clean", verbose=True)
-  common.summary["builder clean"] = rc
+  utils.set_summary("builder clean", rc == 0)
 
+  utils.log_h2("builder build")
   args = []
   if common.platform == "linux_aarch64":
     args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
   rc = utils.sh("make packages " + " ".join(args), verbose=True)
-  common.summary["builder build"] = rc
+  utils.set_summary("builder build", rc == 0)
+
+  key_prefix = branding.company_name_l + "/" + common.release_branch
+  if common.platform == "linux_x86_64":
+    rpm_arch = "x86_64"
+  elif common.platform == "linux_aarch64":
+    rpm_arch = "aarch64"
+  if rc == 0:
+    # utils.log_h2("builder tar deploy")
+    # tar_file = utils.glob_file("tar/*.tar.gz")
+    # tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
+    # rc = aws_s3_upload(tar_file, tar_key, "Portable")
+    # utils.set_summary("builder tar deploy", rc == 0)
+
+    utils.log_h2("builder deb deploy")
+    deb_file = utils.glob_file("deb/*.deb")
+    deb_key = key_prefix + "/ubuntu/" + utils.get_basename(deb_file)
+    rc = aws_s3_upload(deb_file, deb_key, "Ubuntu")
+    utils.set_summary("builder deb deploy", rc == 0)
+
+    utils.log_h2("builder rpm deploy")
+    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
+    rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
+    rc = aws_s3_upload(rpm_file, rpm_key, "CentOS")
+    utils.set_summary("builder rpm deploy", rc == 0)
+
+  else:
+    utils.set_summary("builder tar deploy", False)
+    utils.set_summary("builder deb deploy", False)
+    utils.set_summary("builder rpm deploy", False)
 
   utils.set_cwd(common.workspace_dir)
 

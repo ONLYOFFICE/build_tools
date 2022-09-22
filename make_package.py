@@ -31,10 +31,11 @@ common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
 common.version = args.version if (args.version is not None) else utils.get_env("PRODUCT_VERSION", "1.0.0")
 common.build = args.build if (args.build is not None) else utils.get_env("BUILD_NUMBER", "1")
+common.release_branch = utils.get_env("RELEASE_BRANCH", "experimental")
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
-common.summary = {}
-common.deploy_list = []
+common.summary = []
+common.deploy_data = []
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -59,17 +60,18 @@ import package_builder
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
+utils.delete_file("deploy.json")
 if "core" in common.targets:
   package_core.make()
 if "desktop" in common.targets:
   package_desktop.make()
 if "builder" in common.targets:
   package_builder.make()
-if "server-ce" in common.targets:
+if "server-community" in common.targets:
   package_server.make("community")
-if "server-ee" in common.targets:
+if "server-enterprise" in common.targets:
   package_server.make("enterprise")
-if "server-de" in common.targets:
+if "server-developer" in common.targets:
   package_server.make("developer")
 # if "mobile" in common.targets:
 #   package_mobile.make()
@@ -77,11 +79,11 @@ if "server-de" in common.targets:
 # summary
 utils.log_h1("Build summary")
 exitcode = 0
-for task, rc in common.summary.items():
-  if rc == 0:
-    utils.log("[  OK  ] " + task)
+for i in common.summary:
+  if list(i.values())[0]:
+    utils.log("[  OK  ] " + list(i.keys())[0])
   else:
-    utils.log("[FAILED] " + task)
+    utils.log("[FAILED] " + list(i.keys())[0])
     exitcode = 1
 
 exit(exitcode)

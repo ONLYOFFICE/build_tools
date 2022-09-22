@@ -5,6 +5,7 @@ sys.path.append('../../scripts')
 import base
 import os
 import glob
+from xml.sax.saxutils import escape
 
 AVS_OFFICESTUDIO_FILE_DOCUMENT                      = 0x0040
 AVS_OFFICESTUDIO_FILE_DOCUMENT_DOCX                 = AVS_OFFICESTUDIO_FILE_DOCUMENT + 0x0001
@@ -135,8 +136,8 @@ def convertFile(directory_x2t, file_input, file_output, convert_params):
 
   xml_convert = u"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
   xml_convert += u"<TaskQueueDataConvert>"
-  xml_convert += (u"<m_sFileFrom>" + file_input + u"</m_sFileFrom>")
-  xml_convert += (u"<m_sFileTo>" + file_output + u"</m_sFileTo>")
+  xml_convert += (u"<m_sFileFrom>" + escape(file_input) + u"</m_sFileFrom>")
+  xml_convert += (u"<m_sFileTo>" + escape(file_output) + u"</m_sFileTo>")
   xml_convert += u"<m_nFormatTo>" + str(getFormatByFile(file_output)) + u"</m_nFormatTo>"
   xml_convert += (u"<m_sAllFontsPath>" + directory_fonts + u"/AllFonts.js</m_sAllFontsPath>")
   xml_convert += (u"<m_sFontDir>" + directory_fonts + "</m_sFontDir>")

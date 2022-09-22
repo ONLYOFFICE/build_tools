@@ -17,44 +17,42 @@ def make_core():
   prefix = common.platforms[common.platform]["prefix"]
   company = branding.company_name.lower()
   repos = {
-    "windows": "windows",
-    "darwin": "mac",
-    "linux": "linux"
+    "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },
+    "windows_x86":   { "repo": "windows", "arch": "x86", "version": common.version + "." + common.build },
+    "darwin_x86_64": { "repo": "mac",     "arch": "x64", "version": common.version + "-" + common.build },
+    "linux_x86_64":  { "repo": "linux",   "arch": "x64", "version": common.version + "-" + common.build },
   }
+  repo = repos[common.platform]
   branch = utils.get_env("BRANCH_NAME")
-  if branch is None:
-    utils.log("BRANCH_NAME variable is undefined")
-    return
-  arch = common.platforms[common.platform]["arch"]
-  if utils.is_windows():
-    version = common.version + "." + common.build
-  else:
-    version = common.version + "-" + common.build
-  src = "build_tools/out/%s/%s/core/core.7z" % (prefix, company)
-  dest = common.s3_bucket + "/" + repos[common.os_family] + "/core/" \
-      + branch + "/%s/" + arch + "/"
+  core_7z = utils.get_path("build_tools/out/%s/%s/core/core.7z" % (prefix, company))
+  dest_version = "%s/core/%s/%s/%s/" % (repo["repo"], branch, repo["version"], repo["arch"])
+  dest_latest = "%s/core/%s/%s/%s/" % (repo["repo"], branch, "latest", repo["arch"])
 
-  utils.log_h1("core deploy")
-  common.summary["core deploy"] = 1
-  ret = utils.cmd(
-      "aws", "s3", "cp",
-      "--acl", "public-read", "--no-progress",
-      utils.get_path(src), "s3://" + dest % version,
-      verbose=True
-  )
-  if ret == 0:
-    common.deploy_list.append({
-      "product": "core",
-      "platform": common.platform,
-      "section": "Archive",
-      "path": dest % version + "core.7z",
-      "size": utils.get_file_size(utils.get_path(src))
-    })
-    ret = utils.cmd(
-        "aws", "s3", "sync",
-        "--delete", "--acl", "public-read", "--no-progress",
-        "s3://" + dest % version, "s3://" + dest % "latest",
-        verbose=True
-    )
-  common.summary["core deploy"] = ret
+  if branch is None:
+    utils.log_err("BRANCH_NAME variable is undefined")
+    utils.set_summary("core deploy", False)
+    return
+  if not utils.is_file(core_7z):
+    utils.log_err("core.7z does not exist")
+    utils.set_summary("core deploy", False)
+    return
+
+  utils.log_h2("core deploy")
+  args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+          core_7z, "s3://" + common.s3_bucket + "/" + dest_version + "core.7z"]
+  if common.os_family == "windows":
+    rc = utils.cmd(*args, verbose=True)
+  else:
+    rc = utils.sh(" ".join(args), verbose=True)
+  if rc == 0:
+    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
+    args = ["aws", "s3", "sync", "--delete",
+            "--acl", "public-read", "--no-progress",
+            "s3://" + common.s3_bucket + "/" + dest_version,
+            "s3://" + common.s3_bucket + "/" + dest_latest]
+    if common.os_family == "windows":
+      rc = utils.cmd(*args, verbose=True)
+    else:
+      rc = utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("core deploy", rc == 0)
   return

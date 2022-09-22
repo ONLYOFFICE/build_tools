@@ -34,9 +34,6 @@ config.parse_defaults()
 
 repositories = base.get_repositories()
 
-# Add other plugins
-repositories.update(base.get_plugins('autocomplete, easybib, wordpress'))
-
 # Add other repositories
 if (config.check_option("module", "desktop")):
   repositories['appimage-desktopeditors'] = [False, False]

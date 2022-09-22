@@ -29,12 +29,12 @@ core_android {
 }
 
 addSubProject(cryptopp,		$$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro)
-addSubProject(kernel,		$$CORE_ROOT_DIR/Common/kernel.pro,\
-				cryptopp)
 addSubProject(unicodeconverter,	$$CORE_ROOT_DIR/UnicodeConverter/UnicodeConverter.pro,\
-				kernel)
+				cryptopp)
+addSubProject(kernel,		$$CORE_ROOT_DIR/Common/kernel.pro,\
+				unicodeconverter)
 addSubProject(network,	$$CORE_ROOT_DIR/Common/Network/network.pro,\
-				kernel)
+				kernel unicodeconverter)
 addSubProject(graphics,		$$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro,\
 				kernel unicodeconverter)
 addSubProject(pdfwriter,	$$CORE_ROOT_DIR/PdfWriter/PdfWriter.pro,\

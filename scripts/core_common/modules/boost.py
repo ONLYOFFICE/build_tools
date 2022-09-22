@@ -68,15 +68,17 @@ def make():
   if ("windows" == base.host_platform()):
     win_toolset = "msvc-14.0"
     win_boot_arg = "vc14"
+    win_vs_version = "vc140"
     if (config.option("vs-version") == "2019"):
       win_toolset = "msvc-14.2"
       win_boot_arg = "vc142"
-    if (-1 != config.option("platform").find("win_64")) and not base.is_dir("../build/win_64"):      
+      win_vs_version = "vc142"
+    if (-1 != config.option("platform").find("win_64")) and not base.is_file("../build/win_64/lib/libboost_system-" + win_vs_version + "-mt-x64-1_72.lib"):
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
-    if (-1 != config.option("platform").find("win_32")) and not base.is_dir("../build/win_32"):
+    if (-1 != config.option("platform").find("win_32")) and not base.is_file("../build/win_32/lib/libboost_system-" + win_vs_version + "-mt-x32-1_72.lib"):
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])

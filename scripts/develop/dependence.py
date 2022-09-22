@@ -88,7 +88,6 @@ def check_dependencies():
 
   if (host_platform == 'windows'):
     checksResult.append(check_nodejs())
-    checksResult.append(check_buildTools())
 
   if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
     checksResult.append(check_mysqlServer())
@@ -169,7 +168,7 @@ def check_nodejs():
   nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
   nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
   print('Installed Node.js version: ' + nodejs_version[1:])
-  nodejs_min_version = '10.20'
+  nodejs_min_version = '14.14'
   nodejs_min_version_minor  = 0
   major_minor_min_version = nodejs_min_version.split('.')
   nodejs_min_version_major = int(major_minor_min_version[0])
@@ -183,7 +182,7 @@ def check_nodejs():
     nodejs_max_version_minor = int(major_minor_max_version[1])
 
   if (nodejs_min_version_major > nodejs_cur_version_major or nodejs_cur_version_major > nodejs_max_version_major):
-    print('Installed Node.js version must be 10.20 to 14.x')
+    print('Installed Node.js version must be 14.14 to 14.x')
     isNeedReinstall = True
   elif (nodejs_min_version_major == nodejs_cur_version_major):
     if (nodejs_min_version_minor > nodejs_cur_version_minor):
@@ -193,7 +192,7 @@ def check_nodejs():
       isNeedReinstall = True
 
   if (True == isNeedReinstall):
-    print('Installed Node.js version must be 10.20 to 14.x')
+    print('Installed Node.js version must be 14.14 to 14.x')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
       dependence.append_install('Node.js')
@@ -375,6 +374,7 @@ def check_vc_components():
   if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0):
     print('Microsoft Visual C++ 2015-20** Redistributable (x64) not found')
     result = installProgram('VC2019x64') and result
+
 
   print('Installed Visual C++ components is valid')
   return result
@@ -908,7 +908,7 @@ def install_nodejs():
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-    'Node.js': 'https://nodejs.org/download/release/v14.15.1/node-v14.15.1-x64.msi',
+    'Node.js': 'https://nodejs.org/download/release/v14.17.2/node-v14.17.2-x64.msi',
     'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',

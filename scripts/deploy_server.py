@@ -87,6 +87,9 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DocxRenderer")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "x2t")
 
+    if (native_platform == "linux_64"):
+      base.generate_check_linux_system(git_dir + "/build_tools", converter_dir)
+
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
 
     # icu
@@ -106,7 +109,7 @@ def make():
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
-    base.copy_dir(git_dir + "/DocumentBuilder/empty", converter_dir + "/empty")
+    base.copy_dir(git_dir + "/document-templates/new/en-US", converter_dir + "/empty")
 
     # js
     js_dir = root_dir
@@ -122,6 +125,8 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", js_dir + "/sdkjs-plugins/v1/plugins-ui.js")
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
+
+    base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins")
     
     # tools
     tools_dir = root_dir + "/server/tools"

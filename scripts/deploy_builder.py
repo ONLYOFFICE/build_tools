@@ -51,6 +51,9 @@ def make():
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
 
+    if (native_platform == "linux_64"):
+      base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
+
     # icu
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/icudt58.dll")
@@ -77,8 +80,7 @@ def make():
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
     base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
-    base.copy_dir(git_dir + "/DocumentBuilder/empty", root_dir + "/empty")
-    base.copy_dir(git_dir + "/DocumentBuilder/samples", root_dir + "/samples")
+    base.copy_dir(git_dir + "/document-templates/new/en-US", root_dir + "/empty")
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", root_dir + "/sdkjs")
@@ -94,8 +96,10 @@ def make():
     
     if ("win_64" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/x64/Release/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_64/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
     elif ("win_32" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_32/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
 
     # correct ios frameworks
     if ("ios" == platform):
@@ -103,6 +107,7 @@ def make():
 
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
-
+      base.mac_correct_rpath_docbuilder(root_dir)
+  
   return
 

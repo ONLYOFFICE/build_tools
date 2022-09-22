@@ -6,7 +6,7 @@ but don't want to compile pretty compilcated core product to make those changes.
 
 ## Installing ONLYOFFICE Docs
 
-## How to use - Linux
+## How to use - Linux or macOS
 
 **Note**: You need the latest Docker version installed.
 
@@ -23,9 +23,11 @@ docker pull onlyoffice/documentserver
 ### Create develop image
 
 To create a image with the ability to include external non-minified sdkjs code,
-use the following command from the dockerfile directory:
+use the following command:
 
 ```bash
+git clone https://github.com/ONLYOFFICE/build_tools.git
+cd build_tools/develop
 docker build -t documentserver-develop .
 ```
 
@@ -35,9 +37,11 @@ docker build -t documentserver-develop .
 
 To connect external folders to the container,
 you need to pass the "-v" parameter
-along with the relative paths to the required folders.
+along with the relative paths to the required folders.  
+The folders `sdkjs` and `web-apps` are required for proper development workflow
 
-**For example, let's connect the external folders "sdkjs" and "web-apps" to the container:**
+* `sdkjs` repo is located [here](https://github.com/ONLYOFFICE/sdkjs/)
+* `web-apps` repo is located [here](https://github.com/ONLYOFFICE/web-apps/)
 
 ```bash
 docker run -i -t -d -p 80:80 --restart=always \

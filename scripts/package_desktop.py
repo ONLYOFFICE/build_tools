@@ -353,8 +353,8 @@ def make_sparkle_updates():
   sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (sparkle_base_url, suffix, app_version)
   cmd(git_dir + "/" + build_dir + "/Vendor/Sparkle/bin/generate_appcast", [
       updates_dir,
-      "--download-url-prefix " + sparkle_download_url,
-      "--release-notes-url-prefix " + sparkle_release_notes_url
+      "--download-url-prefix", sparkle_download_url,
+      "--release-notes-url-prefix", sparkle_release_notes_url
     ])
 
   log("\n=== Edit Sparkle appcast links\n")
@@ -369,7 +369,7 @@ def make_sparkle_updates():
     else:
       replace_in_file(appcast,
         r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
-        "\\1" + base + "\\2")
+        "\\1" + sparkle_release_notes_url + base + "\\2")
 
   log("\n=== Delete unnecessary files\n")
   for file in os.listdir(updates_dir):

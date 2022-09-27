@@ -539,14 +539,12 @@ def make_linux():
 
   key_prefix = branding.company_name_l + "/" + common.release_branch
   if common.platform == "linux_x86_64":
-    tar_arch = "x64"
     rpm_arch = "x86_64"
   elif common.platform == "linux_aarch64":
-    tar_arch = "aarch64"
     rpm_arch = "aarch64"
   if rc == 0:
     utils.log_h2("desktop tar deploy")
-    tar_file = utils.glob_file("tar/" + tar_arch + "/*.tar.gz")
+    tar_file = utils.glob_file("tar/*.tar.gz")
     tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
     rc = aws_s3_upload(tar_file, tar_key, "Portable")
     utils.set_summary("desktop tar deploy", rc == 0)

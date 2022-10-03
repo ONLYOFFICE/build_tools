@@ -324,8 +324,8 @@ def make_sparkle_updates():
 
   if "en" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
+    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if is_file(notes_src):
-      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       copy_file(notes_src, notes_dst)
       cur_date = sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       replace_in_file(notes_dst,
@@ -336,11 +336,11 @@ def make_sparkle_updates():
 
   if "ru" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
+    if update_changes_list["ru"] != "ReleaseNotes":
+      notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
+    else:
+      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if is_file(notes_src):
-      if update_changes_list["ru"] != "ReleaseNotes":
-        notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
-      else:
-        notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       copy_file(notes_src, notes_dst)
       cur_date = sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
       replace_in_file(notes_dst,

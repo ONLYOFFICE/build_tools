@@ -62,8 +62,11 @@ def make():
     print("-----------------------------------------------------------")
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
-  base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
 
+  if not base.is_dir(git_dir + "/sdkjs-plugins"):
+    base.create_dir(git_dir + "/sdkjs-plugins")
+
+  base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
   base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins")
 
   if not base.is_dir(git_dir + "/fonts"):
@@ -134,7 +137,10 @@ def make():
 
   #site url
   example_config = {}
-  example_config["port"] = 80
+  if (base.host_platform() == "linux"):
+    example_config["port"] = 3000
+  else:
+    example_config["port"] = 80
   example_config["siteUrl"] = "http://" + config.option("siteUrl") + ":8000/"
   example_config["apiUrl"] = "web-apps/apps/api/documents/api.js"
   example_config["preloaderUrl"] = "web-apps/apps/api/documents/cache-scripts.html"

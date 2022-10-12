@@ -1,105 +1,154 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from package_utils import *
-from package_branding import *
+import package_utils as utils
+import package_common as common
+import package_branding as branding
 
 def make():
-  if system == 'windows':
+  utils.log_h1("BUILDER")
+  if utils.is_windows():
     make_windows()
-  elif system == 'linux':
-    if 'packages' in targets:
-      set_cwd(build_dir)
-      log("Clean")
-      cmd("make", ["clean"])
-      log("Build packages")
-      cmd("make", ["packages"])
+  elif utils.is_linux():
+    make_linux()
   else:
-    exit(1)
+    utils.log("Unsupported host OS")
   return
 
-#
-# Windows
-#
+def aws_s3_upload(local, key, ptype=None):
+  if common.os_family == "windows":
+    rc = utils.cmd(
+        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+        local, "s3://" + common.s3_bucket + "/" + key,
+        verbose=True
+    )
+  else:
+    rc = utils.sh("aws s3 cp --acl public-read --no-progress " \
+        + local + " s3://" + common.s3_bucket + "/" + key, verbose=True)
+  if rc == 0 and ptype is not None:
+    utils.add_deploy_data("builder", ptype, local, key)
+  return rc
 
 def make_windows():
-  global package_version, sign, machine, arch, source_dir, base_dir, \
-    innosetup_file, portable_zip_file, isxdl_file
-  base_dir = "base"
-  isxdl_file = "exe/scripts/isxdl/isxdl.dll"
+  global inno_file, zip_file, suffix, key_prefix
+  utils.set_cwd("document-builder-package")
 
-  set_cwd(get_abspath(git_dir, build_dir))
+  prefix = common.platforms[common.platform]["prefix"]
+  company = branding.company_name.lower()
+  product = branding.builder_product_name.replace(" ","").lower()
+  source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  package_name = company + "_" + product
+  package_version = common.version + "." + common.build
+  suffixes = {
+    "windows_x64": "x64",
+    "windows_x86": "x86",
+    "windows_x64_xp": "x64_xp",
+    "windows_x86_xp": "x86_xp"
+  }
+  suffix = suffixes[common.platform]
+  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
+  key_prefix = "%s/%s/windows/builder/%s/%s" % (branding.company_name_l, \
+      common.release_branch, common.version, common.build)
 
-  if 'clean' in targets:
-    log("\n=== Clean\n")
-    delete_dir(base_dir)
-    delete_files(isxdl_file)
-    delete_files("exe/*.exe")
-    delete_files("zip/*.zip")
+  if common.clean:
+    utils.log_h2("builder clean")
+    utils.delete_dir("build")
 
-  package_version = version + '.' + build
-  sign = 'sign' in targets
+  utils.log_h1("copy arifacts")
+  utils.create_dir("build\\app")
+  utils.copy_dir_content(source_dir, "build\\app\\")
 
-  for target in targets:
-    if not (target.startswith('innosetup') or target.startswith('portable')):
-      continue
+  # if "builder-zip" in common.targets:
+  make_zip()
+  # if "builder-inno" in common.targets:
+  make_inno()
 
-    machine = get_platform(target)['machine']
-    arch = get_platform(target)['arch']
-    suffix = arch
-    source_prefix = "win_" + machine
-    source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
-
-    log("\n=== Copy arifacts\n")
-    create_dir(base_dir)
-    copy_dir_content(source_dir, base_dir + '\\')
-
-    if target.startswith('innosetup'):
-      download_isxdl()
-      innosetup_file = "exe/%s_%s_%s.exe" % (package_name, package_version, suffix)
-      make_innosetup()
-
-    if target.startswith('portable'):
-      portable_zip_file = "zip/%s_%s_%s.zip" % (package_name, package_version, suffix)
-      make_win_portable()
+  utils.set_cwd(common.workspace_dir)
   return
 
-def download_isxdl():
-  log("\n=== Download isxdl\n")
-  log("--- " + isxdl_file)
-  if is_file(isxdl_file):
-    log("! file exist, skip")
-    return
-  create_dir(get_dirname(isxdl_file))
-  download_file(isxdl_link, isxdl_file)
+def make_zip():
+  utils.log_h2("builder zip build")
+  utils.log_h2(zip_file)
+  rc = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
+      chdir="build", creates="build\\" + zip_file, verbose=True)
+  utils.set_summary("builder zip build", rc == 0)
+
+  if rc == 0:
+    utils.log_h2("builder zip deploy")
+    zip_key = key_prefix + "/" + zip_file
+    rc = aws_s3_upload("build\\" + zip_file, zip_key, "Portable")
+  utils.set_summary("builder zip deploy", rc == 0)
   return
 
-def make_innosetup():
-  log("\n=== Build innosetup project\n")
-  iscc_args = [
-    "/Qp",
-    "/DVERSION=" + package_version,
-    "/DARCH=" + arch
+def make_inno():
+  utils.log_h2("builder inno build")
+  utils.log_h2(inno_file)
+  args = [
+    "-Arch " + suffix,
+    "-Version " + common.version,
+    "-Build " + common.build
   ]
-  if not onlyoffice:
-    iscc_args.append("/DBRANDING_DIR=" + get_abspath(git_dir, branding, build_dir, "exe"))
-  if sign:
-    iscc_args.append("/DSIGN")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
-  log("--- " + innosetup_file)
-  if is_file(innosetup_file):
-    log("! file exist, skip")
-    return
-  set_cwd("exe")
-  cmd("iscc", iscc_args + ["builder.iss"])
-  set_cwd("..")
+  if not branding.onlyoffice:
+    args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
+  if common.sign:
+    args.append("-Sign")
+    args.append("-CertName '%s'" % branding.cert_name)
+  rc = utils.ps1(".\\make_inno.ps1", args,
+      creates="build\\" + inno_file, verbose=True)
+  utils.set_summary("builder inno build", rc == 0)
+
+  if rc == 0:
+    utils.log_h2("builder inno deploy")
+    inno_key = key_prefix + "/" + inno_file
+    rc = aws_s3_upload("build\\" + inno_file, inno_key, "Installer")
+  utils.set_summary("builder inno deploy", rc == 0)
   return
 
-def make_win_portable():
-  log("\n=== Build portable\n")
-  log("--- " + portable_zip_file)
-  if is_file(portable_zip_file):
-    log("! file exist, skip")
-    return
-  cmd("7z", ["a", "-y", portable_zip_file, get_path(base_dir, "*")])
+def make_linux():
+  utils.set_cwd("document-builder-package")
+
+  utils.log_h2("builder clean")
+  rc = utils.sh("make clean", verbose=True)
+  utils.set_summary("builder clean", rc == 0)
+
+  utils.log_h2("builder build")
+  args = []
+  if common.platform == "linux_aarch64":
+    args += ["-e", "UNAME_M=aarch64"]
+  if not branding.onlyoffice:
+    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  rc = utils.sh("make packages " + " ".join(args), verbose=True)
+  utils.set_summary("builder build", rc == 0)
+
+  key_prefix = branding.company_name_l + "/" + common.release_branch
+  if common.platform == "linux_x86_64":
+    rpm_arch = "x86_64"
+  elif common.platform == "linux_aarch64":
+    rpm_arch = "aarch64"
+  if rc == 0:
+    # utils.log_h2("builder tar deploy")
+    # tar_file = utils.glob_file("tar/*.tar.gz")
+    # tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
+    # rc = aws_s3_upload(tar_file, tar_key, "Portable")
+    # utils.set_summary("builder tar deploy", rc == 0)
+
+    utils.log_h2("builder deb deploy")
+    deb_file = utils.glob_file("deb/*.deb")
+    deb_key = key_prefix + "/ubuntu/" + utils.get_basename(deb_file)
+    rc = aws_s3_upload(deb_file, deb_key, "Ubuntu")
+    utils.set_summary("builder deb deploy", rc == 0)
+
+    utils.log_h2("builder rpm deploy")
+    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
+    rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
+    rc = aws_s3_upload(rpm_file, rpm_key, "CentOS")
+    utils.set_summary("builder rpm deploy", rc == 0)
+
+  else:
+    utils.set_summary("builder tar deploy", False)
+    utils.set_summary("builder deb deploy", False)
+    utils.set_summary("builder rpm deploy", False)
+
+  utils.set_cwd(common.workspace_dir)
   return

@@ -83,6 +83,7 @@ addSubProject(epubfile,		$$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
 }
 !no_tests {
 	addSubProject(standardtester,	$$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro)
+	addSubProject(x2ttester,	$$CORE_ROOT_DIR/Test/Applications/x2tTester/x2ttester.pro)
 }
 
 core_and_multimedia {

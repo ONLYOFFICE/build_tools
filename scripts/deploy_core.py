@@ -56,6 +56,8 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allthemesgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "standardtester")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2ttester")
+
 
     if base.is_file(archive_dir + "/core.7z"):
       base.delete_file(archive_dir + "/core.7z")

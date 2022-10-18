@@ -167,8 +167,8 @@ def make():
     #document-templates
     document_templates_files = server_dir + '/../document-templates'
     document_templates = build_server_dir + '/../document-templates'
-    base.create_dir(document_templates)
-    base.copy_dir_content(document_templates_files, document_templates, "", ".git")
+    base.copy_dir(document_templates_files + '/new', document_templates + '/new')
+    base.copy_dir(document_templates_files + '/sample', document_templates + '/sample')
 
     #license
     license_file1 = server_dir + '/LICENSE.txt'

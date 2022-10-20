@@ -26,8 +26,9 @@ def make():
 #
 
 def make_windows():
-  global package_version, sign, machine, arch, xp, iscc_args, source_dir, \
-    innosetup_file, innosetup_update_file, advinst_file, portable_zip_file
+  global package_version, sign, machine, arch, xp, iscc_args, \
+    source_dir, source_help_dir, innosetup_file, innosetup_help_file, \
+    innosetup_update_file, advinst_file, portable_zip_file
 
   set_cwd(get_abspath(git_dir, build_dir))
 
@@ -58,6 +59,7 @@ def make_windows():
     suffix = arch + ("_xp" if xp else "")
     source_prefix = "win_" + machine + ("_xp" if xp else "")
     source_dir = get_path("%s/%s/%s/%s" % (out_dir, source_prefix, company_name_l, product_name_s))
+    source_help_dir = source_dir + "-help"
 
     if target.startswith('innosetup'):
       for year in vcredist_list:
@@ -72,6 +74,10 @@ def make_windows():
 
       if 'winsparkle-files' in targets:
         make_winsparkle_files()
+
+    if target.startswith('innosetup-help'):
+      innosetup_help_file = "%s_Help_%s_%s.exe" % (package_name, package_version, suffix)
+      make_innosetup_help()
 
     if target.startswith('advinst'):
       advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
@@ -117,6 +123,29 @@ def make_innosetup():
     log("! file exist, skip")
     return
   cmd("iscc", iscc_args + ["common.iss"])
+  return
+
+def make_innosetup_help():
+  log("\n=== Build innosetup help project\n")
+  global iscc_args
+  iscc_args = [
+    "/Qp",
+    "/DsAppVersion=" + package_version,
+    "/DDEPLOY_PATH=" + source_help_dir,
+    "/D_ARCH=" + machine
+  ]
+  if onlyoffice:
+    iscc_args.append("/D_ONLYOFFICE=1")
+  else:
+    iscc_args.append("/DsBrandingFolder=" + get_abspath(git_dir, branding_dir))
+  if sign:
+    iscc_args.append("/DENABLE_SIGNING=1")
+    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + cert_name + "$q /t " + tsa_server + " $f")
+  log("--- " + innosetup_help_file)
+  if is_file(innosetup_help_file):
+    log("! file exist, skip")
+    return
+  cmd("iscc", iscc_args + ["help.iss"])
   return
 
 def make_innosetup_update():
@@ -324,8 +353,8 @@ def make_sparkle_updates():
 
   if "en" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
+    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if is_file(notes_src):
-      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       copy_file(notes_src, notes_dst)
       cur_date = sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       replace_in_file(notes_dst,
@@ -336,11 +365,11 @@ def make_sparkle_updates():
 
   if "ru" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
+    if update_changes_list["ru"] != "ReleaseNotes":
+      notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
+    else:
+      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if is_file(notes_src):
-      if update_changes_list["ru"] != "ReleaseNotes":
-        notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
-      else:
-        notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       copy_file(notes_src, notes_dst)
       cur_date = sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
       replace_in_file(notes_dst,

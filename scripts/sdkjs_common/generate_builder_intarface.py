@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import os
 import shutil
-
+import re
 def readFile(path):
-  with open(path, "r") as file:
+  with open(path, "r", errors='replace') as file:
     filedata = file.read()
   return filedata
 
@@ -72,6 +72,13 @@ class EditorApi(object):
     rec = rec.replace("\t", "")
     rec = rec.replace('\n    ', '\n')
     indexEndDecoration = rec.find("*/")
+
+    indexOfStartPropName = rec.find('Object.defineProperty(')
+    if indexOfStartPropName != -1:
+      propName = re.search(r'"([^\"]*)"', rec[indexOfStartPropName:])[0]
+    else:
+      propName = None
+
     decoration = "/**" + rec[0:indexEndDecoration + 2]
     decoration = decoration.replace("Api\n", "ApiInterface\n")
     decoration = decoration.replace("Api ", "ApiInterface ")
@@ -85,28 +92,45 @@ class EditorApi(object):
     code = code.strip("\t\n\r ")
     lines = code.split("\n")
     codeCorrect = ""
-    sFuncName = ""
-    is_found_function = False
-    addon_for_func = "{}"
-    if -1 != decoration.find("@return"):
-      addon_for_func = "{ return null; }"
-    for line in lines:
-      line = line.strip("\t\n\r ")
-      line = line.replace("{", "")
-      line = line.replace("}", "")
-      lineWithoutSpaces = line.replace(" ", "")
-      if not is_found_function and 0 == line.find("function "):
-        codeCorrect += (line + addon_for_func + "\n")
-        is_found_function = True
-      if not is_found_function and -1 != line.find(".prototype."):
-        codeCorrect += (line + self.getReturnValue(decoration) + ";\n")
-        is_found_function = True
-      if -1 != lineWithoutSpaces.find(".prototype="):
-        codeCorrect += (line + "\n")
-      if -1 != line.find(".prototype.constructor"):
-        codeCorrect += (line + "\n")
-    codeCorrect = codeCorrect.replace("Api.prototype", "ApiInterface.prototype")
-    self.append_record(decoration, codeCorrect)
+    sMethodName = re.search(r'.prototype.(.*)=', code)
+
+    # может быть только объявление свойства
+    if (sMethodName is not None):
+      is_found_function = False
+      addon_for_func = "{}"
+      if -1 != decoration.find("@return"):
+        addon_for_func = "{ return null; }"
+      for line in lines:
+        line = line.strip("\t\n\r ")
+        line = line.replace("{", "")
+        line = line.replace("}", "")
+        lineWithoutSpaces = line.replace(" ", "")
+        if not is_found_function and 0 == line.find("function "):
+          codeCorrect += (line + addon_for_func + "\n")
+          is_found_function = True
+        if not is_found_function and -1 != line.find(".prototype."):
+          codeCorrect += (line + self.getReturnValue(decoration) + ";\n")
+          is_found_function = True
+        if -1 != lineWithoutSpaces.find(".prototype="):
+          codeCorrect += (line + "\n")
+        if -1 != line.find(".prototype.constructor"):
+          codeCorrect += (line + "\n")
+      codeCorrect = codeCorrect.replace("Api.prototype", "ApiInterface.prototype")
+      self.append_record(decoration, codeCorrect)
+      className = codeCorrect[0:codeCorrect.find('.')]
+    
+    # если свойство определено сразу под методом (без декорации)
+    if propName is not None and sMethodName is not None:
+      prop_define = f'{className}.prototype.{propName[1:-1]} = {className}.prototype.{sMethodName.group(1)}();\n'
+      self.append_record(decoration, prop_define)
+    #иначе
+    elif propName is not None:
+      className = re.search(r'.defineProperty\((.*).prototype', code).group(1).strip()
+      returnValue = 'undefined' if decoration.find('@return') == -1 else self.getReturnValue(decoration)
+      if (returnValue != 'undefined'):
+        returnValue = re.search(r'{ return (.*); }', returnValue).group(1).strip()
+      prop_define = f'{className}.prototype.{propName[1:-1]} = {returnValue};\n'
+      self.append_record(decoration, prop_define)
     return
 
   def append_record(self, decoration, code, init=False):

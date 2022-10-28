@@ -70,7 +70,8 @@ addSubProject(epubfile,		$$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
 	addSubProject(xlsformat,    $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro)
 	addSubProject(xlsbformat,   $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/XlsbFormatLib.pro)
 	addSubProject(vbaformat,    $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/VbaFormatLib.pro)
-	addSubProject(x2t,          $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro,\
+        addSubProject(cfcpp,        $$CORE_ROOT_DIR/Common/cfcpp/cfcpp.pro)
+        addSubProject(x2t,          $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro,\
 					docxformat pptxformat docxfile txtxmlformat rtfformat pptformat docformat odffilereader odffilewriter xlsformat xlsbformat fb2file epubfile docxrenderer)
 }
 !no_use_common_binary {

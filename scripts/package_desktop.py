@@ -239,7 +239,7 @@ def make_advinst():
       "AddUpgradeCode '{47EEF706-B0E4-4C43-944B-E5F914B92B79}' \
                       -min_ver 7.1.1 -include_min_ver \
                       -max_ver 7.2.2 -include_max_ver\
-                      -include_lang 1049 -detect_only \
+                      -include_lang 1049 \
                       -property_name UPGRADE_2 -enable_migrate",
       "DelLanguage 1029 -buildname DefaultBuild",
       "DelLanguage 1031 -buildname DefaultBuild",

@@ -306,7 +306,7 @@ def make_msi():
       "DelFolder CUSTOM_PATH"
     ]
   else:
-    replaceInFileRE('DesktopEditors.aip','(<ROW Property="UpgradeCode" Value=")(.*)("/>)', r'\1%s\3' % (desktop_upgrade_code))
+    replace_in_file('DesktopEditors.aip','(<ROW Property="UpgradeCode" Value=")(.*)("/>)', r'\1%s\3' % (desktop_upgrade_code))
     aic_content += [
       "AddUpgradeCode '{47EEF706-B0E4-4C43-944B-E5F914B92B79}' \
                       -min_ver 7.1.1 -include_min_ver \

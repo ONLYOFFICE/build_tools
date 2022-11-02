@@ -126,11 +126,14 @@ def make():
     def param_apple(platform, arch):
       return ["-G","Xcode", "-DDEPLOYMENT_TARGET=10", "-DENABLE_BITCODE=1", "-DPLATFORM=" + platform, "-DARCHS=" + arch, "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE]
 
+    def param_apple_ios(platform, arch):
+      return ["-G","Xcode", "-DDEPLOYMENT_TARGET=11", "-DENABLE_BITCODE=1", "-DPLATFORM=" + platform, "-DARCHS=" + arch, "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE]
+
     if(platform == "ios"):
-      build_arch("ios", "armv7", param_apple("OS", "armv7"))
-      build_arch("ios", "arm64", param_apple("OS64", "arm64"))
-      build_arch("ios", "i386", param_apple("SIMULATOR", "i386"))
-      build_arch("ios", "x86_64", param_apple("SIMULATOR64", "x86_64"))
+      #build_arch("ios", "armv7", param_apple("OS", "armv7"))
+      build_arch("ios", "arm64", param_apple_ios("OS64", "arm64"))
+      #build_arch("ios", "i386", param_apple_ios("SIMULATOR", "i386"))
+      build_arch("ios", "x86_64", param_apple_ios("SIMULATOR64", "x86_64"))
     else:
       build_arch("mac", "mac_arm64", param_apple("MAC_ARM64", "arm64"))
       build_arch("mac", "mac_64", param_apple("MAC", "x86_64"))

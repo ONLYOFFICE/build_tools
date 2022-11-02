@@ -69,8 +69,8 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
-  if check_option("platform", "ios"):
-    extend_option("config", "core_ios_no_32")
+  #if check_option("platform", "ios"):
+  #  extend_option("config", "core_ios_32")
 
   # check vs-version
   if ("" == option("vs-version")):

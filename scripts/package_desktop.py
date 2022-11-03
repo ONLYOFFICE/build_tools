@@ -275,7 +275,8 @@ def make_advinst():
       "DelLanguage 1033 -buildname DefaultBuild",
       "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe",
+      "SetProperty ASCC_REG_PREFIX=" + ascc_reg_prefix
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,

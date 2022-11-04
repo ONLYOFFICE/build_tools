@@ -95,10 +95,11 @@ def make():
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
     
     if ("win_64" == platform):
-      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/x64/Release/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_64/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_64/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
+      
     elif ("win_32" == platform):
-      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/Win32/Release/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_32/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_32/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
 
     # correct ios frameworks

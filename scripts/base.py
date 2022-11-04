@@ -780,7 +780,7 @@ def generate_plist(path):
     content += "\t<key>CFBundleVersion</key>\n"
     content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "." + bundle_version[2] + "</string>\n"
     content += "\t<key>MinimumOSVersion</key>\n"
-    content += "\t<string>10.0</string>\n"
+    content += "\t<string>13.0</string>\n"
     content += "</dict>\n"
     content += "</plist>"
 

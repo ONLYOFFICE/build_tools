@@ -100,14 +100,14 @@ def make():
   make_pro_file("makefiles", "build.pro")
   if config.check_option("module", "builder") and base.is_windows() and "onlyoffice" == config.branding():
     # check replace
-    new_replace_path = base.correctPathForBuilder(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/docbuilder.h")
+    new_replace_path = base.correctPathForBuilder(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder.h")
     if ("2019" == config.option("vs-version")):
-      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com", "docbuilder.com_2019.sln")
+      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com_2019.sln")
       if (True):
         new_path_net = base.correctPathForBuilder(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.net/src/docbuilder.net.cpp")
         base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.net/src", "docbuilder.net.sln")
         base.restorePathForBuilder(new_path_net)
     else:
-      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com", "docbuilder.com.sln")
+      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com.sln")
     base.restorePathForBuilder(new_replace_path)
   return

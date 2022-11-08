@@ -322,12 +322,14 @@ def make_msi():
       "DelLanguage 1036 -buildname DefaultBuild",
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild",
+      "SetCurrentFeature ExtendedFeature",
       "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
       "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
+    "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,

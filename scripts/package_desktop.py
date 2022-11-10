@@ -381,23 +381,23 @@ def make_macos():
 
   plist_path = common.workspace_dir + "/desktop-apps/macos/ONLYOFFICE/Resources/ONLYOFFICE-" + suffix + "/Info.plist"
   current_version = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "print :CFBundleShortVersionString" ' + plist_path,
-    verbose=True)
+    '/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ' + plist_path,
+    verbose=True).rstrip()
   current_build = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "print :CFBundleShortVersionString" ' + plist_path,
-    verbose=True)
+    '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
+    verbose=True).rstrip()
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_version = utils.sh_output(
     'curl -s ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
-    verbose=True)
+    verbose=True).rstrip()
   release_build = utils.sh_output(
     'curl -s ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
-    verbose=True)
+    verbose=True).rstrip()
 
   utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
         + "\nRELEASE=" + release_version + "(" + release_build + ")")

@@ -399,10 +399,8 @@ def make_macos():
     + ' | cut -f2 -d\\\"',
     verbose=True)
 
-  utils.log("CURRENT_VERSION=" + current_version \
-        + "\nCURRENT_BUILD="   + current_build \
-        + "\nRELEASE_VERSION=" + release_version \
-        + "\nRELEASE_BUILD="   + release_build)
+  utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
+        + "\nRELEASE=" + release_version + "(" + release_build + ")")
 
   make_dmg()
   # if :

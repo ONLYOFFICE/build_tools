@@ -362,9 +362,9 @@ def make_macos():
   changes_dir = branding.desktop_changes_dir
   update_changes_list = branding.desktop_update_changes_list
   suffixes = {
-    "macos_x86_64":    "x86_64",
-    "macos_x86_64_v8": "v8",
-    "macos_arm64":     "arm64"
+    "darwin_x86_64":    "x86_64",
+    "darwin_x86_64_v8": "v8",
+    "darwin_arm64":     "arm64"
   }
   suffix = suffixes[common.platform]
   lane = "release_" + suffix
@@ -374,29 +374,35 @@ def make_macos():
 
   utils.set_cwd(build_dir)
 
-  if 'clean' in targets:
+  if common.clean:
     utils.log("\n=== Clean\n")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
-  script = '''
-    appcast=$(curl -s ''' + branding.sparkle_base_url + '''/''' + suffix + '''/onlyoffice.xml 2> /dev/null)
-    echo -n \"RELEASE_MACOS_VERSION=\"
-    echo $appcast \
-      | xmllint --xpath \"/rss/channel/item[1]/enclosure/@*[name()='sparkle:shortVersionString']\" - \
-      | cut -f 2 -d \\\\\"
-    echo -n \"RELEASE_MACOS_BUILD=\"
-    echo $appcast \
-      | xmllint --xpath \"/rss/channel/item[1]/enclosure/@*[name()='sparkle:version']\" - \
-      | cut -f 2 -d \\\\\"
+  plist_path = common.workspace_dir + "/desktop-apps/macos/ONLYOFFICE/Resources/ONLYOFFICE-" + suffix + "/Info.plist"
+  current_version = utils.sh_output(
+    '/usr/libexec/PlistBuddy -c "print :CFBundleShortVersionString" ' + plist_path,
+    verbose=True)
+  current_build = utils.sh_output(
+    '/usr/libexec/PlistBuddy -c "print :CFBundleShortVersionString" ' + plist_path,
+    verbose=True)
 
-    path=desktop-apps/macos/ONLYOFFICE/Resources/ONLYOFFICE-''' + suffix + '''/Info.plist
-    echo -n \"CURRENT_MACOS_VERSION=\"
-    /usr/libexec/PlistBuddy -c 'print :CFBundleShortVersionString' $path
-    echo -n \"CURRENT_MACOS_BUILD=\"
-    /usr/libexec/PlistBuddy -c 'print :CFBundleVersion' $path
-  '''
-  utils.sh_output(script, verbose=True)
+  appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
+  release_version = utils.sh_output(
+    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
+    + ' | cut -f2 -d\\\"',
+    verbose=True)
+  release_build = utils.sh_output(
+    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
+    + ' | cut -f2 -d\\\"',
+    verbose=True)
+
+  utils.log("CURRENT_VERSION=" + current_version \
+        + "\nCURRENT_BUILD="   + current_build \
+        + "\nRELEASE_VERSION=" + release_version \
+        + "\nRELEASE_BUILD="   + release_build)
 
   make_dmg()
   # if :

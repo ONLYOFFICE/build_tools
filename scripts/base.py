@@ -175,6 +175,14 @@ def create_dir(path):
     os.makedirs(path2)
   return
 
+def move_dir(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
+  if is_dir(src):
+    copy_dir(src, dst)
+    delete_dir(src)
+  return
+
 def copy_dir(src, dst):
   if is_dir(dst):
     delete_dir(dst)

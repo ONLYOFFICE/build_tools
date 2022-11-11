@@ -73,8 +73,8 @@ if "server-enterprise" in common.targets:
   package_server.make("enterprise")
 if "server-developer" in common.targets:
   package_server.make("developer")
-# if "mobile" in common.targets:
-#   package_mobile.make()
+if "mobile" in common.targets:
+  package_mobile.make()
 
 # summary
 utils.log_h1("Build summary")

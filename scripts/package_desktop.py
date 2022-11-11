@@ -414,7 +414,7 @@ def make_dmg():
   utils.log_h2(scheme)
   utils.log_h2("build/" + package_name + ".app")
   rc = utils.sh(
-      "bundler exec fastlane " + lane + " git_bump:false",
+      "bundler exec fastlane " + lane + " skip_git_bump:true",
       verbose=True
   )
   utils.set_summary("desktop dmg build", rc == 0)

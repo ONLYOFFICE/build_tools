@@ -379,7 +379,8 @@ def make_macos():
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
-  plist_path = common.workspace_dir + "/desktop-apps/macos/ONLYOFFICE/Resources/ONLYOFFICE-" + suffix + "/Info.plist"
+  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
+      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
   current_version = utils.sh_output(
     '/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ' + plist_path,
     verbose=True).rstrip()
@@ -403,8 +404,10 @@ def make_macos():
         + "\nRELEASE=" + release_version + "(" + release_build + ")")
 
   make_dmg()
-  # if :
-  make_sparkle_updates()
+  if int(current_build) > int(release_build):
+    make_sparkle_updates()
+  else:
+    utils.log(release_build + " <= " + current_build)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -431,11 +434,11 @@ def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")
 
   app_version = utils.sh_output("/usr/libexec/PlistBuddy \
-    -c 'print :CFBundleShortVersionString' \
+    -c 'Print :CFBundleShortVersionString' \
     build/" + package_name + ".app/Contents/Info.plist", verbose=True)
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
-  updates_storage_dir = "%s/%s/_updates" % (get_env('ARCHIVES_DIR'), scheme)
+  updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
   # utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
@@ -448,8 +451,8 @@ def make_sparkle_updates():
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
-                      r"(<span class=\"releasedate\">).+(</span>)",
-                      "\\1 - " + cur_date + "\\2")
+          r"(<span class=\"releasedate\">).+(</span>)",
+          "\\1 - " + cur_date + "\\2")
     else:
       utils.write_file(notes_dst, '<html></html>\n')
 
@@ -463,8 +466,8 @@ def make_sparkle_updates():
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
-                      r"(<span class=\"releasedate\">).+(</span>)",
-                      "\\1 - " + cur_date + "\\2")
+          r"(<span class=\"releasedate\">).+(</span>)",
+          "\\1 - " + cur_date + "\\2")
     else:
       utils.write_file(notes_dst, '<html></html>\n')
 

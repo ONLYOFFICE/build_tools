@@ -364,7 +364,7 @@ def make_macos():
   suffixes = {
     "darwin_x86_64":    "x86_64",
     "darwin_x86_64_v8": "v8",
-    "darwin_arm64":     "arm64"
+    "darwin_arm64":     "arm"
   }
   suffix = suffixes[common.platform]
   lane = "release_" + suffix

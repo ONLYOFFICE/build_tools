@@ -881,7 +881,7 @@ def extract_unicode(src, dst):
 
 def archive_folder(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"
-  return cmd_exe(app, ["a", "-r", dst, src])
+  return cmd_exe(app, ["a", dst, src])
 
 # windows vcvarsall
 def _call_vcvarsall_and_return_env(arch):

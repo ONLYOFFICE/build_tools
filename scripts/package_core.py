@@ -24,7 +24,7 @@ def make_core():
   }
   repo = repos[common.platform]
   branch = utils.get_env("BRANCH_NAME")
-  core_7z = utils.get_path("build_tools/out/%s/%s/core/core.7z" % (prefix, company))
+  core_7z = utils.get_path("build_tools/out/%s/%s/core.7z" % (prefix, company))
   dest_version = "%s/core/%s/%s/%s/" % (repo["repo"], branch, repo["version"], repo["arch"])
   dest_latest = "%s/core/%s/%s/%s/" % (repo["repo"], branch, "latest", repo["arch"])
 

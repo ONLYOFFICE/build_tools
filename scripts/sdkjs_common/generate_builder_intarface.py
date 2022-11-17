@@ -46,12 +46,12 @@ class EditorApi(object):
     if -1 != retParam.find("[]"):
       isArray = True
       retParam = retParam.replace("[]", "")
-    retType = retParam.replace("|", " ").split(" ")[0]
+    retType = retParam.replace("|", " ").replace(".", " ").split(" ")[0]
     retTypeLower = retType.lower()
     retValue = ""
     if -1 != retType.find("\""):
       retValue = "\"\""
-    elif "bool" == retTypeLower:
+    elif "boolean" == retTypeLower or "bool" == retTypeLower:
       retValue = "true"
     elif "string" == retTypeLower:
       retValue = "\"\""
@@ -61,6 +61,12 @@ class EditorApi(object):
       retValue = "undefined"
     elif "null" == retTypeLower:
       retValue = "null"
+    elif "array" == retTypeLower:
+      retValue = "[]"
+    elif "base64img" == retTypeLower:
+      retValue = "base64img"
+    elif "error" == retTypeLower:
+      retValue = "undefined"
     else:
       retValue = "new " + retType + "()"
     if isArray:
@@ -85,39 +91,39 @@ class EditorApi(object):
     decoration = decoration.replace("{Api}", "{ApiInterface}")
     decoration = decoration.replace("@return ", "@returns ")
     decoration = decoration.replace("@returns {?", "@returns {")
+    decoration = decoration.replace("?}", "}")
     if -1 != decoration.find("@name ApiInterface"):
       self.append_record(decoration, "var ApiInterface = function() {};\nvar Api = new ApiInterface();\n", True)
       return
     code = rec[indexEndDecoration + 2:]
-    code = code.strip("\t\n\r ")
+    code = code.replace("=\n", "= ").strip("\t\n\r ")
     lines = code.split("\n")
     codeCorrect = ""
     sMethodName = re.search(r'.prototype.(.*)=', code)
 
-    # может быть только объявление свойства
-    if (sMethodName is not None):
-      is_found_function = False
-      addon_for_func = "{}"
-      if -1 != decoration.find("@return"):
-        addon_for_func = "{ return null; }"
-      for line in lines:
-        line = line.strip("\t\n\r ")
-        line = line.replace("{", "")
-        line = line.replace("}", "")
-        lineWithoutSpaces = line.replace(" ", "")
-        if not is_found_function and 0 == line.find("function "):
-          codeCorrect += (line + addon_for_func + "\n")
-          is_found_function = True
-        if not is_found_function and -1 != line.find(".prototype."):
-          codeCorrect += (line + self.getReturnValue(decoration) + ";\n")
-          is_found_function = True
-        if -1 != lineWithoutSpaces.find(".prototype="):
-          codeCorrect += (line + "\n")
-        if -1 != line.find(".prototype.constructor"):
-          codeCorrect += (line + "\n")
-      codeCorrect = codeCorrect.replace("Api.prototype", "ApiInterface.prototype")
-      self.append_record(decoration, codeCorrect)
-      className = codeCorrect[0:codeCorrect.find('.')]
+    is_found_function = False
+    addon_for_func = "{}"
+    if -1 != decoration.find("@return"):
+      addon_for_func = "{ return null; }"
+
+    for line in lines:
+      line = line.strip("\t\n\r ")
+      line = line.replace("{", "")
+      line = line.replace("}", "")
+      lineWithoutSpaces = line.replace(" ", "")
+      if not is_found_function and 0 == line.find("function "):
+        codeCorrect += (line + addon_for_func + "\n")
+        is_found_function = True
+      if not is_found_function and -1 != line.find(".prototype."):
+        codeCorrect += (line + self.getReturnValue(decoration) + ";\n")
+        is_found_function = True
+      if -1 != lineWithoutSpaces.find(".prototype="):
+        codeCorrect += (line + "\n")
+      if -1 != line.find(".prototype.constructor"):
+        codeCorrect += (line + "\n")
+    codeCorrect = codeCorrect.replace("Api.prototype", "ApiInterface.prototype")
+    self.append_record(decoration, codeCorrect)
+    className = codeCorrect[0:codeCorrect.find('.')]
     
     # если свойство определено сразу под методом (без декорации)
     if propName is not None and sMethodName is not None:

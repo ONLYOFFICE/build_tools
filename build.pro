@@ -58,22 +58,26 @@ addSubProject(fb2file,		$$CORE_ROOT_DIR/Fb2File/Fb2File.pro,\
 addSubProject(epubfile,		$$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
 				kernel unicodeconverter graphics htmlfile2)
 !no_x2t {
-	addSubProject(docxformat,   $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/DocxFormatLib.pro)
-	addSubProject(pptxformat,   $$CORE_ROOT_DIR/ASCOfficePPTXFile/PPTXLib/Linux/PPTXFormatLib/PPTXFormatLib.pro)
-	addSubProject(docxfile,     $$CORE_ROOT_DIR/ASCOfficeDocxFile2/Linux/ASCOfficeDocxFile2Lib.pro)
-	addSubProject(txtxmlformat, $$CORE_ROOT_DIR/ASCOfficeTxtFile/TxtXmlFormatLib/Linux/TxtXmlFormatLib.pro)
-	addSubProject(rtfformat,    $$CORE_ROOT_DIR/ASCOfficeRtfFile/RtfFormatLib/Linux/RtfFormatLib.pro)
-	addSubProject(pptformat,    $$CORE_ROOT_DIR/ASCOfficePPTFile/PPTFormatLib/Linux/PPTFormatLib.pro)
-	addSubProject(docformat,    $$CORE_ROOT_DIR/ASCOfficeDocFile/DocFormatLib/Linux/DocFormatLib.pro)
-	addSubProject(odffilereader,$$CORE_ROOT_DIR/ASCOfficeOdfFile/linux/OdfFileReaderLib.pro)
-	addSubProject(odffilewriter,$$CORE_ROOT_DIR/ASCOfficeOdfFileW/linux/OdfFileWriterLib.pro)
-	addSubProject(xlsformat,    $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/XlsFormatLib.pro)
-	addSubProject(xlsbformat,   $$CORE_ROOT_DIR/Common/DocxFormat/DocxFormatLib/XlsbFormatLib.pro)
-	addSubProject(vbaformat,    $$CORE_ROOT_DIR/ASCOfficeXlsFile2/source/linux/VbaFormatLib.pro)
-        addSubProject(cfcpp,        $$CORE_ROOT_DIR/Common/cfcpp/cfcpp.pro)
-        addSubProject(x2t,          $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro,\
-					docxformat pptxformat docxfile txtxmlformat rtfformat pptformat docformat odffilereader odffilewriter xlsformat xlsbformat fb2file epubfile docxrenderer)
+	addSubProject(docxformat,   $$CORE_ROOT_DIR/OOXML/Projects/Linux/DocxFormatLib/DocxFormatLib.pro)
+	addSubProject(pptxformat,   $$CORE_ROOT_DIR/OOXML/Projects/Linux/PPTXFormatLib/PPTXFormatLib.pro)
+	addSubProject(xlsbformat,   $$CORE_ROOT_DIR/OOXML/Projects/Linux/XlsbFormatLib/XlsbFormatLib.pro)
+
+	addSubProject(docformat,    $$CORE_ROOT_DIR/MsBinaryFile/Projects/DocFormatLib/Linux/DocFormatLib.pro)
+	addSubProject(pptformat,    $$CORE_ROOT_DIR/MsBinaryFile/Projects/PPTFormatLib/Linux/PPTFormatLib.pro)
+	addSubProject(xlsformat,    $$CORE_ROOT_DIR/MsBinaryFile/Projects/XlsFormatLib/Linux/XlsFormatLib.pro)
+	addSubProject(vbaformat,    $$CORE_ROOT_DIR/MsBinaryFile/Projects/VbaFormatLib/Linux/VbaFormatLib.pro)
+
+	addSubProject(txtxmlformat, $$CORE_ROOT_DIR/TxtFile/Projects/Linux/TxtXmlFormatLib.pro)
+	addSubProject(rtfformat,    $$CORE_ROOT_DIR/RtfFile/Projects/Linux/RtfFormatLib.pro)
+	addSubProject(odffile,      $$CORE_ROOT_DIR/OdfFile/Projects/Linux/OdfFormatLib.pro)
+	
+	addSubProject(cfcpp,        $$CORE_ROOT_DIR/Common/cfcpp/cfcpp.pro)
+	addSubProject(bindocument,  $$CORE_ROOT_DIR/OOXML/Projects/Linux/BinDocument/BinDocument.pro)
+
+	addSubProject(x2t,          $$CORE_ROOT_DIR/X2tConverter/build/Qt/X2tConverter.pro,\
+					docxformat pptxformat xlsbformat docformat pptformat xlsformat vbaformat txtxmlformat rtfformat odffile cfcpp bindocument fb2file epubfile docxrenderer)
 }
+
 !no_use_common_binary {
 	addSubProject(allfontsgen,	$$CORE_ROOT_DIR/DesktopEditor/AllFontsGen/AllFontsGen.pro,\
 					kernel unicodeconverter graphics)

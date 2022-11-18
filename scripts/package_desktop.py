@@ -322,12 +322,14 @@ def make_msi():
       "DelLanguage 1036 -buildname DefaultBuild",
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild",
+      "SetCurrentFeature ExtendedFeature",
       "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
       "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
+    "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
@@ -360,9 +362,9 @@ def make_macos():
   changes_dir = branding.desktop_changes_dir
   update_changes_list = branding.desktop_update_changes_list
   suffixes = {
-    "macos_x86_64":    "x86_64",
-    "macos_x86_64_v8": "v8",
-    "macos_arm64":     "arm64"
+    "darwin_x86_64":    "x86_64",
+    "darwin_x86_64_v8": "v8",
+    "darwin_arm64":     "arm"
   }
   suffix = suffixes[common.platform]
   lane = "release_" + suffix
@@ -372,33 +374,40 @@ def make_macos():
 
   utils.set_cwd(build_dir)
 
-  if 'clean' in targets:
+  if common.clean:
     utils.log("\n=== Clean\n")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
-  script = '''
-    appcast=$(curl -s ''' + branding.sparkle_base_url + '''/''' + suffix + '''/onlyoffice.xml 2> /dev/null)
-    echo -n \"RELEASE_MACOS_VERSION=\"
-    echo $appcast \
-      | xmllint --xpath \"/rss/channel/item[1]/enclosure/@*[name()='sparkle:shortVersionString']\" - \
-      | cut -f 2 -d \\\\\"
-    echo -n \"RELEASE_MACOS_BUILD=\"
-    echo $appcast \
-      | xmllint --xpath \"/rss/channel/item[1]/enclosure/@*[name()='sparkle:version']\" - \
-      | cut -f 2 -d \\\\\"
+  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
+      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
+  current_version = utils.sh_output(
+    '/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ' + plist_path,
+    verbose=True).rstrip()
+  current_build = utils.sh_output(
+    '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
+    verbose=True).rstrip()
 
-    path=desktop-apps/macos/ONLYOFFICE/Resources/ONLYOFFICE-''' + suffix + '''/Info.plist
-    echo -n \"CURRENT_MACOS_VERSION=\"
-    /usr/libexec/PlistBuddy -c 'print :CFBundleShortVersionString' $path
-    echo -n \"CURRENT_MACOS_BUILD=\"
-    /usr/libexec/PlistBuddy -c 'print :CFBundleVersion' $path
-  '''
-  utils.sh_output(script, verbose=True)
+  appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
+  release_version = utils.sh_output(
+    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
+    + ' | cut -f2 -d\\\"',
+    verbose=True).rstrip()
+  release_build = utils.sh_output(
+    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
+    + ' | cut -f2 -d\\\"',
+    verbose=True).rstrip()
+
+  utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
+        + "\nRELEASE=" + release_version + "(" + release_build + ")")
 
   make_dmg()
-  # if :
-  make_sparkle_updates()
+  if int(current_build) > int(release_build):
+    make_sparkle_updates()
+  else:
+    utils.log(release_build + " <= " + current_build)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -408,7 +417,7 @@ def make_dmg():
   utils.log_h2(scheme)
   utils.log_h2("build/" + package_name + ".app")
   rc = utils.sh(
-      "bundler exec fastlane " + lane + " git_bump:false",
+      "bundler exec fastlane " + lane + " skip_git_bump:true",
       verbose=True
   )
   utils.set_summary("desktop dmg build", rc == 0)
@@ -425,11 +434,11 @@ def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")
 
   app_version = utils.sh_output("/usr/libexec/PlistBuddy \
-    -c 'print :CFBundleShortVersionString' \
+    -c 'Print :CFBundleShortVersionString' \
     build/" + package_name + ".app/Contents/Info.plist", verbose=True)
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
-  updates_storage_dir = "%s/%s/_updates" % (get_env('ARCHIVES_DIR'), scheme)
+  updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
   # utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
@@ -442,8 +451,8 @@ def make_sparkle_updates():
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
-                      r"(<span class=\"releasedate\">).+(</span>)",
-                      "\\1 - " + cur_date + "\\2")
+          r"(<span class=\"releasedate\">).+(</span>)",
+          "\\1 - " + cur_date + "\\2")
     else:
       utils.write_file(notes_dst, '<html></html>\n')
 
@@ -457,8 +466,8 @@ def make_sparkle_updates():
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
-                      r"(<span class=\"releasedate\">).+(</span>)",
-                      "\\1 - " + cur_date + "\\2")
+          r"(<span class=\"releasedate\">).+(</span>)",
+          "\\1 - " + cur_date + "\\2")
     else:
       utils.write_file(notes_dst, '<html></html>\n')
 

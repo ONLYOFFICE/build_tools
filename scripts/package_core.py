@@ -20,11 +20,12 @@ def make_core():
     "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },
     "windows_x86":   { "repo": "windows", "arch": "x86", "version": common.version + "." + common.build },
     "darwin_x86_64": { "repo": "mac",     "arch": "x64", "version": common.version + "-" + common.build },
+    "darwin_arm64":  { "repo": "mac",     "arch": "arm", "version": common.version + "-" + common.build },
     "linux_x86_64":  { "repo": "linux",   "arch": "x64", "version": common.version + "-" + common.build },
   }
   repo = repos[common.platform]
   branch = utils.get_env("BRANCH_NAME")
-  core_7z = utils.get_path("build_tools/out/%s/%s/core/core.7z" % (prefix, company))
+  core_7z = utils.get_path("build_tools/out/%s/%s/core.7z" % (prefix, company))
   dest_version = "%s/core/%s/%s/%s/" % (repo["repo"], branch, repo["version"], repo["arch"])
   dest_latest = "%s/core/%s/%s/%s/" % (repo["repo"], branch, "latest", repo["arch"])
 

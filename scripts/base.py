@@ -1332,3 +1332,33 @@ def generate_check_linux_system(build_tools_dir, out_dir):
   copy_file(build_tools_dir + "/tools/linux/check_system/check.sh", out_dir + "/.system/check.sh")
   copy_file(build_tools_dir + "/tools/linux/check_system/libstdc++.so.6", out_dir + "/.system/libstdc++.so.6")
   return
+
+def convert_ios_framework_to_xcframework(folder, lib):
+  cur_dir = os.getcwd()
+  os.chdir(folder)
+  
+  create_dir(lib + "_xc_tmp")
+  create_dir(lib + "_xc_tmp/iphoneos")
+  create_dir(lib + "_xc_tmp/iphonesimulator")
+  copy_dir(lib + ".framework", lib + "_xc_tmp/iphoneos/" + lib + ".framework")
+  copy_dir(lib + ".framework", lib + "_xc_tmp/iphonesimulator/" + lib + ".framework")
+
+  cmd("xcrun", ["lipo", "-remove", "x86_64", "./" + lib + "_xc_tmp/iphoneos/" + lib + ".framework/" + lib, 
+    "-o", "./" + lib + "_xc_tmp/iphoneos/" + lib + ".framework/" + lib])
+  cmd("xcrun", ["lipo", "-remove", "arm64", "./" + lib + "_xc_tmp/iphonesimulator/" + lib + ".framework/" + lib, 
+    "-o", "./" + lib + "_xc_tmp/iphonesimulator/" + lib + ".framework/" + lib])
+
+  cmd("xcodebuild", ["-create-xcframework", 
+    "-framework", "./" + lib + "_xc_tmp/iphoneos/" + lib + ".framework/", 
+    "-framework", "./" + lib + "_xc_tmp/iphonesimulator/" + lib + ".framework/",
+    "-output", lib + ".xcframework"])
+
+  delete_dir(lib + "_xc_tmp")
+
+  os.chdir(cur_dir)
+  return
+
+def convert_ios_framework_to_xcframework_folder(folder, libs):
+  for lib in libs:
+    convert_ios_framework_to_xcframework(folder, lib)
+  return

@@ -63,6 +63,11 @@ def make():
         "PdfReader", "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
         "Fb2File", "EpubFile", "x2t"])
 
+    if ("ios" == platform):
+      if (config.check_option("config", "bundle_dylibs")):
+        base.convert_ios_framework_to_xcframework_folder(root_dir,
+          ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfWriter", "PdfReader", "DjVuFile", "XpsFile", 
+          "HtmlFile2", "HtmlRenderer", "doctrenderer", "Fb2File", "EpubFile", "DocxRenderer", "x2t"])
 
     # icu
     if (0 == platform.find("win")):

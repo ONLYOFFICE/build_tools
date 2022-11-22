@@ -57,6 +57,7 @@ import package_core
 import package_desktop
 import package_server
 import package_builder
+import package_mobile
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
@@ -73,8 +74,8 @@ if "server-enterprise" in common.targets:
   package_server.make("enterprise")
 if "server-developer" in common.targets:
   package_server.make("developer")
-# if "mobile" in common.targets:
-#   package_mobile.make()
+if "mobile" in common.targets:
+  package_mobile.make()
 
 # summary
 utils.log_h1("Build summary")

@@ -58,9 +58,9 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2ttester")
 
 
-    if base.is_file(archive_dir + "/core.7z"):
-      base.delete_file(archive_dir + "/core.7z")
-    base.archive_folder(archive_dir, archive_dir + "/core.7z")
+    if base.is_file(archive_dir + ".7z"):
+      base.delete_file(archive_dir + ".7z")
+    base.archive_folder(archive_dir + "/*", archive_dir + ".7z")
 
   return
 

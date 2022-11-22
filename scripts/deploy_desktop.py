@@ -233,7 +233,6 @@ def make():
       base.delete_file(root_dir + "/converter/icudtl.dat")
 
     if (0 == platform.find("win")):
-      base.copy_lib(git_dir + "/desktop-apps/win-linux/3dparty/WinSparkle/" + platform, root_dir, "WinSparkle")
       base.delete_file(root_dir + "/cef_sandbox.lib")
       base.delete_file(root_dir + "/libcef.lib")
 

@@ -37,16 +37,14 @@ addSubProject(network,	$$CORE_ROOT_DIR/Common/Network/network.pro,\
 				kernel unicodeconverter)
 addSubProject(graphics,		$$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro,\
 				kernel unicodeconverter)
-addSubProject(pdfwriter,	$$CORE_ROOT_DIR/PdfWriter/PdfWriter.pro,\
+addSubProject(pdffile,	$$CORE_ROOT_DIR/PdfFile/PdfFile.pro,\
 				kernel unicodeconverter graphics)
 addSubProject(djvufile,		$$CORE_ROOT_DIR/DjVuFile/DjVuFile.pro,\
-				kernel unicodeconverter graphics pdfwriter)
+				kernel unicodeconverter graphics pdffile)
 addSubProject(xpsfile,		$$CORE_ROOT_DIR/XpsFile/XpsFile.pro,\
-				kernel unicodeconverter graphics pdfwriter)
+				kernel unicodeconverter graphics pdffile)
 addSubProject(htmlrenderer,	$$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro,\
-				kernel unicodeconverter graphics pdfwriter)
-addSubProject(pdfreader,	$$CORE_ROOT_DIR/PdfReader/PdfReader.pro,\
-				kernel unicodeconverter graphics pdfwriter htmlrenderer)
+				kernel unicodeconverter graphics)
 addSubProject(docxrenderer,	$$CORE_ROOT_DIR/DocxRenderer/DocxRenderer.pro,\
 				kernel unicodeconverter graphics)
 addSubProject(htmlfile2,	$$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro,\
@@ -101,7 +99,7 @@ desktop {
 	addSubProject(ooxmlsignature,	$$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/ooxmlsignature.pro,\
 					kernel unicodeconverter graphics)
 	addSubProject(documentscore,	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro,\
-					kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdfwriter pdfreader djvufile xpsfile)
+					kernel unicodeconverter graphics hunspell ooxmlsignature htmlrenderer pdffile djvufile xpsfile)
 	addSubProject(documentscore_helper,	$$ROOT_DIR/desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore_helper.pro,\
 					documentscore)
 	!core_mac {

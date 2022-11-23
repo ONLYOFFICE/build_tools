@@ -42,8 +42,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "graphics")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfWriter")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
@@ -59,10 +58,15 @@ def make():
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     if ("ios" == platform) and config.check_option("config", "bundle_dylibs") and config.check_option("config", "simulator"):
-      exclude_arch(root_dir, ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfWriter", 
-        "PdfReader", "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
+      exclude_arch(root_dir, ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfFile", 
+        "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
         "Fb2File", "EpubFile", "x2t"])
 
+    if ("ios" == platform):
+      if (config.check_option("config", "bundle_dylibs")):
+        base.convert_ios_framework_to_xcframework_folder(root_dir,
+          ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfWriter", "PdfReader", "DjVuFile", "XpsFile", 
+          "HtmlFile2", "HtmlRenderer", "doctrenderer", "Fb2File", "EpubFile", "DocxRenderer", "x2t"])
 
     # icu
     if (0 == platform.find("win")):

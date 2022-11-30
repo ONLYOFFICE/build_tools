@@ -12,13 +12,6 @@ def make():
   make_mobile()
   return
 
-def aws_s3_upload(local, key, ptype=None):
-  rc = utils.sh("aws s3 cp --acl public-read --no-progress " \
-      + local + " s3://" + common.s3_bucket + "/" + key, verbose=True)
-  if rc == 0 and ptype is not None:
-    utils.add_deploy_data("mobile", ptype, local, key)
-  return rc
-
 def make_mobile():
   utils.set_cwd("build_tools/out")
 
@@ -26,8 +19,8 @@ def make_mobile():
     utils.log_h2("mobile clean")
     utils.sh("rm -rfv *.zip", verbose=True)
 
-  zip_file = "android-libs-" + common.version + "-" + common.build + ".zip"
-  zip_key = branding.company_name_l + "/" + common.release_branch + "/android/" + zip_file
+  zip_file = "build-" + common.version + "-" + common.build + ".zip"
+  s3_key = "mobile/android/%s/%s" % (common.channel, zip_file)
 
   utils.log_h2("mobile build")
   rc = utils.sh("zip -r " + zip_file + " ./android* ./js", verbose=True)
@@ -35,7 +28,12 @@ def make_mobile():
 
   utils.log_h2("mobile deploy")
   if rc == 0:
-    rc = aws_s3_upload(zip_file, zip_key, "Android")
+    rc = utils.sh(
+        "aws s3 cp --acl public-read --no-progress " \
+        + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
+        verbose=True)
+    if rc == 0:
+      utils.add_deploy_data("mobile", "Android", zip_file, s3_key)
   utils.set_summary("mobile deploy", rc == 0)
 
   utils.set_cwd(common.workspace_dir)

@@ -15,18 +15,23 @@ def make():
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(local, key, ptype=None):
-  if common.os_family == "windows":
-    rc = utils.cmd(
-        "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-        local, "s3://" + common.s3_bucket + "/" + key,
-        verbose=True
-    )
-  else:
-    rc = utils.sh("aws s3 cp --acl public-read --no-progress " \
-        + local + " s3://" + common.s3_bucket + "/" + key, verbose=True)
-  if rc == 0 and ptype is not None:
-    utils.add_deploy_data("builder", ptype, local, key)
+def aws_s3_upload(files, key, ptype=None):
+  key = "builder/" + key
+  rc = 0
+  for file in files:
+    if common.os_family == "windows":
+      rc += utils.cmd(
+          "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+          file, "s3://" + branding.s3_bucket + "/" + key,
+          verbose=True)
+    else:
+      rc += utils.sh(
+          "aws s3 cp --acl public-read --no-progress " \
+          + file + " s3://" + branding.s3_bucket + "/" + key,
+          verbose=True)
+    if rc == 0 and ptype is not None:
+      if key.endswith("/"): key += utils.get_basename(file)
+      utils.add_deploy_data("builder", ptype, file, key)
   return rc
 
 def make_windows():
@@ -39,17 +44,14 @@ def make_windows():
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
   package_name = company + "_" + product
   package_version = common.version + "." + common.build
-  suffixes = {
+  suffix = {
     "windows_x64": "x64",
     "windows_x86": "x86",
     "windows_x64_xp": "x64_xp",
     "windows_x86_xp": "x86_xp"
-  }
-  suffix = suffixes[common.platform]
+  }[common.platform]
   zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
-  key_prefix = "%s/%s/windows/builder/%s/%s" % (branding.company_name_l, \
-      common.release_branch, common.version, common.build)
 
   if common.clean:
     utils.log_h2("builder clean")
@@ -76,8 +78,10 @@ def make_zip():
 
   if rc == 0:
     utils.log_h2("builder zip deploy")
-    zip_key = key_prefix + "/" + zip_file
-    rc = aws_s3_upload("build\\" + zip_file, zip_key, "Portable")
+    rc = aws_s3_upload(
+        ["build\\" + zip_file],
+        "win/generic/%s/" % common.channel,
+        "Portable")
   utils.set_summary("builder zip deploy", rc == 0)
   return
 
@@ -100,8 +104,10 @@ def make_inno():
 
   if rc == 0:
     utils.log_h2("builder inno deploy")
-    inno_key = key_prefix + "/" + inno_file
-    rc = aws_s3_upload("build\\" + inno_file, inno_key, "Installer")
+    rc = aws_s3_upload(
+        ["build\\" + inno_file],
+        "win/inno/%s/" % common.channel,
+        "Installer")
   utils.set_summary("builder inno deploy", rc == 0)
   return
 
@@ -121,32 +127,33 @@ def make_linux():
   rc = utils.sh("make packages " + " ".join(args), verbose=True)
   utils.set_summary("builder build", rc == 0)
 
-  key_prefix = branding.company_name_l + "/" + common.release_branch
-  if common.platform == "linux_x86_64":
-    rpm_arch = "x86_64"
-  elif common.platform == "linux_aarch64":
-    rpm_arch = "aarch64"
+  rpm_arch = "x86_64"
+  if common.platform == "linux_aarch64": rpm_arch = "aarch64"
+
   if rc == 0:
     # utils.log_h2("builder tar deploy")
-    # tar_file = utils.glob_file("tar/*.tar.gz")
-    # tar_key = key_prefix + "/linux/" + utils.get_basename(tar_file)
-    # rc = aws_s3_upload(tar_file, tar_key, "Portable")
+    # rc = aws_s3_upload(
+    #     utils.glob_path("tar/*.tar.gz"),
+    #     "linux/generic/%s/" % common.channel,
+    #     "Portable")
     # utils.set_summary("builder tar deploy", rc == 0)
 
     utils.log_h2("builder deb deploy")
-    deb_file = utils.glob_file("deb/*.deb")
-    deb_key = key_prefix + "/ubuntu/" + utils.get_basename(deb_file)
-    rc = aws_s3_upload(deb_file, deb_key, "Ubuntu")
+    rc = aws_s3_upload(
+        utils.glob_path("deb/*.deb"),
+        "linux/debian/%s/" % common.channel,
+        "Debian")
     utils.set_summary("builder deb deploy", rc == 0)
 
     utils.log_h2("builder rpm deploy")
-    rpm_file = utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm")
-    rpm_key = key_prefix + "/centos/" + utils.get_basename(rpm_file)
-    rc = aws_s3_upload(rpm_file, rpm_key, "CentOS")
+    rc = aws_s3_upload(
+        utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+        "linux/rhel/%s/" % common.channel,
+        "CentOS")
     utils.set_summary("builder rpm deploy", rc == 0)
 
   else:
-    utils.set_summary("builder tar deploy", False)
+    # utils.set_summary("builder tar deploy", False)
     utils.set_summary("builder deb deploy", False)
     utils.set_summary("builder rpm deploy", False)
 

@@ -46,7 +46,7 @@ def make_core():
   else:
     rc = utils.sh(" ".join(args), verbose=True)
   if rc == 0:
-    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
+    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z", branding.s3_bucket, branding.s3_region)
     args = ["aws", "s3", "sync", "--delete",
             "--acl", "public-read", "--no-progress",
             "s3://" + branding.s3_bucket + "/" + dest_version,

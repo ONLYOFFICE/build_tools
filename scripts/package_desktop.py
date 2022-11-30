@@ -566,13 +566,13 @@ def make_linux():
         "CentOS")
     utils.set_summary("desktop rpm deploy", rc == 0)
 
-    utils.log_h2("desktop apt-rpm deploy")
+    utils.log_h2("desktop rpm-apt deploy")
     rc = aws_s3_upload(
         utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
         + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
         "linux/altlinux/%s/" % common.channel,
         "ALT Linux")
-    utils.set_summary("desktop apt-rpm deploy", rc == 0)
+    utils.set_summary("desktop rpm-apt deploy", rc == 0)
 
     utils.log_h2("desktop urpmi deploy")
     rc = aws_s3_upload(
@@ -582,13 +582,13 @@ def make_linux():
         "ROSA")
     utils.set_summary("desktop urpmi deploy", rc == 0)
 
-    utils.log_h2("desktop suse-rpm deploy")
+    utils.log_h2("desktop rpm-suse deploy")
     rc = aws_s3_upload(
         utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
         + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
         "linux/suse/%s/" % common.channel,
         "SUSE Linux")
-    utils.set_summary("desktop suse-rpm deploy", rc == 0)
+    utils.set_summary("desktop rpm-suse deploy", rc == 0)
 
     if not branding.onlyoffice:
       utils.log_h2("desktop deb-astra deploy")
@@ -602,9 +602,9 @@ def make_linux():
     utils.set_summary("desktop tar deploy", False)
     utils.set_summary("desktop deb deploy", False)
     utils.set_summary("desktop rpm deploy", False)
-    utils.set_summary("desktop apt-rpm deploy", False)
+    utils.set_summary("desktop rpm-apt deploy", False)
     utils.set_summary("desktop urpmi deploy", False)
-    utils.set_summary("desktop suse-rpm deploy", False)
+    utils.set_summary("desktop rpm-suse deploy", False)
     if not branding.onlyoffice:
       utils.set_summary("desktop deb-astra deploy", False)
 

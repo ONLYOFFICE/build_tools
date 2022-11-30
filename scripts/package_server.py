@@ -56,7 +56,7 @@ def make_windows(edition):
   if rc == 0:
     utils.log_h2("server " + edition + " inno deploy")
     rc = aws_s3_upload(
-        utils.glob_file("exe/*.exe"),
+        utils.glob_path("exe/*.exe"),
         "win/inno/%s/" % common.channel,
         edition,
         "Installer")
@@ -93,7 +93,7 @@ def make_linux(edition):
   if rc == 0:
     utils.log_h2("server " + edition + " tar deploy")
     rc = aws_s3_upload(
-        utils.glob_file("*.tar.gz"),
+        utils.glob_path("*.tar.gz"),
         "linux/generic/%s/" % common.channel,
         edition,
         "Portable")
@@ -101,7 +101,7 @@ def make_linux(edition):
 
     utils.log_h2("server " + edition + " deb deploy")
     rc = aws_s3_upload(
-        utils.glob_file("deb/*.deb"),
+        utils.glob_path("deb/*.deb"),
         "linux/debian/%s/" % common.channel,
         edition,
         "Debian")
@@ -109,7 +109,7 @@ def make_linux(edition):
 
     utils.log_h2("server " + edition + " rpm deploy")
     rc = aws_s3_upload(
-        utils.glob_file("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+        utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
         "linux/rhel/%s/" % common.channel,
         edition,
         "CentOS")
@@ -117,7 +117,7 @@ def make_linux(edition):
 
     utils.log_h2("server " + edition + " apt-rpm deploy")
     rc = aws_s3_upload(
-        utils.glob_file("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+        utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
         "linux/altlinux/%s/" % common.channel,
         edition,
         "ALT Linux")

@@ -419,9 +419,8 @@ def make_dmg():
 
   if rc == 0:
     utils.log_h2("desktop dmg deploy")
-    dmg_file = utils.glob_file("build/*.dmg")
     rc = aws_s3_upload(
-        [dmg_file],
+        utils.glob_path("build/*.dmg"),
         "mac/%s/%s/%s/" % (suffix, common.version, common.build),
         "Disk Image")
   utils.set_summary("desktop msi deploy", rc == 0)
@@ -507,16 +506,16 @@ def make_sparkle_updates():
   utils.log_h2("desktop sparkle files deploy")
   rc = aws_s3_upload(
       [macos_zip] \
-      + utils.glob_files("build/update/*.delta") \
-      + utils.glob_files("build/update/*.xml") \
-      + utils.glob_files("build/update/*.html"),
+      + utils.glob_path("build/update/*.delta") \
+      + utils.glob_path("build/update/*.xml") \
+      + utils.glob_path("build/update/*.html"),
       "mac/%s/%s/%s/" % (suffix, common.version, common.build),
       "Sparkle")
   utils.set_summary("desktop sparkle files deploy", rc == 0)
 
   utils.log_h2("desktop checksums deploy")
   rc = aws_s3_upload(
-      utils.glob_files("build/update/*.txt"),
+      utils.glob_path("build/update/*.txt"),
       "mac/%s/%s/%s/" % (suffix, common.version, common.build),
       "Checksums")
   utils.set_summary("desktop checksums deploy", rc == 0)
@@ -593,7 +592,7 @@ def make_linux():
     if not branding.onlyoffice:
       utils.log_h2("desktop deb-astra deploy")
       rc = aws_s3_upload(
-          utils.glob_file("deb-astra/*.deb"),
+          utils.glob_path("deb-astra/*.deb"),
           "linux/astra/",
           "Astra Linux Signed")
       utils.set_summary("desktop deb-astra deploy", rc == 0)

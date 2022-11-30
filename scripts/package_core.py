@@ -40,7 +40,7 @@ def make_core():
 
   utils.log_h2("core deploy")
   args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          core_7z, "s3://" + common.s3_bucket + "/" + dest_version + "core.7z"]
+          core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
   if common.os_family == "windows":
     rc = utils.cmd(*args, verbose=True)
   else:
@@ -49,8 +49,8 @@ def make_core():
     utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
     args = ["aws", "s3", "sync", "--delete",
             "--acl", "public-read", "--no-progress",
-            "s3://" + common.s3_bucket + "/" + dest_version,
-            "s3://" + common.s3_bucket + "/" + dest_latest]
+            "s3://" + branding.s3_bucket + "/" + dest_version,
+            "s3://" + branding.s3_bucket + "/" + dest_latest]
     if common.os_family == "windows":
       rc = utils.cmd(*args, verbose=True)
     else:

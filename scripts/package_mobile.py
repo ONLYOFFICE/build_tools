@@ -33,7 +33,7 @@ def make_mobile():
         + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
         verbose=True)
     if rc == 0:
-      utils.add_deploy_data("mobile", "Android", zip_file, s3_key)
+      utils.add_deploy_data("mobile", "Android", zip_file, s3_key, branding.s3_bucket, branding.s3_region)
   utils.set_summary("mobile deploy", rc == 0)
 
   utils.set_cwd(common.workspace_dir)

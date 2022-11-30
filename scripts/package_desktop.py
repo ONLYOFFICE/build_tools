@@ -34,7 +34,7 @@ def aws_s3_upload(files, key, ptype=None):
           verbose=True)
     if rc == 0 and ptype is not None:
       if key.endswith("/"): key += utils.get_basename(file)
-      utils.add_deploy_data("desktop", ptype, file, key)
+      utils.add_deploy_data("desktop", ptype, file, key, branding.s3_bucket, branding.s3_region)
   return rc
 
 #

@@ -265,7 +265,9 @@ def add_deploy_data(product, ptype, src, dst):
     "type": ptype,
     # "local": get_path(src),
     "size": get_file_size(get_path(src)),
-    "remote": dst
+    "bucket": branding.s3_bucket,
+    "region": branding.s3_region,
+    "key": dst
   })
   file = open(get_path(common.workspace_dir + "/deploy.json"), 'w')
   file.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))

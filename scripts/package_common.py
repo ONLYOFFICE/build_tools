@@ -14,8 +14,6 @@ platforms = {
 }
 
 out_dir = "build_tools/out"
-s3_bucket = "repo-doc-onlyoffice-com"
-s3_region = "eu-west-1"
 tsa_server = "http://timestamp.digicert.com"
 vcredist_links = {
   "2022": {

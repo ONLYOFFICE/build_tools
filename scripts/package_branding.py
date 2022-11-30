@@ -9,6 +9,9 @@ company_name_l = company_name.lower()
 publisher_name = "Ascensio System SIA"
 cert_name = "Ascensio System SIA"
 
+s3_bucket = "repo-doc-onlyoffice-com"
+s3_region = "eu-west-1"
+
 if utils.is_windows():
   desktop_product_name = "Desktop Editors"
   desktop_product_name_s = desktop_product_name.replace(" ","")

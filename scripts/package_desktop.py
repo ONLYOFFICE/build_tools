@@ -204,7 +204,7 @@ def make_winsparkle_files():
   awk_args = [
     "-v", "Version=" + common.version,
     "-v", "Build=" + common.build,
-    "-v", "Branch=" + common.release_branch,
+    "-v", "Branch=" + common.channel,
     "-v", "Timestamp=" + common.timestamp,
     "-i", awk_branding
   ]

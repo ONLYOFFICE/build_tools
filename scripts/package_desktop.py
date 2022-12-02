@@ -42,8 +42,9 @@ def aws_s3_upload(files, key, ptype=None):
 #
 
 def make_windows():
-  global package_version, iscc_args, source_dir, arch_list, inno_arch_list, \
-    inno_file, inno_update_file, msi_file, zip_file, key_prefix
+  global package_version, iscc_args, source_dir, source_help_dir, \
+    inno_file, inno_help_file, inno_update_file, advinst_file, zip_file, \
+    arch_list, inno_arch_list
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
   prefix = common.platforms[common.platform]["prefix"]
@@ -68,6 +69,7 @@ def make_windows():
   if common.platform.endswith("_xp"): suffix += "_xp"
   zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
+  inno_help_file = "%s_Help_%s_%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix
   msi_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
 
@@ -92,12 +94,14 @@ def make_windows():
 
   if not vcdl:
     utils.set_summary("desktop inno build", False)
+    # utils.set_summary("desktop inno help build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
     utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()
+  # make_inno_help()
   make_inno_update()
 
   if common.platform == "windows_x64":
@@ -174,6 +178,39 @@ def make_inno():
         "win/inno/%s/%s/" % (common.version, common.build),
         "Installer")
   utils.set_summary("desktop inno deploy", rc == 0)
+  return
+
+def make_inno_help():
+  utils.log_h2("desktop inno help build")
+  utils.log_h2(inno_help_file)
+
+  args = [
+    "iscc",
+    "/Qp",
+    "/DsAppVersion=" + package_version,
+    "/DDEPLOY_PATH=" + source_help_dir,
+    "/D_ARCH=" + inno_arch_list[common.platform]
+  ]
+  if branding.onlyoffice:
+    args.append("/D_ONLYOFFICE=1")
+  else:
+    args.append("/DsBrandingFolder=" + \
+        utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
+  if common.sign:
+    args.append("/DENABLE_SIGNING=1")
+    args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
+        branding.cert_name + "$q /t " + common.tsa_server + " $f")
+  args.append("help.iss")
+  rc = utils.cmd(*args, creates=inno_help_file, verbose=True)
+  utils.set_summary("desktop inno help build", rc == 0)
+
+  if rc == 0:
+    utils.log_h2("desktop inno help deploy")
+    rc = aws_s3_upload(
+        [inno_help_file],
+        "win/inno/%s/%s/" % (common.version, common.build),
+        "Installer")
+  utils.set_summary("desktop inno help deploy", rc == 0)
   return
 
 def make_inno_update():
@@ -321,7 +358,8 @@ def make_msi():
       "SetCurrentFeature ExtendedFeature",
       "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe"
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe",
+      "SetProperty ASCC_REG_PREFIX=" + ascc_reg_prefix
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,
@@ -442,30 +480,30 @@ def make_sparkle_updates():
 
   if "en" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
+    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if utils.is_file(notes_src):
-      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
           r"(<span class=\"releasedate\">).+(</span>)",
           "\\1 - " + cur_date + "\\2")
     else:
-      utils.write_file(notes_dst, '<html></html>\n')
+      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
 
   if "ru" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
+    if update_changes_list["ru"] != "ReleaseNotes":
+      notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
+    else:
+      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if utils.is_file(notes_src):
-      if update_changes_list["ru"] != "ReleaseNotes":
-        notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
-      else:
-        notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
       utils.copy_file(notes_src, notes_dst)
       cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
       utils.replace_in_file(notes_dst,
           r"(<span class=\"releasedate\">).+(</span>)",
           "\\1 - " + cur_date + "\\2")
     else:
-      utils.write_file(notes_dst, '<html></html>\n')
+      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
 
   sparkle_download_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
   sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (branding.sparkle_base_url, suffix, app_version)
@@ -496,12 +534,8 @@ def make_sparkle_updates():
       utils.delete_file(updates_dir + '/' + file)
 
   utils.log_h3("generate checksums")
-  utils.sh(
-      "md5 *.zip *.delta > md5sums.txt && " \
-      + "shasum -a 256 *.zip *.delta > sha256sums.txt",
-      chdir="build/update",
-      verbose=True
-  )
+  utils.sh("md5 *.zip *.delta > md5sums.txt", chdir="build/update", verbose=True)
+  utils.sh("shasum -a 256 *.zip *.delta > sha256sums.txt", chdir="build/update", verbose=True)
 
   utils.log_h2("desktop sparkle files deploy")
   rc = aws_s3_upload(

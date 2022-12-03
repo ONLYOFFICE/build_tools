@@ -71,7 +71,7 @@ def make_windows():
   inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
   inno_help_file = "%s_Help_%s_%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix
-  msi_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
+  advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
 
   if common.clean:
     utils.log_h2("desktop clean")
@@ -108,7 +108,7 @@ def make_windows():
     make_winsparkle_files()
 
   if common.platform in ["windows_x64", "windows_x86"]:
-    make_msi()
+    make_advinst()
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -289,9 +289,9 @@ def make_winsparkle_files():
   utils.set_summary("desktop winsparkle files deploy", rc == 0)
   return
 
-def make_msi():
-  utils.log_h2("desktop msi build")
-  utils.log_h2(msi_file)
+def make_advinst():
+  utils.log_h2("desktop advinst build")
+  utils.log_h2(advinst_file)
 
   arch = arch_list[common.platform]
 
@@ -367,21 +367,21 @@ def make_msi():
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
     "SetVersion " + package_version,
-    "SetPackageName " + msi_file + " -buildname DefaultBuild",
+    "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
   ]
   utils.write_file("DesktopEditors.aic", "\r\n".join(aic_content), "utf-8-sig")
   rc = utils.cmd("AdvancedInstaller.com", "/execute", \
     "DesktopEditors.aip", "DesktopEditors.aic", verbose=True)
-  utils.set_summary("desktop msi build", rc == 0)
+  utils.set_summary("desktop advinst build", rc == 0)
 
   if rc == 0:
-    utils.log_h2("desktop msi deploy")
+    utils.log_h2("desktop advinst deploy")
     rc = aws_s3_upload(
-        [msi_file],
+        [advinst_file],
         "win/advinst/%s/" % common.channel,
         "Installer")
-  utils.set_summary("desktop msi deploy", rc == 0)
+  utils.set_summary("desktop advinst deploy", rc == 0)
   return
 
 #
@@ -461,7 +461,7 @@ def make_dmg():
         utils.glob_path("build/*.dmg"),
         "mac/%s/%s/%s/" % (suffix, common.version, common.build),
         "Disk Image")
-  utils.set_summary("desktop msi deploy", rc == 0)
+  utils.set_summary("desktop dmg deploy", rc == 0)
   return
 
 def make_sparkle_updates():
@@ -469,7 +469,7 @@ def make_sparkle_updates():
 
   app_version = utils.sh_output("/usr/libexec/PlistBuddy \
     -c 'Print :CFBundleShortVersionString' \
-    build/" + package_name + ".app/Contents/Info.plist", verbose=True)
+    build/" + package_name + ".app/Contents/Info.plist", verbose=True).rstrip()
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
   updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)

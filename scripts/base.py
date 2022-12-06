@@ -613,7 +613,7 @@ def qt_config(platform):
 
   if ("ios" == platform):
     config_param += " disable_precompiled_header"
-  if ("android" == platform):
+  if (0 == platform.find("android")):
     config_param += " disable_precompiled_header"
 
   if ("linux_arm64" == platform):

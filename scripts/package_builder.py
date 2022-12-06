@@ -30,8 +30,9 @@ def aws_s3_upload(files, key, ptype=None):
           + file + " s3://" + branding.s3_bucket + "/" + key,
           verbose=True)
     if rc == 0 and ptype is not None:
-      if key.endswith("/"): key += utils.get_basename(file)
-      utils.add_deploy_data("builder", ptype, file, key, branding.s3_bucket, branding.s3_region)
+      full_key = key
+      if full_key.endswith("/"): full_key += utils.get_basename(file)
+      utils.add_deploy_data("builder", ptype, file, full_key, branding.s3_bucket, branding.s3_region)
   return rc
 
 def make_windows():

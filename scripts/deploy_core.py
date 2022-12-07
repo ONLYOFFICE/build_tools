@@ -56,6 +56,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allthemesgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "standardtester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2ttester")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "ooxml_crypt")
 
 
     if base.is_file(archive_dir + ".7z"):

@@ -194,7 +194,7 @@ def make():
           base_dir + "/js/" + branding + "/desktop/web-apps/apps/%s/main/resources/help" % i,
           root_help_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
 
-    if ("1" != config.option("preinstalled-help")):
+    if ("1" != config.option("preinstalled-help") and not isWindowsXP):
       # remove help from install until web-apps containes help
       base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")
       base.delete_dir(root_dir + "/editors/web-apps/apps/presentationeditor/main/resources/help")

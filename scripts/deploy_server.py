@@ -114,6 +114,9 @@ def make():
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps", js_dir + "/web-apps")
+
+    # add embed worker code
+    base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
@@ -163,8 +166,8 @@ def make():
     #document-templates
     document_templates_files = server_dir + '/../document-templates'
     document_templates = build_server_dir + '/../document-templates'
-    base.create_dir(document_templates)
-    base.copy_dir_content(document_templates_files, document_templates, "", ".git")
+    base.copy_dir(document_templates_files + '/new', document_templates + '/new')
+    base.copy_dir(document_templates_files + '/sample', document_templates + '/sample')
 
     #license
     license_file1 = server_dir + '/LICENSE.txt'

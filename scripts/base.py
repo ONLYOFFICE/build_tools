@@ -619,6 +619,11 @@ def qt_config(platform):
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
 
+  if ("ios" == platform):
+    config_param += " disable_precompiled_header"
+  if (0 == platform.find("android")):
+    config_param += " disable_precompiled_header"
+
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
 

@@ -84,9 +84,11 @@ addSubProject(epubfile,		$$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
 	addSubProject(docbuilder,	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro,\
 					kernel unicodeconverter graphics doctrenderer)
 }
+
 !no_tests {
 	addSubProject(standardtester,	$$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro)
 	addSubProject(x2ttester,	$$CORE_ROOT_DIR/Test/Applications/x2tTester/x2ttester.pro)
+	addSubProject(ooxml_crypt,	$$CORE_ROOT_DIR/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro)
 }
 
 core_and_multimedia {

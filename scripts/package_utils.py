@@ -258,14 +258,16 @@ def set_summary(target, status):
   common.summary.append({target: status})
   return
 
-def add_deploy_data(product, ptype, src, dst):
+def add_deploy_data(product, ptype, src, dst, bucket, region):
   common.deploy_data.append({
     "platform": common.platforms[common.platform]["title"],
     "product": product,
     "type": ptype,
     # "local": get_path(src),
     "size": get_file_size(get_path(src)),
-    "remote": dst
+    "bucket": bucket,
+    "region": region,
+    "key": dst
   })
   file = open(get_path(common.workspace_dir + "/deploy.json"), 'w')
   file.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))

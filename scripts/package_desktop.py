@@ -360,7 +360,7 @@ def make_advinst():
       "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
       "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe",
-      "SetProperty ASCC_REG_PREFIX=" + ascc_reg_prefix
+      "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [
     "AddOsLc -buildname DefaultBuild -arch " + arch,

@@ -19,16 +19,17 @@ def aws_s3_upload(files, key, ptype=None):
   key = "builder/" + key
   rc = 0
   for file in files:
+    args = ["aws"]
+    if branding.s3_endpoint_url is not None:
+      args += ["--endpoint-url=" + branding.s3_endpoint_url]
+    args += [
+      "s3", "cp", "--no-progress", "--acl", "public-read",
+      file, "s3://" + branding.s3_bucket + "/" + key
+    ]
     if common.os_family == "windows":
-      rc += utils.cmd(
-          "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          file, "s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
+      rc += utils.cmd(*args, verbose=True)
     else:
-      rc += utils.sh(
-          "aws s3 cp --acl public-read --no-progress " \
-          + file + " s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
+      rc += utils.sh(" ".join(args), verbose=True)
     if rc == 0 and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)

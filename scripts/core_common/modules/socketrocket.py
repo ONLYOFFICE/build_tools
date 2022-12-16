@@ -10,12 +10,16 @@ import config
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/socketrocket"
 
 def buildIOS():
-
 # Build for iphone
+  base.cmd("xcodebuild", ["archive", "-project", current_dir + "/SocketRocket.xcodeproj", "-scheme",  "SocketRocket", "-archivePath", current_dir + "/build/SocketRocket-devices.xcarchive", "-sdk", "iphoneos", "ENABLE_BITCODE=NO", "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", "SKIP_INSTALL=NO"])
   base.cmd("xcodebuild", ["-sdk", "iphoneos", "BITCODE_GENERATION_MODE = bitcode", "ENABLE_BITCODE = YES", "OTHER_CFLAGS = -fembed-bitcode", "-configuration", "Release"])
 
 # Build for simulator
+  base.cmd("xcodebuild", ["archive", "-project", current_dir + "/SocketRocket.xcodeproj", "-scheme",  "SocketRocket", "-archivePath", current_dir + "/build/SocketRocket-simulators.xcarchive", "-sdk", "iphonesimulator", "ENABLE_BITCODE=NO", "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", "SKIP_INSTALL=NO"])
   base.cmd("xcodebuild", ["-sdk", "iphonesimulator", "BITCODE_GENERATION_MODE = bitcode", "ENABLE_BITCODE = YES", "OTHER_CFLAGS = -fembed-bitcode", "-configuration", "Release"])
+
+# Package xcframework
+  base.cmd("xcodebuild", ["-create-xcframework", "-library", current_dir + "/build/SocketRocket-devices.xcarchive/Products/usr/local/lib/libSocketRocket.a", "-library", current_dir + "/build/SocketRocket-simulators.xcarchive/Products/usr/local/lib/libSocketRocket.a", "-output", current_dir + "/build/SocketRocket.xcframework"])
 
 # Remove arm64 for simulator for SDK 14
   base.cmd("lipo", ["-remove", "arm64", "-output", "build/Release-iphonesimulator/libSocketRocket.a", "build/Release-iphonesimulator/libSocketRocket.a"])

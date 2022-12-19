@@ -19,7 +19,7 @@ def aws_s3_upload(files, key, edition, ptype=None):
   rc = 0
   for file in files:
     args = ["aws"]
-    if branding.s3_endpoint_url is not None:
+    if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
       "s3", "cp", "--no-progress", "--acl", "public-read",

@@ -37,7 +37,7 @@ def log_h1(string):
   return
 
 def log_h2(string):
-  log("### " + string + "\n")
+  log("\n### " + string + "\n")
   return
 
 def log_h3(string):
@@ -284,13 +284,13 @@ def cmd(*args, **kwargs):
       log("    creates: " + kwargs["creates"])
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     log_err("creates exist")
-    return 0
+    return False
   if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
     oldcwd = get_cwd()
     set_cwd(kwargs["chdir"])
   ret = subprocess.call(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   if kwargs.get("chdir") and oldcwd:
     set_cwd(oldcwd)
   return ret
@@ -312,21 +312,21 @@ def powershell(*args, **kwargs):
     if kwargs.get("creates"):
       log("    creates: " + kwargs["creates"])
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
-    return 0
+    return False
   args = ["powershell", "-Command"] + [i for i in args]
   ret = subprocess.call(
       args, stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   return ret
 
 def ps1(file, args=[], **kwargs):
   if kwargs.get("verbose"):
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
-    return 0
+    return True
   ret = subprocess.call(
       ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   return ret
 
 def download_file(url, path, md5, verbose=False):
@@ -338,15 +338,18 @@ def download_file(url, path, md5, verbose=False):
   if is_file(path):
     if get_md5(path) == md5:
       log_err("file already exist (match checksum)")
-      return 0
+      return True
     else:
       log_err("wrong checksum (%s), delete" % md5)
       os.remove(path)
-  ret = powershell("(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path), verbose=True)
+  ret = powershell(
+      "(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path),
+      verbose=True
+  )
   md5_new = get_md5(path)
   if md5 != md5_new:
     log_err("checksum didn't match (%s != %s)" % (md5, md5_new))
-    return 1
+    return False
   return ret
 
 def sh(command, **kwargs):
@@ -357,7 +360,7 @@ def sh(command, **kwargs):
       log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
       log("    creates: " + kwargs["creates"])
-  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
+  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True) == 0
 
 def sh_output(command, **kwargs):
   if kwargs.get("verbose"):

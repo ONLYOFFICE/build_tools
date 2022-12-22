@@ -42,18 +42,18 @@ def make_core():
   args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
           core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
   if common.os_family == "windows":
-    rc = utils.cmd(*args, verbose=True)
+    ret = utils.cmd(*args, verbose=True)
   else:
-    rc = utils.sh(" ".join(args), verbose=True)
-  if rc == 0:
+    ret = utils.sh(" ".join(args), verbose=True)
+  if ret:
     utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z", branding.s3_bucket, branding.s3_region)
     args = ["aws", "s3", "sync", "--delete",
             "--acl", "public-read", "--no-progress",
             "s3://" + branding.s3_bucket + "/" + dest_version,
             "s3://" + branding.s3_bucket + "/" + dest_latest]
     if common.os_family == "windows":
-      rc = utils.cmd(*args, verbose=True)
+      ret &= utils.cmd(*args, verbose=True)
     else:
-      rc = utils.sh(" ".join(args), verbose=True)
-  utils.set_summary("core deploy", rc == 0)
+      ret &= utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("core deploy", ret)
   return

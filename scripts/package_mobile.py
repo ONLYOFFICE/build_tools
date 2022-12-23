@@ -23,18 +23,23 @@ def make_mobile():
   s3_key = "mobile/android/%s/%s" % (common.channel, zip_file)
 
   utils.log_h2("mobile build")
-  rc = utils.sh("zip -r " + zip_file + " ./android* ./js", verbose=True)
-  utils.set_summary("mobile build", rc == 0)
+  ret = utils.sh("zip -r " + zip_file + " ./android* ./js", verbose=True)
+  utils.set_summary("mobile build", ret)
 
-  utils.log_h2("mobile deploy")
-  if rc == 0:
-    rc = utils.sh(
-        "aws s3 cp --acl public-read --no-progress " \
-        + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
-        verbose=True)
-    if rc == 0:
-      utils.add_deploy_data("mobile", "Android", zip_file, s3_key, branding.s3_bucket, branding.s3_region)
-  utils.set_summary("mobile deploy", rc == 0)
+  if common.deploy:
+    utils.log_h2("mobile deploy")
+    if ret:
+      ret = utils.sh(
+          "aws s3 cp --acl public-read --no-progress " \
+          + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
+          verbose=True
+      )
+    if ret:
+      utils.add_deploy_data(
+          "mobile", "Android", zip_file, s3_key,
+          branding.s3_bucket, branding.s3_region
+      )
+    utils.set_summary("mobile deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return

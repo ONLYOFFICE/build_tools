@@ -63,8 +63,8 @@ def get_cwd():
 
 def set_cwd(path, verbose=True):
   if verbose:
-    log_h3("change working dir:")
-    log_h3("  path: " + path)
+    log("- change working dir:")
+    log("    path: " + path)
   os.chdir(path)
   return
 
@@ -116,8 +116,8 @@ def get_md5(path):
 
 def create_dir(path, verbose=True):
   if verbose:
-    log_h3("create_dir:")
-    log_h3("  path:" + path)
+    log("- create_dir:")
+    log("    path: " + path)
   if not is_exist(path):
     os.makedirs(path)
   else:
@@ -128,21 +128,21 @@ def write_file(path, data, encoding='utf-8', verbose=True):
   if is_file(path):
     delete_file(path)
   if verbose:
-    log_h3("write_file:")
-    log_h3("  path: " + path)
-    log_h3("  encoding: " + encoding)
-    log_h3("  data: |\n" + data)
+    log("- write_file:")
+    log("    path: " + path)
+    log("    encoding: " + encoding)
+    log("    data: |\n" + data)
   with codecs.open(path, 'w', encoding) as file:
     file.write(data)
   return
 
 def replace_in_file(path, pattern, text_replace, encoding='utf-8', verbose=True):
   if verbose:
-    log_h3("replace_in_file:")
-    log_h3("  path: " + path)
-    log_h3("  pattern: " + pattern)
-    log_h3("  replace: " + text_replace)
-    log_h3("  encoding: " + encoding)
+    log("- replace_in_file:")
+    log("    path: " + path)
+    log("    pattern: " + pattern)
+    log("    replace: " + text_replace)
+    log("    encoding: " + encoding)
   file_data = ""
   with codecs.open(get_path(path), "r", encoding) as file:
     file_data = file.read()
@@ -154,9 +154,9 @@ def replace_in_file(path, pattern, text_replace, encoding='utf-8', verbose=True)
 
 def copy_file(src, dst, verbose=True):
   if verbose:
-    log_h3("copy_file:")
-    log_h3("  src: " + src)
-    log_h3("  dst: " + dst)
+    log("- copy_file:")
+    log("    src: " + src)
+    log("    dst: " + dst)
   if is_file(dst):
     delete_file(dst)
   if not is_file(src):
@@ -166,10 +166,10 @@ def copy_file(src, dst, verbose=True):
 
 def copy_files(src, dst, override=True, verbose=True):
   if verbose:
-    log_h3("copy_files:")
-    log_h3("  src: " + src)
-    log_h3("  dst: " + dst)
-    log_h3("  override: " + str(override))
+    log("- copy_files:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    override: " + str(override))
   for file in glob.glob(src):
     file_name = os.path.basename(file)
     if is_file(file):
@@ -187,10 +187,10 @@ def copy_files(src, dst, override=True, verbose=True):
 
 def copy_dir(src, dst, override=True, verbose=True):
   if verbose:
-    log_h3("copy_dir:")
-    log_h3("  src: " + src)
-    log_h3("  dst: " + dst)
-    log_h3("  override: " + str(override))
+    log("- copy_dir:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    override: " + str(override))
   if is_dir(dst):
     delete_dir(dst)
   try:
@@ -201,11 +201,11 @@ def copy_dir(src, dst, override=True, verbose=True):
 
 def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose=True):
   if verbose:
-    log_h3("copy_dir_content:")
-    log_h3("  src: " + src)
-    log_h3("  dst: " + dst)
-    log_h3("  include: " + filter_include)
-    log_h3("  exclude: " + filter_exclude)
+    log("- copy_dir_content:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    include: " + filter_include)
+    log("    exclude: " + filter_exclude)
   src_folder = src
   if ("/" != src[-1:]):
     src_folder += "/"
@@ -224,8 +224,8 @@ def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose
 
 def delete_file(path, verbose=True):
   if verbose:
-    log_h3("delete_file:")
-    log_h3("  path: " + path)
+    log("- delete_file:")
+    log("    path: " + path)
   if not is_file(path):
     log_err("file not exist")
     return
@@ -233,8 +233,8 @@ def delete_file(path, verbose=True):
 
 def delete_dir(path, verbose=True):
   if verbose:
-    log_h3("delete_dir:")
-    log_h3("  path: " + path)
+    log("- delete_dir:")
+    log("    path: " + path)
   if not is_dir(path):
     log_err("dir not exist")
     return
@@ -243,8 +243,8 @@ def delete_dir(path, verbose=True):
 
 def delete_files(src, verbose=True):
   if verbose:
-    log_h3("delete_files:")
-    log_h3("  pattern: " + src)
+    log("- delete_files:")
+    log("    pattern: " + src)
   for path in glob.glob(src):
     if verbose:
       log(path)
@@ -276,93 +276,96 @@ def add_deploy_data(product, ptype, src, dst, bucket, region):
 
 def cmd(*args, **kwargs):
   if kwargs.get("verbose"):
-    log_h3("cmd:")
-    log_h3("  command: " + " ".join(args))
+    log("- cmd:")
+    log("    command: " + " ".join(args))
     if kwargs.get("chdir"):
-      log_h3("  chdir: " + kwargs["chdir"])
+      log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
-      log_h3("  creates: " + kwargs["creates"])
+      log("    creates: " + kwargs["creates"])
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     log_err("creates exist")
-    return 0
+    return False
   if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
     oldcwd = get_cwd()
     set_cwd(kwargs["chdir"])
   ret = subprocess.call(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   if kwargs.get("chdir") and oldcwd:
     set_cwd(oldcwd)
   return ret
 
 def cmd_output(*args, **kwargs):
   if kwargs.get("verbose"):
-    log_h3("cmd_output:")
-    log_h3("  command: " + " ".join(args))
+    log("- cmd_output:")
+    log("    command: " + " ".join(args))
   return subprocess.check_output(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
   ).decode("utf-8")
 
 def powershell(*args, **kwargs):
   if kwargs.get("verbose"):
-    log_h3("powershell:")
-    log_h3("  command: " + " ".join(args))
+    log("- powershell:")
+    log("    command: " + " ".join(args))
     if kwargs.get("chdir"):
-      log_h3("  chdir: " + kwargs["chdir"])
+      log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
-      log_h3("  creates: " + kwargs["creates"])
+      log("    creates: " + kwargs["creates"])
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
-    return 0
+    return False
   args = ["powershell", "-Command"] + [i for i in args]
   ret = subprocess.call(
       args, stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   return ret
 
 def ps1(file, args=[], **kwargs):
   if kwargs.get("verbose"):
     log_h2("powershell cmdlet: " + file + " " + " ".join(args))
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
-    return 0
+    return True
   ret = subprocess.call(
       ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
-  )
+  ) == 0
   return ret
 
 def download_file(url, path, md5, verbose=False):
   if verbose:
-    log_h3("download_file:")
-    log_h3("  url: " + path)
-    log_h3("  path: " + url)
-    log_h3("  md5: " + md5)
+    log("- download_file:")
+    log("    url: " + path)
+    log("    path: " + url)
+    log("    md5: " + md5)
   if is_file(path):
     if get_md5(path) == md5:
       log_err("file already exist (match checksum)")
-      return 0
+      return True
     else:
       log_err("wrong checksum (%s), delete" % md5)
       os.remove(path)
-  ret = powershell("(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path), verbose=True)
+  ret = powershell(
+      "(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path),
+      verbose=True
+  )
   md5_new = get_md5(path)
   if md5 != md5_new:
     log_err("checksum didn't match (%s != %s)" % (md5, md5_new))
-    return 1
+    return False
   return ret
 
 def sh(command, **kwargs):
   if kwargs.get("verbose"):
-    log_h3("sh:")
-    log_h3("  command: " + command)
+    log("- sh:")
+    log("    command: " + command)
     if kwargs.get("chdir"):
-      log_h3("  chdir: " + kwargs["chdir"])
+      log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
-      log_h3("  creates: " + kwargs["creates"])
-  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
+      log("    creates: " + kwargs["creates"])
+  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True) == 0
 
 def sh_output(command, **kwargs):
   if kwargs.get("verbose"):
-    log_h3("sh_output:")
-    log_h3("  command: " + command)
+    log("- sh_output:")
+    log("    command: " + command)
   return subprocess.check_output(
       command, stderr=subprocess.STDOUT, shell=True
   ).decode("utf-8")

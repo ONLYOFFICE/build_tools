@@ -16,23 +16,26 @@ def make(edition):
 
 def aws_s3_upload(files, key, edition, ptype=None):
   key = "server/" + key
-  rc = 0
   for file in files:
+    args = ["aws"]
+    if hasattr(branding, "s3_endpoint_url"):
+      args += ["--endpoint-url=" + branding.s3_endpoint_url]
+    args += [
+      "s3", "cp", "--no-progress", "--acl", "public-read",
+      file, "s3://" + branding.s3_bucket + "/" + key
+    ]
     if common.os_family == "windows":
-      rc += utils.cmd(
-          "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          file, "s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
+      ret = utils.cmd(*args, verbose=True)
     else:
-      rc += utils.sh(
-          "aws s3 cp --acl public-read --no-progress " \
-          + file + " s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
-    if rc == 0 and ptype is not None:
+      ret = utils.sh(" ".join(args), verbose=True)
+    if ret and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data("server_" + edition, ptype, file, full_key, branding.s3_bucket, branding.s3_region)
-  return rc
+      utils.add_deploy_data(
+          "server_" + edition, ptype, file, full_key,
+          branding.s3_bucket, branding.s3_region
+      )
+  return ret
 
 def make_windows(edition):
   if edition == "enterprise":
@@ -43,25 +46,23 @@ def make_windows(edition):
     product_name = "DocumentServer"
   utils.set_cwd("document-server-package")
 
-  utils.log_h2("server " + edition + " clean")
-  rc = utils.cmd("make", "clean", verbose=True)
-  utils.set_summary("server " + edition + " clean", rc == 0)
-
   utils.log_h2("server " + edition + " build")
+  ret = utils.cmd("make", "clean", verbose=True)
   args = ["-e", "PRODUCT_NAME=" + product_name]
   if not branding.onlyoffice:
     args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-  rc = utils.cmd("make", "packages", *args, verbose=True)
-  utils.set_summary("server " + edition + " build", rc == 0)
+  ret &= utils.cmd("make", "packages", *args, verbose=True)
+  utils.set_summary("server " + edition + " build", ret)
 
-  if rc == 0:
+  if common.deploy and ret:
     utils.log_h2("server " + edition + " inno deploy")
-    rc = aws_s3_upload(
+    ret = aws_s3_upload(
         utils.glob_path("exe/*.exe"),
         "win/inno/%s/" % common.channel,
         edition,
-        "Installer")
-  utils.set_summary("server " + edition + " inno deploy", rc == 0)
+        "Installer"
+    )
+    utils.set_summary("server " + edition + " inno deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -75,60 +76,61 @@ def make_linux(edition):
     product_name = "documentserver"
   utils.set_cwd("document-server-package")
 
-  utils.log_h2("server " + edition + " clean")
-  rc = utils.sh("make clean", verbose=True)
-  utils.set_summary("server " + edition + " clean", rc == 0)
-
   utils.log_h2("server " + edition + " build")
   args = ["-e", "PRODUCT_NAME=" + product_name]
   if common.platform == "linux_aarch64":
     args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-  rc = utils.sh("make packages " + " ".join(args), verbose=True)
-  utils.set_summary("server " + edition + " build", rc == 0)
+  ret = utils.sh("make clean && make packages " + " ".join(args), verbose=True)
+  utils.set_summary("server " + edition + " build", ret)
 
   rpm_arch = "x86_64"
   if common.platform == "linux_aarch64": rpm_arch = "aarch64"
 
-  if rc == 0:
-    utils.log_h2("server " + edition + " tar deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("*.tar.gz"),
-        "linux/generic/%s/" % common.channel,
-        edition,
-        "Portable")
-    utils.set_summary("server " + edition + " tar deploy", rc == 0)
+  if common.deploy:
+    utils.log_h2("server " + edition + " deploy")
+    if ret:
+      utils.log_h2("server " + edition + " tar deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("*.tar.gz"),
+          "linux/generic/%s/" % common.channel,
+          edition,
+          "Portable"
+      )
+      utils.set_summary("server " + edition + " tar deploy", ret)
 
-    utils.log_h2("server " + edition + " deb deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("deb/*.deb"),
-        "linux/debian/%s/" % common.channel,
-        edition,
-        "Debian")
-    utils.set_summary("server " + edition + " deb deploy", rc == 0)
+      utils.log_h2("server " + edition + " deb deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("deb/*.deb"),
+          "linux/debian/%s/" % common.channel,
+          edition,
+          "Debian"
+      )
+      utils.set_summary("server " + edition + " deb deploy", ret)
 
-    utils.log_h2("server " + edition + " rpm deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-        "linux/rhel/%s/" % common.channel,
-        edition,
-        "CentOS")
-    utils.set_summary("server " + edition + " rpm deploy", rc == 0)
+      utils.log_h2("server " + edition + " rpm deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          "linux/rhel/%s/" % common.channel,
+          edition,
+          "CentOS"
+      )
+      utils.set_summary("server " + edition + " rpm deploy", ret)
 
-    utils.log_h2("server " + edition + " apt-rpm deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-        "linux/altlinux/%s/" % common.channel,
-        edition,
-        "ALT Linux")
-    utils.set_summary("server " + edition + " apt-rpm deploy", rc == 0)
-
-  else:
-    utils.set_summary("server " + edition + " tar deploy", False)
-    utils.set_summary("server " + edition + " deb deploy", False)
-    utils.set_summary("server " + edition + " rpm deploy", False)
-    utils.set_summary("server " + edition + " rpm-alt deploy", False)
+      utils.log_h2("server " + edition + " apt-rpm deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          "linux/altlinux/%s/" % common.channel,
+          edition,
+          "ALT Linux"
+      )
+      utils.set_summary("server " + edition + " apt-rpm deploy", ret)
+    else:
+      utils.set_summary("server " + edition + " tar deploy", False)
+      utils.set_summary("server " + edition + " deb deploy", False)
+      utils.set_summary("server " + edition + " rpm deploy", False)
+      utils.set_summary("server " + edition + " rpm-alt deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

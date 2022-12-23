@@ -17,23 +17,26 @@ def make():
 
 def aws_s3_upload(files, key, ptype=None):
   key = "builder/" + key
-  rc = 0
   for file in files:
+    args = ["aws"]
+    if hasattr(branding, "s3_endpoint_url"):
+      args += ["--endpoint-url=" + branding.s3_endpoint_url]
+    args += [
+      "s3", "cp", "--no-progress", "--acl", "public-read",
+      file, "s3://" + branding.s3_bucket + "/" + key
+    ]
     if common.os_family == "windows":
-      rc += utils.cmd(
-          "aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          file, "s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
+      ret = utils.cmd(*args, verbose=True)
     else:
-      rc += utils.sh(
-          "aws s3 cp --acl public-read --no-progress " \
-          + file + " s3://" + branding.s3_bucket + "/" + key,
-          verbose=True)
-    if rc == 0 and ptype is not None:
+      ret = utils.sh(" ".join(args), verbose=True)
+    if ret and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data("builder", ptype, file, full_key, branding.s3_bucket, branding.s3_region)
-  return rc
+      utils.add_deploy_data(
+          "builder", ptype, file, full_key,
+          branding.s3_bucket, branding.s3_region
+      )
+  return ret
 
 def make_windows():
   global inno_file, zip_file, suffix, key_prefix
@@ -58,13 +61,11 @@ def make_windows():
     utils.log_h2("builder clean")
     utils.delete_dir("build")
 
-  utils.log_h1("copy arifacts")
+  utils.log_h2("copy arifacts")
   utils.create_dir("build\\app")
   utils.copy_dir_content(source_dir, "build\\app\\")
 
-  # if "builder-zip" in common.targets:
   make_zip()
-  # if "builder-inno" in common.targets:
   make_inno()
 
   utils.set_cwd(common.workspace_dir)
@@ -72,23 +73,24 @@ def make_windows():
 
 def make_zip():
   utils.log_h2("builder zip build")
-  utils.log_h2(zip_file)
-  rc = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
-      chdir="build", creates="build\\" + zip_file, verbose=True)
-  utils.set_summary("builder zip build", rc == 0)
+  utils.log_h3(zip_file)
 
-  if rc == 0:
+  ret = utils.cmd("7z", "a", "-y", zip_file, ".\\app\\*",
+      chdir="build", creates="build\\" + zip_file, verbose=True)
+  utils.set_summary("builder zip build", ret)
+
+  if common.deploy and ret:
     utils.log_h2("builder zip deploy")
-    rc = aws_s3_upload(
-        ["build\\" + zip_file],
-        "win/generic/%s/" % common.channel,
-        "Portable")
-  utils.set_summary("builder zip deploy", rc == 0)
+    ret = aws_s3_upload(
+        ["build\\" + zip_file], "win/generic/%s/" % common.channel, "Portable"
+    )
+    utils.set_summary("builder zip deploy", ret)
   return
 
 def make_inno():
   utils.log_h2("builder inno build")
-  utils.log_h2(inno_file)
+  utils.log_h3(inno_file)
+
   args = [
     "-Arch " + suffix,
     "-Version " + common.version,
@@ -99,25 +101,21 @@ def make_inno():
   if common.sign:
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
-  rc = utils.ps1(".\\make_inno.ps1", args,
-      creates="build\\" + inno_file, verbose=True)
-  utils.set_summary("builder inno build", rc == 0)
+  ret = utils.ps1(
+      ".\\make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
+  )
+  utils.set_summary("builder inno build", ret)
 
-  if rc == 0:
+  if common.deploy and ret:
     utils.log_h2("builder inno deploy")
-    rc = aws_s3_upload(
-        ["build\\" + inno_file],
-        "win/inno/%s/" % common.channel,
-        "Installer")
-  utils.set_summary("builder inno deploy", rc == 0)
+    ret = aws_s3_upload(
+        ["build\\" + inno_file], "win/inno/%s/" % common.channel, "Installer"
+    )
+    utils.set_summary("builder inno deploy", ret)
   return
 
 def make_linux():
   utils.set_cwd("document-builder-package")
-
-  utils.log_h2("builder clean")
-  rc = utils.sh("make clean", verbose=True)
-  utils.set_summary("builder clean", rc == 0)
 
   utils.log_h2("builder build")
   args = []
@@ -125,38 +123,41 @@ def make_linux():
     args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
-  rc = utils.sh("make packages " + " ".join(args), verbose=True)
-  utils.set_summary("builder build", rc == 0)
+  ret = utils.sh("make clean && make packages " + " ".join(args), verbose=True)
+  utils.set_summary("builder build", ret)
 
   rpm_arch = "x86_64"
   if common.platform == "linux_aarch64": rpm_arch = "aarch64"
 
-  if rc == 0:
-    # utils.log_h2("builder tar deploy")
-    # rc = aws_s3_upload(
-    #     utils.glob_path("tar/*.tar.gz"),
-    #     "linux/generic/%s/" % common.channel,
-    #     "Portable")
-    # utils.set_summary("builder tar deploy", rc == 0)
+  if common.deploy:
+    utils.log_h2("builder deploy")
+    if ret:
+      # utils.log_h2("builder tar deploy")
+      # ret = aws_s3_upload(
+      #     utils.glob_path("tar/*.tar.gz"),
+      #     "linux/generic/%s/" % common.channel,
+      #     "Portable")
+      # utils.set_summary("builder tar deploy", ret)
 
-    utils.log_h2("builder deb deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("deb/*.deb"),
-        "linux/debian/%s/" % common.channel,
-        "Debian")
-    utils.set_summary("builder deb deploy", rc == 0)
+      utils.log_h2("builder deb deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("deb/*.deb"),
+          "linux/debian/%s/" % common.channel,
+          "Debian"
+      )
+      utils.set_summary("builder deb deploy", ret)
 
-    utils.log_h2("builder rpm deploy")
-    rc = aws_s3_upload(
-        utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-        "linux/rhel/%s/" % common.channel,
-        "CentOS")
-    utils.set_summary("builder rpm deploy", rc == 0)
-
-  else:
-    # utils.set_summary("builder tar deploy", False)
-    utils.set_summary("builder deb deploy", False)
-    utils.set_summary("builder rpm deploy", False)
+      utils.log_h2("builder rpm deploy")
+      ret = aws_s3_upload(
+          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          "linux/rhel/%s/" % common.channel,
+          "CentOS"
+      )
+      utils.set_summary("builder rpm deploy", ret)
+    else:
+      # utils.set_summary("builder tar deploy", False)
+      utils.set_summary("builder deb deploy", False)
+      utils.set_summary("builder rpm deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

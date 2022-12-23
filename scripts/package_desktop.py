@@ -35,8 +35,11 @@ def aws_s3_upload(files, key, ptype=None):
     if ret and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data("desktop", ptype, file, full_key, branding.s3_bucket, branding.s3_region)
-  return rc
+      utils.add_deploy_data(
+          "desktop", ptype, file, full_key,
+          branding.s3_bucket, branding.s3_region
+      )
+  return ret
 
 #
 # Windows

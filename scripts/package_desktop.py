@@ -568,15 +568,13 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/win-linux/package/linux")
 
-  ret = utils.sh("make clean", verbose=True)
-  utils.set_summary("desktop clean", ret)
-
-  args = []
+  utils.log_h2("desktop build")
+  make_args = branding.desktop_make_targets
   if common.platform == "linux_aarch64":
-    args += ["-e", "UNAME_M=aarch64"]
+    make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
-  ret = utils.sh("make packages " + " ".join(args), verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("desktop build", ret)
 
   rpm_arch = "x86_64"

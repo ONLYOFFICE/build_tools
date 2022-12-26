@@ -122,12 +122,12 @@ def make_linux():
   utils.set_cwd("document-builder-package")
 
   utils.log_h2("builder build")
-  args = []
+  make_args = branding.builder_make_targets
   if common.platform == "linux_aarch64":
-    args += ["-e", "UNAME_M=aarch64"]
+    make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
-  ret = utils.sh("make clean && make packages " + " ".join(args), verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("builder build", ret)
 
   rpm_arch = "x86_64"

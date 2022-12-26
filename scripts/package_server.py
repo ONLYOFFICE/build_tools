@@ -81,12 +81,12 @@ def make_linux(edition):
   utils.set_cwd("document-server-package")
 
   utils.log_h2("server " + edition + " build")
-  args = ["-e", "PRODUCT_NAME=" + product_name]
+  make_args = branding.server_make_targets + ["-e", "PRODUCT_NAME=" + product_name]
   if common.platform == "linux_aarch64":
-    args += ["-e", "UNAME_M=aarch64"]
+    make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-  ret = utils.sh("make clean && make packages " + " ".join(args), verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 
   rpm_arch = "x86_64"

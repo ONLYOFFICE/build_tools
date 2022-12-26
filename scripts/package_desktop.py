@@ -19,6 +19,9 @@ def make():
   return
 
 def aws_s3_upload(files, key, ptype=None):
+  if not files:
+    return False
+  ret = True
   key = "desktop/" + key
   for file in files:
     args = ["aws"]
@@ -29,10 +32,11 @@ def aws_s3_upload(files, key, ptype=None):
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":
-      ret = utils.cmd(*args, verbose=True)
+      upload = utils.cmd(*args, verbose=True)
     else:
-      ret = utils.sh(" ".join(args), verbose=True)
-    if ret and ptype is not None:
+      upload = utils.sh(" ".join(args), verbose=True)
+    ret &= upload
+    if upload and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
       utils.add_deploy_data(

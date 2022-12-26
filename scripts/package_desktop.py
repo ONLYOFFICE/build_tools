@@ -497,21 +497,14 @@ def make_sparkle_updates():
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-
-  if "en" in update_changes_list:
-    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
-    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if utils.is_file(notes_src):
-      utils.copy_file(notes_src, notes_dst)
-
-  if "ru" in update_changes_list:
-    notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
-    if update_changes_list["ru"] != "ReleaseNotes":
-      notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
-    else:
-      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if utils.is_file(notes_src):
-      utils.copy_file(notes_src, notes_dst)
+  utils.copy_file(
+      changes_dir + "/" + app_version + "/ReleaseNotes.html",
+      updates_dir + "/" + zip_filename + ".html"
+  )
+  utils.copy_file(
+      changes_dir + "/" + app_version + "/ReleaseNotesRU.html",
+      updates_dir + "/" + zip_filename + ".ru.html"
+  )
 
   sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
   ret = utils.sh(

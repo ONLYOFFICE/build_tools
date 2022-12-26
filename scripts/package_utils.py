@@ -360,7 +360,18 @@ def sh(command, **kwargs):
       log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
       log("    creates: " + kwargs["creates"])
-  return subprocess.call(command, stderr=subprocess.STDOUT, shell=True) == 0
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    log_err("creates exist")
+    return False
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"])
+  ret = subprocess.call(
+      command, stderr=subprocess.STDOUT, shell=True
+  ) == 0
+  if kwargs.get("chdir") and oldcwd:
+    set_cwd(oldcwd)
+  return ret
 
 def sh_output(command, **kwargs):
   if kwargs.get("verbose"):

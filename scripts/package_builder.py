@@ -136,32 +136,37 @@ def make_linux():
   if common.deploy:
     utils.log_h2("builder deploy")
     if ret:
-      # utils.log_h2("builder tar deploy")
-      # ret = aws_s3_upload(
-      #     utils.glob_path("tar/*.tar.gz"),
-      #     "linux/generic/%s/" % common.channel,
-      #     "Portable")
-      # utils.set_summary("builder tar deploy", ret)
-
-      utils.log_h2("builder deb deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "linux/debian/%s/" % common.channel,
-          "Debian"
-      )
-      utils.set_summary("builder deb deploy", ret)
-
-      utils.log_h2("builder rpm deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-          "linux/rhel/%s/" % common.channel,
-          "CentOS"
-      )
-      utils.set_summary("builder rpm deploy", ret)
+      if "tar" in branding.builder_make_targets:
+        utils.log_h2("builder tar deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("tar/*.tar.gz"),
+            "linux/generic/%s/" % common.channel,
+            "Portable"
+        )
+        utils.set_summary("builder tar deploy", ret)
+      if "deb" in branding.builder_make_targets:
+        utils.log_h2("builder deb deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("deb/*.deb"),
+            "linux/debian/%s/" % common.channel,
+            "Debian"
+        )
+        utils.set_summary("builder deb deploy", ret)
+      if "rpm" in branding.builder_make_targets:
+        utils.log_h2("builder rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+            "linux/rhel/%s/" % common.channel,
+            "CentOS"
+        )
+        utils.set_summary("builder rpm deploy", ret)
     else:
-      # utils.set_summary("builder tar deploy", False)
-      utils.set_summary("builder deb deploy", False)
-      utils.set_summary("builder rpm deploy", False)
+      if "tar" in branding.builder_make_targets:
+        utils.set_summary("builder tar deploy", False)
+      if "deb" in branding.builder_make_targets:
+        utils.set_summary("builder deb deploy", False)
+      if "rpm" in branding.builder_make_targets:
+        utils.set_summary("builder rpm deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

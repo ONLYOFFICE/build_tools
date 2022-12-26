@@ -95,46 +95,51 @@ def make_linux(edition):
   if common.deploy:
     utils.log_h2("server " + edition + " deploy")
     if ret:
-      utils.log_h2("server " + edition + " tar deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("*.tar.gz"),
-          "linux/generic/%s/" % common.channel,
-          edition,
-          "Portable"
-      )
-      utils.set_summary("server " + edition + " tar deploy", ret)
-
-      utils.log_h2("server " + edition + " deb deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "linux/debian/%s/" % common.channel,
-          edition,
-          "Debian"
-      )
-      utils.set_summary("server " + edition + " deb deploy", ret)
-
-      utils.log_h2("server " + edition + " rpm deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-          "linux/rhel/%s/" % common.channel,
-          edition,
-          "CentOS"
-      )
-      utils.set_summary("server " + edition + " rpm deploy", ret)
-
-      utils.log_h2("server " + edition + " apt-rpm deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-          "linux/altlinux/%s/" % common.channel,
-          edition,
-          "ALT Linux"
-      )
-      utils.set_summary("server " + edition + " apt-rpm deploy", ret)
+      if "deb" in branding.server_make_targets:
+        utils.log_h2("server " + edition + " deb deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("deb/*.deb"),
+            "linux/debian/%s/" % common.channel,
+            edition,
+            "Debian"
+        )
+        utils.set_summary("server " + edition + " deb deploy", ret)
+      if "rpm" in branding.server_make_targets:
+        utils.log_h2("server " + edition + " rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+            "linux/rhel/%s/" % common.channel,
+            edition,
+            "CentOS"
+        )
+        utils.set_summary("server " + edition + " rpm deploy", ret)
+      if "apt-rpm" in branding.server_make_targets:
+        utils.log_h2("server " + edition + " apt-rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+            "linux/altlinux/%s/" % common.channel,
+            edition,
+            "ALT Linux"
+        )
+        utils.set_summary("server " + edition + " apt-rpm deploy", ret)
+      if "tar" in branding.server_make_targets:
+        utils.log_h2("server " + edition + " snap deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("*.tar.gz"),
+            "linux/generic/%s/" % common.channel,
+            edition,
+            "Portable"
+        )
+        utils.set_summary("server " + edition + " snap deploy", ret)
     else:
-      utils.set_summary("server " + edition + " tar deploy", False)
-      utils.set_summary("server " + edition + " deb deploy", False)
-      utils.set_summary("server " + edition + " rpm deploy", False)
-      utils.set_summary("server " + edition + " rpm-alt deploy", False)
+      if "deb" in branding.server_make_targets:
+        utils.set_summary("server " + edition + " deb deploy", False)
+      if "rpm" in branding.server_make_targets:
+        utils.set_summary("server " + edition + " rpm deploy", False)
+      if "apt-rpm" in branding.server_make_targets:
+        utils.set_summary("server " + edition + " apt-rpm deploy", False)
+      if "tar" in branding.server_make_targets:
+        utils.set_summary("server " + edition + " snap deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

@@ -404,13 +404,12 @@ def make_advinst():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    update_changes_list, suffix, lane, scheme, app_version
+    suffix, lane, scheme, app_version
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
   updates_dir = branding.desktop_updates_dir
   changes_dir = branding.desktop_changes_dir
-  update_changes_list = branding.desktop_update_changes_list
   suffix = {
     "darwin_x86_64":    "x86_64",
     "darwin_x86_64_v8": "v8",

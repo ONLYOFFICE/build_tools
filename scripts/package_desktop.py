@@ -404,7 +404,7 @@ def make_advinst():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    update_changes_list, suffix, lane, scheme, key_prefix
+    update_changes_list, suffix, lane, scheme, app_version
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
@@ -434,6 +434,7 @@ def make_macos():
   current_build = utils.sh_output(
     '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
     verbose=True).rstrip()
+  app_version = current_version
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_version = utils.sh_output(
@@ -477,33 +478,31 @@ def make_dmg():
         "Disk Image"
     )
     utils.set_summary("desktop dmg deploy", ret)
+
+    utils.log_h2("desktop zip deploy")
+    ret = aws_s3_upload(
+        utils.glob_path("build/%s-%s.zip" % (scheme, app_version)),
+        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "Archive"
+    )
+    utils.set_summary("desktop zip deploy", ret)
   return
 
 def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")
 
-  app_version = utils.sh_output("/usr/libexec/PlistBuddy \
-    -c 'Print :CFBundleShortVersionString' \
-    build/" + package_name + ".app/Contents/Info.plist", verbose=True).rstrip()
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
   updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
-  utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  # utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
   utils.copy_file(macos_zip, updates_dir)
+  utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
 
   if "en" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
     notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if utils.is_file(notes_src):
       utils.copy_file(notes_src, notes_dst)
-      cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
-      utils.replace_in_file(notes_dst,
-          r"(<span class=\"releasedate\">).+(</span>)",
-          "\\1 - " + cur_date + "\\2")
-    else:
-      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
 
   if "ru" in update_changes_list:
     notes_src = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
@@ -513,50 +512,47 @@ def make_sparkle_updates():
       notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
     if utils.is_file(notes_src):
       utils.copy_file(notes_src, notes_dst)
-      cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
-      utils.replace_in_file(notes_dst,
-          r"(<span class=\"releasedate\">).+(</span>)",
-          "\\1 - " + cur_date + "\\2")
-    else:
-      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
 
-  sparkle_download_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
-  sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (branding.sparkle_base_url, suffix, app_version)
-  utils.sh(common.workspace_dir \
+  sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
+  ret = utils.sh(
+      common.workspace_dir \
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
       + updates_dir \
-      + " --download-url-prefix " + sparkle_download_url \
-      + " --release-notes-url-prefix " + sparkle_release_notes_url)
+      + " --download-url-prefix " + sparkle_base_url \
+      + " --release-notes-url-prefix " + sparkle_base_url \
+      + " 2>&1 | grep -v xar_prop_serializable",
+      verbose=True
+  )
+  utils.set_summary("desktop sparkle files build", ret)
 
-  utils.log_h3("edit sparkle appcast links")
-  appcast_url = branding.sparkle_base_url + "/" + suffix
-  appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
+  # utils.log_h3("edit sparkle appcast links")
+  # appcast_url = branding.sparkle_base_url + "/" + suffix
+  # appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
+  # for lang, base in update_changes_list.items():
+  #   if base == "ReleaseNotes":
+  #     utils.replace_in_file(appcast,
+  #         r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
+  #         "\\1" + base + "\\2")
+  #   else:
+  #     utils.replace_in_file(appcast,
+  #         r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
+  #         "\\1" + base + "\\2")
 
-  for lang, base in update_changes_list.items():
-    if base == "ReleaseNotes":
-      utils.replace_in_file(appcast,
-          r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
-          "\\1" + base + "\\2")
-    else:
-      utils.replace_in_file(appcast,
-          r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
-          "\\1" + base + "\\2")
-
-  utils.log_h3("delete unnecessary files")
-  for file in os.listdir(updates_dir):
-    if (-1 == file.find(app_version)) and (file.endswith(".zip") or
-          file.endswith(".html")):
-      utils.delete_file(updates_dir + '/' + file)
-
+  utils.log("")
   utils.log_h3("generate checksums")
-  utils.sh("md5 *.zip *.delta > md5sums.txt", chdir="build/update", verbose=True)
-  utils.sh("shasum -a 256 *.zip *.delta > sha256sums.txt", chdir="build/update", verbose=True)
+  utils.sh(
+      "md5 *.zip *.delta > md5sums.txt",
+      chdir="build/update", verbose=True
+  )
+  utils.sh(
+      "shasum -a 256 *.zip *.delta > sha256sums.txt",
+      chdir="build/update", verbose=True
+  )
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")
     ret = aws_s3_upload(
-        [macos_zip] \
-        + utils.glob_path("build/update/*.delta") \
+        utils.glob_path("build/update/*.delta") \
         + utils.glob_path("build/update/*.xml") \
         + utils.glob_path("build/update/*.html"),
         "mac/%s/%s/%s/" % (suffix, common.version, common.build),

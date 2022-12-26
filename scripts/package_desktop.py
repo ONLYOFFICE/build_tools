@@ -481,7 +481,7 @@ def make_dmg():
 
     utils.log_h2("desktop zip deploy")
     ret = aws_s3_upload(
-        utils.glob_path("build/%s-%s.zip" % (scheme, app_version)),
+        ["build/%s-%s.zip" % (scheme, app_version)],
         "mac/%s/%s/%s/" % (suffix, common.version, common.build),
         "Archive"
     )

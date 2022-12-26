@@ -404,13 +404,12 @@ def make_advinst():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    update_changes_list, suffix, lane, scheme, app_version
+    suffix, lane, scheme, app_version
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
   updates_dir = branding.desktop_updates_dir
   changes_dir = branding.desktop_changes_dir
-  update_changes_list = branding.desktop_update_changes_list
   suffix = {
     "darwin_x86_64":    "x86_64",
     "darwin_x86_64_v8": "v8",
@@ -569,15 +568,13 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/win-linux/package/linux")
 
-  ret = utils.sh("make clean", verbose=True)
-  utils.set_summary("desktop clean", ret)
-
-  args = []
+  utils.log_h2("desktop build")
+  make_args = branding.desktop_make_targets
   if common.platform == "linux_aarch64":
-    args += ["-e", "UNAME_M=aarch64"]
+    make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
-  ret = utils.sh("make packages " + " ".join(args), verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("desktop build", ret)
 
   rpm_arch = "x86_64"
@@ -587,58 +584,22 @@ def make_linux():
     utils.log_h2("desktop deploy")
     if ret:
       utils.log_h2("desktop tar deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
-          "linux/generic/%s/" % common.channel,
-          "Portable"
-      )
-      utils.set_summary("desktop tar deploy", ret)
-
-      utils.log_h2("desktop deb deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "linux/debian/%s/" % common.channel,
-          "Debian"
-      )
-      utils.set_summary("desktop deb deploy", ret)
-
-      utils.log_h2("desktop rpm deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/rhel/%s/" % common.channel,
-          "CentOS"
-      )
-      utils.set_summary("desktop rpm deploy", ret)
-
-      utils.log_h2("desktop rpm-apt deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/altlinux/%s/" % common.channel,
-          "ALT Linux"
-      )
-      utils.set_summary("desktop rpm-apt deploy", ret)
-
-      utils.log_h2("desktop urpmi deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("urpmi/builddir/RPMS/noarch/*.rpm"),
-          "linux/rosa/%s/" % common.channel,
-          "ROSA"
-      )
-      utils.set_summary("desktop urpmi deploy", ret)
-
-      utils.log_h2("desktop rpm-suse deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/suse/%s/" % common.channel,
-          "SUSE Linux"
-      )
-      utils.set_summary("desktop rpm-suse deploy", ret)
-
-      if not branding.onlyoffice:
+      if "tar" in branding.desktop_make_targets:
+        ret = aws_s3_upload(
+            utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
+            "linux/generic/%s/" % common.channel,
+            "Portable"
+        )
+        utils.set_summary("desktop tar deploy", ret)
+      if "deb" in branding.desktop_make_targets:
+        utils.log_h2("desktop deb deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("deb/*.deb"),
+            "linux/debian/%s/" % common.channel,
+            "Debian"
+        )
+        utils.set_summary("desktop deb deploy", ret)
+      if "deb-astra" in branding.desktop_make_targets:
         utils.log_h2("desktop deb-astra deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb-astra/*.deb"),
@@ -646,15 +607,57 @@ def make_linux():
             "Astra Linux Signed"
         )
         utils.set_summary("desktop deb-astra deploy", ret)
+      if "rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/rhel/%s/" % common.channel,
+            "CentOS"
+        )
+        utils.set_summary("desktop rpm deploy", ret)
+      if "suse-rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop suse-rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/suse/%s/" % common.channel,
+            "SUSE Linux"
+        )
+        utils.set_summary("desktop suse-rpm deploy", ret)
+      if "apt-rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop apt-rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/altlinux/%s/" % common.channel,
+            "ALT Linux"
+        )
+        utils.set_summary("desktop apt-rpm deploy", ret)
+      if "urpmi" in branding.desktop_make_targets:
+        utils.log_h2("desktop urpmi deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("urpmi/builddir/RPMS/noarch/*.rpm"),
+            "linux/rosa/%s/" % common.channel,
+            "ROSA"
+        )
+        utils.set_summary("desktop urpmi deploy", ret)
     else:
-      utils.set_summary("desktop tar deploy", False)
-      utils.set_summary("desktop deb deploy", False)
-      utils.set_summary("desktop rpm deploy", False)
-      utils.set_summary("desktop rpm-apt deploy", False)
-      utils.set_summary("desktop urpmi deploy", False)
-      utils.set_summary("desktop rpm-suse deploy", False)
-      if not branding.onlyoffice:
+      if "tar" in branding.desktop_make_targets:
+        utils.set_summary("desktop tar deploy", False)
+      if "deb" in branding.desktop_make_targets:
+        utils.set_summary("desktop deb deploy", False)
+      if "deb-astra" in branding.desktop_make_targets:
         utils.set_summary("desktop deb-astra deploy", False)
+      if "rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop rpm deploy", False)
+      if "suse-rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop suse-rpm deploy", False)
+      if "apt-rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop apt-rpm deploy", False)
+      if "urpmi" in branding.desktop_make_targets:
+        utils.set_summary("desktop urpmi deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

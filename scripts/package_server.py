@@ -128,7 +128,7 @@ def make_linux(edition):
             utils.glob_path("*.tar.gz"),
             "linux/generic/%s/" % common.channel,
             edition,
-            "Portable"
+            "Snap"
         )
         utils.set_summary("server " + edition + " snap deploy", ret)
     else:

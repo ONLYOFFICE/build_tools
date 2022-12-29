@@ -437,12 +437,12 @@ def make_macos():
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_version = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
   release_build = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()

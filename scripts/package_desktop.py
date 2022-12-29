@@ -437,12 +437,12 @@ def make_macos():
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_version = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
   release_build = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
@@ -450,11 +450,12 @@ def make_macos():
   utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
         + "\nRELEASE=" + release_version + "(" + release_build + ")")
 
-  make_dmg()
-  if int(current_build) > int(release_build):
-    make_sparkle_updates()
-  else:
-    utils.log(release_build + " <= " + current_build)
+  dmg = make_dmg()
+  if dmg:
+    if int(current_build) > int(release_build):
+      make_sparkle_updates()
+    else:
+      utils.log(release_build + " <= " + current_build)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -463,13 +464,13 @@ def make_dmg():
   utils.log_h2("desktop dmg build")
   utils.log_h3(scheme)
   utils.log_h3("build/" + package_name + ".app")
-  ret = utils.sh(
+  dmg = utils.sh(
       "bundler exec fastlane " + lane + " skip_git_bump:true",
       verbose=True
   )
-  utils.set_summary("desktop dmg build", ret)
+  utils.set_summary("desktop dmg build", dmg)
 
-  if common.deploy and ret:
+  if common.deploy and dmg:
     utils.log_h2("desktop dmg deploy")
     ret = aws_s3_upload(
         utils.glob_path("build/*.dmg"),
@@ -485,7 +486,7 @@ def make_dmg():
         "Archive"
     )
     utils.set_summary("desktop zip deploy", ret)
-  return
+  return dmg
 
 def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")

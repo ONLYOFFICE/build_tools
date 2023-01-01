@@ -19,6 +19,9 @@ def make():
   return
 
 def aws_s3_upload(files, key, ptype=None):
+  if not files:
+    return False
+  ret = True
   key = "desktop/" + key
   for file in files:
     args = ["aws"]
@@ -29,10 +32,11 @@ def aws_s3_upload(files, key, ptype=None):
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":
-      ret = utils.cmd(*args, verbose=True)
+      upload = utils.cmd(*args, verbose=True)
     else:
-      ret = utils.sh(" ".join(args), verbose=True)
-    if ret and ptype is not None:
+      upload = utils.sh(" ".join(args), verbose=True)
+    ret &= upload
+    if upload and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
       utils.add_deploy_data(
@@ -400,13 +404,12 @@ def make_advinst():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    update_changes_list, suffix, lane, scheme, key_prefix
+    suffix, lane, scheme, app_version
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
   updates_dir = branding.desktop_updates_dir
   changes_dir = branding.desktop_changes_dir
-  update_changes_list = branding.desktop_update_changes_list
   suffix = {
     "darwin_x86_64":    "x86_64",
     "darwin_x86_64_v8": "v8",
@@ -430,15 +433,16 @@ def make_macos():
   current_build = utils.sh_output(
     '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
     verbose=True).rstrip()
+  app_version = current_version
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_version = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
   release_build = utils.sh_output(
-    'curl -s ' + appcast_url + ' 2> /dev/null' \
+    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
@@ -446,11 +450,12 @@ def make_macos():
   utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
         + "\nRELEASE=" + release_version + "(" + release_build + ")")
 
-  make_dmg()
-  if int(current_build) > int(release_build):
-    make_sparkle_updates()
-  else:
-    utils.log(release_build + " <= " + current_build)
+  dmg = make_dmg()
+  if dmg:
+    if int(current_build) > int(release_build):
+      make_sparkle_updates()
+    else:
+      utils.log(release_build + " <= " + current_build)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -459,13 +464,13 @@ def make_dmg():
   utils.log_h2("desktop dmg build")
   utils.log_h3(scheme)
   utils.log_h3("build/" + package_name + ".app")
-  ret = utils.sh(
+  dmg = utils.sh(
       "bundler exec fastlane " + lane + " skip_git_bump:true",
       verbose=True
   )
-  utils.set_summary("desktop dmg build", ret)
+  utils.set_summary("desktop dmg build", dmg)
 
-  if common.deploy and ret:
+  if common.deploy and dmg:
     utils.log_h2("desktop dmg deploy")
     ret = aws_s3_upload(
         utils.glob_path("build/*.dmg"),
@@ -473,86 +478,74 @@ def make_dmg():
         "Disk Image"
     )
     utils.set_summary("desktop dmg deploy", ret)
-  return
+
+    utils.log_h2("desktop zip deploy")
+    ret = aws_s3_upload(
+        ["build/%s-%s.zip" % (scheme, app_version)],
+        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "Archive"
+    )
+    utils.set_summary("desktop zip deploy", ret)
+  return dmg
 
 def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")
 
-  app_version = utils.sh_output("/usr/libexec/PlistBuddy \
-    -c 'Print :CFBundleShortVersionString' \
-    build/" + package_name + ".app/Contents/Info.plist", verbose=True).rstrip()
   zip_filename = scheme + '-' + app_version
   macos_zip = "build/" + zip_filename + ".zip"
   updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
-  utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  # utils.copy_dir_content(updates_storage_dir, updates_dir, ".html")
   utils.copy_file(macos_zip, updates_dir)
+  utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
+  utils.copy_file(
+      changes_dir + "/" + app_version + "/ReleaseNotes.html",
+      updates_dir + "/" + zip_filename + ".html"
+  )
+  utils.copy_file(
+      changes_dir + "/" + app_version + "/ReleaseNotesRU.html",
+      updates_dir + "/" + zip_filename + ".ru.html"
+  )
 
-  if "en" in update_changes_list:
-    notes_sret = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["en"])
-    notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if utils.is_file(notes_src):
-      utils.copy_file(notes_src, notes_dst)
-      cur_date = utils.sh_output("env LC_ALL=en_US.UTF-8 date -u \"+%B %e, %Y\"", verbose=True)
-      utils.replace_in_file(notes_dst,
-          r"(<span class=\"releasedate\">).+(</span>)",
-          "\\1 - " + cur_date + "\\2")
-    else:
-      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
-
-  if "ru" in update_changes_list:
-    notes_sret = "%s/%s/%s.html" % (changes_dir, app_version, update_changes_list["ru"])
-    if update_changes_list["ru"] != "ReleaseNotes":
-      notes_dst = "%s/%s.ru.html" % (updates_dir, zip_filename)
-    else:
-      notes_dst = "%s/%s.html" % (updates_dir, zip_filename)
-    if utils.is_file(notes_src):
-      utils.copy_file(notes_src, notes_dst)
-      cur_date = utils.sh_output("env LC_ALL=ru_RU.UTF-8 date -u \"+%e %B %Y\"", verbose=True)
-      utils.replace_in_file(notes_dst,
-          r"(<span class=\"releasedate\">).+(</span>)",
-          "\\1 - " + cur_date + "\\2")
-    else:
-      utils.write_file(notes_dst, '<html><head></head><body></body></html>\n')
-
-  sparkle_download_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
-  sparkle_release_notes_url = "%s/%s/updates/changes/%s/" % (branding.sparkle_base_url, suffix, app_version)
-  utils.sh(common.workspace_dir \
+  sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
+  ret = utils.sh(
+      common.workspace_dir \
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
       + updates_dir \
-      + " --download-url-prefix " + sparkle_download_url \
-      + " --release-notes-url-prefix " + sparkle_release_notes_url)
+      + " --download-url-prefix " + sparkle_base_url \
+      + " --release-notes-url-prefix " + sparkle_base_url \
+      + " 2>&1 | grep -v xar_prop_serializable",
+      verbose=True
+  )
+  utils.set_summary("desktop sparkle files build", ret)
 
-  utils.log_h3("edit sparkle appcast links")
-  appcast_url = branding.sparkle_base_url + "/" + suffix
-  appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
+  # utils.log_h3("edit sparkle appcast links")
+  # appcast_url = branding.sparkle_base_url + "/" + suffix
+  # appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
+  # for lang, base in update_changes_list.items():
+  #   if base == "ReleaseNotes":
+  #     utils.replace_in_file(appcast,
+  #         r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
+  #         "\\1" + base + "\\2")
+  #   else:
+  #     utils.replace_in_file(appcast,
+  #         r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
+  #         "\\1" + base + "\\2")
 
-  for lang, base in update_changes_list.items():
-    if base == "ReleaseNotes":
-      utils.replace_in_file(appcast,
-          r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
-          "\\1" + base + "\\2")
-    else:
-      utils.replace_in_file(appcast,
-          r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
-          "\\1" + base + "\\2")
-
-  utils.log_h3("delete unnecessary files")
-  for file in os.listdir(updates_dir):
-    if (-1 == file.find(app_version)) and (file.endswith(".zip") or
-          file.endswith(".html")):
-      utils.delete_file(updates_dir + '/' + file)
-
+  utils.log("")
   utils.log_h3("generate checksums")
-  utils.sh("md5 *.zip *.delta > md5sums.txt", chdir="build/update", verbose=True)
-  utils.sh("shasum -a 256 *.zip *.delta > sha256sums.txt", chdir="build/update", verbose=True)
+  utils.sh(
+      "md5 *.zip *.delta > md5sums.txt",
+      chdir="build/update", verbose=True
+  )
+  utils.sh(
+      "shasum -a 256 *.zip *.delta > sha256sums.txt",
+      chdir="build/update", verbose=True
+  )
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")
     ret = aws_s3_upload(
-        [macos_zip] \
-        + utils.glob_path("build/update/*.delta") \
+        utils.glob_path("build/update/*.delta") \
         + utils.glob_path("build/update/*.xml") \
         + utils.glob_path("build/update/*.html"),
         "mac/%s/%s/%s/" % (suffix, common.version, common.build),
@@ -576,15 +569,13 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/win-linux/package/linux")
 
-  ret = utils.sh("make clean", verbose=True)
-  utils.set_summary("desktop clean", ret)
-
-  args = []
+  utils.log_h2("desktop build")
+  make_args = branding.desktop_make_targets
   if common.platform == "linux_aarch64":
-    args += ["-e", "UNAME_M=aarch64"]
+    make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
-  ret = utils.sh("make packages " + " ".join(args), verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../../../../" + common.branding + "/desktop-apps/win-linux/package/linux"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("desktop build", ret)
 
   rpm_arch = "x86_64"
@@ -594,58 +585,22 @@ def make_linux():
     utils.log_h2("desktop deploy")
     if ret:
       utils.log_h2("desktop tar deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
-          "linux/generic/%s/" % common.channel,
-          "Portable"
-      )
-      utils.set_summary("desktop tar deploy", ret)
-
-      utils.log_h2("desktop deb deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "linux/debian/%s/" % common.channel,
-          "Debian"
-      )
-      utils.set_summary("desktop deb deploy", ret)
-
-      utils.log_h2("desktop rpm deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/rhel/%s/" % common.channel,
-          "CentOS"
-      )
-      utils.set_summary("desktop rpm deploy", ret)
-
-      utils.log_h2("desktop rpm-apt deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/altlinux/%s/" % common.channel,
-          "ALT Linux"
-      )
-      utils.set_summary("desktop rpm-apt deploy", ret)
-
-      utils.log_h2("desktop urpmi deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("urpmi/builddir/RPMS/noarch/*.rpm"),
-          "linux/rosa/%s/" % common.channel,
-          "ROSA"
-      )
-      utils.set_summary("desktop urpmi deploy", ret)
-
-      utils.log_h2("desktop rpm-suse deploy")
-      ret = aws_s3_upload(
-          utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
-          + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
-          "linux/suse/%s/" % common.channel,
-          "SUSE Linux"
-      )
-      utils.set_summary("desktop rpm-suse deploy", ret)
-
-      if not branding.onlyoffice:
+      if "tar" in branding.desktop_make_targets:
+        ret = aws_s3_upload(
+            utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
+            "linux/generic/%s/" % common.channel,
+            "Portable"
+        )
+        utils.set_summary("desktop tar deploy", ret)
+      if "deb" in branding.desktop_make_targets:
+        utils.log_h2("desktop deb deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("deb/*.deb"),
+            "linux/debian/%s/" % common.channel,
+            "Debian"
+        )
+        utils.set_summary("desktop deb deploy", ret)
+      if "deb-astra" in branding.desktop_make_targets:
         utils.log_h2("desktop deb-astra deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb-astra/*.deb"),
@@ -653,15 +608,57 @@ def make_linux():
             "Astra Linux Signed"
         )
         utils.set_summary("desktop deb-astra deploy", ret)
+      if "rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/rhel/%s/" % common.channel,
+            "CentOS"
+        )
+        utils.set_summary("desktop rpm deploy", ret)
+      if "suse-rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop suse-rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/suse/%s/" % common.channel,
+            "SUSE Linux"
+        )
+        utils.set_summary("desktop suse-rpm deploy", ret)
+      if "apt-rpm" in branding.desktop_make_targets:
+        utils.log_h2("desktop apt-rpm deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
+            "linux/altlinux/%s/" % common.channel,
+            "ALT Linux"
+        )
+        utils.set_summary("desktop apt-rpm deploy", ret)
+      if "urpmi" in branding.desktop_make_targets:
+        utils.log_h2("desktop urpmi deploy")
+        ret = aws_s3_upload(
+            utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm") \
+            + utils.glob_path("urpmi/builddir/RPMS/noarch/*.rpm"),
+            "linux/rosa/%s/" % common.channel,
+            "ROSA"
+        )
+        utils.set_summary("desktop urpmi deploy", ret)
     else:
-      utils.set_summary("desktop tar deploy", False)
-      utils.set_summary("desktop deb deploy", False)
-      utils.set_summary("desktop rpm deploy", False)
-      utils.set_summary("desktop rpm-apt deploy", False)
-      utils.set_summary("desktop urpmi deploy", False)
-      utils.set_summary("desktop rpm-suse deploy", False)
-      if not branding.onlyoffice:
+      if "tar" in branding.desktop_make_targets:
+        utils.set_summary("desktop tar deploy", False)
+      if "deb" in branding.desktop_make_targets:
+        utils.set_summary("desktop deb deploy", False)
+      if "deb-astra" in branding.desktop_make_targets:
         utils.set_summary("desktop deb-astra deploy", False)
+      if "rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop rpm deploy", False)
+      if "suse-rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop suse-rpm deploy", False)
+      if "apt-rpm" in branding.desktop_make_targets:
+        utils.set_summary("desktop apt-rpm deploy", False)
+      if "urpmi" in branding.desktop_make_targets:
+        utils.set_summary("desktop urpmi deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

@@ -28,10 +28,11 @@ if utils.is_macos():
   desktop_branding_dir = "desktop-apps/macos"
   desktop_updates_dir = "build/update"
   desktop_changes_dir = "ONLYOFFICE/update/updates/ONLYOFFICE/changes"
-  desktop_update_changes_list = {
-    "en": "ReleaseNotes",
-    "ru": "ReleaseNotesRU"
-  }
   sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"
 
 builder_product_name = "Document Builder"
+
+if utils.is_linux():
+  desktop_make_targets = ["deb", "rpm", "suse-rpm", "tar"]
+  builder_make_targets = ["deb", "rpm"] # tar
+  server_make_targets = ["deb", "rpm", "tar"]

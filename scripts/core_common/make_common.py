@@ -49,5 +49,6 @@ def make():
   
   if config.check_option("module", "mobile"):
     curl.make()
-    websocket.make()
+    # since 7.3: ONLY socketio
+    #websocket.make()
   return

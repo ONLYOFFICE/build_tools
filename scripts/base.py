@@ -768,7 +768,7 @@ def generate_plist(path):
   for n in bundle_version_natural:
     bundle_version.append(n)
 
-  for file in glob.glob(path + "/*.framework"):
+  for file in glob.glob(path + '/**/*.framework', recursive=True):
     if not is_dir(file):
       continue
     name = os.path.basename(file)

@@ -1,15 +1,18 @@
-name: check
-on: [push]
+name: Markdown check
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.md'
+      - 'develop/*.md'
+
 jobs:
   markdownlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 12
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: DavidAnson/markdownlint-cli2-action@v9
         with:
-            node-version: 12
-      - name: Check *.md files by `markdownlint`
-        run: |
-          npm install -g markdownlint-cli
-          markdownlint *.md develop/*.md
+          globs: '*.md,develop/*.md'
+          separator: ','

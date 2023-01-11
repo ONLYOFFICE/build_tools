@@ -418,7 +418,7 @@ def make_macos():
   lane = "release_" + suffix
   scheme = package_name + "-" + suffix
 
-  utils.set_cwd(build_dir)
+  utils.set_cwd(branding_dir)
 
   if common.clean:
     utils.log("\n=== Clean\n")

@@ -287,7 +287,6 @@ def make_winsparkle_files():
 
     if utils.is_exist(changes_file):
       changes_result = utils.cmd_output(*args, verbose=True)
-      print(changes_result)
       utils.write_file(changes, changes_result)
     else:
       utils.log("! file not exist: " + changes_file)

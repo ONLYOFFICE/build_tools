@@ -512,8 +512,7 @@ def make_sparkle_updates():
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
       + updates_dir \
       + " --download-url-prefix " + sparkle_base_url \
-      + " --release-notes-url-prefix " + sparkle_base_url \
-      + " 2>&1 | grep -v xar_prop_serializable",
+      + " --release-notes-url-prefix " + sparkle_base_url,
       verbose=True
   )
   utils.set_summary("desktop sparkle files build", ret)

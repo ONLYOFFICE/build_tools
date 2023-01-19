@@ -266,37 +266,47 @@ class Fixer(object):
 			file.writelines(result)
 		return
 
-config = Config(
-	dir='sdkjs',
-	singleComm='//',
-	fileExtensions=['.js'],
-	startMultiComm='/*',
-	endMultiComm='*/',
-	prefix='*',
-	ignoreListDir=[
-		'sdkjs/build/node_modules',
-		'sdkjs/build/maps',
-		'sdkjs/.github',
-		'sdkjs/deploy',
-		'sdkjs/develop',
-		'sdkjs/vendor',
-		'sdkjs/configs',
-		'sdkjs/pdf/test/vendor'
-	]
-)
+configs = [
+	Config(
+		dir='sdkjs',
+		singleComm='//',
+		fileExtensions=['.js'],
+		startMultiComm='/*',
+		endMultiComm='*/',
+		prefix='*',
+		ignoreListDir=[
+			'sdkjs/build/node_modules',
+			'sdkjs/build/maps',
+			'sdkjs/.github',
+			'sdkjs/deploy',
+			'sdkjs/develop',
+			'sdkjs/vendor',
+			'sdkjs/configs',
+			'sdkjs/pdf/test/vendor'
+		]
+	),
+]
 
-walker = Walker(config=config)
-reports = walker.checkFiles()
+walkers: list[Walker] = []
+reports: list[Report] = []
+
+for config in configs:
+	walkers.append(Walker(config=config))
+
+for walker in walkers:
+	reports = reports + walker.checkFiles()
+
 if reports:
 	print('\n'.join(map(lambda report: report.report(), reports)))
 	choice = str(input(f'{len(reports)} invalid licenses were found, fix it automatically? [Y/N]')).lower()
 	if choice == 'y':
-		fixer = Fixer(walker=walker)
-		print(f'Fixind all {len(reports)} files...')
-		fixer.fix()
+		print(f'Fixing all {len(reports)} files...')
+		for walker in walkers:
+			fixer = Fixer(walker=walker)
+			fixer.fix()
 		print('Done.')
 else:
-	print('All licenses are ok')
+	print('All licenses are ok.')
 
 
 os.system('pause')

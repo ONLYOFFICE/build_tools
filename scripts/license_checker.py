@@ -90,8 +90,9 @@ class Config(object):
 		endMultiComm: characters to end a multi-line comment.
 		prefix: prefix for multiline comments
 		checkLines: number of lines to be checked at the beginning of the file.
-		ignoreListDir: Ignored directories.
-		ignoreListFile: Ignored files.
+		ignoreListDir: Ignored folder paths.
+		ignoreListDirName: Ignored folder names.
+		ignoreListFile: Ignored file paths.
 	"""
 	def __init__(self,
 		dir: str,

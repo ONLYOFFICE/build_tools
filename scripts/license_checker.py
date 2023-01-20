@@ -276,8 +276,6 @@ configs = [
 		prefix='*',
 		ignoreListDir=[
 			'sdkjs/build/node_modules',
-			'sdkjs/build/maps',
-			'sdkjs/.github',
 			'sdkjs/deploy',
 			'sdkjs/develop',
 			'sdkjs/vendor',

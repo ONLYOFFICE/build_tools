@@ -285,6 +285,55 @@ configs = [
 			'sdkjs/pdf/test/vendor'
 		]
 	),
+	Config(
+		dir='server',
+		singleComm='//',
+		fileExtensions=['.js'],
+		startMultiComm='/*',
+		endMultiComm='*/',
+		prefix='*',
+		ignoreListDir=[
+			'server/node_modules',
+			'server/DocService/node_modules',
+			'server/FileConverter/node_modules',
+			'server/FileConverter/bin',
+			'server/Common/node_modules'
+		]
+	),
+	Config(
+		dir='web-apps',
+		singleComm='//',
+		fileExtensions=['.js'],
+		startMultiComm='/*',
+		endMultiComm='*/',
+		prefix='*',
+		ignoreListDir=[
+			'web-apps/build/node_modules',
+			'web-apps/vendor',
+			'web-apps/build/sprites/node_modules',
+			'web-apps/documenteditor/main/resources/help/de/search/js',
+			'web-apps/documenteditor/main/resources/help/en/search/js',
+			'web-apps/documenteditor/main/resources/help/es/search/js',
+			'web-apps/documenteditor/main/resources/help/fr/search/js',
+			'web-apps/documenteditor/main/resources/help/it/search/js',
+			'web-apps/documenteditor/main/resources/help/ru/search/js',
+		]
+	),
+	# Config(
+	# 	dir='core',
+	# 	singleComm='//',
+	# 	fileExtensions=['.cpp', '.h'],
+	# 	startMultiComm='/*',
+	# 	endMultiComm='*/',
+	# 	prefix='*',
+	# 	ignoreListDir=[
+	# 		'core/Common/3dParty',
+	# 		'core/DesktopEditor/freetype-2.5.2',
+	# 		'core/DesktopEditor/freetype-2.10.4',
+	# 		'core/DesktopEditor/raster/Jp2',
+	# 		'core/DesktopEditor/raster/JBig2'
+	# 	]
+	# )
 ]
 
 walkers: list[Walker] = []

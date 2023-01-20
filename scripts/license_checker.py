@@ -102,6 +102,7 @@ class Config(object):
 		prefix: str = '',
 		checkLines: int = False, 
 		ignoreListDir: list[str] = [],
+		ignoreListDirName: list[str] = [],
 		ignoreListFile: list[str] = []) -> None:
 
 		self._dir = dir
@@ -112,6 +113,7 @@ class Config(object):
 		self._prefix = prefix
 		self._checkLines = checkLines
 		self._ignoreListDir = ignoreListDir
+		self._ignoreListDirName = ignoreListDirName
 		self._ignoreListFile = ignoreListFile
 
 	def getDir(self) -> str:
@@ -130,6 +132,8 @@ class Config(object):
 		return self._checkLines
 	def getIgnoreListDir(self) -> list[str]:
 		return self._ignoreListDir
+	def getIgnoreListDirName(self) -> list[str]:
+		return self._ignoreListDirName
 	def getIgnoreListFile(self) -> list[str]:
 		return self._ignoreListFile
 
@@ -209,19 +213,23 @@ class Walker(object):
 	def _getFiles(self) -> list[str]:
 		result = []
 		for address, dirs, files in os.walk(self._config.getDir()):
-			for i in self._config.getIgnoreListDir():
-				if(re.search(re.escape(os.path.normpath(i)), address)):
+			for i in self._config.getIgnoreListDirName():
+				if(re.search(re.escape(i), address)):
 					break
 			else:
-				for i in files:
-					for j in self._config.getIgnoreListFile():
-						if (os.path.normpath(j) == os.path.join(address, i)):
-							break
-					else:
-						filename, file_extension = os.path.splitext(i)
-						for j in self._config.getFileExtensions():
-							if (file_extension == j):
-								result.append(os.path.join(address, i))
+				for i in self._config.getIgnoreListDir():
+					if(re.search(re.escape(os.path.normpath(i)), address)):
+						break
+				else:
+					for i in files:
+						for j in self._config.getIgnoreListFile():
+							if (os.path.normpath(j) == os.path.join(address, i)):
+								break
+						else:
+							filename, file_extension = os.path.splitext(i)
+							for j in self._config.getFileExtensions():
+								if (file_extension == j):
+									result.append(os.path.join(address, i))
 		return result
 	def checkFiles(self) -> list[Report]:
 		print('Getting files...')
@@ -275,12 +283,13 @@ configs = [
 		endMultiComm='*/',
 		prefix='*',
 		ignoreListDir=[
-			'sdkjs/build/node_modules',
 			'sdkjs/deploy',
 			'sdkjs/develop',
-			'sdkjs/vendor',
 			'sdkjs/configs',
-			'sdkjs/pdf/test/vendor'
+		],
+		ignoreListDirName=[
+			'node_modules',
+			'vendor'
 		]
 	),
 	Config(
@@ -291,11 +300,10 @@ configs = [
 		endMultiComm='*/',
 		prefix='*',
 		ignoreListDir=[
-			'server/node_modules',
-			'server/DocService/node_modules',
-			'server/FileConverter/node_modules',
 			'server/FileConverter/bin',
-			'server/Common/node_modules'
+		],
+		ignoreListDirName=[
+			'node_modules',
 		]
 	),
 	Config(
@@ -306,15 +314,28 @@ configs = [
 		endMultiComm='*/',
 		prefix='*',
 		ignoreListDir=[
-			'web-apps/build/node_modules',
 			'web-apps/vendor',
-			'web-apps/build/sprites/node_modules',
-			'web-apps/documenteditor/main/resources/help/de/search/js',
-			'web-apps/documenteditor/main/resources/help/en/search/js',
-			'web-apps/documenteditor/main/resources/help/es/search/js',
-			'web-apps/documenteditor/main/resources/help/fr/search/js',
-			'web-apps/documenteditor/main/resources/help/it/search/js',
-			'web-apps/documenteditor/main/resources/help/ru/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/de/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/en/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/es/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/fr/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/it/search/js',
+			'web-apps/apps/documenteditor/main/resources/help/ru/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/de/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/en/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/es/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/fr/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/it/search/js',
+			'web-apps/apps/spreadsheeteditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js',
+			'web-apps/apps/presentationeditor/main/resources/help/ru/search/js'
+		],
+		ignoreListDirName=[
+			'node_modules',
 		]
 	),
 	# Config(

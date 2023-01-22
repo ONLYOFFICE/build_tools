@@ -113,7 +113,7 @@ def parse():
 
   if check_option("config", "bundle_xcframeworks"):
     if not check_option("config", "bundle_dylibs"):
-    extend_option("config", "bundle_dylibs")
+      extend_option("config", "bundle_dylibs")
 
   return
 

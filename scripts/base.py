@@ -214,6 +214,20 @@ def delete_dir(path):
 def copy_lib(src, dst, name):
   if (config.check_option("config", "bundle_dylibs")) and is_dir(src + "/" + name + ".framework"):
     copy_dir(src + "/" + name + ".framework", dst + "/" + name + ".framework")
+
+    if (config.check_option("config", "bundle_xcframeworks")) and is_dir(src + "/simulator/" + name + ".framework"):
+        create_dir(dst + "/simulator")
+        copy_dir(src + "/simulator/" + name + ".framework", dst + "/simulator/" + name + ".framework")
+
+        cmd("xcodebuild", ["-create-xcframework", 
+            "-framework", dst + "/" + name + ".framework", 
+            "-framework", dst + "/simulator/" + name + ".framework", 
+            "-output", dst + "/" + name + ".xcframework"])
+
+        delete_dir(dst + "/" + name + ".framework")
+        delete_dir(dst + "/simulator/" + name + ".framework")
+        delete_dir(dst + "/simulator")
+
     return
 
   lib_ext = ".so"

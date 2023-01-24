@@ -79,8 +79,8 @@ with open(CONFIG_PATH, 'r') as j:
 			raise Exception(f'KeyError. "fix" cannot process value. It must be an array of strings. Check {CONFIG_PATH}. Possible array values: "OUTDATED", "NO_LICENSE", "INVALID_LICENSE", "LEN_MISMATCH"')
 	else:
 		FIX = False
-	PRINT_CHECKING: bool = _json.get('printChecking') or True
-	PRINT_REPORTS: bool = _json.get('printReports') or True
+	PRINT_CHECKING: bool = _json.get('printChecking')
+	PRINT_REPORTS: bool = _json.get('printReports')
 	CONFIGS: list[Config] = []
 	for i in _json.get('configs'):
 		CONFIGS.append(Config(**i))
@@ -130,7 +130,7 @@ class Report(object):
 	def getMessage(self) -> str:
 		return self._message
 	def report(self) -> str:
-		return f'{self.getPathToFile()}: {self.getError().getErrorMessage()}. {self.getMessage()}'
+		return f'{self.getPathToFile()}: {self.getError().getErrorMessage()}. {self.getMessage()}.'
 
 class Checker(object):
 	def __init__(self, config: Config) -> None:
@@ -244,7 +244,6 @@ class Walker(object):
 									result.append(os.path.join(address, i))
 		return result
 	def checkFiles(self) -> list[Report]:
-		print('Getting files...')
 		files = self._getFiles()
 		for file in files:
 			if (PRINT_CHECKING):
@@ -317,6 +316,8 @@ def writeReports(reports: list[Report]) -> None:
 for config in CONFIGS:
 	walkers.append(Walker(config=config))
 
+print('Checking files...')
+
 for walker in walkers:
 	reports = reports + walker.checkFiles()
 
@@ -325,12 +326,13 @@ if reports:
 		os.mkdir(REPORT_FOLDER)
 	if PRINT_REPORTS:
 		print('\n'.join(map(lambda report: report.report(), reports)))
+	print(f'{len(reports)} invalid licenses were found.')
 	print(f'Saving reports in {REPORT_FOLDER}')
 	writeReports(reports=reports)
 	if FIX:
 		fix(walkers=walkers)
 	else:
-		choice = str(input(f'{len(reports)} invalid licenses were found, fix it automatically? [Y/N]')).lower()
+		choice = str(input(f'Fix it automatically? [Y/N] ')).lower()
 		if choice == 'y':
 			fix(walkers=walkers)
 else:

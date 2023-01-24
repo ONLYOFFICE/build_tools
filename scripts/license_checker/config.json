@@ -1,0 +1,41 @@
+{
+	"basePath": "../../../",
+	"reportFolder": "build_tools/scripts/license_checker/reports",
+	"licensePath": "build_tools/scripts/license_checker/license_template.txt",
+	"printChecking": false,
+	"printReports": false,
+	"fix": ["OUTDATED"],
+	"configs": [
+		{
+			"dir": "sdkjs",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"sdkjs/deploy",
+				"sdkjs/develop",
+				"sdkjs/configs",
+				"sdkjs/common/AllFonts.js",
+				"sdkjs/slide/themes/themes.js"
+			],
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor"
+			]
+		},
+		{
+			"dir": "server",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"server/FileConverter/bin"
+			],
+			"ignoreListDirName": [
+				"node_modules"
+			]
+		}
+	]
+}

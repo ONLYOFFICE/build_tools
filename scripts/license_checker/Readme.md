@@ -33,7 +33,7 @@ The license template is a plain text file where the license text is indicated as
 * `reportFolder` specifies in which folder to save text files with reports.\
 **For example:**
     ```
-    "reportFolder": "build_tools/scripts license_checker/reports"
+    "reportFolder": "build_tools/scripts/license_checker/reports"
     ```
 * `licensePath` specifies the path to the license template.\
 **For example:**

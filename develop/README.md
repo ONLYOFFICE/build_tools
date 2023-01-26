@@ -141,12 +141,10 @@ sdkjs\common\apiBase.js
 
 Linux or macOS (bash)
 
-```bash
-sed -i "s,this.sendEvent('asc_onDocumentContentReady');,\
-this.sendEvent('asc_onDocumentContentReady');\n\
-this.AddImageUrl(['http://localhost/example/images/logo.png']);," \
-sdkjs\common\apiBase.js
-```
+sed -i "s,this.sendEvent('asc_onDocumentContentReady');,
+this.sendEvent('asc_onDocumentContentReady');\n
+this.AddImageUrl(['http://localhost/example/images/logo.png']);,"
+ sdkjs\common\apiBase.js
 
 2)Delete browser cache or hard reload the page `Ctrl + Shift + R`
 
@@ -157,23 +155,11 @@ To change something in `server` do the following steps
 1)Edit source file. Let's send `"Hello World!"`
 chart message every time a document is opened.Do the following command
 
-Windows(cmd)
-
-```bash
-sed -i 's#opt_hasForgotten, opt_openedAt) {#^
-opt_hasForgotten, opt_openedAt) {^
-\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' ^
-server\DocService\sources\DocsCoServer.js
-```
-
-Linux or macOS (bash)
-
-```bash
-sed -i 's#opt_hasForgotten, opt_openedAt) {#\
-opt_hasForgotten, opt_openedAt) {\
-\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' \
-server\DocService\sources\DocsCoServer.js
-```
+sed -i 's#opt_hasForgotten, opt_openedAt) {#
+opt_hasForgotten, opt_openedAt) {\n
+yield* onMessage(ctx, conn, {"message": "Hello World!"});#'
+ server\DocService\sources\DocsCoServer.js
+=
 
 2)Restart document server process
 

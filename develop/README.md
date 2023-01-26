@@ -118,29 +118,59 @@ docker run -i -t -p 80:80 --restart=always \
 
 ### Open editor
 
-After the server starts successfully, you will see Docker log messages like this. 
-*[Date] [WARN] [localhost] [docId] [userId] nodeJS
- - Express server listening on port 8000 in production-linux mode. Version:*  
+After the server starts successfully, you will see Docker log messages like this
+*[Date] [WARN] [localhost] [docId] [userId] nodeJS*  
 To try the document editor, open a browser tab and type
 [http://localhost/example](http://localhost/example) into the URL bar.
 
 ### Modify sources
 
-To change something in `sdkjs` do the following things
-1. Edit source file. Let's insert an image url into any open document. Do the following command.
+To change something in `sdkjs` do the following steps
+1. Edit source file. Let's insert an image url into each open document.
+Do the following command.
 
-sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');\n
-this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs\common\apiBase.js
+Windows(cmd)
+
+```
+sed -i "s,this.sendEvent('asc_onDocumentContentReady');,^
+this.sendEvent('asc_onDocumentContentReady');\n^
+this.AddImageUrl(['http://localhost/example/images/logo.png']);," ^
+sdkjs\common\apiBase.js
+```
+
+Linux or macOS (bash)
+
+```
+sed -i "s,this.sendEvent('asc_onDocumentContentReady');,\
+this.sendEvent('asc_onDocumentContentReady');\n\
+this.AddImageUrl(['http://localhost/example/images/logo.png']);," \
+sdkjs\common\apiBase.js
+```
 
 2. Delete browser cache or hard reload the page `Ctrl + Shift + R`
 3. Open new file in browser
 
-To change something in `server` do the following things
-1. Edit source file. Let's send `"Hello World!"` chart message every time a document is opened.Do the following command
+To change something in `server` do the following steps
+1. Edit source file. Let's send `"Hello World!"`
+chart message every time a document is opened.Do the following command
 
-sed -i 's#sendAuthInfo(ctx, conn, bIsRestore, participantsMap, opt_hasForgotten, opt_openedAt)
- {#sendAuthInfo(ctx, conn, bIsRestore, participantsMap, opt_hasForgotten, opt_openedAt)
- {\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' server\DocService\sources\DocsCoServer.js
+Windows(cmd)
+
+```
+sed -i 's#opt_hasForgotten, opt_openedAt) {#^
+opt_hasForgotten, opt_openedAt) {^
+\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' ^
+server\DocService\sources\DocsCoServer.js
+```
+
+Linux or macOS (bash)
+
+```
+sed -i 's#opt_hasForgotten, opt_openedAt) {#\
+opt_hasForgotten, opt_openedAt) {\
+\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' \
+server\DocService\sources\DocsCoServer.js
+```
 
 2. Restart document server process
 

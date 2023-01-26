@@ -15,6 +15,6 @@ jobs:
       - uses: DavidAnson/markdownlint-cli2-action@v9
         with:
           globs: |
-          .markdownlint.jsonc
-          *.md
-          develop/*.md
+            .markdownlint.jsonc
+            *.md
+            develop/*.md

@@ -66,6 +66,28 @@ class CDependencies:
       res += ['--remove-path', item]
     return res
 
+def check__docker_dependencies():
+  if (host_platform == 'windows' and not check_vc_components()):
+    return False
+  if (host_platform == 'mac'):
+    return True
+
+  checksResult = CDependencies()
+  checksResult.append(check_nodejs())
+  checksResult.append(check_7z())
+  if (len(checksResult.install) > 0):
+    install_args = ['install.py']
+    install_args += checksResult.get_uninstall()
+    install_args += checksResult.get_removepath()
+    install_args += checksResult.get_install()
+    base_dir = base.get_script_dir(__file__)
+    install_args[0] = './scripts/develop/' + install_args[0]
+    if (host_platform == 'windows'):
+      code = libwindows.sudo(unicode(sys.executable), install_args)
+    elif (host_platform == 'linux'):
+      get_updates()
+      base.cmd_in_dir(base_dir + "/../../", 'python', install_args, False)
+
 def check_dependencies():
   if (host_platform == 'windows' and not check_vc_components()):
     return False

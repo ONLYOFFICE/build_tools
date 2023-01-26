@@ -126,12 +126,13 @@ To try the document editor, open a browser tab and type
 ### Modify sources
 
 To change something in `sdkjs` do the following steps
-1. Edit source file. Let's insert an image url into each open document.
+
+1) Edit source file. Let's insert an image url into each open document.
 Do the following command.
 
 Windows(cmd)
 
-```
+```bash
 sed -i "s,this.sendEvent('asc_onDocumentContentReady');,^
 this.sendEvent('asc_onDocumentContentReady');\n^
 this.AddImageUrl(['http://localhost/example/images/logo.png']);," ^
@@ -140,23 +141,24 @@ sdkjs\common\apiBase.js
 
 Linux or macOS (bash)
 
-```
+```bash
 sed -i "s,this.sendEvent('asc_onDocumentContentReady');,\
 this.sendEvent('asc_onDocumentContentReady');\n\
 this.AddImageUrl(['http://localhost/example/images/logo.png']);," \
 sdkjs\common\apiBase.js
 ```
 
-2. Delete browser cache or hard reload the page `Ctrl + Shift + R`
-3. Open new file in browser
+2) Delete browser cache or hard reload the page `Ctrl + Shift + R`
+
+3) Open new file in browser
 
 To change something in `server` do the following steps
-1. Edit source file. Let's send `"Hello World!"`
+1) Edit source file. Let's send `"Hello World!"`
 chart message every time a document is opened.Do the following command
 
 Windows(cmd)
 
-```
+```bash
 sed -i 's#opt_hasForgotten, opt_openedAt) {#^
 opt_hasForgotten, opt_openedAt) {^
 \nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' ^
@@ -165,17 +167,17 @@ server\DocService\sources\DocsCoServer.js
 
 Linux or macOS (bash)
 
-```
+```bash
 sed -i 's#opt_hasForgotten, opt_openedAt) {#\
 opt_hasForgotten, opt_openedAt) {\
 \nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' \
 server\DocService\sources\DocsCoServer.js
 ```
 
-2. Restart document server process
+2) Restart document server process
 
 ```bash
 docker exec -it CONTAINER_ID supervisorctl restart all
 ``` 
 
-3. Open new file in browser
+3) Open new file in browser

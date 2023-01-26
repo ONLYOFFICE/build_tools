@@ -179,6 +179,6 @@ server\DocService\sources\DocsCoServer.js
 
 ```bash
 docker exec -it CONTAINER_ID supervisorctl restart all
-``` 
+```
 
 3)Open new file in browser

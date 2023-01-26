@@ -234,14 +234,10 @@ class Walker(object):
 						break
 				else:
 					for i in files:
-						for j in self._config.getIgnoreListFile():
-							if (os.path.normpath(j) == os.path.join(address, i)):
-								break
-						else:
+						if not (os.path.join(address, i) in list(map(lambda x: os.path.normpath(x), self._config.getIgnoreListFile()))):
 							filename, file_extension = os.path.splitext(i)
-							for j in self._config.getFileExtensions():
-								if (file_extension == j):
-									result.append(os.path.join(address, i))
+							if file_extension in self._config.getFileExtensions():
+								result.append(os.path.join(address, i))
 		return result
 	def checkFiles(self) -> list[Report]:
 		files = self._getFiles()

@@ -16,5 +16,5 @@ jobs:
         with:
           globs: |
           .markdownlint.jsonc
-          '*.md,develop/*.md'
-          separator: ','
+          *.md
+          develop/*.md

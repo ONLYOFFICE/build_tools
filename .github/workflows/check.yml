@@ -17,5 +17,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: DavidAnson/markdownlint-cli2-action@v9
         with:
-          globs: '*.md,develop/*.md,scripts/**.md'
+          globs: |
+          .markdownlint.jsonc
+          '*.md,develop/*.md,scripts/**.md'
           separator: ','

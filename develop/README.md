@@ -74,46 +74,16 @@ The folders `server` is optional
 **Note**: server start with `sdkjs` and `web-apps` takes 10 minutes
 and takes 15 minutes with `server`
 
-### Windows (cmd)
-
 run with `sdkjs` and `web-apps`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always ^
-    -v %cd%/sdkjs:/var/www/onlyoffice/documentserver/sdkjs ^
-    -v %cd%/web-apps:/var/www/onlyoffice/documentserver/web-apps ^
-    documentserver-develop
+docker run -i -t -p 80:80 --restart=always  -v %cd%/sdkjs:/var/www/onlyoffice/documentserver/sdkjs  -v %cd%/web-apps:/var/www/onlyoffice/documentserver/web-apps  documentserver-develop
 ```
 
 run with `sdkjs`, `web-apps` and `server`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always ^
-    -v %cd%/sdkjs:/var/www/onlyoffice/documentserver/sdkjs ^
-    -v %cd%/web-apps:/var/www/onlyoffice/documentserver/web-apps ^
-    -v %cd%/server:/var/www/onlyoffice/documentserver/server ^
-    documentserver-develop
-```
-
-### Linux or macOS (bash)
-
-run with `sdkjs` and `web-apps`
-
-```bash
-docker run -i -t -p 80:80 --restart=always \
-    -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
-    -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps \
-    documentserver-develop
-```
-
-run with `sdkjs`, `web-apps` and `server`
-
-```bash
-docker run -i -t -p 80:80 --restart=always \
-    -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
-    -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps \
-    -v $(pwd)/server:/var/www/onlyoffice/documentserver/server \
-    documentserver-develop
+docker run -i -t -p 80:80 --restart=always  -v %cd%/sdkjs:/var/www/onlyoffice/documentserver/sdkjs  -v %cd%/web-apps:/var/www/onlyoffice/documentserver/web-apps  -v %cd%/server:/var/www/onlyoffice/documentserver/server  documentserver-develop
 ```
 
 ### Open editor
@@ -130,21 +100,9 @@ To change something in `sdkjs` do the following steps
 1)Edit source file. Let's insert an image url into each open document.
 Do the following command.
 
-Windows(cmd)
-
 ```bash
-sed -i "s,this.sendEvent('asc_onDocumentContentReady');,^
-this.sendEvent('asc_onDocumentContentReady');\n^
-this.AddImageUrl(['http://localhost/example/images/logo.png']);," ^
-sdkjs\common\apiBase.js
+sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');\nthis.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs\common\apiBase.js
 ```
-
-Linux or macOS (bash)
-
-sed -i "s,this.sendEvent('asc_onDocumentContentReady');,
-this.sendEvent('asc_onDocumentContentReady');\n
-this.AddImageUrl(['http://localhost/example/images/logo.png']);,"
- sdkjs\common\apiBase.js
 
 2)Delete browser cache or hard reload the page `Ctrl + Shift + R`
 
@@ -155,11 +113,9 @@ To change something in `server` do the following steps
 1)Edit source file. Let's send `"Hello World!"`
 chart message every time a document is opened.Do the following command
 
-sed -i 's#opt_hasForgotten, opt_openedAt) {#
-opt_hasForgotten, opt_openedAt) {\n
-yield* onMessage(ctx, conn, {"message": "Hello World!"});#'
- server\DocService\sources\DocsCoServer.js
-=
+```bash
+sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {\nyield* onMessage(ctx, conn, {"message": "Hello World!"});#' server\DocService\sources\DocsCoServer.js
+```
 
 2)Restart document server process
 

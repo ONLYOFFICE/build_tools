@@ -14,6 +14,9 @@ but don't want to compile pretty compilcated core product to make those changes.
 [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
 installed.
 
+**Note**: Docker Desktop does not start automatically after installation.
+You should manually start the **Docker Desktop** application.
+
 ```bash
 docker pull onlyoffice/documentserver
 ```

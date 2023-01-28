@@ -769,7 +769,7 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
   file.close()
   return
 
-def generate_plist(path):
+def generate_plist_framework_folder(file):
   bundle_id_url = "com.onlyoffice."
   if ("" != get_env("PUBLISHER_BUNDLE_ID")):
     bundle_id_url = get_env("PUBLISHER_BUNDLE_ID")
@@ -782,43 +782,52 @@ def generate_plist(path):
   for n in bundle_version_natural:
     bundle_version.append(n)
 
-  for file in glob.glob(path + '/**/*.framework', recursive=True):
-    if not is_dir(file):
-      continue
-    name = os.path.basename(file)
-    name = name.replace(".framework", "")
+  name = os.path.basename(file)
+  name = name.replace(".framework", "")
 
-    content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    content += "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-    content += "<plist version=\"1.0\">\n"
-    content += "<dict>\n"
-    content += "\t<key>CFBundleExecutable</key>\n"
-    content += ("\t<string>" + name + "</string>\n")
-    content += "\t<key>CFBundleGetInfoString</key>\n"
-    content += "\t<string>Created by " + bundle_creator + "</string>\n"
-    content += "\t<key>CFBundleIdentifier</key>\n"
-    content += "\t<string>" + bundle_id_url + correct_bundle_identifier(name) + "</string>\n"
-    content += "\t<key>CFBundlePackageType</key>\n"
-    content += "\t<string>FMWK</string>\n"
-    content += "\t<key>CFBundleShortVersionString</key>\n"
-    content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "</string>\n"
-    content += "\t<key>CFBundleSignature</key>\n"
-    content += "\t<string>????</string>\n"
-    content += "\t<key>CFBundleVersion</key>\n"
-    content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "." + bundle_version[2] + "</string>\n"
-    content += "\t<key>MinimumOSVersion</key>\n"
-    content += "\t<string>13.0</string>\n"
-    content += "</dict>\n"
-    content += "</plist>"
+  content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+  content += "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+  content += "<plist version=\"1.0\">\n"
+  content += "<dict>\n"
+  content += "\t<key>CFBundleExecutable</key>\n"
+  content += ("\t<string>" + name + "</string>\n")
+  content += "\t<key>CFBundleGetInfoString</key>\n"
+  content += "\t<string>Created by " + bundle_creator + "</string>\n"
+  content += "\t<key>CFBundleIdentifier</key>\n"
+  content += "\t<string>" + bundle_id_url + correct_bundle_identifier(name) + "</string>\n"
+  content += "\t<key>CFBundlePackageType</key>\n"
+  content += "\t<string>FMWK</string>\n"
+  content += "\t<key>CFBundleShortVersionString</key>\n"
+  content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "</string>\n"
+  content += "\t<key>CFBundleSignature</key>\n"
+  content += "\t<string>????</string>\n"
+  content += "\t<key>CFBundleVersion</key>\n"
+  content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "." + bundle_version[2] + "</string>\n"
+  content += "\t<key>MinimumOSVersion</key>\n"
+  content += "\t<string>13.0</string>\n"
+  content += "</dict>\n"
+  content += "</plist>"
 
-    fileDst = file + "/Info.plist"
-    if is_file(fileDst):
-      delete_file(fileDst)
+  fileDst = file + "/Info.plist"
+  if is_file(fileDst):
+    delete_file(fileDst)
 
-    fileInfo = codecs.open(fileDst, "w", "utf-8")
-    fileInfo.write(content)
-    fileInfo.close()
-      
+  fileInfo = codecs.open(fileDst, "w", "utf-8")
+  fileInfo.write(content)
+  fileInfo.close()
+  return
+
+def generate_plist(path):
+  src_folder = path
+  if ("/" != path[-1:]):
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    if (is_dir(file)):
+      if file.endswith(".framework"):
+        generate_plist_framework_folder(file)
+      else:
+        generate_plist(file)
   return
 
 def correct_bundle_identifier(bundle_identifier):

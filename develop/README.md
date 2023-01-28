@@ -8,7 +8,7 @@ but don't want to compile pretty compilcated core product to make those changes.
 
 ### Windows
 
-**Note**: You need the latest
+You need the latest
 [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
 installed.
 
@@ -17,7 +17,7 @@ You should manually start the **Docker Desktop** application.
 
 ### Linux or macOS
 
-**Note**: You need the latest Docker version installed.
+You need the latest Docker version installed.
 
 You might need to pull **onlyoffice/documentserver** image:
 
@@ -34,28 +34,12 @@ use the following commands:
 
 ```bash
 git clone -b feature/docker-instruction https://github.com/ONLYOFFICE/build_tools.git
-cd build_tools/develop
-```
-
-### Modify Dockerfile
-
-**Windows (PowerShell)**
-
-```bash
-cd build_tools/develop
-(Get-Content Dockerfile) | ForEach-Object { $_ -replace "https://github.com", "-b feature/docker-instruction https://github.com" } | Set-Content Dockerfile
-```
-
-**Linux or macOS**
-
-```bash
-cd build_tools/develop
-sed -i 's,https://github.com,-b feature/docker-instruction https://github.com,' Dockerfile
 ```
 
 ### Modify Docker Images
 
 ```bash
+cd build_tools/develop
 docker pull onlyoffice/documentserver
 docker build -t documentserver-develop .
 ```
@@ -64,7 +48,7 @@ docker build -t documentserver-develop .
 
 ## Clone development modules
 
-At first clone modules to the work dir
+Clone development modules to the work dir
 
 * `sdkjs` repo is located [here](https://github.com/ONLYOFFICE/sdkjs/)
 * `web-apps` repo is located [here](https://github.com/ONLYOFFICE/web-apps/)
@@ -88,7 +72,7 @@ The folders `server` is optional
 **Note**: ONLYOFFICE server uses port 80.
 Look for another application using port 80 and stop it
 
-**Note**: server start with `sdkjs` and `web-apps` takes 15 minutes
+**Note**: Server start with `sdkjs` and `web-apps` takes 15 minutes
 and takes 20 minutes with `server`
 
 **Note**: Run command from work dir with development modules
@@ -101,7 +85,10 @@ run with `sdkjs` and `web-apps`
 docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
 ```
 
-run with `sdkjs`, `web-apps` and `server`
+or run with `sdkjs`, `web-apps` and `server`
+
+**Note**: Run PowerShell as administrator to fix EACCES error when installing
+node_modules
 
 ```bash
 docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/server:/var/www/onlyoffice/documentserver/server documentserver-develop
@@ -115,7 +102,7 @@ run with `sdkjs` and `web-apps`
 docker run -i -t -p 80:80 --restart=always -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
 ```
 
-run with `sdkjs`, `web-apps` and `server`
+or run with `sdkjs`, `web-apps` and `server`
 
 ```bash
 docker run -i -t -p 80:80 --restart=always -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $(pwd)/server:/var/www/onlyoffice/documentserver/server documentserver-develop
@@ -176,6 +163,8 @@ sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yie
 ```
 
 2)Restart document server process
+
+**Note**: Look for ``CONTAINER_ID`` in the result of ``docker ps``.
 
 ```bash
 docker exec -it CONTAINER_ID supervisorctl restart all

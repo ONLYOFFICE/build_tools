@@ -61,6 +61,7 @@ def make_windows():
   package_name = branding.desktop_package_name
   package_version = common.version + "." + common.build
   source_dir = "..\\..\\..\\..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  source_help_dir = source_dir + "-help"
   arch_list = {
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
@@ -102,14 +103,14 @@ def make_windows():
 
   if not vcdl:
     utils.set_summary("desktop inno build", False)
-    # utils.set_summary("desktop inno help build", False)
+    utils.set_summary("desktop inno help build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
     utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()
-  # make_inno_help()
+  make_inno_help()
   make_inno_update()
 
   if common.platform == "windows_x64":

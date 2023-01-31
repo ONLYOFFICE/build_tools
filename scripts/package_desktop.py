@@ -110,7 +110,10 @@ def make_windows():
     return
 
   make_inno()
-  make_inno_help()
+
+  if branding.onlyoffice && common.platform in ["windows_x64", "windows_x86"]:
+    make_inno_help()
+
   make_inno_update()
 
   if common.platform == "windows_x64":

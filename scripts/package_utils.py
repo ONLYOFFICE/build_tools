@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import argparse
 import codecs
 import glob
+import hashlib
+import json
 import os
 import platform
 import re
@@ -11,71 +12,81 @@ import shutil
 import subprocess
 import sys
 import time
-import base
-
-def parse():
-  parser = argparse.ArgumentParser(description="Build packages.")
-  parser.add_argument('-P', '--product', dest='product', type=str,
-                      action='store', help="Defines product")
-  parser.add_argument('-S', '--system', dest='system', type=str,
-                      action='store', help="Defines system")
-  parser.add_argument('-R', '--branding', dest='branding', type=str,
-                      action='store', help="Provides branding path")
-  parser.add_argument('-V', '--version', dest='version', type=str,
-                      action='store', help="Defines version")
-  parser.add_argument('-B', '--build', dest='build', type=str,
-                      action='store', help="Defines build")
-  parser.add_argument('-T', '--targets', dest='targets', type=str, nargs='+',
-                      action='store', help="Defines targets")
-  args = parser.parse_args()
-
-  global product, system, targets, version, build, branding, sign, clean
-  product = args.product
-  system = args.system if (args.system is not None) else host_platform()
-  targets = args.targets
-  version = args.version if (args.version is not None) else get_env('PRODUCT_VERSION', '0.0.0')
-  build = args.build if (args.build is not None) else get_env('BUILD_NUMBER', '0')
-  branding = args.branding
-  return
+import package_common as common
 
 def host_platform():
   return platform.system().lower()
 
-def log(string, end='\n', bold=False):
-  if bold:
-    out = '\033[1m' + string + '\033[0m' + end
-  else:
-    out = string + end
-  sys.stdout.write(out)
+def is_windows():
+  return host_platform() == "windows"
+
+def is_macos():
+  return host_platform() == "darwin"
+
+def is_linux():
+  return host_platform() == "linux"
+
+def log(string, end='\n'):
+  sys.stdout.write(string + end)
   sys.stdout.flush()
   return
 
-def get_env(name, default=''):
-  return os.getenv(name, default)
-
-def set_env(name, value):
-  os.environ[name] = value
+def log_h1(string):
+  line = "#" * (len(string) + 8)
+  log("\n" + line + "\n### " + string + " ###\n" + line + "\n")
   return
 
-def set_cwd(dir):
-  log("- change working dir: " + dir)
-  os.chdir(dir)
+def log_h2(string):
+  log("\n### " + string + "\n")
   return
 
-def get_path(*paths):
-  arr = []
-  for path in paths:
-    if host_platform() == 'windows':
-      arr += path.split('/')
-    else:
-      arr += [path]
-  return os.path.join(*arr)
+def log_h3(string):
+  log("# " + string)
+  return
 
-def get_abspath(*paths):
-  arr = []
-  for path in paths:
-    arr += path.split('/')
-  return os.path.abspath(os.path.join(*arr))
+def log_err(string):
+  log("!!! " + string)
+  return
+
+def get_timestamp():
+  return "%.f" % time.time()
+
+def get_env(key, default=None):
+  return os.getenv(key, default)
+
+def set_env(key, value):
+  os.environ[key] = value
+  return
+
+def get_cwd():
+  return os.getcwd()
+
+def set_cwd(path, verbose=True):
+  if verbose:
+    log("- change working dir:")
+    log("    path: " + path)
+  os.chdir(path)
+  return
+
+def get_path(path):
+  if is_windows():
+    return path.replace("/", "\\")
+  return path
+
+def get_abspath(path):
+  return os.path.abspath(get_path(path))
+
+def get_basename(path):
+  return os.path.basename(path)
+
+def get_dirname(path):
+  return os.path.dirname(path)
+
+def get_file_size(path):
+  return os.path.getsize(path)
+
+def get_script_dir(path):
+  return get_dirname(os.path.realpath(path))
 
 def is_file(path):
   return os.path.isfile(path)
@@ -88,200 +99,284 @@ def is_exist(path):
     return True
   return False
 
-def get_dirname(path):
-  return os.path.dirname(path)
+def glob_path(path):
+  return glob.glob(path)
 
-def create_dir(path):
-  log("- create dir: " + path)
+def glob_file(path):
+  if glob.glob(path) and is_file(glob.glob(path)[0]):
+    return glob.glob(path)[0]
+  return
+
+def get_md5(path):
+  if os.path.exists(path):
+    md5_hash = hashlib.md5()
+    md5_hash.update(open(path, "rb").read())
+    return md5_hash.hexdigest()
+  return
+
+def create_dir(path, verbose=True):
+  if verbose:
+    log("- create_dir:")
+    log("    path: " + path)
   if not is_exist(path):
     os.makedirs(path)
   else:
-    log("! dir exist")
+    log_err("dir exist")
   return
 
-def write_file(path, data, encoding='utf-8'):
+def write_file(path, data, encoding='utf-8', verbose=True):
   if is_file(path):
     delete_file(path)
-  log("- write file: " + path)
+  if verbose:
+    log("- write_file:")
+    log("    path: " + path)
+    log("    encoding: " + encoding)
+    log("    data: |\n" + data)
   with codecs.open(path, 'w', encoding) as file:
     file.write(data)
   return
 
-def write_template(src, dst, encoding='utf-8', **kwargs):
-  template = Template(open(src).read())
-  if is_file(dst):
-    os.remove(dst)
-  log("- write template: " + dst + " < " + src)
-  with codecs.open(dst, 'w', encoding) as file:
-    file.write(template.render(**kwargs))
-  return
-
-def replace_in_file(path, pattern, textReplace, encoding='utf-8'):
-  log("- replace in file: " + path + \
-      "\n  pattern: " + pattern + \
-      "\n  replace: " + textReplace)
-  filedata = ""
+def replace_in_file(path, pattern, text_replace, encoding='utf-8', verbose=True):
+  if verbose:
+    log("- replace_in_file:")
+    log("    path: " + path)
+    log("    pattern: " + pattern)
+    log("    replace: " + text_replace)
+    log("    encoding: " + encoding)
+  file_data = ""
   with codecs.open(get_path(path), "r", encoding) as file:
-    filedata = file.read()
-  filedata = re.sub(pattern, textReplace, filedata)
+    file_data = file.read()
+  file_data = re.sub(pattern, text_replace, file_data)
   delete_file(path)
   with codecs.open(get_path(path), "w", encoding) as file:
-    file.write(filedata)
+    file.write(file_data)
   return
 
-def copy_file(src, dst):
-  log("- copy file: " + dst + " < " + src)
+def copy_file(src, dst, verbose=True):
+  if verbose:
+    log("- copy_file:")
+    log("    src: " + src)
+    log("    dst: " + dst)
   if is_file(dst):
     delete_file(dst)
   if not is_file(src):
-    log("! file not exist: " + src)
+    log_err("file not exist: " + src)
     return
   return shutil.copy2(get_path(src), get_path(dst))
 
-def copy_files(src, dst, override=True):
-  log("- copy files: " + dst + " < " + src)
+def copy_files(src, dst, override=True, verbose=True):
+  if verbose:
+    log("- copy_files:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    override: " + str(override))
   for file in glob.glob(src):
     file_name = os.path.basename(file)
     if is_file(file):
       if override and is_file(dst + "/" + file_name):
         delete_file(dst + "/" + file_name)
       if not is_file(dst + "/" + file_name):
-        copy_file(file, dst)
+        if verbose:
+          log(file + " : " + get_path(dst))
+        shutil.copy2(file, get_path(dst))
     elif is_dir(file):
       if not is_dir(dst + "/" + file_name):
         create_dir(dst + "/" + file_name)
       copy_files(file + "/*", dst + "/" + file_name, override)
   return
 
-def copy_dir(src, dst):
+def copy_dir(src, dst, override=True, verbose=True):
+  if verbose:
+    log("- copy_dir:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    override: " + str(override))
   if is_dir(dst):
     delete_dir(dst)
   try:
     shutil.copytree(get_path(src), get_path(dst))    
   except OSError as e:
-    log('! Directory not copied. Error: %s' % e)
+    log_err('directory not copied. Error: %s' % e)
   return
 
-def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
-  log("- copy dir content: " + src + " " + dst + " " + filterInclude + " " + filterExclude)
+def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose=True):
+  if verbose:
+    log("- copy_dir_content:")
+    log("    src: " + src)
+    log("    dst: " + dst)
+    log("    include: " + filter_include)
+    log("    exclude: " + filter_exclude)
   src_folder = src
   if ("/" != src[-1:]):
     src_folder += "/"
   src_folder += "*"
   for file in glob.glob(src_folder):
     basename = os.path.basename(file)
-    if ("" != filterInclude) and (-1 == basename.find(filterInclude)):
+    if ("" != filter_include) and (-1 == basename.find(filter_include)):
       continue
-    if ("" != filterExclude) and (-1 != basename.find(filterExclude)):
+    if ("" != filter_exclude) and (-1 != basename.find(filter_exclude)):
       continue
     if is_file(file):
-      copy_file(file, dst)
+      copy_file(file, dst, verbose=False)
     elif is_dir(file):
       copy_dir(file, dst + "/" + basename)
   return
 
-def delete_file(path):
-  log("- delete file: " + path)
+def delete_file(path, verbose=True):
+  if verbose:
+    log("- delete_file:")
+    log("    path: " + path)
   if not is_file(path):
-    log("! file not exist")
+    log_err("file not exist")
     return
   return os.remove(path)
 
-def delete_dir(path):
-  log("- delete dir: " + path)
+def delete_dir(path, verbose=True):
+  if verbose:
+    log("- delete_dir:")
+    log("    path: " + path)
   if not is_dir(path):
-    log("! dir not exist")
+    log_err("dir not exist")
     return
   shutil.rmtree(path, ignore_errors=True)
   return
 
-def delete_files(src):
+def delete_files(src, verbose=True):
+  if verbose:
+    log("- delete_files:")
+    log("    pattern: " + src)
   for path in glob.glob(src):
+    if verbose:
+      log(path)
     if is_file(path):
-      delete_file(path)
+      os.remove(path)
     elif is_dir(path):
-      delete_dir(path)
+      shutil.rmtree(path, ignore_errors=True)
   return
 
-def download_file(url, path):
-  log("- download file: " + path + " < " + url)
+def set_summary(target, status):
+  common.summary.append({target: status})
+  return
+
+def add_deploy_data(product, ptype, src, dst, bucket, region):
+  common.deploy_data.append({
+    "platform": common.platforms[common.platform]["title"],
+    "product": product,
+    "type": ptype,
+    # "local": get_path(src),
+    "size": get_file_size(get_path(src)),
+    "bucket": bucket,
+    "region": region,
+    "key": dst
+  })
+  file = open(get_path(common.workspace_dir + "/deploy.json"), 'w')
+  file.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))
+  file.close()
+  return
+
+def cmd(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log("- cmd:")
+    log("    command: " + " ".join(args))
+    if kwargs.get("chdir"):
+      log("    chdir: " + kwargs["chdir"])
+    if kwargs.get("creates"):
+      log("    creates: " + kwargs["creates"])
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    log_err("creates exist")
+    return False
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"])
+  ret = subprocess.call(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  ) == 0
+  if kwargs.get("chdir") and oldcwd:
+    set_cwd(oldcwd)
+  return ret
+
+def cmd_output(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log("- cmd_output:")
+    log("    command: " + " ".join(args))
+  return subprocess.check_output(
+      [i for i in args], stderr=subprocess.STDOUT, shell=True
+  ).decode("utf-8")
+
+def powershell(*args, **kwargs):
+  if kwargs.get("verbose"):
+    log("- powershell:")
+    log("    command: " + " ".join(args))
+    if kwargs.get("chdir"):
+      log("    chdir: " + kwargs["chdir"])
+    if kwargs.get("creates"):
+      log("    creates: " + kwargs["creates"])
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    return False
+  args = ["powershell", "-Command"] + [i for i in args]
+  ret = subprocess.call(
+      args, stderr=subprocess.STDOUT, shell=True
+  ) == 0
+  return ret
+
+def ps1(file, args=[], **kwargs):
+  if kwargs.get("verbose"):
+    log_h2("powershell cmdlet: " + file + " " + " ".join(args))
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    return True
+  ret = subprocess.call(
+      ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
+  ) == 0
+  return ret
+
+def download_file(url, path, md5, verbose=False):
+  if verbose:
+    log("- download_file:")
+    log("    url: " + path)
+    log("    path: " + url)
+    log("    md5: " + md5)
   if is_file(path):
-    os.remove(path)
-  powershell(["Invoke-WebRequest", url, "-OutFile", path])
-  return
-
-def proc_open(command):
-  log("- open process: " + command)
-  popen = subprocess.Popen(command, stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE, shell=True)
-  ret = {'stdout' : '', 'stderr' : ''}
-  try:
-    stdout, stderr = popen.communicate()
-    popen.wait()
-    ret['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
-    ret['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
-  finally:
-    popen.stdout.close()
-    popen.stderr.close()
+    if get_md5(path) == md5:
+      log_err("file already exist (match checksum)")
+      return True
+    else:
+      log_err("wrong checksum (%s), delete" % md5)
+      os.remove(path)
+  ret = powershell(
+      "(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path),
+      verbose=True
+  )
+  md5_new = get_md5(path)
+  if md5 != md5_new:
+    log_err("checksum didn't match (%s != %s)" % (md5, md5_new))
+    return False
   return ret
 
-def cmd(prog, args=[], is_no_errors=False):  
-  log("- cmd: " + prog + " " + ' '.join(args))
-  ret = 0
-  if host_platform() == 'windows':
-    sub_args = args[:]
-    sub_args.insert(0, get_path(prog))
-    ret = subprocess.call(sub_args, stderr=subprocess.STDOUT, shell=True)
-  else:
-    command = prog
-    for arg in args:
-      command += (" \"%s\"" % arg)
-    ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
-  if ret != 0 and True != is_no_errors:
-    sys.exit("! error (" + prog + "): " + str(ret))
-  return ret
-
-def powershell(cmd):
-  log("- pwsh: " + ' '.join(cmd))
-  ret = subprocess.call(['powershell', '-Command'] + cmd,
-                        stderr=subprocess.STDOUT, shell=True)
-  if ret != 0:
-    sys.exit("! error: " + str(ret))
+def sh(command, **kwargs):
+  if kwargs.get("verbose"):
+    log("- sh:")
+    log("    command: " + command)
+    if kwargs.get("chdir"):
+      log("    chdir: " + kwargs["chdir"])
+    if kwargs.get("creates"):
+      log("    creates: " + kwargs["creates"])
+  if kwargs.get("creates") and is_exist(kwargs["creates"]):
+    log_err("creates exist")
+    return False
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"])
+  ret = subprocess.call(
+      command, stderr=subprocess.STDOUT, shell=True
+  ) == 0
+  if kwargs.get("chdir") and oldcwd:
+    set_cwd(oldcwd)
   return ret
 
 def sh_output(command, **kwargs):
   if kwargs.get("verbose"):
-    log("- sh output: " + command)
-  ret = subprocess.check_output(
+    log("- sh_output:")
+    log("    command: " + command)
+  return subprocess.check_output(
       command, stderr=subprocess.STDOUT, shell=True
-  )
-  return ret.decode("utf-8").strip()
-
-def get_platform(target):
-  xp = (-1 != target.find('-xp'))
-  if (-1 != target.find('-x64')):
-    return {'machine': "64", 'arch': "x64", 'xp': xp}
-  elif (-1 != target.find('-x86')):
-    return {'machine': "32", 'arch': "x86", 'xp': xp}
-  return
-
-global git_dir, out_dir, tsa_server, vcredist_links
-git_dir = get_abspath(get_dirname(__file__), '../..')
-out_dir = get_abspath(get_dirname(__file__), '../out')
-timestamp = "%.f" % time.time()
-tsa_server = "http://timestamp.digicert.com"
-vcredist_links = {
-  '2022': {
-    '64': "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-    '32': "https://aka.ms/vs/17/release/vc_redist.x86.exe"
-  },
-  '2015': {
-    '64': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe",
-    '32': "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
-  },
-  '2013': {
-    '64': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe",
-    '32': "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x86.exe"
-  }
-}
-isxdl_link = "https://raw.githubusercontent.com/jrsoftware/ispack/is-5_6_1/isxdlfiles/isxdl.dll"
+  ).decode("utf-8")

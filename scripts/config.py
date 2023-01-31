@@ -69,6 +69,9 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
+  #if check_option("platform", "ios"):
+  #  extend_option("config", "core_ios_32")
+
   # check vs-version
   if ("" == option("vs-version")):
     options["vs-version"] = "2015"
@@ -107,6 +110,10 @@ def parse():
 
   if not "arm64-toolchain-bin" in options:
     options["arm64-toolchain-bin"] = "/usr/bin"
+
+  if check_option("config", "bundle_xcframeworks"):
+    if not check_option("config", "bundle_dylibs"):
+      extend_option("config", "bundle_dylibs")
 
   return
 

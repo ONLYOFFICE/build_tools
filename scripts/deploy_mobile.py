@@ -42,8 +42,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "UnicodeConverter")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "graphics")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfWriter")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfReader")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
@@ -52,17 +51,12 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DocxRenderer")
+    base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
 
     if (0 == platform.find("win") or 0 == platform.find("linux") or 0 == platform.find("mac")):
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
     else:
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
-
-    if ("ios" == platform) and config.check_option("config", "bundle_dylibs") and config.check_option("config", "simulator"):
-      exclude_arch(root_dir, ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfWriter", 
-        "PdfReader", "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
-        "Fb2File", "EpubFile", "x2t"])
-
 
     # icu
     if (0 == platform.find("win")):

@@ -137,7 +137,10 @@ def make():
 
   #site url
   example_config = {}
-  example_config["port"] = 80
+  if (base.host_platform() == "linux"):
+    example_config["port"] = 3000
+  else:
+    example_config["port"] = 80
   example_config["siteUrl"] = "http://" + config.option("siteUrl") + ":8000/"
   example_config["apiUrl"] = "web-apps/apps/api/documents/api.js"
   example_config["preloaderUrl"] = "web-apps/apps/api/documents/cache-scripts.html"

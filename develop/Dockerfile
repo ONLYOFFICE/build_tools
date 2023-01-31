@@ -12,7 +12,5 @@ RUN apt-get update -y && \
 	sed -i '/documentserver-static-gzip.sh ${ONLYOFFICE_DATA_CONTAINER}/d' /app/ds/run-document-server.sh && \
 	#Set Up Debug Logging
 	sed -i 's/WARN/ALL/g' /etc/onlyoffice/documentserver/log4js/production.json && \
-	#Start test example
-	sed -i 's,autostart=false,autostart=true,' /etc/supervisor/conf.d/ds-example.conf && \
 	rm -rf /var/lib/apt/lists/*
 ENTRYPOINT python3 /var/www/onlyoffice/documentserver/build_tools/develop/run_build_js.py /var/www/onlyoffice/documentserver && /bin/sh -c /app/ds/run-document-server.sh 

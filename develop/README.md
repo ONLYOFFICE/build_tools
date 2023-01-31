@@ -117,7 +117,9 @@ After the server starts successfully, you will see Docker log messages like this
 ```
 
 To try the document editor, open a browser tab and type
-[http://localhost/example](http://localhost/example) into the URL bar.
+[http://localhost](http://localhost) into the URL bar.  
+Follow instructions on the welcome page to start test example.  
+Then go to test example
 
 **Note**: Disable **ad blockers** for localhost page.
 It may block some scripts (like Analytics.js)

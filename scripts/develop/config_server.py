@@ -63,12 +63,6 @@ def make():
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
 
-  if not base.is_dir(git_dir + "/sdkjs-plugins"):
-    base.create_dir(git_dir + "/sdkjs-plugins")
-
-  base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
-  base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins")
-
   if not base.is_dir(git_dir + "/fonts"):
     base.create_dir(git_dir + "/fonts")
 
@@ -148,5 +142,20 @@ def make():
   base.writeFile(json_file, json.dumps({"server": example_config}, indent=2))
   
   os.chdir(old_cur)
+  
+  # note: cwd is old_cur
+  if not base.is_dir(git_dir + "/sdkjs-plugins"):
+    base.create_dir(git_dir + "/sdkjs-plugins")
+  print("copy_sdkjs_plugins:" + git_dir + "/sdkjs-plugins")
+  base.copy_sdkjs_plugins(git_dir + "/sdkjs-plugins", False, True)
+  base.copy_sdkjs_plugins_server(git_dir + "/sdkjs-plugins", False, True)
+  if not base.is_dir(git_dir + "/sdkjs-plugins/v1"):
+    base.create_dir(git_dir + "/sdkjs-plugins/v1")
+  base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", git_dir + "/sdkjs-plugins/v1/plugins.js")
+  base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", git_dir + "/sdkjs-plugins/v1/plugins-ui.js")
+  base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", git_dir + "/sdkjs-plugins/v1/plugins.css")
+  base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
+  base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins")
+  
   return
 

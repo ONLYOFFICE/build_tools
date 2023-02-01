@@ -1294,7 +1294,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
 
 def check_correct_plugins(dir, license = ''):
   extensions = ['.js', '.html', '.md', '.txt']
-  ignoreNameDirs = ['vendor', 'thirdparty', 'marketplace']
+  ignoreNameDirs = ['vendor', 'thirdparty']
   for address, dirs, files in os.walk(dir):
     for i in ignoreNameDirs:
       if (re.search(re.escape(i), address)):
@@ -1339,7 +1339,9 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
   delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
-  check_correct_plugins(os.path.normpath(out_dir))
+  branding = config.option("branding")
+  if (not "" == branding and not "onlyoffice" == branding):
+    check_correct_plugins(os.path.normpath(out_dir))
   return
 
 def correctPathForBuilder(path):

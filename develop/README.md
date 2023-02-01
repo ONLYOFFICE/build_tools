@@ -17,13 +17,9 @@ You should manually start the **Docker Desktop** application.
 
 ### Linux or macOS
 
-You need the latest Docker version installed.
-
-You might need to pull **onlyoffice/documentserver** image:
-
-**Note**: Do not prefix docker command with sudo.
-[This](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-instruction show how to use docker without sudo.
+You need the latest
+[Docker](https://docs.docker.com/engine/install/)
+version installed.
 
 ## Create develop Docker Images
 
@@ -37,6 +33,10 @@ git clone -b feature/docker-instruction https://github.com/ONLYOFFICE/build_tool
 ```
 
 ### Modify Docker Images
+
+**Note**: Do not prefix docker command with sudo.
+[This](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
+instruction show how to use docker without sudo.
 
 ```bash
 cd build_tools/develop

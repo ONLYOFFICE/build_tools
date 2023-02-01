@@ -13,7 +13,7 @@ RUN apt-get update -y && \
 	#Set Up Debug Logging
 	sed -i 's/WARN/ALL/g' /etc/onlyoffice/documentserver/log4js/production.json && \
 	#Start test example
-	if [ -s /etc/supervisor/conf.d/ds-example.conf ] ; then sed -s -i 's/WARN/ALL/g' /etc/supervisor/conf.d/ds-example.conf; fi && \
-	if [ -s /app/ds/setup/config/supervisor/ds/ds-example.conf ] ; then sed -s -i 's/WARN/ALL/g' /app/ds/setup/config/supervisor/ds/ds-example.conf; fi && \
+	if [ -s /etc/supervisor/conf.d/ds-example.conf ] ; then sed -i 's,autostart=false,autostart=true,' /etc/supervisor/conf.d/ds-example.conf; fi && \
+	if [ -s /app/ds/setup/config/supervisor/ds/ds-example.conf ] ; then sed -i 's,autostart=false,autostart=true,' /app/ds/setup/config/supervisor/ds/ds-example.conf; fi && \
 	rm -rf /var/lib/apt/lists/*
 ENTRYPOINT python3 /var/www/onlyoffice/documentserver/build_tools/develop/run_build_js.py /var/www/onlyoffice/documentserver && /bin/sh -c /app/ds/run-document-server.sh 

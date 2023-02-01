@@ -247,44 +247,44 @@ def copy_exe(src, dst, name):
   copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
   return
 
-def replaceInFile(path, text, textReplace, encoding='utf-8'):
+def replaceInFile(path, text, textReplace, encoding='utf8'):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with codecs.open(get_path(path), "r", encoding) as file:
+  with open(get_path(path), "r", encoding=encoding) as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with codecs.open(get_path(path), "w", encoding) as file:
+  with open(get_path(path), "w", encoding=encoding) as file:
     file.write(filedata)
   return
 
-def replaceInFileRE(path, pattern, textReplace):
+def replaceInFileRE(path, pattern, textReplace, encoding='utf8'):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding=encoding) as file:
     filedata = file.read()
   filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding=encoding) as file:
     file.write(filedata)
   return
 
-def readFile(path):
+def readFile(path, encoding='utf8'):
   if not is_file(path):
     return ""
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding=encoding) as file:
     filedata = file.read()
   return filedata
 
-def writeFile(path, data):
+def writeFile(path, data, encoding='utf8'):
   if is_file(path):
     delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding=encoding) as file:
     file.write(data)
   return
 
@@ -1258,15 +1258,15 @@ def get_android_sdk_home():
     return ndk_root_path + "/../.."
   return ndk_root_path + "/.."
 
-def readFileLicence(path):
+def readFileLicence(path, end='*/'):
   content = readFile(path)
-  index = content.find("*/")
+  index = content.find(end)
   if index >= 0:
-    return content[0:index+2]
+    return content[0:index+len(end)]
   return ""
 
-def replaceFileLicence(path, license):
-  old_licence = readFileLicence(path)
+def replaceFileLicence(path, license, end='*/'):
+  old_licence = readFileLicence(path, end)
   replaceInFile(path, old_licence, license)
   return
 
@@ -1292,6 +1292,30 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
+def check_correct_plugins(dir, license = ''):
+  extensions = ['.js', '.html', '.md', '.txt']
+  ignoreNameDirs = ['vendor', 'thirdparty', 'marketplace']
+  for address, dirs, files in os.walk(dir):
+    for i in ignoreNameDirs:
+      if (re.search(re.escape(i), address)):
+          break
+    else:
+      for i in files:
+        path = os.path.join(address, i)
+        filename, file_extension = os.path.splitext(i)
+        if file_extension in extensions:
+          if (file_extension == '.js'):
+            replaceFileLicence(path, license)
+          elif (file_extension == '.html'):
+            replaceFileLicence(path, license, '-->')
+            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js', '../v1/plugins.js')
+            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js', '../v1/plugins-ui.js')
+            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css', '../v1/plugins.css')
+          elif (file_extension == '.md' or file_extension == '.txt'):
+            check = readFile(path)
+            if (re.search(r'onlyoffice', check, re.IGNORECASE) or re.search(r'ascensio', check, re.IGNORECASE)):
+              delete_file(path)
+
 def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
   old_cur = os.getcwd()
   os.chdir(out_dir)
@@ -1315,6 +1339,7 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
   delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  check_correct_plugins(os.path.normpath(out_dir))
   return
 
 def correctPathForBuilder(path):

@@ -1301,7 +1301,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
 # ATTENTION sdkjs-plugins\wordpress\index.html -- changed link to Learn More
 def check_correct_plugins(dir, license = ''):
   extensions = ['.js', '.html', '.md', '.txt', '.json']
-  ignoreNameDirs = ['vendor', 'thirdparty']
+  ignoreNameDirs = ['vendor', 'thirdparty', 'marketplace']
   for address, dirs, files in os.walk(dir):
     for i in ignoreNameDirs:
       if (re.search(re.escape(i), address)):

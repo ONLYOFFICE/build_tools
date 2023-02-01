@@ -227,9 +227,10 @@ def make_inno_update():
   utils.log_h2("desktop inno update build")
   utils.log_h2(inno_update_file)
 
-  args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
-  ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
-  utils.set_summary("desktop inno update build", ret)
+  # args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
+  # ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
+  # utils.set_summary("desktop inno update build", ret)
+  utils.copy_file(inno_file, inno_update_file)
 
   if common.deploy and ret:
     utils.log_h2("desktop inno update deploy")

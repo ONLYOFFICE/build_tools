@@ -21,7 +21,9 @@ if base.is_exist(git_dir + "/server/FileConverter/bin/fonts.log"):
 if base.is_exist(sys.argv[1] + '/server/DocService/package.json'):
   base.print_info('replace supervisor cfg to run docservice and converter from source')
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-docservice.conf", "command=.*", "command=" + "node " + git_dir + "/server/DocService/sources/server.js")
+  base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-docservice.conf", "command=.*", "command=" + "node " + git_dir + "/server/DocService/sources/server.js")
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-converter.conf", "command=.*", "command=" + "node " + git_dir + "/server/FileConverter/sources/convertermaster.js")
+  base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-converter.conf", "command=.*", "command=" + "node " + git_dir + "/server/FileConverter/sources/convertermaster.js")
   base.print_info('run_server.run_docker_server')
   run_server.run_docker_server();
 else:

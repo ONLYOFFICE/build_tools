@@ -15,6 +15,10 @@ installed.
 **Note**: Docker Desktop does not start automatically after installation.
 You should manually start the **Docker Desktop** application.
 
+**Note**: If you have problems running Docker Desktop with the
+"Use WSL 2 instead of Hyper-V" installation option,
+try reinstalling it without this option.
+
 ### Linux or macOS
 
 You need the latest
@@ -79,6 +83,9 @@ and takes 20 minutes with `server`
 
 **Windows (PowerShell)**
 
+**Note**: Run PowerShell as administrator to fix EACCES error when installing
+node_modules
+
 run with `sdkjs` and `web-apps`
 
 ```bash
@@ -86,9 +93,6 @@ docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/doc
 ```
 
 or run with `sdkjs`, `web-apps` and `server`
-
-**Note**: Run PowerShell as administrator to fix EACCES error when installing
-node_modules
 
 ```bash
 docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/server:/var/www/onlyoffice/documentserver/server documentserver-develop
@@ -117,9 +121,7 @@ After the server starts successfully, you will see Docker log messages like this
 ```
 
 To try the document editor, open a browser tab and type
-[http://localhost](http://localhost) into the URL bar.  
-Follow instructions on the welcome page to start test example.  
-Then go to test example
+[http://localhost/example](http://localhost/example) into the URL bar.
 
 **Note**: Disable **ad blockers** for localhost page.
 It may block some scripts (like Analytics.js)

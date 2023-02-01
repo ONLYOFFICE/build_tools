@@ -1299,7 +1299,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
 # ATTENTION sdkjs-plugins\easybib\index.html -- changed link to Learn More
 # ATTENTION sdkjs-plugins\macros\config.json -- changed link to API at "help"
 # ATTENTION sdkjs-plugins\wordpress\index.html -- changed link to Learn More
-def check_correct_plugins(dir, license = ''):
+def check_correct_plugins(dir, license = '', branding=''):
   extensions = ['.js', '.html', '.md', '.txt', '.json']
   ignoreNameDirs = ['vendor', 'thirdparty', 'marketplace']
   for address, dirs, files in os.walk(dir):
@@ -1313,22 +1313,22 @@ def check_correct_plugins(dir, license = ''):
         if file_extension in extensions:
           if (file_extension == '.js'):
             replaceFileLicence(path, license)
-            replaceInFileRE(path, 'onlyoffice', 'r7-office')
-            replaceInFileRE(path, 'ONLYOFFICE', 'R7-OFFICE')
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
           elif (file_extension == '.html'):
             replaceFileLicence(path, license, '-->')
             replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js', '../v1/plugins.js')
             replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js', '../v1/plugins-ui.js')
             replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css', '../v1/plugins.css')
-            replaceInFileRE(path, 'onlyoffice', 'r7-office')
-            replaceInFileRE(path, 'ONLYOFFICE', 'R7-OFFICE')
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
           elif (file_extension == '.md' or file_extension == '.txt'):
             check = readFile(path)
             if (re.search(r'onlyoffice', check, re.IGNORECASE) or re.search(r'ascensio', check, re.IGNORECASE)):
               delete_file(path)
           elif (file_extension == '.json'):
-            replaceInFileRE(path, 'onlyoffice', 'r7-office')
-            replaceInFileRE(path, 'ONLYOFFICE', 'R7-OFFICE')
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
 
 def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
   old_cur = os.getcwd()
@@ -1355,7 +1355,7 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
   delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
   branding = config.option("branding")
   if (not "" == branding and not "onlyoffice" == branding):
-    check_correct_plugins(os.path.normpath(out_dir))
+    check_correct_plugins(os.path.normpath(out_dir), branding=branding)
   return
 
 def correctPathForBuilder(path):

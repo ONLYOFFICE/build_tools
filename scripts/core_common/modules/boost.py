@@ -101,9 +101,15 @@ def make():
     base.copy_files(directory_build + "/linux_arm64/*.a", directory_build)
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
+    old_cur2 = os.getcwd()
     clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
+    os.chdir(old_cur2)
+
+  if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios_xcframework"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios_simulator", "xcframework_platform_ios_simulator")
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios")
 
   if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])

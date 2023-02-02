@@ -51,22 +51,12 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DocxRenderer")
+    base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
 
     if (0 == platform.find("win") or 0 == platform.find("linux") or 0 == platform.find("mac")):
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
     else:
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
-
-    if ("ios" == platform) and config.check_option("config", "bundle_dylibs") and config.check_option("config", "simulator"):
-      exclude_arch(root_dir, ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfFile", 
-        "DjVuFile", "XpsFile", "HtmlFile2", "HtmlRenderer", "doctrenderer",
-        "Fb2File", "EpubFile", "x2t"])
-
-    if ("ios" == platform):
-      if (config.check_option("config", "bundle_dylibs")):
-        base.convert_ios_framework_to_xcframework_folder(root_dir,
-          ["kernel", "kernel_network", "UnicodeConverter", "graphics", "PdfFile", "DjVuFile", "XpsFile", 
-          "HtmlFile2", "HtmlRenderer", "doctrenderer", "Fb2File", "EpubFile", "DocxRenderer", "x2t"])
 
     # icu
     if (0 == platform.find("win")):

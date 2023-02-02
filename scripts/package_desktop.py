@@ -61,6 +61,7 @@ def make_windows():
   package_name = branding.desktop_package_name
   package_version = common.version + "." + common.build
   source_dir = "..\\..\\..\\..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  source_help_dir = source_dir + "-help"
   arch_list = {
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
@@ -102,14 +103,17 @@ def make_windows():
 
   if not vcdl:
     utils.set_summary("desktop inno build", False)
-    # utils.set_summary("desktop inno help build", False)
+    utils.set_summary("desktop inno help build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
     utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()
-  # make_inno_help()
+
+  if branding.onlyoffice and common.platform in ["windows_x64", "windows_x86"]:
+    make_inno_help()
+
   make_inno_update()
 
   if common.platform == "windows_x64":
@@ -288,7 +292,6 @@ def make_winsparkle_files():
 
     if utils.is_exist(changes_file):
       changes_result = utils.cmd_output(*args, verbose=True)
-      print(changes_result)
       utils.write_file(changes, changes_result)
     else:
       utils.log("! file not exist: " + changes_file)
@@ -419,7 +422,7 @@ def make_macos():
   lane = "release_" + suffix
   scheme = package_name + "-" + suffix
 
-  utils.set_cwd(build_dir)
+  utils.set_cwd(branding_dir)
 
   if common.clean:
     utils.log("\n=== Clean\n")
@@ -513,8 +516,7 @@ def make_sparkle_updates():
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
       + updates_dir \
       + " --download-url-prefix " + sparkle_base_url \
-      + " --release-notes-url-prefix " + sparkle_base_url \
-      + " 2>&1 | grep -v xar_prop_serializable",
+      + " --release-notes-url-prefix " + sparkle_base_url,
       verbose=True
   )
   utils.set_summary("desktop sparkle files build", ret)

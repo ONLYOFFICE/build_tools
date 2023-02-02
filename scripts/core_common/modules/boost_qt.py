@@ -7,7 +7,7 @@ import base
 import os
 import build
 
-def make(src_dir, modules, build_platform="android"):
+def make(src_dir, modules, build_platform="android", qmake_addon=""):
   old_cur = os.getcwd()
 
   print("boost-headers...")
@@ -43,7 +43,7 @@ def make(src_dir, modules, build_platform="android"):
     pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/" + build_platform + "/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
     os.chdir(module_dir)
-    build.make_pro_file("./", module + ".pro")
+    build.make_pro_file("./", module + ".pro", qmake_addon)
   
   os.chdir(old_cur)
   return

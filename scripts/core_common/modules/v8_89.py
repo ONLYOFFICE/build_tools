@@ -70,12 +70,14 @@ def make():
 
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
+    base.copy_dir("./v8/third_party", "./v8/third_party_new")
     if ("windows" == base.host_platform()):
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
     base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
     base.cmd("gclient", ["sync", "--force"], True)
+    base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")

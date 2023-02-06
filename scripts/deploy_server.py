@@ -130,6 +130,10 @@ def make():
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
 
     base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins")
+    license = base.readFileLicence(git_dir + "/sdkjs/deploy/sdkjs/word/sdk-all-min.js")
+    base.correct_plugins_branding(root_dir + "/sdkjs-plugins", license=license)
+    print(license)
+    print(root_dir + "/sdkjs-plugins")
     
     # tools
     tools_dir = root_dir + "/server/tools"

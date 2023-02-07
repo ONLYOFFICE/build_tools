@@ -1325,14 +1325,6 @@ def change_plugin_license(path, license, start, end, encoding='utf8'):
         file.close()
         replaceInFile(path, old_license, license)
 
-# ATTENTION sdkjs-plugins\wordpress\scripts\wordpress.js -- changed proxy (Can kill the plugin)
-# ATTENTION sdkjs-plugins\easybib\scripts\easybibhelper.js -- changed proxy (Can kill the plugin)
-# ATTENTION sdkjs-plugins\deepl\index.html -- changed link to Learn More
-# ATTENTION sdkjs-plugins\chess\index_about.html -- changed link to Source Code
-# ATTENTION sdkjs-plugins\easybib\index.html -- changed link to Learn More
-# ATTENTION sdkjs-plugins\macros\config.json -- changed link to API at "help"
-# ATTENTION sdkjs-plugins\wordpress\index.html -- changed link to Learn More
-# ATTENTION sdkjs-plugins\marketplace\index.html -- changed link 
 def check_correct_plugins(dir, license = '', branding=''):
   js_license = license
   html_license = license.replace('/*', '<!--')
@@ -1367,6 +1359,14 @@ def check_correct_plugins(dir, license = '', branding=''):
             replaceInFileRE(path, 'onlyoffice', branding.lower())
             replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
 
+# ATTENTION sdkjs-plugins\wordpress\scripts\wordpress.js -- changed proxy | https://onlyoffice-proxy.herokuapp.com/https://public-api.wordpress.com/oauth2/token | (Can kill the plugin)
+# ATTENTION sdkjs-plugins\wordpress\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-wordpress/tree/develop#configuration |
+# ATTENTION sdkjs-plugins\easybib\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-mendeley/tree/master#configuration |
+# ATTENTION sdkjs-plugins\easybib\scripts\easybibhelper.js -- changed proxy | https://onlyoffice-proxy.herokuapp.com/ | (Can kill the plugin)
+# ATTENTION sdkjs-plugins\deepl\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-deepl/tree/develop#configuration |
+# ATTENTION sdkjs-plugins\chess\index_about.html -- changed link to Source Code | https://github.com/ONLYOFFICE/onlyoffice.github.io/tree/master/sdkjs-plugins/content/chess |
+# ATTENTION sdkjs-plugins\macros\config.json -- changed link to API at "help" | https://api.onlyoffice.com/plugin/macros |
+# ATTENTION sdkjs-plugins\marketplace\index.html -- changed link | https://onlyoffice.github.io/store/index.html |
 def correct_plugins_branding(out_dir, license):
   branding = config.option("branding")
   if not "" == branding and not "onlyoffice" == branding:

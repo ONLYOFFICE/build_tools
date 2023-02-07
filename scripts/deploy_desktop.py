@@ -222,7 +222,7 @@ def make():
 
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
     base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
-    license = base.readFileLicence(base_dir + "/editors/sdkjs/word/sdk-all-min.js")
+    license = base.readFileLicence(root_dir + "/editors/sdkjs/word/sdk-all-min.js")
     base.correct_plugins_branding(root_dir + '/editors/sdkjs-plugins', license=license)
 
     isUseJSC = False

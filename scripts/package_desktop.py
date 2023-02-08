@@ -117,7 +117,7 @@ def make_windows():
   make_inno_update()
 
   if common.platform == "windows_x64":
-    make_winsparkle_files()
+    make_update_files()
 
   if common.platform in ["windows_x64", "windows_x86"]:
     make_advinst()
@@ -229,7 +229,7 @@ def make_inno_help():
 
 def make_inno_update():
   utils.log_h2("desktop inno update build")
-  utils.log_h2(inno_update_file)
+  utils.log_h3(inno_update_file)
 
   args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
   ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
@@ -245,64 +245,68 @@ def make_inno_update():
     utils.set_summary("desktop inno update deploy", ret)
   return
 
-def make_winsparkle_files():
-  utils.log_h2("desktop winsparkle files build")
+def make_update_files():
+  utils.log_h2("desktop update files build")
 
   if branding.onlyoffice:
-    awk_branding = "update/branding.awk"
+    changes_dir = "update\\changes\\" + common.version
   else:
-    awk_branding = "../../../../" + common.branding + \
-        "/desktop-apps/win-linux/package/windows/update/branding.awk"
-  awk_args = [
-    "-v", "Version=" + common.version,
-    "-v", "Build=" + common.build,
-    "-v", "Branch=" + common.channel,
-    "-v", "Timestamp=" + common.timestamp,
-    "-i", awk_branding
+    changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
+        "win-linux\\package\\windows\\update\\changes\\" + common.version
+  for lang, base in branding.desktop_update_changes_list.items():
+    utils.log_h3("changes " + lang + " html")
+    utils.copy_file(changes_dir + "\\" + lang + ".html", "update\\" + base + ".html")
+
+  appcast_args = [
+    "-Version", package_version,
+    "-Timestamp", common.timestamp
+  ]
+  if branding.onlyoffice:
+    appcast_args.append("-Multilang")
+  appcast_prod_args = [
+    "-UpdatesUrlPrefix", branding.desktop_updates_url,
+    "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
+  ]
+  appcast_test_base_url = "%s/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
+  appcast_test_args = [
+    "-UpdatesUrlPrefix", appcast_test_base_url,
+    "-ReleaseNotesUrlPrefix", appcast_test_base_url
   ]
 
-  appcast = "update/appcast.xml"
-  utils.log_h3(appcast)
-  args = ["env", "LANG=en_US.UTF-8", "awk", "-v", "Prod=1"] + \
-      awk_args + ["-f", "update/appcast.xml.awk"]
-  appcast_result = utils.cmd_output(*args, verbose=True)
-  utils.write_file(appcast, appcast_result)
-
-  appcast_test = "update/appcast-test.xml"
-  utils.log_h3(appcast_test)
-  args = ["env", "LANG=en_US.UTF-8", "awk"] + \
-      awk_args + ["-f", "update/appcast.xml.awk"]
-  appcast_result = utils.cmd_output(*args, verbose=True)
-  utils.write_file(appcast_test, appcast_result)
-
-  if branding.onlyoffice:
-    changes_dir = "update/changes/" + common.version
-  else:
-    changes_dir = "../../../../" + common.branding + \
-        "/desktop-apps/win-linux/package/windows/update/changes/" + common.version
-  for lang, base in branding.desktop_update_changes_list.items():
-    changes = "update/%s.html" % base
-    if   lang == "en": encoding = "en_US.UTF-8"
-    elif lang == "ru": encoding = "ru_RU.UTF-8"
-    utils.log_h3(changes)
-    changes_file = "%s/%s.html" % (changes_dir, lang)
-    args = ["env", "LANG=" + encoding, "awk"] + awk_args + \
-      ["-f", "update/changes.html.awk", changes_file]
-
-    if utils.is_exist(changes_file):
-      changes_result = utils.cmd_output(*args, verbose=True)
-      utils.write_file(changes, changes_result)
-    else:
-      utils.log("! file not exist: " + changes_file)
+  utils.log_h3("appcast prod json")
+  utils.ps1(
+      "update\\make_appcast.ps1",
+      appcast_args + appcast_prod_args,
+      creates="update\\appcast.json", verbose=True
+  )
+  utils.log_h3("appcast prod xml")
+  utils.ps1(
+      "update\\make_appcast_xml.ps1",
+      appcast_args + appcast_prod_args,
+      creates="update\\appcast.xml", verbose=True
+  )
+  utils.log_h3("appcast test json")
+  utils.ps1(
+      "update\\make_appcast.ps1",
+      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
+      creates="update\\appcast-test.json", verbose=True
+  )
+  utils.log_h3("appcast test xml")
+  utils.ps1(
+      "update\\make_appcast_xml.ps1",
+      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.xml"],
+      creates="update\\appcast-test.xml", verbose=True
+  )
 
   if common.deploy:
-    utils.log_h2("desktop winsparkle files deploy")
+    utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
-        utils.glob_path("update/*.xml") + utils.glob_path("update/*.html"),
+        utils.glob_path("update/*.json") + utils.glob_path("update/*.xml") + \
+            utils.glob_path("update/*.html"),
         "win/inno/%s/%s/" % (common.version, common.build),
-        "WinSparkle"
+        "Update"
     )
-    utils.set_summary("desktop winsparkle files deploy", ret)
+    utils.set_summary("desktop update files deploy", ret)
   return
 
 def make_advinst():

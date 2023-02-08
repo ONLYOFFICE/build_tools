@@ -11,6 +11,7 @@ cert_name = "Ascensio System SIA"
 
 s3_bucket = "repo-doc-onlyoffice-com"
 s3_region = "eu-west-1"
+s3_base_url = "https://s3.eu-west-1.amazonaws.com/repo-doc-onlyoffice-com"
 
 if utils.is_windows():
   desktop_product_name = "Desktop Editors"
@@ -21,6 +22,8 @@ if utils.is_windows():
     "en": "changes",
     "ru": "changes_ru"
   }
+  desktop_changes_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/changes"
+  desktop_updates_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/updates"
 
 if utils.is_macos():
   desktop_package_name = "ONLYOFFICE"

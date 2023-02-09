@@ -1346,9 +1346,7 @@ def check_correct_plugins(dir, license = '', branding=''):
             replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
           elif (file_extension == '.html'):
             change_plugin_license(path, html_license, start='<!--', end='-->')
-            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js', '../v1/plugins.js')
-            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js', '../v1/plugins-ui.js')
-            replaceInFileRE(path, 'https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css', '../v1/plugins.css')
+            replaceInFile(path, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
             replaceInFileRE(path, 'onlyoffice', branding.lower())
             replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
           elif (file_extension == '.md' or file_extension == '.txt'):

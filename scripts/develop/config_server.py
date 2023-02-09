@@ -156,6 +156,8 @@ def make():
   base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", git_dir + "/sdkjs-plugins/v1/plugins.css")
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
   base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins")
+  license = base.readFileLicence(git_dir + "/sdkjs/word/api.js")
+  base.correct_plugins_branding(git_dir + '/sdkjs-plugins', license=license)
 
   return
 

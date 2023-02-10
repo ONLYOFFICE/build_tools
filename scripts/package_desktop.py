@@ -342,17 +342,22 @@ def make_advinst():
     aic_content += [
       "ResetSig"
     ]
-  if arch == "x86": 
-    aic_content += [
-      "SetPackageType x86",
-      "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
-    ]
   if arch == "x64": 
     aic_content += [
+      "SetPackageType x64 -buildname DefaultBuild",
+      "AddOsLc -buildname DefaultBuild -arch x64",
+      "DelOsLc -buildname DefaultBuild -arch x86",
       'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"',
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
+    ]
+  if arch == "x86": 
+    aic_content += [
+      "SetPackageType x86 -buildname DefaultBuild",
+      "AddOsLc -arch x86 -buildname DefaultBuild",
+      "DelOsLc -arch x64 -buildname DefaultBuild",
+      "SetAppdir -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER] -buildname DefaultBuild",
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if branding.onlyoffice:
     aic_content += [
@@ -382,7 +387,6 @@ def make_advinst():
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [
-    "AddOsLc -buildname DefaultBuild -arch " + arch,
     "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",

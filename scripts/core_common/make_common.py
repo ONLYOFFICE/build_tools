@@ -20,7 +20,6 @@ import hunspell
 import glew
 import harfbuzz
 import hyphen
-import socket_io
 
 def check_android_ndk_macos_arm(dir):
   if base.is_dir(dir + "/darwin-x86_64") and not base.is_dir(dir + "/darwin-arm64"):
@@ -44,10 +43,10 @@ def make():
   hunspell.make(False)
   harfbuzz.make()
   glew.make()
-  hyphen.make()
-  socket_io.make()
+  hyphen.make()  
   
   if config.check_option("module", "mobile"):
-    curl.make()
+    if (config.check_option("platform", "android")):
+      curl.make()
     websocket.make()
   return

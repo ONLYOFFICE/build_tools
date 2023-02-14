@@ -267,7 +267,7 @@ def make_update_files():
     "-UpdatesUrlPrefix", branding.desktop_updates_url,
     "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
   ]
-  appcast_test_base_url = "%s/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
+  appcast_test_base_url = "%s/desktop/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
   appcast_test_args = [
     "-UpdatesUrlPrefix", appcast_test_base_url,
     "-ReleaseNotesUrlPrefix", appcast_test_base_url

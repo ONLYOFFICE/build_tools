@@ -452,10 +452,10 @@ def make_macos():
   bundle_version = str(int(release_bundle_version) + 1)
   plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
       % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
-  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ' \
-      + common.version + '" ' + plist_path, verbose=True)
-  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ' \
-      + bundle_version + '" ' + plist_path, verbose=True)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString %s" %s' \
+      % (common.version, plist_path), verbose=True)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
+      % (bundle_version, plist_path), verbose=True)
 
   utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \
         + "\nCURRENT=" + common.version + "(" + bundle_version + ")")

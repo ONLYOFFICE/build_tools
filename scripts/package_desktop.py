@@ -432,41 +432,37 @@ def make_macos():
   utils.set_cwd(branding_dir)
 
   if common.clean:
-    utils.log("\n=== Clean\n")
+    utils.log_h2("clean")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
-  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
-      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
-  current_version = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ' + plist_path,
-    verbose=True).rstrip()
-  current_build = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
-    verbose=True).rstrip()
-  app_version = current_version
-
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
-  release_version = utils.sh_output(
+  release_bundle_version_string = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
-  release_build = utils.sh_output(
+  release_bundle_version = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
 
-  utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
-        + "\nRELEASE=" + release_version + "(" + release_build + ")")
+  app_version = common.version
+  bundle_version = str(int(release_bundle_version) + 1)
+  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
+      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString %s" %s' \
+      % (common.version, plist_path), verbose=True)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
+      % (bundle_version, plist_path), verbose=True)
+
+  utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \
+        + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
   dmg = make_dmg()
   if dmg:
-    if int(current_build) > int(release_build):
-      make_sparkle_updates()
-    else:
-      utils.log(release_build + " <= " + current_build)
+    make_sparkle_updates()
 
   utils.set_cwd(common.workspace_dir)
   return

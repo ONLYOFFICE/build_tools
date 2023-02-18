@@ -25,6 +25,8 @@ def make():
 
   if ("windows" == base.host_platform()):
     platformToolset = "v140"
+    if (config.option("vs-version") == "2017"):
+      platformToolset = "v141"
     if (config.option("vs-version") == "2019"):
       platformToolset = "v142"
     need_platforms = []

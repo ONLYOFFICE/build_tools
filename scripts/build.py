@@ -78,7 +78,7 @@ def make_pro_file(makefiles_dir, pro_file, qmake_config_addon=""):
     else:
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
-      qmake_bat.append("if exist ./" + makefiles_dir + "/build.makefile_" + file_suff + " del /F ./" + makefiles_dir + "/build.makefile_" + file_suff)
+      qmake_bat.append("if exist .\\" + makefiles_dir + "\\build.makefile_" + file_suff + " del /F .\\" + makefiles_dir + "\\build.makefile_" + file_suff)
       qmake_addon_string = ""
       if ("" != config.option("qmake_addon")):
         qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])

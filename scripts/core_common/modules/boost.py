@@ -69,6 +69,10 @@ def make():
     win_toolset = "msvc-14.0"
     win_boot_arg = "vc14"
     win_vs_version = "vc140"
+    if (config.option("vs-version") == "2017"):
+      win_toolset = "msvc-14.1"
+      win_boot_arg = "vc141"
+      win_vs_version = "vc141"
     if (config.option("vs-version") == "2019"):
       win_toolset = "msvc-14.2"
       win_boot_arg = "vc142"

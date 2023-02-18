@@ -71,11 +71,11 @@ make_common.make()
 
 # build updmodule for desktop (only for windows version)
 if config.check_option("module", "desktop"):
-  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://download.onlyoffice.com/install/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "-1/apps")
+  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://www.biz-software.com.cn/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "-1/apps")
 
   if "windows" == base.host_platform():
     config.extend_option("config", "updmodule")
-    config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
+    config.extend_option("qmake_addon", "LINK=https://download.biz-software.com.cn/install/desktop/editors/windows/onlyoffice/appcast.json")
 
 
 

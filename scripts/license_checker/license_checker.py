@@ -2,6 +2,7 @@ import os
 import re
 import enum
 import json
+import codecs
 
 CONFIG_PATH = 'config.json'
 
@@ -30,6 +31,7 @@ class Config(object):
 		ignoreListDir: Ignored folder paths.
 		ignoreListDirName: Ignored folder names.
 		ignoreListFile: Ignored file paths.
+		allowListFile: allow file paths.
 	"""
 	def __init__(self,
 		dir: str,
@@ -37,6 +39,7 @@ class Config(object):
 		startMultiComm: str,
 		endMultiComm: str,
 		prefix: str = '',
+		allowListFile: list[str] = [],
 		ignoreListDir: list[str] = [],
 		ignoreListDirName: list[str] = [],
 		ignoreListFile: list[str] = []) -> None:
@@ -46,6 +49,7 @@ class Config(object):
 		self._startMultiComm = startMultiComm
 		self._endMultiComm = endMultiComm
 		self._prefix = prefix
+		self._allowListFile = allowListFile
 		self._ignoreListDir = ignoreListDir
 		self._ignoreListDirName = ignoreListDirName
 		self._ignoreListFile = ignoreListFile
@@ -60,6 +64,8 @@ class Config(object):
 		return self._endMultiComm
 	def getPrefix(self) -> str:
 		return self._prefix
+	def getAllowListFile(self) -> list[str]:
+		return self._allowListFile
 	def getIgnoreListDir(self) -> list[str]:
 		return self._ignoreListDir
 	def getIgnoreListDirName(self) -> list[str]:
@@ -142,6 +148,8 @@ class Checker(object):
 		return getLicense(start=self._config.getStartMultiComm(), prefix=self._config.getPrefix(), end=self._config.getEndMultiComm())
 	def _checkLine(self, line: str, prefix: str) -> bool:
 		"""Checks if a line has a prefix."""
+		"""Trim to catch invalid license without leading spaces"""
+		prefix = prefix.lstrip()
 		if (re.search(re.escape(prefix), line)):
 			return True
 		else:
@@ -198,13 +206,13 @@ class Checker(object):
 				return Report(pathToFile=pathToFile,
 					error=Error(errorType=ErrorType.INVALID_LICENSE),
 					message=f"Found something similar to the date: {testDate}, but it's not correct. Expected: {licenseDate}")
-		else:
+		elif (invalidLinesCount > 0):
 			return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.INVALID_LICENSE),
 				message=f'Found {invalidLinesCount} wrong lines out of {len(license)}')
 	def checkFile(self, pathToFile: str) -> None:
 		"""Checks a file for a valid license."""
-		with open(pathToFile, 'r', encoding="utf8") as file:
+		with open(pathToFile, 'r', encoding="utf-8-sig") as file:
 			test = self.findLicense(lines=file.readlines())
 			if test:
 				result = self._checkLicense(test=test, pathToFile=pathToFile)
@@ -225,26 +233,37 @@ class Walker(object):
 	def _getFiles(self) -> list[str]:
 		result = []
 		for address, dirs, files in os.walk(self._config.getDir()):
-			for i in self._config.getIgnoreListDirName():
-				if(re.search(re.escape(i), address)):
-					break
+			for i in files:
+				if (os.path.join(address, i) in list(map(lambda x: os.path.normpath(x), self._config.getAllowListFile()))):
+					filename, file_extension = os.path.splitext(i)
+					if file_extension in self._config.getFileExtensions():
+						result.append(os.path.join(address, i))
 			else:
-				for i in self._config.getIgnoreListDir():
-					if(re.search(re.escape(os.path.normpath(i)), address)):
+				for i in self._config.getIgnoreListDirName():
+					if(re.search(re.escape(i), address)):
 						break
 				else:
-					for i in files:
-						if not (os.path.join(address, i) in list(map(lambda x: os.path.normpath(x), self._config.getIgnoreListFile()))):
-							filename, file_extension = os.path.splitext(i)
-							if file_extension in self._config.getFileExtensions():
-								result.append(os.path.join(address, i))
+					for i in self._config.getIgnoreListDir():
+						if(re.search(re.escape(os.path.normpath(i)), address)):
+							break
+					else:
+						for i in files:
+							if not (os.path.join(address, i) in list(map(lambda x: os.path.normpath(x), self._config.getIgnoreListFile()))):
+								filename, file_extension = os.path.splitext(i)
+								if file_extension in self._config.getFileExtensions():
+									result.append(os.path.join(address, i))
 		return result
 	def checkFiles(self) -> list[Report]:
 		files = self._getFiles()
 		for file in files:
 			if (PRINT_CHECKING):
 				print(f'Checking {file}...')
-			self._checker.checkFile(file)
+			# self._checker.checkFile(file)
+			try:
+				self._checker.checkFile(file)
+			except Exception as e:
+				print(file)	
+				print(e)			
 		return self._checker.getReports()
 
 class Fixer(object):
@@ -273,12 +292,15 @@ class Fixer(object):
 		return
 	def _fixLicense(self, pathToFile: str):
 		buffer = []
+		writeEncoding = "utf8";
 		with open(pathToFile, 'r', encoding="utf8") as file:
 			buffer = file.readlines()
+			if buffer and buffer[0].startswith(codecs.decode(codecs.BOM_UTF8)):
+				writeEncoding = "utf-8-sig";
 			oldLicense = self._checker.findLicense(buffer)
 			for i in oldLicense:
 				buffer.remove(i)
-		with open(pathToFile, 'w', encoding="utf8") as file:
+		with open(pathToFile, 'w', encoding=writeEncoding) as file:
 			license = self._checker.getLicense()
 			file.writelines(map(lambda x: "".join([x, '\n']), license))
 			file.writelines(buffer)
@@ -327,12 +349,12 @@ if reports:
 	writeReports(reports=reports)
 	if FIX:
 		fix(walkers=walkers)
-	else:
-		choice = str(input(f'Fix it automatically? [Y/N] ')).lower()
-		if choice == 'y':
-			fix(walkers=walkers)
+	# else:
+		# choice = str(input(f'Fix it automatically? [Y/N] ')).lower()
+		# if choice == 'y':
+			# fix(walkers=walkers)
 else:
 	print('All licenses are ok.')
 
-os.system('pause')
+# os.system('pause')
 

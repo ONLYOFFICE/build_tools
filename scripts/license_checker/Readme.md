@@ -7,6 +7,7 @@
 ## How to use
 
 ### Running
+**Note**: Pyhton 3.9 and above required(otherwise `TypeError: 'type' object is not subscriptable`)
 * Linux
 ```bash
 python3 license_checker.py

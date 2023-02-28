@@ -7,6 +7,90 @@
 	"fix": ["OUTDATED"],
 	"configs": [
 		{
+			"dir": "core",
+			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".cs", ".js", ".m", ".mm", ".license"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"core/build",
+				"core/Common/cfcpp/test",
+				"core/Common/js",
+				"core/DesktopEditor/agg-2.4",
+				"core/DesktopEditor/cximage",
+				"core/DesktopEditor/doctrenderer",
+				"core/DesktopEditor/freetype_names/freetype-2.5.3",
+				"core/DesktopEditor/freetype-2.5.2",
+				"core/DesktopEditor/freetype-2.10.4",
+				"core/DesktopEditor/graphics/pro",
+				"core/DesktopEditor/raster/JBig2",
+				"core/DesktopEditor/raster/Jp2",
+				"core/DesktopEditor/raster/Metafile",
+				"core/DesktopEditor/xml/build",
+				"core/DesktopEditor/xml/libxml2",
+				"core/DesktopEditor/xmlsec",		
+				"core/DjVuFile/libdjvu",
+				"core/DjVuFile/wasm",
+				"core/DocxRenderer",
+				"core/EpubFile",
+				"core/OOXML/PPTXFormat/Limit/pri",
+				"core/Fb2File",
+				"core/HtmlFile2",
+				"core/HtmlFile2",
+				"core/OdfFile/Common/utf8cpp",
+				"core/OfficeUtils/js",
+				"core/OfficeUtils/src/zlib-1.2.11",
+				"core/OOXML/Projects/Linux",
+				"core/PdfFile/lib",
+				"core/UnicodeConverter/icubuilds-mac",
+				"core/UnicodeConverter/icubuilds-win32",
+				"core/Test",
+				"core/X2tConverter/build",
+				"core/X2tConverter/test"
+			],
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor",
+				"3dParty"
+			],
+			"ignoreListFile": [
+				"core/Test/CoAuthoring/settings.js",
+				"core/OdfFile/Projects/Linux/precompiled.h",
+				"core/MsBinaryFile/Projects/XlsFormatLib/Linux/precompiled.h"
+			],
+			"allowListFile": [
+				"core/DesktopEditor/freetype_names/FontMaps/FontMaps.cpp",
+				"core/DesktopEditor/doctrenderer/embed/jsc/jsc_NativeBuilder.mm",
+				"core/Common/3dParty/openssl/test/main.cpp ",
+				"core/Common/3dParty/openssl/common/common_openssl.h",
+				"core/Common/3dParty/openssl/common/common_openssl.cpp"
+			]
+		},
+		{
+			"dir": "core-ext",
+			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"core-ext/AutoTester",
+				"core-ext/cell_android",
+				"core-ext/cell_android",
+				"core-ext/desktop-sdk-private",
+				"core-ext/docbuilder",
+				"core-ext/Registration",
+				"core-ext/slide_android",
+				"core-ext/test",
+				"core-ext/word_android",
+				"core-ext/word_ios"
+			],
+			"ignoreListFile": [
+				"core-ext/native_base/json.hpp",
+				"core-ext/native_base/android_base/libeditors/src/main/cpp/workaround/swab/swab.h"
+			]
+			
+		},
+		{
 			"dir": "sdkjs",
 			"fileExtensions": [".js"],
 			"startMultiComm": "/*",
@@ -15,10 +99,72 @@
 			"ignoreListDir": [
 				"sdkjs/deploy",
 				"sdkjs/develop",
-				"sdkjs/configs",
+				"sdkjs/configs"
+			],
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor"
+			],
+			"ignoreListFile": [
+				"sdkjs/common/externs/jquery-3.2.js",
+				"sdkjs/common/externs/socket.io.js",
+				"sdkjs/common/Native/jquery_native.js",
 				"sdkjs/common/AllFonts.js",
 				"sdkjs/slide/themes/themes.js"
+			]
+		},
+		{
+			"dir": "sdkjs-forms",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor"
+			]
+		},
+		{
+			"dir": "sdkjs-ooxml",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor"
+			]
+		},
+		{
+			"dir": "web-apps",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDirName": [
+				"node_modules",
+				"vendor",
+				"search"
 			],
+			"ignoreListDir": [
+				"web-apps/apps/common/mobile",
+				"web-apps/apps/documenteditor/mobile",
+				"web-apps/apps/spreadsheeteditor/mobile",
+				"web-apps/apps/presentationeditor/mobile",
+				"web-apps/build/plugins/grunt-inline"
+			],
+			"ignoreListFile": [
+				"web-apps/apps/api/documents/api.js",
+				"web-apps/apps/common/main/lib/mods/perfect-scrollbar.js",
+				"web-apps/apps/common/main/lib/core/keymaster.js"
+			]
+		},
+		{
+			"dir": "web-apps-mobile",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -26,6 +172,32 @@
 		},
 		{
 			"dir": "server",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"server/FileConverter/bin"
+			],
+			"ignoreListDirName": [
+				"node_modules"
+			]
+		},
+		{
+			"dir": "server-lockstorage",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDir": [
+				"server/FileConverter/bin"
+			],
+			"ignoreListDirName": [
+				"node_modules"
+			]
+		},
+		{
+			"dir": "server-license",
 			"fileExtensions": [".js"],
 			"startMultiComm": "/*",
 			"endMultiComm": " */",

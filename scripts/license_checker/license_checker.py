@@ -77,7 +77,7 @@ with open(CONFIG_PATH, 'r') as j:
 	_json: dict = json.load(j)
 	BASE_PATH: str = _json.get('basePath') or '../../../'
 	REPORT_FOLDER: str = _json.get('reportFolder') or 'build_tools/scripts/license_checker/reports'
-	LICENSE_TEMPLATE_PATH: str = _json.get('licensePath') or 'build_tools/scripts/license_checker/license_template.txt'
+	LICENSE_TEMPLATE_PATH: str = _json.get('licensePath') or 'build_tools/scripts/license_checker/header.license'
 	if (_json.get('fix')):
 		try:
 			FIX: list[ErrorType] = list(map(lambda x: FIX_TYPES[x], _json.get('fix')))

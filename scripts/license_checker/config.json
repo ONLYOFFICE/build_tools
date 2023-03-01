@@ -1,7 +1,7 @@
 {
 	"basePath": "../../../",
 	"reportFolder": "build_tools/scripts/license_checker/reports",
-	"licensePath": "build_tools/scripts/license_checker/license_template.txt",
+	"licensePath": "build_tools/scripts/license_checker/header.license",
 	"printChecking": false,
 	"printReports": false,
 	"fix": ["OUTDATED"],
@@ -18,35 +18,26 @@
 				"core/Common/js",
 				"core/DesktopEditor/agg-2.4",
 				"core/DesktopEditor/cximage",
-				"core/DesktopEditor/doctrenderer",
 				"core/DesktopEditor/freetype_names/freetype-2.5.3",
 				"core/DesktopEditor/freetype-2.5.2",
 				"core/DesktopEditor/freetype-2.10.4",
-				"core/DesktopEditor/graphics/pro",
 				"core/DesktopEditor/raster/JBig2",
 				"core/DesktopEditor/raster/Jp2",
-				"core/DesktopEditor/raster/Metafile",
-				"core/DesktopEditor/xml/build",
 				"core/DesktopEditor/xml/libxml2",
 				"core/DesktopEditor/xmlsec",		
 				"core/DjVuFile/libdjvu",
 				"core/DjVuFile/wasm",
-				"core/DocxRenderer",
 				"core/EpubFile",
 				"core/OOXML/PPTXFormat/Limit/pri",
 				"core/Fb2File",
 				"core/HtmlFile2",
 				"core/HtmlFile2",
 				"core/OdfFile/Common/utf8cpp",
-				"core/OfficeUtils/js",
+				"core/OfficeUtils/js/emsdk",
 				"core/OfficeUtils/src/zlib-1.2.11",
-				"core/OOXML/Projects/Linux",
 				"core/PdfFile/lib",
 				"core/UnicodeConverter/icubuilds-mac",
-				"core/UnicodeConverter/icubuilds-win32",
-				"core/Test",
-				"core/X2tConverter/build",
-				"core/X2tConverter/test"
+				"core/UnicodeConverter/icubuilds-win32"
 			],
 			"ignoreListDirName": [
 				"node_modules",
@@ -60,7 +51,6 @@
 			],
 			"allowListFile": [
 				"core/DesktopEditor/freetype_names/FontMaps/FontMaps.cpp",
-				"core/DesktopEditor/doctrenderer/embed/jsc/jsc_NativeBuilder.mm",
 				"core/Common/3dParty/openssl/test/main.cpp ",
 				"core/Common/3dParty/openssl/common/common_openssl.h",
 				"core/Common/3dParty/openssl/common/common_openssl.cpp"
@@ -156,7 +146,9 @@
 			"ignoreListFile": [
 				"web-apps/apps/api/documents/api.js",
 				"web-apps/apps/common/main/lib/mods/perfect-scrollbar.js",
-				"web-apps/apps/common/main/lib/core/keymaster.js"
+				"web-apps/apps/common/main/lib/core/application.js",
+				"web-apps/apps/common/main/lib/core/keymaster.js",
+				"web-apps/apps/presentationeditor/embed/resources/less/watch.js"
 			]
 		},
 		{
@@ -207,6 +199,24 @@
 			],
 			"ignoreListDirName": [
 				"node_modules"
+			]
+		},
+		{
+			"dir": "editors-ios",
+			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
+			"ignoreListDirName": [
+				"vendor",
+				"Vendor",
+				"3dParty"
+			],
+			"allowListFile": [
+				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableArray.h",
+				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableArray.m",
+				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.h",
+				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.m"
 			]
 		}
 	]

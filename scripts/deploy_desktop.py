@@ -190,16 +190,14 @@ def make():
     root_help_dir = root_dir + "-help"
     if (base.is_dir(root_help_dir)):
       base.delete_dir(root_help_dir)
-    for i in ["documenteditor", "presentationeditor", "spreadsheeteditor"]:
+    for i in ["common", "documenteditor", "presentationeditor", "spreadsheeteditor"]:
       base.copy_dir(
           base_dir + "/js/" + branding + "/desktop/web-apps/apps/%s/main/resources/help" % i,
           root_help_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
 
-    if ("1" != config.option("preinstalled-help") and not isWindowsXP):
-      # remove help from install until web-apps containes help
-      base.delete_dir(root_dir + "/editors/web-apps/apps/documenteditor/main/resources/help")
-      base.delete_dir(root_dir + "/editors/web-apps/apps/presentationeditor/main/resources/help")
-      base.delete_dir(root_dir + "/editors/web-apps/apps/spreadsheeteditor/main/resources/help")
+      if ("1" != config.option("preinstalled-help") and not isWindowsXP):
+        # remove help from install until web-apps containes help
+        base.delete_dir(root_dir + "/editors/web-apps/apps/%s/main/resources/help")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)

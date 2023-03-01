@@ -133,7 +133,7 @@ def get_build_param(minimize=True):
 def build_sdk_desktop(directory):
   #_run_npm_cli(directory)
   _run_npm(directory)  
-  _run_grunt(directory, get_build_param() + ["--desktop=true"] + base.sdkjs_addons_param() + base.sdkjs_addons_desktop_param())
+  _run_grunt(directory, get_build_param() + ["--desktop=true"] + base.sdkjs_addons_param() + base.sdkjs_addons_desktop_param() + ["--map"])
   return
 
 def build_sdk_builder(directory):

@@ -139,7 +139,7 @@ def build_sdk_desktop(directory):
 def build_sdk_builder(directory):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, get_build_param() + base.sdkjs_addons_param())
+  _run_grunt(directory, get_build_param() + base.sdkjs_addons_param() + ["--map"])
   return
 
 def build_sdk_native(directory, minimize=True):

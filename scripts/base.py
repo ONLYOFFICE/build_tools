@@ -266,11 +266,11 @@ def replaceInFile(path, text, textReplace):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with codecs.open(get_path(path), "r") as file:
+  with open(get_path(path), "r") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with codecs.open(get_path(path), "w") as file:
+  with open(get_path(path), "w") as file:
     file.write(filedata)
   return
 def replaceInFileRE(path, pattern, textReplace):
@@ -1359,7 +1359,7 @@ def restorePathForBuilder(new_path):
   old_path = new_path[:-4]
   delete_file(old_path)
   copy_file(new_path, old_path)
-  delete_file(new_path)
+  delete_file(new_path);
   return
 
 def generate_check_linux_system(build_tools_dir, out_dir):

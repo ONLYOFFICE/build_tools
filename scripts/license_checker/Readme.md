@@ -9,7 +9,8 @@ licenses inside specified code files.
 
 ### Running
 
-**Note**: Pyhton 3.9 and above required(otherwise `TypeError: 'type' object is not subscriptable`)
+**Note**: Pyhton 3.9 and above required
+(otherwise `TypeError: 'type' object is not subscriptable`)
 
 * Linux
 
@@ -71,7 +72,7 @@ being checked to the console.
   "printChecking": false
   ```
 
-* `printReports` specifies whether to output 
+* `printReports` specifies whether to output
 reports to the console.
 **For example:**
 

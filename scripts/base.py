@@ -1360,7 +1360,7 @@ def restorePathForBuilder(new_path):
   old_path = new_path[:-4]
   delete_file(old_path)
   copy_file(new_path, old_path)
-  delete_file(new_path);
+  delete_file(new_path)
   return
 
 def generate_check_linux_system(build_tools_dir, out_dir):

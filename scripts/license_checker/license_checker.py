@@ -292,11 +292,11 @@ class Fixer(object):
 		return
 	def _fixLicense(self, pathToFile: str):
 		buffer = []
-		writeEncoding = "utf8";
+		writeEncoding = "utf8"
 		with open(pathToFile, 'r', encoding="utf8") as file:
 			buffer = file.readlines()
 			if buffer and buffer[0].startswith(codecs.decode(codecs.BOM_UTF8)):
-				writeEncoding = "utf-8-sig";
+				writeEncoding = "utf-8-sig"
 			oldLicense = self._checker.findLicense(buffer)
 			for i in oldLicense:
 				buffer.remove(i)

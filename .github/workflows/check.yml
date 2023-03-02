@@ -5,8 +5,7 @@ on:
   push:
     paths:
       - '*.md'
-      - 'develop/**.md'
-      - 'scripts/**.md'
+      - 'develop/*.md'
 
 jobs:
   markdownlint:
@@ -15,5 +14,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: DavidAnson/markdownlint-cli2-action@v9
         with:
-          globs: '**.md,develop/**.md,scripts/**.md'
+          globs: '*.md,develop/*.md'
           separator: ','

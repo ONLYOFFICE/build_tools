@@ -2,20 +2,26 @@
 
 ## Overview
 
-**license_checker** allow you to automatically check licenses inside specified code files.
+**license_checker** allow you to automatically check\
+licenses inside specified code files.
 
 ## How to use
 
 ### Running
+
 **Note**: Pyhton 3.9 and above required(otherwise `TypeError: 'type' object is not subscriptable`)
+
 * Linux
-```bash
-python3 license_checker.py
-```
+
+    ```bash
+    python3 license_checker.py
+    ```
+
 * Windows
-```bash
-python license_checker.py
-```
+
+    ```bash
+    python license_checker.py
+    ```
 
 ## How to configure
 The checker settings are specified in the `config.json`.
@@ -26,31 +32,42 @@ The license template is a plain text file where the license text is indicated as
 
 ### How to configure `config.json`
 #### Сonfig parameters
+
 * `basePath` specifies which folder the paths will be relative to.\
 **For example:**
+
     ```
     "basePath": "../../../"
     ```
+
 * `reportFolder` specifies in which folder to save text files with reports.\
 **For example:**
+
     ```
     "reportFolder": "build_tools/scripts/license_checker/reports"
     ```
+
 * `licensePath` specifies the path to the license template.\
 **For example:**
+
     ```
     "licensePath": "build_tools/scripts/license_checker/license_template.txt"
     ```
+
 * `printChecking` specifies whether to output information about which file is being checked to the console.\
 **For example:**
+
     ```
     "printChecking": false
     ```
+
 * `printReports` specifies whether to output reports to the console.\
 **For example:**
+
     ```
     "printReports": false
     ```
+
 * `fix` specifies which categories of reports should be repaired automatically.\
 Possible array values:\
 `"OUTDATED"`,\

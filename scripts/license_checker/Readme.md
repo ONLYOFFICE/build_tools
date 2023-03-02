@@ -118,5 +118,4 @@ Possible array values:\
 			]
         ```
     Any number of configurations can be specified, they can overlap if we need to check files in the same folder in different ways.
-    test
     

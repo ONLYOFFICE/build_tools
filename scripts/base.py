@@ -261,19 +261,18 @@ def copy_exe(src, dst, name):
   copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
   return
 
-def replaceInFile(path, text, textReplace, encoding='utf-8'):
+def replaceInFile(path, text, textReplace):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with codecs.open(get_path(path), "r", encoding) as file:
+  with codecs.open(get_path(path), "r") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with codecs.open(get_path(path), "w", encoding) as file:
+  with codecs.open(get_path(path), "w") as file:
     file.write(filedata)
   return
-
 def replaceInFileRE(path, pattern, textReplace):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)

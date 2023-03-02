@@ -61,6 +61,7 @@ def make_windows():
   package_name = branding.desktop_package_name
   package_version = common.version + "." + common.build
   source_dir = "..\\..\\..\\..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
+  source_help_dir = source_dir + "-help"
   arch_list = {
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
@@ -102,18 +103,21 @@ def make_windows():
 
   if not vcdl:
     utils.set_summary("desktop inno build", False)
-    # utils.set_summary("desktop inno help build", False)
+    utils.set_summary("desktop inno help build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
     utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()
-  # make_inno_help()
+
+  if branding.onlyoffice and common.platform in ["windows_x64", "windows_x86"]:
+    make_inno_help()
+
   make_inno_update()
 
   if common.platform == "windows_x64":
-    make_winsparkle_files()
+    make_update_files()
 
   if common.platform in ["windows_x64", "windows_x86"]:
     make_advinst()
@@ -225,11 +229,13 @@ def make_inno_help():
 
 def make_inno_update():
   utils.log_h2("desktop inno update build")
-  utils.log_h2(inno_update_file)
+  utils.log_h3(inno_update_file)
 
-  args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
-  ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
-  utils.set_summary("desktop inno update build", ret)
+  # args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
+  # ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
+  # utils.set_summary("desktop inno update build", ret)
+  ret = True
+  utils.copy_file(inno_file, inno_update_file)
 
   if common.deploy and ret:
     utils.log_h2("desktop inno update deploy")
@@ -241,65 +247,68 @@ def make_inno_update():
     utils.set_summary("desktop inno update deploy", ret)
   return
 
-def make_winsparkle_files():
-  utils.log_h2("desktop winsparkle files build")
+def make_update_files():
+  utils.log_h2("desktop update files build")
 
   if branding.onlyoffice:
-    awk_branding = "update/branding.awk"
+    changes_dir = "update\\changes\\" + common.version
   else:
-    awk_branding = "../../../../" + common.branding + \
-        "/desktop-apps/win-linux/package/windows/update/branding.awk"
-  awk_args = [
-    "-v", "Version=" + common.version,
-    "-v", "Build=" + common.build,
-    "-v", "Branch=" + common.channel,
-    "-v", "Timestamp=" + common.timestamp,
-    "-i", awk_branding
+    changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
+        "win-linux\\package\\windows\\update\\changes\\" + common.version
+  for lang, base in branding.desktop_update_changes_list.items():
+    utils.log_h3("changes " + lang + " html")
+    utils.copy_file(changes_dir + "\\" + lang + ".html", "update\\" + base + ".html")
+
+  appcast_args = [
+    "-Version", package_version,
+    "-Timestamp", common.timestamp
+  ]
+  if branding.onlyoffice:
+    appcast_args.append("-Multilang")
+  appcast_prod_args = [
+    "-UpdatesUrlPrefix", branding.desktop_updates_url,
+    "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
+  ]
+  appcast_test_base_url = "%s/desktop/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
+  appcast_test_args = [
+    "-UpdatesUrlPrefix", appcast_test_base_url,
+    "-ReleaseNotesUrlPrefix", appcast_test_base_url
   ]
 
-  appcast = "update/appcast.xml"
-  utils.log_h3(appcast)
-  args = ["env", "LANG=en_US.UTF-8", "awk", "-v", "Prod=1"] + \
-      awk_args + ["-f", "update/appcast.xml.awk"]
-  appcast_result = utils.cmd_output(*args, verbose=True)
-  utils.write_file(appcast, appcast_result)
-
-  appcast_test = "update/appcast-test.xml"
-  utils.log_h3(appcast_test)
-  args = ["env", "LANG=en_US.UTF-8", "awk"] + \
-      awk_args + ["-f", "update/appcast.xml.awk"]
-  appcast_result = utils.cmd_output(*args, verbose=True)
-  utils.write_file(appcast_test, appcast_result)
-
-  if branding.onlyoffice:
-    changes_dir = "update/changes/" + common.version
-  else:
-    changes_dir = "../../../../" + common.branding + \
-        "/desktop-apps/win-linux/package/windows/update/changes/" + common.version
-  for lang, base in branding.desktop_update_changes_list.items():
-    changes = "update/%s.html" % base
-    if   lang == "en": encoding = "en_US.UTF-8"
-    elif lang == "ru": encoding = "ru_RU.UTF-8"
-    utils.log_h3(changes)
-    changes_file = "%s/%s.html" % (changes_dir, lang)
-    args = ["env", "LANG=" + encoding, "awk"] + awk_args + \
-      ["-f", "update/changes.html.awk", changes_file]
-
-    if utils.is_exist(changes_file):
-      changes_result = utils.cmd_output(*args, verbose=True)
-      print(changes_result)
-      utils.write_file(changes, changes_result)
-    else:
-      utils.log("! file not exist: " + changes_file)
+  utils.log_h3("appcast prod json")
+  utils.ps1(
+      "update\\make_appcast.ps1",
+      appcast_args + appcast_prod_args,
+      creates="update\\appcast.json", verbose=True
+  )
+  utils.log_h3("appcast prod xml")
+  utils.ps1(
+      "update\\make_appcast_xml.ps1",
+      appcast_args + appcast_prod_args,
+      creates="update\\appcast.xml", verbose=True
+  )
+  utils.log_h3("appcast test json")
+  utils.ps1(
+      "update\\make_appcast.ps1",
+      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
+      creates="update\\appcast-test.json", verbose=True
+  )
+  utils.log_h3("appcast test xml")
+  utils.ps1(
+      "update\\make_appcast_xml.ps1",
+      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.xml"],
+      creates="update\\appcast-test.xml", verbose=True
+  )
 
   if common.deploy:
-    utils.log_h2("desktop winsparkle files deploy")
+    utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
-        utils.glob_path("update/*.xml") + utils.glob_path("update/*.html"),
+        utils.glob_path("update/*.json") + utils.glob_path("update/*.xml") + \
+            utils.glob_path("update/*.html"),
         "win/inno/%s/%s/" % (common.version, common.build),
-        "WinSparkle"
+        "Update"
     )
-    utils.set_summary("desktop winsparkle files deploy", ret)
+    utils.set_summary("desktop update files deploy", ret)
   return
 
 def make_advinst():
@@ -335,17 +344,22 @@ def make_advinst():
     aic_content += [
       "ResetSig"
     ]
-  if arch == "x86": 
-    aic_content += [
-      "SetPackageType x86",
-      "SetAppdir -buildname DefaultBuild -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER]",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
-    ]
   if arch == "x64": 
     aic_content += [
+      "SetPackageType x64 -buildname DefaultBuild",
+      "AddOsLc -buildname DefaultBuild -arch x64",
+      "DelOsLc -buildname DefaultBuild -arch x86",
       'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"',
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
+    ]
+  if arch == "x86": 
+    aic_content += [
+      "SetPackageType x86 -buildname DefaultBuild",
+      "AddOsLc -arch x86 -buildname DefaultBuild",
+      "DelOsLc -arch x64 -buildname DefaultBuild",
+      "SetAppdir -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER] -buildname DefaultBuild",
+      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
+      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if branding.onlyoffice:
     aic_content += [
@@ -375,7 +389,6 @@ def make_advinst():
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [
-    "AddOsLc -buildname DefaultBuild -arch " + arch,
     "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
@@ -418,44 +431,40 @@ def make_macos():
   lane = "release_" + suffix
   scheme = package_name + "-" + suffix
 
-  utils.set_cwd(build_dir)
+  utils.set_cwd(branding_dir)
 
   if common.clean:
-    utils.log("\n=== Clean\n")
+    utils.log_h2("clean")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
-  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
-      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
-  current_version = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ' + plist_path,
-    verbose=True).rstrip()
-  current_build = utils.sh_output(
-    '/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ' + plist_path,
-    verbose=True).rstrip()
-  app_version = current_version
-
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
-  release_version = utils.sh_output(
+  release_bundle_version_string = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
-  release_build = utils.sh_output(
+  release_bundle_version = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
     + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
     + ' | cut -f2 -d\\\"',
     verbose=True).rstrip()
 
-  utils.log("CURRENT=" + current_version + "(" + current_build + ")" \
-        + "\nRELEASE=" + release_version + "(" + release_build + ")")
+  app_version = common.version
+  bundle_version = str(int(release_bundle_version) + 1)
+  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
+      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString %s" %s' \
+      % (common.version, plist_path), verbose=True)
+  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
+      % (bundle_version, plist_path), verbose=True)
+
+  utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \
+        + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
   dmg = make_dmg()
   if dmg:
-    if int(current_build) > int(release_build):
-      make_sparkle_updates()
-    else:
-      utils.log(release_build + " <= " + current_build)
+    make_sparkle_updates()
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -512,8 +521,7 @@ def make_sparkle_updates():
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
       + updates_dir \
       + " --download-url-prefix " + sparkle_base_url \
-      + " --release-notes-url-prefix " + sparkle_base_url \
-      + " 2>&1 | grep -v xar_prop_serializable",
+      + " --release-notes-url-prefix " + sparkle_base_url,
       verbose=True
   )
   utils.set_summary("desktop sparkle files build", ret)

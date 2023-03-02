@@ -75,7 +75,7 @@ if config.check_option("module", "desktop"):
 
   if "windows" == base.host_platform():
     config.extend_option("config", "updmodule")
-    config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
+    config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
 
 
 

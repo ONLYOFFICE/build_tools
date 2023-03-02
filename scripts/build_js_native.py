@@ -31,6 +31,7 @@ def write_version_files(output_dir):
 
 # parse configuration
 config.parse()
+config.parse_defaults()
 config.extend_option("jsminimize", "0")
 
 branding = config.option("branding-name")

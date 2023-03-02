@@ -118,7 +118,9 @@ Possible array values:
     ```
 
   * `endMultiComm` the line that ends the multiline comment.
-  You should carefully consider the formatting of the string, all spaces are taken into account. This affects how the license check works.
+  You should carefully consider the formatting
+  of the string, all spaces are taken into account.
+  This affects how the license check works.
   **For example:**
 
     ```json
@@ -127,7 +129,9 @@ Possible array values:
 
     Space at the beginning for a prettier comment.
 
-  * `prefix` the line on which each comment line will begin, except for the beginning and end.
+  * `prefix` the line on which each comment
+  line will begin, except for the
+  beginning and end.
   **For example:**
 
       ```json
@@ -167,4 +171,7 @@ Possible array values:
     ]
     ```
 
-  Any number of configurations can be specified, they can overlap if we need to check files in the same folder in different ways.
+  Any number of configurations can be
+  specified, they can overlap
+  if we need to check
+  files in the same folder in different ways.

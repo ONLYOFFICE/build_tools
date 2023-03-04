@@ -97,10 +97,14 @@ def make():
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
     # cef
+    build_dir_name = "build"
+    if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
+      build_dir_name = "build_107"
+
     if not isWindowsXP:
-      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/" + build_dir_name + "/*", root_dir)
     else:
-      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/" + build_dir_name + "/*", root_dir)
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):

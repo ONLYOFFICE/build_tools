@@ -64,6 +64,10 @@ utils.set_cwd(common.workspace_dir, verbose=True)
 utils.delete_file("deploy.json")
 if "core" in common.targets:
   package_core.make()
+if "closure-maps-os" in common.targets:
+  package_core.deploy_closure_maps("opensource")
+if "closure-maps-com" in common.targets:
+  package_core.deploy_closure_maps("commercial")
 if "desktop" in common.targets:
   package_desktop.make()
 if "builder" in common.targets:

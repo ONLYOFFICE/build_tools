@@ -176,3 +176,5 @@ Possible array values:
   specified, they can overlap
   if we need to check
   files in the same folder in different ways.
+
+  test

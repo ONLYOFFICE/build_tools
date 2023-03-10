@@ -177,4 +177,3 @@ Possible array values:
   if we need to check
   files in the same folder in different ways.
 
-  test

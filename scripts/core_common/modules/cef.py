@@ -15,12 +15,11 @@ def make():
 
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64"]
 
-  url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
-
   for platform in platforms:
     if not config.check_option("platform", platform):
       continue
 
+    url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
     archive_name = "./cef_binary.7z"
 
     if (-1 != platform.find("_xp")):
@@ -39,7 +38,7 @@ def make():
       base.create_dir(platform)
 
     os.chdir(platform)
-
+    
     data_url = base.get_file_last_modified_url(url_platform)
     old_data_url = base.readFile(archive_name_data)
 

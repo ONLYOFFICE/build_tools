@@ -80,6 +80,9 @@ def parse():
   if ("linux" == host_platform) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
     extend_option("config", "v8_version_89")
 
+  if ("linux" == host_platform) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+    extend_option("config", "cef_version_107")
+
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
     extend_option("config", "v8_version_89")
     extend_option("config", "vs2019")

@@ -177,7 +177,7 @@ def make_inno():
     iscc_args.append("/D_WIN_XP=1")
   if common.sign:
     iscc_args.append("/DENABLE_SIGNING=1")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
+    iscc_args.append("/Sbyparam=signtool.exe sign /a /v /n $q" + \
         branding.cert_name + "$q /t " + common.tsa_server + " $f")
   args = ["iscc"] + iscc_args + ["common.iss"]
   ret = utils.cmd(*args, creates=inno_file, verbose=True)
@@ -211,7 +211,7 @@ def make_inno_help():
         utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
   if common.sign:
     args.append("/DENABLE_SIGNING=1")
-    args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
+    args.append("/Sbyparam=signtool.exe sign /a /v /n $q" + \
         branding.cert_name + "$q /t " + common.tsa_server + " $f")
   args.append("help.iss")
   ret = utils.cmd(*args, creates=inno_help_file, verbose=True)

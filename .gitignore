@@ -7,3 +7,4 @@ config
 *.*~
 **~
 *.DS_Store
+scripts/license_checker/reports

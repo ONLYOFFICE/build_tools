@@ -1397,3 +1397,43 @@ def convert_ios_framework_to_xcframework_folder(folder, libs):
   for lib in libs:
     convert_ios_framework_to_xcframework(folder, lib)
   return
+
+def change_elf_rpath(path, origin):
+  tools_dir = get_script_dir() + "/../tools/linux/"
+  result_obj = run_command(tools_dir + "readelf -d '" + path + "' | grep R*PATH")
+  result = result_obj["stdout"]
+  result_error = result_obj["stderr"]
+  if (result_error != ""):
+    return
+  if (-1 != result.find("Error:")) or (-1 != result.find(" ELF ")):
+    return
+  is_rpath = True
+  if (-1 != result.find("Library runpath: [")):
+    is_rpath = False
+  old_path = run_command(tools_dir + "patchelf --print-rpath '" + path + "'")['stdout']
+  if (-1 != old_path.find(origin)):
+    return
+  new_path = old_path
+  new_path = new_path.replace("$ORIGIN", "\$ORIGIN")
+  if ("" != new_path):
+    new_path += ":"
+  new_path += origin
+  if (-1 != old_path.find("$ORIGIN/converter")) or (-1 != path.find("/desktopeditors/converter")):
+    new_path += (":" + origin + "/converter")
+  if (-1 != old_path.find("$ORIGIN/system")):
+    new_path += (":" + origin + "/system")
+  if is_rpath:
+    cmd(tools_dir + "patchelf", ["--force-rpath", "--set-rpath", "'" + new_path + "'", path], True)
+  else:
+    cmd(tools_dir + "patchelf", ["--set-rpath", "'" + new_path + "'", path], True)
+  #print("[" + os.path.basename(path) + "] old: " + old_path + "; new: " + new_path)
+  return
+  
+def correct_elf_rpath_directory(directory, origin, is_recursion = True):
+  for file in glob.glob(directory + "/*"):
+    if is_file(file):
+      change_elf_rpath(file, origin)
+    elif is_dir(file) and is_recursion:
+      correct_elf_rpath_directory(file, origin)
+  return
+

@@ -1399,7 +1399,7 @@ def convert_ios_framework_to_xcframework_folder(folder, libs):
   return
 
 def change_elf_rpath(path, origin):
-  tools_dir = get_script_dir() + "/../tools/linux/"
+  tools_dir = get_script_dir() + "/../tools/linux/elf/"
   result_obj = run_command(tools_dir + "readelf -d '" + path + "' | grep R*PATH")
   result = result_obj["stdout"]
   result_error = result_obj["stderr"]

@@ -1423,9 +1423,9 @@ def change_elf_rpath(path, origin):
   if (-1 != old_path.find("$ORIGIN/system")):
     new_path += (":" + origin + "/system")
   if is_rpath:
-    cmd(tools_dir + "patchelf", ["--force-rpath", "--set-rpath", "'" + new_path + "'", path], True)
+    cmd(tools_dir + "patchelf", ["--force-rpath", "--set-rpath", new_path, path], True)
   else:
-    cmd(tools_dir + "patchelf", ["--set-rpath", "'" + new_path + "'", path], True)
+    cmd(tools_dir + "patchelf", ["--set-rpath", new_path, path], True)
   #print("[" + os.path.basename(path) + "] old: " + old_path + "; new: " + new_path)
   return
   

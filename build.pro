@@ -114,7 +114,7 @@ desktop {
 	!no_desktop_apps {
 		core_windows:addSubProject(projicons,	$$ROOT_DIR/desktop-apps/win-linux/extras/projicons/ProjIcons.pro,\
 							documentscore videoplayer)
-		core_windows:addSubProject(updatedaemon, $$ROOT_DIR/desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro)
+		core_windows:!build_xp:addSubProject(updatedaemon, $$ROOT_DIR/desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro)
 		addSubProject(desktopapp,	$$ROOT_DIR/desktop-apps/win-linux/ASCDocumentEditor.pro,\
 						documentscore videoplayer)
 	}

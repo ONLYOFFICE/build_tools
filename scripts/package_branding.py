@@ -16,7 +16,7 @@ s3_base_url = "https://s3.eu-west-1.amazonaws.com/repo-doc-onlyoffice-com"
 if utils.is_windows():
   desktop_product_name = "Desktop Editors"
   desktop_product_name_s = desktop_product_name.replace(" ","")
-  desktop_package_name = company_name + "_" + desktop_product_name_s
+  desktop_package_name = company_name + "-" + desktop_product_name_s
   desktop_vcredist_list = ["2022"]
   desktop_update_changes_list = {
     "en": "changes",

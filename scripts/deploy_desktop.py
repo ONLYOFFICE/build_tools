@@ -61,8 +61,8 @@ def make():
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "x2t")
 
-    if (native_platform == "linux_64"):
-      base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
+    #if (native_platform == "linux_64"):
+    #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
     if (0 == platform.find("win")):

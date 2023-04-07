@@ -50,16 +50,14 @@ def make_windows():
   company = branding.company_name.lower()
   product = branding.builder_product_name.replace(" ","").lower()
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
-  package_name = company + "_" + product
+  package_name = company + "-" + product
   package_version = common.version + "." + common.build
   suffix = {
     "windows_x64": "x64",
-    "windows_x86": "x86",
-    "windows_x64_xp": "x64_xp",
-    "windows_x86_xp": "x86_xp"
+    "windows_x86": "x86"
   }[common.platform]
-  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
-  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
+  zip_file = "%s-%s-%s-%s.zip" % (company, product, package_version, suffix)
+  inno_file = "%s-%s-%s-%s.exe" % (company, product, package_version, suffix)
 
   if common.clean:
     utils.log_h2("builder clean")

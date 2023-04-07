@@ -75,12 +75,12 @@ def make_windows():
     "windows_x86_xp": "32"
   }
   suffix = arch_list[common.platform]
-  if common.platform.endswith("_xp"): suffix += "_xp"
-  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
-  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
-  inno_help_file = "%s_Help_%s_%s.exe" % (package_name, package_version, suffix)
+  if common.platform.endswith("_xp"): suffix += "-xp"
+  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix
-  advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
+  advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
 
   if common.clean:
     utils.log_h2("desktop clean")

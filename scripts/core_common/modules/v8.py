@@ -181,7 +181,7 @@ def make():
 
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
+      base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false enable_iterator_debugging=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
 
     base.cmd2("gn", ["gen", "out.gn/win_64/release", "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
@@ -189,7 +189,7 @@ def make():
 
   if config.check_option("platform", "win_32"):
     if (-1 != config.option("config").lower().find("debug")):
-      base.cmd2("gn", ["gen", "out.gn/win_32/debug", "--args=\"is_debug=true " + base_args32 + " is_clang=false\""])
+      base.cmd2("gn", ["gen", "out.gn/win_32/debug", "--args=\"is_debug=true " + base_args32 + " is_clang=false enable_iterator_debugging=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
 
     base.cmd2("gn", ["gen", "out.gn/win_32/release", "--args=\"is_debug=false " + base_args32 + " is_clang=false\""])
@@ -273,7 +273,7 @@ def make_xp():
       base.copy_file("v8/build/Release/icudt.dll", "win_64/release/icudt.dll")
    
     if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_64/debug"):
-      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
+      base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "SET CL=\"/D_ITERATOR_DEBUG_LEVEL=0\"", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
       base.create_dir("win_64/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_64/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_64/debug/icudt.dll")
@@ -286,7 +286,7 @@ def make_xp():
       base.copy_file("v8/build/Release/icudt.dll", "win_32/release/icudt.dll")
    
     if (-1 != config.option("config").lower().find("debug")) and not base.is_dir("win_32/debug"):
-      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
+      base.run_as_bat(["call python v8/build/gyp_v8", "call python v8/build/common_xp.py", "SET CL=\"/D_ITERATOR_DEBUG_LEVEL=0\"", "call devenv v8/tools/gyp/v8.sln /Rebuild Debug"])
       base.create_dir("win_32/debug")
       base.copy_files("v8/build/Debug/lib/*", "win_32/debug/")
       base.copy_file("v8/build/Debug/icudt.dll", "win_32/debug/icudt.dll")

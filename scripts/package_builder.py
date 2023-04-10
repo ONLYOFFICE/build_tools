@@ -47,8 +47,8 @@ def make_windows():
   utils.set_cwd("document-builder-package")
 
   prefix = common.platforms[common.platform]["prefix"]
-  company = branding.company_name.lower()
-  product = branding.builder_product_name.replace(" ","").lower()
+  company = branding.company_name
+  product = branding.builder_product_name.replace(" ","")
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
   package_name = company + "-" + product
   package_version = common.version + "." + common.build

@@ -1296,17 +1296,16 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (-1 != config.option("config").find("use_javascript_core")):
     return
   directory_v8 = core_dir + "/Common/3dParty"
+  
   if is_xp:
     directory_v8 += "/v8/v8_xp"
-  
-  if (-1 != config.option("config").lower().find("v8_version_89")) and not is_xp:
-    directory_v8 += "/v8_89/v8/out.gn/"
-  else:
-    directory_v8 += "/v8/v8/out.gn/"
-
-  if is_xp:
     copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
     return
+  
+  if check_option("config", "v8_version_60"):
+    directory_v8 += "/v8/v8/out.gn/"
+  else:
+    directory_v8 += "/v8_89/v8/out.gn/"
 
   if (0 == platform.find("win")):
     copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")

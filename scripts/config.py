@@ -72,29 +72,25 @@ def parse():
   #if check_option("platform", "ios"):
   #  extend_option("config", "core_ios_32")
 
-  # enable v8 8.9 version, if compiler support sources
-  if ("linux" == host_platform) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
-    extend_option("config", "v8_version_89")
-
+  # disable v8 8.9 version, if compiler not support
   if ("linux" == host_platform) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
     extend_option("config", "cef_version_107")
+    extend_option("config", "v8_version_60")
+
+  if check_option("platform", "android"):
     extend_option("config", "v8_version_60")
 
   # check vs-version
   if ("windows" == host_platform) and ("" == option("vs-version")):
     options["vs-version"] = "2019"
-    if check_option("platform", "win_64_xp") or check_option("platform", "win_64_xp"):
+    if check_option("platform", "win_64_xp") or check_option("platform", "win_32_xp"):
       options["vs-version"] = "2015"
 
   if ("windows" == host_platform):
     if ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
-      extend_option("config", "v8_version_89")
     else:
       extend_option("config", "v8_version_60")
-
-  if check_option("platform", "linux_arm64"):
-    extend_option("config", "v8_version_89")
 
   # check vs-path
   if ("windows" == host_platform) and ("" == option("vs-path")):

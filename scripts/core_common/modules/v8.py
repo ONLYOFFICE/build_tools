@@ -68,9 +68,9 @@ def make():
   if ("mac" == base.host_platform()) and (-1 == config.option("config").find("use_v8")):
     return
 
-  use_v8_89 = False
-  if (-1 != config.option("config").lower().find("v8_version_89")):
-    use_v8_89 = True
+  use_v8_89 = True
+  if check_option("config", "v8_version_60"):
+    use_v8_89 = False
 
   if (use_v8_89):
     v8_89.make()

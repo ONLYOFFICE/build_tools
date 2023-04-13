@@ -46,7 +46,7 @@ def make_core():
   else:
     ret = utils.sh(" ".join(args), verbose=True)
   if ret:
-    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z", branding.s3_bucket, branding.s3_region)
+    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
     args = ["aws", "s3", "sync", "--delete",
             "--acl", "public-read", "--no-progress",
             "s3://" + branding.s3_bucket + "/" + dest_version,
@@ -76,7 +76,7 @@ def deploy_closure_maps(license):
     return
 
   utils.log_h2("closure maps " + license + " deploy")
-  dest = "closure-maps/%s/%s/%s/%s" % (branch, common.build, license, common.platform)
+  dest = "closure-maps/%s/%s/%s" % (common.version, common.build, license)
   ret = True
   for file in maps:
     args = ["aws"]

@@ -55,15 +55,14 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DocxRenderer")
-    base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
-
+    
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "x2t")
 
-    if (native_platform == "linux_64"):
-      base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
+    #if (native_platform == "linux_64"):
+    #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
     if (0 == platform.find("win")):
@@ -156,6 +155,8 @@ def make():
 
       if (0 == platform.find("win")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/" + apps_postfix + "/projicons.exe", root_dir + "/DesktopEditors.exe")
+        if not isWindowsXP:
+          base.copy_file(git_dir + "/desktop-apps/win-linux/extras/update-daemon/" + apps_postfix + "/updatesvc.exe", root_dir + "/updatesvc.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors.exe", root_dir + "/editors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
       elif (0 == platform.find("linux")):

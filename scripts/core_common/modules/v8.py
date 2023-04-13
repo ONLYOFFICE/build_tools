@@ -179,6 +179,7 @@ def make():
     base.cmd2("gn", ["gen", "out.gn/mac_64", "--args=\"is_debug=false " + base_args64 + "\""])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
 
+  # add enable_iterator_debugging=false for disable _ITERATOR_DEBUG_LEVEL
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
       base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
@@ -265,6 +266,7 @@ def make_xp():
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
     ]);
 
+  # add "SET CL=\"/D_ITERATOR_DEBUG_LEVEL=0\"" before devenv for disable _ITERATOR_DEBUG_LEVEL in debug
   if config.check_option("platform", "win_64_xp"):
     if not base.is_dir("win_64/release"):
       base.run_as_bat(["call python v8/build/gyp_v8 -Dtarget_arch=x64", "call python v8/build/common_xp.py", "call devenv v8/tools/gyp/v8.sln /Rebuild Release"])

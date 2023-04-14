@@ -1302,7 +1302,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
     return
   
-  if check_option("config", "v8_version_60"):
+  if config.check_option("config", "v8_version_60"):
     directory_v8 += "/v8/v8/out.gn/"
   else:
     directory_v8 += "/v8_89/v8/out.gn/"

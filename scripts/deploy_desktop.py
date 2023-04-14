@@ -6,6 +6,32 @@ import os
 import platform
 import glob
 
+def deploy_marketplace_plugin(git_dir, root_dir):
+  # old manager
+  #base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
+
+  # plugin manager with local paths
+  sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
+  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
+      
+  # store with local paths
+  manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+  
+  store_dir_path = manager_dir + "/store"
+  if base.is_dir(store_dir_path):
+    base.delete_dir(store_dir_path)
+  base.create_dir(store_dir_path)
+  
+  base.copy_dir_content(sys_plugins_dir + "/onlyoffice.github.io/store", store_dir_path, "", ".git")
+  base.delete_dir(store_dir_path + "/plugin")
+  base.delete_file(store_dir_path + "/build.bat")
+  
+  for file in glob.glob(store_dir_path + "/*.html"):
+    base.replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
+      
+  base.delete_dir_with_access_error(sys_plugins_dir + "/onlyoffice.github.io")
+  return
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -218,34 +244,13 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", root_dir + "/editors/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(root_dir + "/editors/sdkjs-plugins")
 
-    ##base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
-    ##base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt", root_dir + "/editors/sdkjs-plugins", "advanced2", True)
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt", root_dir + "/editors/sdkjs-plugins", "advanced2", True)
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
-    ##base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
     
-    # plugin manager with local paths
-    sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
-    base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
-        
-    # store with local paths
-    manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+    deploy_marketplace_plugin(git_dir, root_dir)
     
-    store_dir_path = manager_dir + "/store"
-    if base.is_dir(store_dir_path):
-      base.delete_dir(store_dir_path)
-    base.create_dir(store_dir_path)
-    
-    base.copy_dir_content(sys_plugins_dir + "/onlyoffice.github.io/store", store_dir_path, "", ".git")
-    base.delete_dir(store_dir_path + "/plugin")
-    base.delete_file(store_dir_path + "/build.bat")
-    
-    for file in glob.glob(store_dir_path + "/*.html"):
-        base.replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
-        
-    base.delete_dir_with_access_error(sys_plugins_dir + "/onlyoffice.github.io")
-    
-    #
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
 
     if isWindowsXP:

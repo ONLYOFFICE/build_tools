@@ -92,10 +92,7 @@ def deploy_closure_maps(license):
       upload = utils.sh(" ".join(args), verbose=True)
     ret &= upload
     if upload:
-      utils.add_deploy_data(
-          "core", "Closure maps " + license, file, dest + "/" + file,
-          branding.s3_bucket, branding.s3_region
-      )
+      utils.add_deploy_data("core", "Closure maps " + license, file, dest + "/" + file)
   utils.set_summary("closure maps " + license + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

@@ -69,28 +69,19 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
-  #if check_option("platform", "ios"):
-  #  extend_option("config", "core_ios_32")
-
-  # disable v8 8.9 version, if compiler not support
-  if ("linux" == host_platform) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
-    extend_option("config", "cef_version_107")
-    extend_option("config", "v8_version_60")
-
-  if check_option("platform", "android"):
-    extend_option("config", "v8_version_60")
-
   # check vs-version
   if ("windows" == host_platform) and ("" == option("vs-version")):
     options["vs-version"] = "2019"
     if check_option("platform", "win_64_xp") or check_option("platform", "win_32_xp"):
       options["vs-version"] = "2015"
 
-  if ("windows" == host_platform):
-    if ("2019" == option("vs-version")):
+  if ("windows" == host_platform) and ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
-    else:
-      extend_option("config", "v8_version_60")
+
+  if is_cef_107():
+    extend_option("config", "cef_version_107")
+  if is_v8_60():
+    extend_option("config", "v8_version_60")
 
   # check vs-path
   if ("windows" == host_platform) and ("" == option("vs-path")):
@@ -216,3 +207,23 @@ def parse_defaults():
     else:
       options[name] = defaults_options[name]
   return
+
+def is_cef_107():
+  if ("linux" == host_platform) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+    return True
+  return False
+
+def is_v8_60():
+  if ("linux" == host_platform) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+    return True
+
+  if check_option("platform", "android"):
+    return True
+
+  if ("2015" == option("vs-version")):
+    return True
+
+  if check_option("config", "use_v8"):
+    return True
+
+  return False

@@ -69,7 +69,7 @@ def make():
     return
 
   use_v8_89 = True
-  if check_option("config", "v8_version_60"):
+  if config.check_option("config", "v8_version_60"):
     use_v8_89 = False
 
   if (use_v8_89):

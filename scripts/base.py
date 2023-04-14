@@ -1338,7 +1338,7 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=Fa
   
   if is_replace_paths:
     for file in glob.glob(dst_dir_path + "/*.html"):
-        replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
         
   if is_delete_git_dir:
     delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")

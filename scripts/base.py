@@ -1313,7 +1313,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True):
   old_cur = os.getcwd()
   os.chdir(out_dir)
   git_update("onlyoffice.github.io", False, True)
@@ -1333,9 +1333,14 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
-
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
-  delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  
+  if is_replace_paths:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+        
+  if is_delete_git_dir:
+    delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
   return
 
 def correctPathForBuilder(path):

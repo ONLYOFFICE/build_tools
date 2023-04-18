@@ -142,7 +142,7 @@ Do the following command.
 **Linux or macOS**
 
 ```bash
-sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs\common\apiBase.js
+sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs/common/apiBase.js
 ```
 
 2)Delete browser cache or hard reload the page `Ctrl + Shift + R`
@@ -163,7 +163,7 @@ chart message every time a document is opened.Do the following command
 **Linux or macOS**
 
 ```bash
-sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});#' server\DocService\sources\DocsCoServer.js
+sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});#' server/DocService/sources/DocsCoServer.js
 ```
 
 2)Restart document server process

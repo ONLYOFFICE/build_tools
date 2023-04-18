@@ -95,7 +95,7 @@ def make():
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/converter/icuuc58.dll")
-      base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
+      #base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
 
     if (0 == platform.find("linux")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/converter/libicudata.so.58")

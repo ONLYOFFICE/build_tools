@@ -12,7 +12,7 @@ def deploy_marketplace_plugin(git_dir, root_dir):
 
   # plugin manager with local paths
   sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
-  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
+  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False, "K0R0L")
       
   # store with local paths
   manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"

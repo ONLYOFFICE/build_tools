@@ -129,7 +129,7 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
 
-    base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins")
+    base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins", False, False, True, "K0R0L")
     
     # tools
     tools_dir = root_dir + "/server/tools"

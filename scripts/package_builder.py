@@ -99,7 +99,7 @@ def make_inno():
     args.append("-Sign")
     args.append("-CertName '%s'" % branding.cert_name)
   ret = utils.ps1(
-      ".\\make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
+      "make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
   )
   utils.set_summary("builder inno build", ret)
 

@@ -76,7 +76,7 @@ def make_windows():
   zip_file = "build\\%s-%s-%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
   inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
-  inno_update_file = "update\\editors_update_%s.exe" % suffix
+  inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
   advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
 
   if common.clean:
@@ -117,8 +117,6 @@ def make_windows():
 
   if branding.onlyoffice and common.platform in ["windows_x64", "windows_x86"]:
     make_inno_help()
-
-  make_inno_update()
 
   if common.platform == "windows_x64":
     make_update_files()
@@ -197,6 +195,14 @@ def make_inno():
         "Installer"
     )
     utils.set_summary("desktop inno deploy", ret)
+
+    utils.log_h2("desktop inno update deploy")
+    ret = aws_s3_upload(
+        [inno_file],
+        "win/inno/%s/%s/%s" % (common.version, common.build, inno_update_file),
+        "Installer"
+    )
+    utils.set_summary("desktop inno update deploy", ret)
   return
 
 def make_inno_help():
@@ -231,26 +237,6 @@ def make_inno_help():
         "Installer"
     )
     utils.set_summary("desktop inno help deploy", ret)
-  return
-
-def make_inno_update():
-  utils.log_h2("desktop inno update build")
-  utils.log_h3(inno_update_file)
-
-  # args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
-  # ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
-  # utils.set_summary("desktop inno update build", ret)
-  ret = True
-  utils.copy_file(inno_file, inno_update_file)
-
-  if common.deploy and ret:
-    utils.log_h2("desktop inno update deploy")
-    ret = aws_s3_upload(
-        [inno_update_file],
-        "win/inno/%s/%s/" % (common.version, common.build),
-        "WinSparkle"
-    )
-    utils.set_summary("desktop inno update deploy", ret)
   return
 
 def make_update_files():

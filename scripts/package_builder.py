@@ -89,15 +89,19 @@ def make_inno():
   utils.log_h3(inno_file)
 
   args = [
-    "-Arch " + suffix,
-    "-Version " + common.version,
-    "-Build " + common.build
+    "-Arch", suffix,
+    "-Version", common.version,
+    "-Build", common.build
   ]
   if not branding.onlyoffice:
-    args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
+    args += [
+      "-Branding", "%s\\%s\\document-builder-package\\exe" % (common.workspace_dir, common.branding)
+    ]
   if common.sign:
-    args.append("-Sign")
-    args.append("-CertName '%s'" % branding.cert_name)
+    args += [
+      "-Sign",
+      "-CertName", branding.cert_name
+    ]
   ret = utils.ps1(
       "make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
   )

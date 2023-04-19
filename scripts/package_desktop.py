@@ -73,7 +73,7 @@ def make_windows():
   }
   suffix = arch_list[common.platform]
   if common.platform.endswith("_xp"): suffix += "-xp"
-  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
+  zip_file = "build\\%s-%s-%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
   inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix
@@ -81,6 +81,7 @@ def make_windows():
 
   if common.clean:
     utils.log_h2("desktop clean")
+    utils.delete_dir("build")
     # utils.delete_dir("data\\vcredist")
     utils.delete_dir("DesktopEditors-cache")
     utils.delete_files("*.exe")
@@ -91,6 +92,12 @@ def make_windows():
     utils.delete_files("update\\*.exe")
     utils.delete_files("update\\*.xml")
     utils.delete_files("update\\*.html")
+
+  utils.log_h2("copy arifacts")
+  utils.create_dir("build\\desktop")
+  utils.create_dir("build\\help")
+  utils.copy_dir_content(source_dir, "build\\desktop\\")
+  utils.copy_dir_content(source_help_dir, "build\\help\\")
 
   make_zip()
 
@@ -124,9 +131,13 @@ def make_windows():
 
 def make_zip():
   utils.log_h2("desktop zip build")
-  ret = utils.cmd(
-      "7z", "a", "-y", zip_file, source_dir + "\\*",
-      creates=zip_file, verbose=True
+
+  args = ["-OutFile " + zip_file]
+  if common.sign:
+    args.append("-Sign")
+    args.append("-CertName '%s'" % branding.cert_name)
+  ret = utils.ps1(
+      "make_zip.ps1", args, creates=zip_file, verbose=True
   )
   utils.set_summary("desktop zip build", ret)
 

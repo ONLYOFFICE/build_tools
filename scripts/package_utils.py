@@ -323,7 +323,7 @@ def ps1(file, args=[], **kwargs):
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return True
   ret = subprocess.call(
-      ["powershell", file] + args, stderr=subprocess.STDOUT, shell=True
+      ["powershell", "-File", file] + args, stderr=subprocess.STDOUT, shell=True
   ) == 0
   return ret
 

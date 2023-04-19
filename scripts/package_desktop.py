@@ -132,10 +132,12 @@ def make_windows():
 def make_zip():
   utils.log_h2("desktop zip build")
 
-  args = ["-OutFile " + zip_file]
+  args = ["-OutFile", zip_file]
   if common.sign:
-    args.append("-Sign")
-    args.append("-CertName '%s'" % branding.cert_name)
+    args += [
+      "-Sign",
+      "-CertName", branding.cert_name
+    ]
   ret = utils.ps1(
       "make_zip.ps1", args, creates=zip_file, verbose=True
   )

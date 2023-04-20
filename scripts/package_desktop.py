@@ -199,7 +199,7 @@ def make_inno():
     utils.log_h2("desktop inno update deploy")
     ret = aws_s3_upload(
         [inno_file],
-        "win/inno/%s/%s/%s" % (common.version, common.build, inno_update_file),
+        "win/inno/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
         "Installer"
     )
     utils.set_summary("desktop inno update deploy", ret)

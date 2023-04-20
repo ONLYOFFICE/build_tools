@@ -61,7 +61,7 @@ def make_core():
 def deploy_closure_maps(license):
   if not common.deploy: return
   utils.log_h1("CLOSURE MAPS")
-  utils.set_cwd(utils.get_path("sdkjs/build"))
+  utils.set_cwd(utils.get_path("sdkjs/build/maps"))
 
   branch = utils.get_env("BRANCH_NAME")
   maps = utils.glob_path("*.js.map")

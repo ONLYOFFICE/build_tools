@@ -92,6 +92,8 @@ def make():
     base.create_dir(root_dir + "/include")
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/common_deploy.h", root_dir + "/include/common.h")
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.h", root_dir + "/include/docbuilder.h")
+    if (0 == platform.find("win")):
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder_midl.h", root_dir + "/include/docbuilder_midl.h")
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
     
     if ("win_64" == platform):

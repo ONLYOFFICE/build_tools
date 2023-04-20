@@ -85,6 +85,7 @@ def make_install():
   install_module(base_dir + '/../../../server/FileConverter')
 
 def make_run():
+  platform = base.host_platform()
   base.set_env('NODE_ENV', 'development-' + platform)
   base.set_env('NODE_CONFIG_DIR', '../Common/config')
   

@@ -109,6 +109,10 @@ def make():
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
 
+  if not base.is_file("v8/third_party/jinja2/tests.py.bak"):
+    base.copy_file("v8/third_party/jinja2/tests.py", "v8/third_party/jinja2/tests.py.bak")
+    base.replaceInFile("v8/third_party/jinja2/tests.py", "from collections import Mapping", "try:\n    from collections.abc import Mapping\nexcept ImportError:\n    from collections import Mapping")
+
   os.chdir("v8")
   
   gn_args = ["v8_static_library=true",

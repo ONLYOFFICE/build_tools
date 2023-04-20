@@ -41,7 +41,7 @@ def make():
       base.create_dir("./../build/win_64")
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64")      
-      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64 --openssldir=" + old_cur_dir + "\\build\\win_64 no-shared no-asm")
+      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64 --openssldir=" + old_cur_dir + "\\build\\win_64 no-shared no-asm enable-md2")
       qmake_bat.append("call nmake clean")
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
@@ -49,7 +49,7 @@ def make():
       base.create_dir("./../build/win_32")
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x86")
-      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32 --openssldir=" + old_cur_dir + "\\build\\win_32 no-shared no-asm")
+      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32 --openssldir=" + old_cur_dir + "\\build\\win_32 no-shared no-asm enable-md2")
       qmake_bat.append("call nmake clean")
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
@@ -62,7 +62,7 @@ def make():
       base.create_dir("./../build/win_64_xp")
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64")      
-      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64_xp --openssldir=" + old_cur_dir + "\\build\\win_64_xp no-shared no-asm no-async")
+      qmake_bat.append("perl Configure VC-WIN64A --prefix=" + old_cur_dir + "\\build\\win_64_xp --openssldir=" + old_cur_dir + "\\build\\win_64_xp no-shared no-asm no-async enable-md2")
       qmake_bat.append("call nmake clean")
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
@@ -70,7 +70,7 @@ def make():
       base.create_dir("./../build/win_32_xp")
       qmake_bat = []
       qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x86")
-      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32_xp --openssldir=" + old_cur_dir + "\\build\\win_32_xp no-shared no-asm no-async")
+      qmake_bat.append("perl Configure VC-WIN32 --prefix=" + old_cur_dir + "\\build\\win_32_xp --openssldir=" + old_cur_dir + "\\build\\win_32_xp no-shared no-asm no-async enable-md2")
       qmake_bat.append("call nmake clean")
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
@@ -79,7 +79,7 @@ def make():
     return
 
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
-    base.cmd("./config", ["no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
+    base.cmd("./config", ["enable-md2", "no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
     base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
     base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
     base.cmd("make")
@@ -94,14 +94,14 @@ def make():
       if ("" == cross_compiler_arm64):
         cross_compiler_arm64 = "/usr/bin"
       cross_compiler_arm64_prefix = cross_compiler_arm64 + "/" + base.get_prefix_cross_compiler_arm64()
-      base.cmd("./Configure", ["linux-aarch64", "--cross-compile-prefix=" + cross_compiler_arm64_prefix, "no-shared", "no-asm", "no-tests", "--prefix=" + old_cur_dir + "/build/linux_arm64", "--openssldir=" + old_cur_dir + "/build/linux_arm64"])
+      base.cmd("./Configure", ["linux-aarch64", "--cross-compile-prefix=" + cross_compiler_arm64_prefix, "enable-md2", "no-shared", "no-asm", "no-tests", "--prefix=" + old_cur_dir + "/build/linux_arm64", "--openssldir=" + old_cur_dir + "/build/linux_arm64"])
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
       base.cmd("make", [], True)
       base.cmd("make", ["install"], True)
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
-    base.cmd("./Configure", ["no-shared", "no-asm", "darwin64-x86_64-cc", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
+    base.cmd("./Configure", ["enable-md2", "no-shared", "no-asm", "darwin64-x86_64-cc", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])
     base.cmd("make", ["build_libs", "install"])
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_arm64"):
@@ -119,7 +119,7 @@ def make():
     },\n\
     \"darwin64-x86_64-cc\" => {"
     base.replaceInFile(base_dir + "/openssl2/Configurations/10-main.conf", replace1, replace2)
-    base.cmd("./Configure", ["no-shared", "no-asm", "darwin64-arm64-cc", "--prefix=" + old_cur_dir + "/build/mac_arm64", "--openssldir=" + old_cur_dir + "/build/mac_arm64"])
+    base.cmd("./Configure", ["enable-md2", "no-shared", "no-asm", "darwin64-arm64-cc", "--prefix=" + old_cur_dir + "/build/mac_arm64", "--openssldir=" + old_cur_dir + "/build/mac_arm64"])
     base.cmd("make", ["build_libs", "install"])
 
   os.chdir(old_cur)

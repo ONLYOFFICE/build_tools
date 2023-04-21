@@ -6,17 +6,25 @@ import config
 import base
 import os
 import subprocess
+import platform
 
-def make_args(args, platform, is_64=True, is_debug=False):
+def make_args(args, os_platform, is_64=True, is_debug=False):
   args_copy = args[:]
-  if is_64:
+  if "ppc64le" in platform.machine():
+    args_copy.append("target_cpu=\\\"ppc64\\\"")
+    args_copy.append("v8_target_cpu=\\\"ppc64\\\"")
+    args_copy.append("v8_static_library=true")
+    args_copy.append("v8_enable_pointer_compression=true")
+    args_copy.append("is_component_build=false")
+    args_copy.append("clang_base_path=\\\"/usr\\\" clang_use_chrome_plugins=false")
+  elif is_64:
     args_copy.append("target_cpu=\\\"x64\\\"") 
     args_copy.append("v8_target_cpu=\\\"x64\\\"")
   else:
     args_copy.append("target_cpu=\\\"x86\\\"") 
     args_copy.append("v8_target_cpu=\\\"x86\\\"")
 
-  if (platform == "linux_arm64"):
+  if (os_platform == "linux_arm64"):
     args_copy = args[:]
     args_copy.append("target_cpu=\\\"arm64\\\"")
     args_copy.append("v8_target_cpu=\\\"arm64\\\"")
@@ -24,15 +32,15 @@ def make_args(args, platform, is_64=True, is_debug=False):
   
   if is_debug:
     args_copy.append("is_debug=true")
-    if (platform == "windows"):
+    if (os_platform == "windows"):
       args_copy.append("enable_iterator_debugging=true")
   else:
     args_copy.append("is_debug=false")
   
-  if (platform == "linux"):
+  if (os_platform == "linux"):
     args_copy.append("is_clang=true")
     args_copy.append("use_sysroot=false")
-  if (platform == "windows"):
+  if (os_platform == "windows"):
     args_copy.append("is_clang=false")
 
   return "--args=\"" + " ".join(args_copy) + "\""
@@ -88,6 +96,9 @@ def make():
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 
+  if "ppc64" in platform.machine():
+    os.environ["VPYTHON_BYPASS"] = "manually managed python not supported by chrome operations"
+
   if ("windows" == base.host_platform()):
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", config.option("vs-version"))
@@ -108,6 +119,18 @@ def make():
 
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
+
+  if "ppc64" in platform.machine():
+    # Google's gn and ninja binaries won't work, they're x86 only by Google fiat.
+    # Remove them and use the system binaries...
+    try:
+      os.remove(base_dir + "/depot_tools/gn")
+    except:
+      pass
+    try:
+      os.remove(base_dir + "/depot_tools/ninja")
+    except:
+      pass
 
   os.chdir("v8")
   

@@ -5,6 +5,7 @@ sys.path.append('../../scripts')
 import base
 import os
 import subprocess
+import platform
 
 def install_deps():
   if base.is_file("./packages_complete"):
@@ -60,7 +61,8 @@ def install_deps():
     if (base.is_dir("./node_js_setup_10.x")):
       base.delete_dir("./node_js_setup_10.x")
     base.cmd("sudo", ["apt-get", "remove", "--purge", "-y", "nodejs"])
-    base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
+    if "ppc64le" not in platform.machine():
+      base.download("https://deb.nodesource.com/setup_10.x", "./node_js_setup_10.x")
     base.cmd('curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -')
     base.cmd("sudo", ["bash", "./node_js_setup_10.x"])
     base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])

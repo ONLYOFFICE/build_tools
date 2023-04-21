@@ -8,6 +8,8 @@ import config
 import base
 import glob
 
+import platform
+
 import boost
 import cef
 import icu
@@ -35,7 +37,8 @@ def make():
         check_android_ndk_macos_arm(toolchain + "/prebuilt")
 
   boost.make()
-  cef.make()
+  if "ppc64" not in platform.machine():
+    cef.make()
   icu.make()
   openssl.make()
   v8.make()

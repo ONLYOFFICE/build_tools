@@ -384,6 +384,7 @@ def make_advinst():
     "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + source_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
+    "UpdateFile APPDIR\\updatesvc.exe " + source_dir + "\\updatesvc.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"

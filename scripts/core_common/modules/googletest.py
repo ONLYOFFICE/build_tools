@@ -2,13 +2,11 @@
 
 import sys
 sys.path.append('../..')
-import config
 import base
 import os
-import platform
 
 def make():
-  print("[fetch & build]: googletest")
+  print("[fetch]: googletest")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/googletest"
   old_cur = os.getcwd()

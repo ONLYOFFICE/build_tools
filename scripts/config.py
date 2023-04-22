@@ -227,7 +227,7 @@ def is_v8_60():
   if check_option("platform", "android"):
     return True
 
-  if ("2015" == option("vs-version")):
+  if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):
     return True
 
   if check_option("config", "use_v8"):

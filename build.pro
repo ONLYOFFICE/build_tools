@@ -12,7 +12,13 @@ core_windows {
 	desktop:CONFIG += core_and_multimedia
 }
 core_linux {
-	desktop:CONFIG += core_and_multimedia
+	linux-g++:contains(QMAKE_HOST.arch, ppc64le): {
+		CONFIG += no_use_htmlfileinternal
+		CONFIG += no_desktop_apps
+	}
+	else {
+		CONFIG += core_and_multimedia
+	}
 }
 core_mac {
 	CONFIG += no_desktop_apps

@@ -44,7 +44,7 @@ def parse():
 
   if check_option("platform", "native"):
     bits = "32"
-    if platform.machine().endswith('64'):
+    if platform.machine().endswith('64') or platform.machine().endswith('64le'):
       bits = "64"
     if ("windows" == host_platform):
       options["platform"] += (" win_" + bits)

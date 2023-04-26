@@ -36,10 +36,7 @@ def aws_s3_upload(files, key, ptype=None):
     if upload and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data(
-          "builder", ptype, file, full_key,
-          branding.s3_bucket, branding.s3_region
-      )
+      utils.add_deploy_data("builder", ptype, file, full_key)
   return ret
 
 def make_windows():
@@ -83,9 +80,7 @@ def make_zip():
 
   if common.deploy and ret:
     utils.log_h2("builder zip deploy")
-    ret = aws_s3_upload(
-        ["build\\" + zip_file], "win/generic/%s/" % common.channel, "Portable"
-    )
+    ret = aws_s3_upload(["build\\" + zip_file], "win/generic/", "Portable")
     utils.set_summary("builder zip deploy", ret)
   return
 
@@ -94,25 +89,27 @@ def make_inno():
   utils.log_h3(inno_file)
 
   args = [
-    "-Arch " + suffix,
-    "-Version " + common.version,
-    "-Build " + common.build
+    "-Arch", suffix,
+    "-Version", common.version,
+    "-Build", common.build
   ]
   if not branding.onlyoffice:
-    args.append("-Branding '..\\..\\%s\\document-builder-package\\exe'" % common.branding)
+    args += [
+      "-Branding", "%s\\%s\\document-builder-package\\exe" % (common.workspace_dir, common.branding)
+    ]
   if common.sign:
-    args.append("-Sign")
-    args.append("-CertName '%s'" % branding.cert_name)
+    args += [
+      "-Sign",
+      "-CertName", branding.cert_name
+    ]
   ret = utils.ps1(
-      ".\\make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
+      "make_inno.ps1", args, creates="build\\" + inno_file, verbose=True
   )
   utils.set_summary("builder inno build", ret)
 
   if common.deploy and ret:
     utils.log_h2("builder inno deploy")
-    ret = aws_s3_upload(
-        ["build\\" + inno_file], "win/inno/%s/" % common.channel, "Installer"
-    )
+    ret = aws_s3_upload(["build\\" + inno_file], "win/inno/", "Installer")
     utils.set_summary("builder inno deploy", ret)
   return
 
@@ -138,24 +135,21 @@ def make_linux():
         utils.log_h2("builder tar deploy")
         ret = aws_s3_upload(
             utils.glob_path("tar/*.tar.gz"),
-            "linux/generic/%s/" % common.channel,
-            "Portable"
+            "linux/generic/", "Portable"
         )
         utils.set_summary("builder tar deploy", ret)
       if "deb" in branding.builder_make_targets:
         utils.log_h2("builder deb deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb/*.deb"),
-            "linux/debian/%s/" % common.channel,
-            "Debian"
+            "linux/debian/", "Debian"
         )
         utils.set_summary("builder deb deploy", ret)
       if "rpm" in branding.builder_make_targets:
         utils.log_h2("builder rpm deploy")
         ret = aws_s3_upload(
             utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-            "linux/rhel/%s/" % common.channel,
-            "CentOS"
+            "linux/rhel/", "CentOS"
         )
         utils.set_summary("builder rpm deploy", ret)
     else:

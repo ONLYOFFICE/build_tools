@@ -440,9 +440,10 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
-def git_update(repo, is_no_errors=False, is_current_dir=False):
+def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
-  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  owner = git_owner if git_owner else "ONLYOFFICE"
+  url = "https://github.com/" + owner + "/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -1296,17 +1297,16 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (-1 != config.option("config").find("use_javascript_core")):
     return
   directory_v8 = core_dir + "/Common/3dParty"
+  
   if is_xp:
     directory_v8 += "/v8/v8_xp"
-  
-  if (-1 != config.option("config").lower().find("v8_version_89")) and not is_xp:
-    directory_v8 += "/v8_89/v8/out.gn/"
-  else:
-    directory_v8 += "/v8/v8/out.gn/"
-
-  if is_xp:
     copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
     return
+  
+  if config.check_option("config", "v8_version_60"):
+    directory_v8 += "/v8/v8/out.gn/"
+  else:
+    directory_v8 += "/v8_89/v8/out.gn/"
 
   if (0 == platform.find("win")):
     copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
@@ -1314,10 +1314,10 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):
   old_cur = os.getcwd()
   os.chdir(out_dir)
-  git_update("onlyoffice.github.io", False, True)
+  git_update("onlyoffice.github.io", False, True, git_owner)
   os.chdir(old_cur)
 
   dst_dir_name = "marketplace"
@@ -1334,9 +1334,14 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
-
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
-  delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  
+  if is_replace_paths:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+        
+  if is_delete_git_dir:
+    delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
   return
 
 def correctPathForBuilder(path):

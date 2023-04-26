@@ -111,6 +111,9 @@ def make():
 def _run_npm(directory):
   return base.cmd_in_dir(directory, "npm", ["install"])
 
+def _run_npm_ci(directory):
+  return base.cmd_in_dir(directory, "npm", ["ci"])
+
 def _run_npm_cli(directory):
   return base.cmd_in_dir(directory, "npm", ["install", "-g", "grunt-cli"])
 
@@ -154,7 +157,7 @@ def build_js_develop(root_dir):
   if (external_folder != ""):
     external_folder = "/" + external_folder
     
-  _run_npm(root_dir + external_folder + "/sdkjs/build")
+  _run_npm_ci(root_dir + external_folder + "/sdkjs/build")
   _run_grunt(root_dir + external_folder + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
   _run_grunt(root_dir + external_folder + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
   _run_npm(root_dir + external_folder + "/web-apps/build")

@@ -19,15 +19,16 @@ def make():
 
   print("[fetch & build]: openssl")
 
-  if (-1 != config.option("platform").find("android") or -1 != config.option("platform").find("ios")):
-    openssl_mobile.make()
-    return
-
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/openssl"
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
   base.common_check_version("openssl", "4", clean)
+
+  if (-1 != config.option("platform").find("android") or -1 != config.option("platform").find("ios")):
+    os.chdir(old_cur)
+    openssl_mobile.make()
+    return
 
   if not base.is_dir("openssl"):
     base.cmd("git", ["clone", "--depth=1", "--branch", "OpenSSL_1_1_1f", "https://github.com/openssl/openssl.git"])

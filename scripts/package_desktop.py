@@ -242,14 +242,11 @@ def make_inno_help():
 def make_update_files():
   utils.log_h2("desktop update files build")
 
-  if branding.onlyoffice:
-    changes_dir = "update\\changes\\" + common.version
-  else:
+  changes_dir = "update\\changes\\" + common.version
+  if not branding.onlyoffice:
     changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
         "win-linux\\package\\windows\\update\\changes\\" + common.version
-  for lang, base in branding.desktop_update_changes_list.items():
-    utils.log_h3("changes " + lang + " html")
-    utils.copy_file(changes_dir + "\\" + lang + ".html", "update\\" + base + ".html")
+  utils.copy_dir_content(changes_dir, "update")
 
   appcast_args = [
     "-Version", package_version,
@@ -295,8 +292,9 @@ def make_update_files():
   if common.deploy:
     utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
-        utils.glob_path("update/*.json") + utils.glob_path("update/*.xml") + \
-            utils.glob_path("update/*.html"),
+        utils.glob_path("update\\*.json") \
+        + utils.glob_path("update\\*.xml") \
+        + utils.glob_path("update\\*.html"),
         "win/inno/%s/%s/" % (common.version, common.build),
         "Update"
     )
@@ -495,14 +493,10 @@ def make_sparkle_updates():
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  utils.copy_file(
-      changes_dir + "/" + app_version + "/ReleaseNotes.html",
-      updates_dir + "/" + zip_filename + ".html"
-  )
-  utils.copy_file(
-      changes_dir + "/" + app_version + "/ReleaseNotesRU.html",
-      updates_dir + "/" + zip_filename + ".ru.html"
-  )
+
+  for file in utils.glob_path(changes_dir + "/" + app_version + "/*.html"):
+    filename = utils.get_basename(file).replace("changes", zip_filename)
+    utils.copy_file(file, updates_dir + "/" + filename)
 
   sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
   ret = utils.sh(

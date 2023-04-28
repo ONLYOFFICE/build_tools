@@ -115,6 +115,10 @@ def parse():
     base.cmd_in_dir(base.get_script_dir() + "/../tools/linux", "python", ["use_system_qt.py"])
     options["qt-dir"] = base.get_script_dir() + "/../tools/linux/system_qt"
 
+  # disable all warnings (enable if needed with core_enable_all_warnings options)
+  if not check_option("config", "core_enable_all_warnings"):
+    extend_option("config", "core_disable_all_warnings")
+
   return
 
 def check_compiler(platform):

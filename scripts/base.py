@@ -1067,6 +1067,10 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer"])
+  if is_file("./pluginsmanager"):
+    cmd("chmod", ["-v", "+x", "./pluginsmanager"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
+    mac_correct_rpath_binary("./pluginsmanager", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
   os.chdir(cur_dir)
   return
 

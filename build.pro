@@ -83,6 +83,8 @@ addSubProject(epubfile,		$$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
 					kernel unicodeconverter graphics)
 	addSubProject(docbuilder,	$$CORE_ROOT_DIR/DesktopEditor/doctrenderer/app_builder/docbuilder.pro,\
 					kernel unicodeconverter graphics doctrenderer)
+	addSubProject(pluginsmanager,	$$CORE_ROOT_DIR/DesktopEditor/pluginsmanager/pluginsmanager.pro,\
+					kernel)
 }
 
 !no_tests {

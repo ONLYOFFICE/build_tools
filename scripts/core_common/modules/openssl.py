@@ -85,6 +85,7 @@ def make():
     base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
     base.cmd("make")
     base.cmd("make", ["install"])
+    base.cmd("make", ["clean"], True)
     # TODO: support x86
 
   if (-1 != config.option("platform").find("linux_arm64")) and not base.is_dir("../build/linux_arm64"):

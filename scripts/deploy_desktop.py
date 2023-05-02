@@ -126,6 +126,8 @@ def make():
     build_dir_name = "build"
     if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
       build_dir_name = "build_107"
+    elif (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
+      build_dir_name = "build_103"
 
     if not isWindowsXP:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/" + build_dir_name + "/*", root_dir)

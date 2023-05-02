@@ -75,7 +75,7 @@ def make():
 
     # deploy
     if (0 == platform.find("mac")):
-      base.cmd("mv", ["Chromium Embedded Framework.framework", "build/Chromium Embedded Framework.framework"])
+      base.cmd("mv", ["Chromium Embedded Framework.framework", build_dir_name + "/Chromium Embedded Framework.framework"])
       base.delete_dir("./Chromium Embedded Framework.framework")
     else:
       base.copy_files("cef_binary/Release/*", build_dir_name + "/")

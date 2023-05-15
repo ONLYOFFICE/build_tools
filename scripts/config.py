@@ -234,7 +234,7 @@ def is_v8_60():
   if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):
     return True
 
-  if check_option("config", "use_v8"):
-    return True
+  #if check_option("config", "use_v8"):
+  #  return True
 
   return False

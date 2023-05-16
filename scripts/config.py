@@ -107,9 +107,10 @@ def parse():
   if not "arm64-toolchain-bin" in options:
     options["arm64-toolchain-bin"] = "/usr/bin"
 
-  if not check_option("config", "no_bundle_xcframeworks"):
-    if not check_option("config", "bundle_xcframeworks"):
-      extend_option("config", "bundle_xcframeworks")
+  if check_option("platform", "ios"):
+    if not check_option("config", "no_bundle_xcframeworks"):
+      if not check_option("config", "bundle_xcframeworks"):
+        extend_option("config", "bundle_xcframeworks")
 
   if check_option("config", "bundle_xcframeworks"):
     if not check_option("config", "bundle_dylibs"):

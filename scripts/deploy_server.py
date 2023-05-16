@@ -121,8 +121,9 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
-    base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins", False, True)
-    base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins", False, True)
+    if ("1" == config.option("preinstalled-plugins")):
+      base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins", False, True)
+      base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins", False, True)
     base.create_dir(js_dir + "/sdkjs-plugins/v1")
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", js_dir + "/sdkjs-plugins/v1/plugins.js")
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", js_dir + "/sdkjs-plugins/v1/plugins-ui.js")

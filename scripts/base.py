@@ -12,6 +12,7 @@ import config
 import codecs
 import re
 import stat
+import json
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -1197,6 +1198,13 @@ def support_old_versions_plugins(out_dir):
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
+  return
+
+def generate_sdkjs_plugin_list(dst):
+  plugins_list = config.option("sdkjs-plugin").rsplit(", ") \
+               + config.option("sdkjs-plugin-server").rsplit(", ")
+  with open(get_path(dst), 'w') as file:
+    file.write(json.dumps(sorted(plugins_list), indent=4))
   return
 
 def get_xcode_major_version():

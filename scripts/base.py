@@ -1156,10 +1156,13 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
   create_dir(dst_dir_path)
-  copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
+  copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
   if is_desktop_local:
-    for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
+    for file in glob.glob(dst_dir_path + "/*.html"):
       replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+  dst_deploy_dir = dst_dir_path + "/deploy"
+  if is_dir(dst_deploy_dir):
+    delete_dir(dst_deploy_dir)
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):

@@ -19,11 +19,11 @@ vcredist_links = {
   "2022": {
     "x64": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "119dde89a20674349a51893114eae5ed"
+      "md5": "077f0abdc2a3881d5c6c774af821f787"
     },
     "x86": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "ca8c521c30f57c0c199d526b9a23fc4a"
+      "md5": "ae427c1329c3b211a6d09f8d9506eb74"
     }
   },
   "2015": {

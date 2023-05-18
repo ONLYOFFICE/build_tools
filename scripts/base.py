@@ -1207,7 +1207,8 @@ def generate_sdkjs_plugin_list(dst):
   plugins_list = config.option("sdkjs-plugin").rsplit(", ") \
                + config.option("sdkjs-plugin-server").rsplit(", ")
   with open(get_path(dst), 'w') as file:
-    file.write(json.dumps(sorted(plugins_list), indent=4))
+    dump = json.dumps(sorted(plugins_list), indent=4)
+    file.write(re.sub(r"^(\s{4})", '\t', dump, 0, re.MULTILINE))
   return
 
 def get_xcode_major_version():

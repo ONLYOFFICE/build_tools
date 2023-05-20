@@ -61,7 +61,7 @@ for input_file in input_files:
   xml_convert += u"<m_oThumbnail>"
   xml_convert += u"<first>false</first>"
   if ((0 != th_width) and (0 != th_height)):
-    xml_convert += u"<aspect>0</aspect>"
+    xml_convert += u"<aspect>16</aspect>"
     xml_convert += (u"<width>" + str(th_width) + u"</width>")
     xml_convert += (u"<height>" + str(th_height) + u"</height>")
   xml_convert += u"</m_oThumbnail>"

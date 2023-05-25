@@ -31,6 +31,7 @@ def make_mobile():
     if ret:
       ret = utils.sh(
           "aws s3 cp --acl public-read --no-progress " \
+          + "--metadata '{\"md5\":\"" + utils.get_md5(zip_file) + "\"}'" \
           + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
           verbose=True
       )

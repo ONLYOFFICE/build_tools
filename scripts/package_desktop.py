@@ -29,7 +29,7 @@ def aws_s3_upload(files, key, ptype=None):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
       "s3", "cp", "--no-progress", "--acl", "public-read",
-      "--metadata", "'{\"md5\":\"" + utils.get_md5(file) + "\"}'",
+      "--metadata", "md5=" + utils.get_md5(file),
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":

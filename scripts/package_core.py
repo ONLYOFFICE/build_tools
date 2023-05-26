@@ -40,7 +40,7 @@ def make_core():
 
   utils.log_h2("core deploy")
   args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          "--metadata", "'{\"md5\":\"" + utils.get_md5(core_7z) + "\"}'",
+          "--metadata", "md5=" + utils.get_md5(core_7z),
           core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
   if common.os_family == "windows":
     ret = utils.cmd(*args, verbose=True)
@@ -84,9 +84,8 @@ def deploy_closure_maps(license):
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
-      "s3", "cp", "--no-progress", file,
-      "--metadata", "'{\"md5\":\"" + utils.get_md5(file) + "\"}'",
-      "s3://" + branding.s3_bucket + "/" + dest + "/"
+      "s3", "cp", "--no-progress", "--metadata", "md5=" + utils.get_md5(file),
+      file, "s3://" + branding.s3_bucket + "/" + dest + "/"
     ]
     if common.os_family == "windows":
       upload = utils.cmd(*args, verbose=True)

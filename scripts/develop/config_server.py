@@ -67,7 +67,7 @@ def make():
     base.create_dir(git_dir + "/sdkjs-plugins")
 
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
-  base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins")
+  base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins", False, False, False)
 
   if not base.is_dir(git_dir + "/fonts"):
     base.create_dir(git_dir + "/fonts")

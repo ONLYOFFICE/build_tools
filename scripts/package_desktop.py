@@ -190,18 +190,14 @@ def make_inno():
 
   if common.deploy and ret:
     utils.log_h2("desktop inno deploy")
-    ret = aws_s3_upload(
-        [inno_file],
-        "win/inno/%s/%s/" % (common.version, common.build),
-        "Installer"
-    )
+    ret = aws_s3_upload([inno_file], "win/inno/","Installer")
     utils.set_summary("desktop inno deploy", ret)
 
     utils.log_h2("desktop inno update deploy")
     ret = aws_s3_upload(
         [inno_file],
-        "win/inno/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
-        "Installer"
+        "win/update/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
+        "Update"
     )
     utils.set_summary("desktop inno update deploy", ret)
   return
@@ -232,22 +228,18 @@ def make_inno_help():
 
   if common.deploy and ret:
     utils.log_h2("desktop inno help deploy")
-    ret = aws_s3_upload(
-        [inno_help_file],
-        "win/inno/%s/%s/" % (common.version, common.build),
-        "Installer"
-    )
+    ret = aws_s3_upload([inno_help_file], "win/inno/", "Installer")
     utils.set_summary("desktop inno help deploy", ret)
   return
 
 def make_update_files():
   utils.log_h2("desktop update files build")
 
-  changes_dir = "update\\changes\\" + common.version
-  if not branding.onlyoffice:
-    changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
-        "win-linux\\package\\windows\\update\\changes\\" + common.version
-  utils.copy_dir_content(changes_dir, "update")
+  # changes_dir = "update\\changes\\" + common.version
+  # if not branding.onlyoffice:
+  #   changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
+  #       "win-linux\\package\\windows\\update\\changes\\" + common.version
+  # utils.copy_dir_content(changes_dir, "update")
 
   appcast_args = [
     "-Version", package_version,
@@ -259,30 +251,30 @@ def make_update_files():
     "-UpdatesUrlPrefix", branding.desktop_updates_url,
     "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
   ]
-  appcast_test_base_url = "%s/desktop/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
+  appcast_test_base_url = "%s/desktop/win/update/%s/%s" % (branding.s3_base_url, common.version, common.build)
   appcast_test_args = [
     "-UpdatesUrlPrefix", appcast_test_base_url,
     "-ReleaseNotesUrlPrefix", appcast_test_base_url
   ]
 
-  utils.log_h3("appcast prod json")
-  utils.ps1(
-      "update\\make_appcast.ps1",
-      appcast_args + appcast_prod_args,
-      creates="update\\appcast.json", verbose=True
-  )
+  # utils.log_h3("appcast prod json")
+  # utils.ps1(
+  #     "update\\make_appcast.ps1",
+  #     appcast_args + appcast_prod_args,
+  #     creates="update\\appcast.json", verbose=True
+  # )
   utils.log_h3("appcast prod xml")
   utils.ps1(
       "update\\make_appcast_xml.ps1",
       appcast_args + appcast_prod_args,
       creates="update\\appcast.xml", verbose=True
   )
-  utils.log_h3("appcast test json")
-  utils.ps1(
-      "update\\make_appcast.ps1",
-      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
-      creates="update\\appcast-test.json", verbose=True
-  )
+  # utils.log_h3("appcast test json")
+  # utils.ps1(
+  #     "update\\make_appcast.ps1",
+  #     appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
+  #     creates="update\\appcast-test.json", verbose=True
+  # )
   utils.log_h3("appcast test xml")
   utils.ps1(
       "update\\make_appcast_xml.ps1",
@@ -296,7 +288,7 @@ def make_update_files():
         utils.glob_path("update\\*.json") \
         + utils.glob_path("update\\*.xml") \
         + utils.glob_path("update\\*.html"),
-        "win/inno/%s/%s/" % (common.version, common.build),
+        "win/update/%s/%s/" % (common.version, common.build),
         "Update"
     )
     utils.set_summary("desktop update files deploy", ret)

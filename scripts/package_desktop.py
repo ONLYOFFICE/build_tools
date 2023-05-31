@@ -5,6 +5,7 @@ import os
 import package_utils as utils
 import package_common as common
 import package_branding as branding
+import config
 
 def make():
   utils.log_h1("DESKTOP")
@@ -195,7 +196,7 @@ def make_inno():
 
     utils.log_h2("desktop inno update deploy")
 
-    if 1:
+    if ("1" != config.option("desktop-updates-skip-iss-wrapper")):
       args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
       ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
       utils.set_summary("desktop inno update build", ret)

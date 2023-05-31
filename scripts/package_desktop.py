@@ -194,11 +194,25 @@ def make_inno():
     utils.set_summary("desktop inno deploy", ret)
 
     utils.log_h2("desktop inno update deploy")
-    ret = aws_s3_upload(
-        [inno_file],
-        "win/update/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
-        "Update"
-    )
+
+    if 1:
+      args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
+      ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
+      utils.set_summary("desktop inno update build", ret)
+
+      if ret:
+        ret = aws_s3_upload(
+            [inno_update_file],
+            "win/inno/%s/%s/" % (common.version, common.build),
+            "Update"
+        )
+    else:
+      ret = aws_s3_upload(
+          [inno_file],
+          "win/inno/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
+          "Update"
+      )
+
     utils.set_summary("desktop inno update deploy", ret)
   return
 

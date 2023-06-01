@@ -196,7 +196,7 @@ def make_inno():
 
     utils.log_h2("desktop inno update deploy")
 
-    if ("1" != config.option("desktop-updates-skip-iss-wrapper")):
+    if not (hasattr(branding, 'desktop_updates_skip_iss_wrapper') and branding.desktop_updates_skip_iss_wrapper):
       args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
       ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
       utils.set_summary("desktop inno update build", ret)

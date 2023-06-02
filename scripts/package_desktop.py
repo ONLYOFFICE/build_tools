@@ -75,7 +75,7 @@ def make_windows():
   }
   suffix = arch_list[common.platform]
   if common.platform.endswith("_xp"): suffix += "-xp"
-  zip_file = "build\\%s-%s-%s.zip" % (package_name, package_version, suffix)
+  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
   inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
@@ -132,14 +132,13 @@ def make_windows():
 def make_zip():
   utils.log_h2("desktop zip build")
 
-  args = ["-OutFile", zip_file]
+  args = ["-DesktopPath", desktop_dir, "-OutFile", zip_file]
   if common.sign:
-    args += [
-      "-Sign",
-      "-CertName", branding.cert_name
-    ]
+    args += ["-Sign", "-CertName", branding.cert_name]
+  if branding.onlyoffice and not common.platform.endswith("_xp"):
+    args += ["-ExcludeHelp"]
   ret = utils.ps1(
-      "make_zip.ps1", args, creates=zip_file, verbose=True
+    "make_zip.ps1", args, creates=zip_file, verbose=True
   )
   utils.set_summary("desktop zip build", ret)
 

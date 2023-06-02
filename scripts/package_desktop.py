@@ -283,7 +283,6 @@ def make_update_files():
 
 def make_advinst():
   utils.log_h2("desktop advinst build")
-  utils.log_h3(advinst_file)
 
   arch = arch_list[common.platform]
 
@@ -332,6 +331,8 @@ def make_advinst():
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if branding.onlyoffice:
+    for path in utils.glob_path(desktop_dir + "\\editors\\web-apps\\apps\\*\\main\\resources\\help"):
+      utils.delete_dir(path)
     aic_content += [
       "DelFolder CUSTOM_PATH"
     ]
@@ -353,16 +354,16 @@ def make_advinst():
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild",
       "SetCurrentFeature ExtendedFeature",
-      "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
-      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe",
+      "NewSync CUSTOM_PATH " + viewer_dir,
+      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + viewer_dir + "\\VideoPlayer.exe",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [
     "SetCurrentFeature MainFeature",
-    "NewSync APPDIR " + source_dir,
-    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
-    "UpdateFile APPDIR\\updatesvc.exe " + source_dir + "\\updatesvc.exe",
+    "NewSync APPDIR " + desktop_dir,
+    "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
+    "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"

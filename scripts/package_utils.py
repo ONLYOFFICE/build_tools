@@ -219,7 +219,7 @@ def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose
     if is_file(file):
       copy_file(file, dst, verbose=False)
     elif is_dir(file):
-      copy_dir(file, dst + "/" + basename)
+      copy_dir(file, dst + "/" + basename, verbose=False)
   return
 
 def delete_file(path, verbose=True):
@@ -319,7 +319,7 @@ def powershell(*args, **kwargs):
 
 def ps1(file, args=[], **kwargs):
   if kwargs.get("verbose"):
-    log_h2("powershell cmdlet: " + file + " " + " ".join(args))
+    log("- ps1: " + file + " " + " ".join(args))
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return True
   ret = subprocess.call(

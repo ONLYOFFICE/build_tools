@@ -86,6 +86,16 @@ def make():
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
 
+    base.create_dir(root_dir + "/fonts")
+    base.copy_file(git_dir + "/core-fonts/ASC.ttf", root_dir + "/fonts/ASC.ttf")
+    base.copy_dir(git_dir + "/core-fonts/asana", root_dir + "/fonts/asana")
+    base.copy_dir(git_dir + "/core-fonts/caladea", root_dir + "/fonts/caladea")
+    base.copy_dir(git_dir + "/core-fonts/crosextra", root_dir + "/fonts/crosextra")
+    base.copy_dir(git_dir + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+    if (0 == platform.find("android")):
+      base.copy_dir(git_dir + "/core-fonts/dejavu", root_dir + "/fonts/dejavu")
+      base.copy_dir(git_dir + "/core-fonts/liberation", root_dir + "/fonts/liberation")
+
   for native_platform in platforms:
     if native_platform == "android":
       # make full version
@@ -95,6 +105,8 @@ def make():
       base.create_dir(root_dir)
       # js
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
+      # fonts
+      base.copy_dir(base_dir + "/js/" + branding + "/mobile/fonts", root_dir + "/fonts")
       # app
       base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
       libs_dir = root_dir + "/lib"

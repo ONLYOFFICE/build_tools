@@ -481,6 +481,7 @@ def get_repositories():
   result["web-apps"] = [False, False]
   result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
+  result["core-fonts"] = [False, False]
 
   if config.check_option("module", "builder"):
     result["document-templates"] = [False, False]
@@ -495,9 +496,6 @@ def get_repositories():
     result.update(get_server_addons())
     result["document-server-integration"] = [False, False]
     result["document-templates"] = [False, False]
-    
-  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
-    result["core-fonts"] = [False, False]
 
   get_branding_repositories(result)
   return result

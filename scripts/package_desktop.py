@@ -84,8 +84,8 @@ def make_windows():
     utils.delete_files("update\\*.html")
 
   utils.log_h2("copy arifacts")
-  source_dir = "%s\\build_tools\\out\\%s\\%s" % (common.workspace_dir, \
-    common.platforms[common.platform]["prefix"], branding.company_name)
+  source_dir = "%s\\build_tools\\out\\%s\\%s" \
+    % (common.workspace_dir, common.prefix, branding.company_name)
   utils.create_dir("build")
   desktop_dir = "build\\" + branding.desktop_product_name_s
   utils.copy_dir(source_dir + "\\" + branding.desktop_product_name_s, desktop_dir)
@@ -406,6 +406,13 @@ def make_macos():
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
+  source_dir = "%s/build_tools/out/%s/%s" \
+    % (common.workspace_dir, common.prefix, branding.company_name)
+  if branding.onlyoffice:
+    for path in utils.glob_path(source_dir \
+        + "/desktopeditors/editors/web-apps/apps/*/main/resources/help"):
+      utils.delete_dir(path)
+
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_bundle_version_string = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
@@ -559,7 +566,7 @@ def make_linux():
       utils.log_h2("desktop tar deploy")
       if "tar" in branding.desktop_make_targets:
         ret = aws_s3_upload(
-            utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
+            utils.glob_path("tar/*.tar*"),
             "linux/generic/", "Portable"
         )
         utils.set_summary("desktop tar deploy", ret)

@@ -247,8 +247,6 @@ def make():
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers/onlyoffice", root_dir + "/providers/onlyoffice")
     else:
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
-    license = base.readFileLicence(root_dir + "/editors/sdkjs/word/sdk-all-min.js")
-    base.correct_plugins_branding(root_dir + '/editors/sdkjs-plugins', license=license)
 
     isUseJSC = False
     if (0 == platform.find("mac")):

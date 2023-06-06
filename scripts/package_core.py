@@ -14,7 +14,7 @@ def make():
   return
 
 def make_core():
-  prefix = common.platforms[common.platform]["prefix"]
+  prefix = common.platformPrefixes[common.platform]
   company = branding.company_name.lower()
   repos = {
     "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },

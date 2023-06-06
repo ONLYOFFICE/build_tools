@@ -260,7 +260,7 @@ def set_summary(target, status):
 
 def add_deploy_data(product, ptype, src, dst):
   common.deploy_data.append({
-    "platform": common.platforms[common.platform]["title"],
+    "platform": common.platformTitles[common.platform],
     "product": product,
     "type": ptype,
     # "local": get_path(src),

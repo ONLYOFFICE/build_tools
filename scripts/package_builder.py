@@ -44,7 +44,7 @@ def make_windows():
   global inno_file, zip_file, suffix, key_prefix
   utils.set_cwd("document-builder-package")
 
-  prefix = common.platforms[common.platform]["prefix"]
+  prefix = common.platformPrefixes[common.platform]
   company = branding.company_name
   product = branding.builder_product_name.replace(" ","")
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)

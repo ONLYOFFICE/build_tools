@@ -50,7 +50,7 @@ def aws_s3_upload(files, key, ptype=None):
 
 def make_windows():
   global package_version, arch_list, source_dir, desktop_dir, viewer_dir, \
-    inno_file, inno_sa_file, inno_update_file, advinst_file, zip_file
+    inno_file, inno_help_file, inno_sa_file, inno_update_file, advinst_file, zip_file
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
   package_name = branding.desktop_package_name
@@ -65,6 +65,7 @@ def make_windows():
   if common.platform.endswith("_xp"): suffix += "-xp"
   zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
   inno_sa_file = "%s-Standalone-%s-%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
   advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
@@ -182,6 +183,11 @@ def make_inno():
   utils.set_summary("desktop inno build", ret)
 
   if branding.onlyoffice and not common.platform.endswith("_xp"):
+    args = ["iscc", "/Qp", "/DARCH=" + arch_list[common.platform],
+      "/DVERSION=" + package_version, "/DDEPLOY_PATH=" + desktop_dir, "help.iss"]
+    ret = utils.cmd(*args, creates=inno_help_file, verbose=True)
+    utils.set_summary("desktop inno help build", ret)
+
     args = ["iscc"] + iscc_args + ["/DEMBED_HELP", "/DsPackageEdition=Standalone", "common.iss"]
     ret = utils.cmd(*args, creates=inno_sa_file, verbose=True)
     utils.set_summary("desktop inno standalone build", ret)
@@ -197,6 +203,10 @@ def make_inno():
     utils.set_summary("desktop inno deploy", ret)
 
     if branding.onlyoffice and not common.platform.endswith("_xp"):
+      utils.log_h2("desktop inno help deploy")
+      ret = aws_s3_upload([inno_help_file], "win/inno/","Installer")
+      utils.set_summary("desktop inno help deploy", ret)
+
       utils.log_h2("desktop inno standalone deploy")
       ret = aws_s3_upload([inno_sa_file], "win/inno/","Installer")
       utils.set_summary("desktop inno standalone deploy", ret)

@@ -85,6 +85,8 @@ addSubProject(epubfile,         $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
                                       kernel unicodeconverter graphics doctrenderer)
     addSubProject(pluginsmanager, $$CORE_ROOT_DIR/DesktopEditor/pluginsmanager/pluginsmanager.pro,\
                                       kernel)
+    addSubProject(vboxtester,     $$CORE_ROOT_DIR/DesktopEditor/vboxtester/vboxtester.pro,\
+                                      kernel)
 }
 
 !no_tests {

@@ -1070,6 +1070,10 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./pluginsmanager"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
     mac_correct_rpath_binary("./pluginsmanager", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
+  if is_file("./vboxtester"):
+    cmd("chmod", ["-v", "+x", "./vboxtester"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./vboxtester"], True)
+    mac_correct_rpath_binary("./vboxtester", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
   os.chdir(cur_dir)
   return
 

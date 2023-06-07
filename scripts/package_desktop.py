@@ -163,9 +163,11 @@ def make_inno():
   }
   iscc_args = [
     "/Qp",
+    "/DVERSION=" + package_version,
     "/DsAppVersion=" + package_version,
     "/DDEPLOY_PATH=" + desktop_dir,
-    "/D_ARCH=" + inno_arch_list[common.platform]
+    "/DARCH=" + inno_arch_list[common.platform],
+    "/D_ARCH=" + inno_arch_list[common.platform],
   ]
   if branding.onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
@@ -183,8 +185,7 @@ def make_inno():
   utils.set_summary("desktop inno build", ret)
 
   if branding.onlyoffice and not common.platform.endswith("_xp"):
-    args = ["iscc", "/Qp", "/DARCH=" + arch_list[common.platform],
-      "/DVERSION=" + package_version, "/DDEPLOY_PATH=" + desktop_dir, "help.iss"]
+    args = ["iscc"] + iscc_args + ["help.iss"]
     ret = utils.cmd(*args, creates=inno_help_file, verbose=True)
     utils.set_summary("desktop inno help build", ret)
 

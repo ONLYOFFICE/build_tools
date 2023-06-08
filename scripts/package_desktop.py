@@ -170,7 +170,7 @@ def make_inno():
     "/DVERSION=" + package_version,
     "/DsAppVersion=" + package_version,
     "/DDEPLOY_PATH=" + desktop_dir,
-    "/DARCH=" + inno_arch_list[common.platform],
+    "/DARCH=" + arch_list[common.platform],
     "/D_ARCH=" + inno_arch_list[common.platform],
   ]
   if branding.onlyoffice:

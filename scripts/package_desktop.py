@@ -25,6 +25,10 @@ def aws_s3_upload(files, key, ptype=None):
   ret = True
   key = "desktop/" + key
   for file in files:
+    if not utils.is_file(file):
+      utils.log_err("file not exist: " + file)
+      ret &= False
+      continue
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
@@ -166,7 +170,7 @@ def make_inno():
     "/DVERSION=" + package_version,
     "/DsAppVersion=" + package_version,
     "/DDEPLOY_PATH=" + desktop_dir,
-    "/DARCH=" + inno_arch_list[common.platform],
+    "/DARCH=" + arch_list[common.platform],
     "/D_ARCH=" + inno_arch_list[common.platform],
   ]
   if branding.onlyoffice:

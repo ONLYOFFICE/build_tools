@@ -20,6 +20,10 @@ def aws_s3_upload(files, key, edition, ptype=None):
   ret = True
   key = "server/" + key
   for file in files:
+    if not utils.is_file(file):
+      utils.log_err("file not exist: " + file)
+      ret &= False
+      continue
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]

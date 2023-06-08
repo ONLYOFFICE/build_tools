@@ -34,7 +34,7 @@ def make_core():
     utils.set_summary("core deploy", False)
     return
   if not utils.is_file(core_7z):
-    utils.log_err("core.7z does not exist")
+    utils.log_err("file not exist: " + core_7z)
     utils.set_summary("core deploy", False)
     return
 

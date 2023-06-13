@@ -12,6 +12,7 @@ import config
 import codecs
 import re
 import stat
+import json
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -440,9 +441,10 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
-def git_update(repo, is_no_errors=False, is_current_dir=False):
+def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
-  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  owner = git_owner if git_owner else "ONLYOFFICE"
+  url = "https://github.com/" + owner + "/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:ONLYOFFICE/" + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -479,6 +481,7 @@ def get_repositories():
   result["web-apps"] = [False, False]
   result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
+  result["core-fonts"] = [False, False]
 
   if config.check_option("module", "builder"):
     result["document-templates"] = [False, False]
@@ -493,9 +496,6 @@ def get_repositories():
     result.update(get_server_addons())
     result["document-server-integration"] = [False, False]
     result["document-templates"] = [False, False]
-    
-  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
-    result["core-fonts"] = [False, False]
 
   get_branding_repositories(result)
   return result
@@ -1066,6 +1066,10 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
     mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer"])
+  if is_file("./pluginsmanager"):
+    cmd("chmod", ["-v", "+x", "./pluginsmanager"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
+    mac_correct_rpath_binary("./pluginsmanager", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
   os.chdir(cur_dir)
   return
 
@@ -1150,10 +1154,13 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
   create_dir(dst_dir_path)
-  copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
+  copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
   if is_desktop_local:
-    for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
+    for file in glob.glob(dst_dir_path + "/*.html"):
       replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+  dst_deploy_dir = dst_dir_path + "/deploy"
+  if is_dir(dst_deploy_dir):
+    delete_dir(dst_deploy_dir)
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
@@ -1192,6 +1199,14 @@ def support_old_versions_plugins(out_dir):
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
+  return
+
+def generate_sdkjs_plugin_list(dst):
+  plugins_list = config.option("sdkjs-plugin").rsplit(", ") \
+               + config.option("sdkjs-plugin-server").rsplit(", ")
+  with open(get_path(dst), 'w') as file:
+    dump = json.dumps(sorted(plugins_list), indent=4)
+    file.write(re.sub(r"^(\s{4})", '\t', dump, 0, re.MULTILINE))
   return
 
 def get_xcode_major_version():
@@ -1296,17 +1311,16 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (-1 != config.option("config").find("use_javascript_core")):
     return
   directory_v8 = core_dir + "/Common/3dParty"
+  
   if is_xp:
     directory_v8 += "/v8/v8_xp"
-  
-  if (-1 != config.option("config").lower().find("v8_version_89")) and not is_xp:
-    directory_v8 += "/v8_89/v8/out.gn/"
-  else:
-    directory_v8 += "/v8/v8/out.gn/"
-
-  if is_xp:
     copy_files(directory_v8 + platform + "/release/icudt*.dll", deploy_dir + "/")
     return
+  
+  if config.check_option("config", "v8_version_60"):
+    directory_v8 += "/v8/v8/out.gn/"
+  else:
+    directory_v8 += "/v8_89/v8/out.gn/"
 
   if (0 == platform.find("win")):
     copy_files(directory_v8 + platform + "/release/icudt*.dat", deploy_dir + "/")
@@ -1314,10 +1328,10 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):
   old_cur = os.getcwd()
   os.chdir(out_dir)
-  git_update("onlyoffice.github.io", False, True)
+  git_update("onlyoffice.github.io", False, True, git_owner)
   os.chdir(old_cur)
 
   dst_dir_name = "marketplace"
@@ -1334,9 +1348,14 @@ def clone_marketplace_plugin(out_dir, is_name_as_guid=False):
 
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
-
   copy_dir(out_dir + "/onlyoffice.github.io/store/plugin", dst_dir_path)
-  delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
+  
+  if is_replace_paths:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+        
+  if is_delete_git_dir:
+    delete_dir_with_access_error(out_dir + "/onlyoffice.github.io")
   return
 
 def correctPathForBuilder(path):

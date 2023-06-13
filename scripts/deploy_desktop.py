@@ -4,6 +4,33 @@ import config
 import base
 import os
 import platform
+import glob
+
+def deploy_marketplace_plugin(git_dir, root_dir):
+  # old manager
+  #base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
+
+  # plugin manager with local paths
+  sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
+  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
+      
+  # store with local paths
+  manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+  
+  store_dir_path = manager_dir + "/store"
+  if base.is_dir(store_dir_path):
+    base.delete_dir(store_dir_path)
+  base.create_dir(store_dir_path)
+  
+  base.copy_dir_content(sys_plugins_dir + "/onlyoffice.github.io/store", store_dir_path, "", ".git")
+  base.delete_dir(store_dir_path + "/plugin")
+  base.delete_file(store_dir_path + "/build.bat")
+  
+  for file in glob.glob(store_dir_path + "/*.html"):
+    base.replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
+      
+  base.delete_dir_with_access_error(sys_plugins_dir + "/onlyoffice.github.io")
+  return
 
 def make():
   base_dir = base.get_script_dir() + "/../out"
@@ -55,21 +82,20 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DocxRenderer")
-    base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
-
+    
     if ("ios" == platform):
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "x2t")
 
-    if (native_platform == "linux_64"):
-      base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
+    #if (native_platform == "linux_64"):
+    #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/converter/icuuc58.dll")
-      base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
+      #base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
 
     if (0 == platform.find("linux")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/converter/libicudata.so.58")
@@ -97,10 +123,16 @@ def make():
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
     # cef
+    build_dir_name = "build"
+    if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
+      build_dir_name = "build_107"
+    elif (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
+      build_dir_name = "build_103"
+
     if not isWindowsXP:
-      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/" + build_dir_name + "/*", root_dir)
     else:
-      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/build/*", root_dir)
+      base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/" + build_dir_name + "/*", root_dir)
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
@@ -152,6 +184,8 @@ def make():
 
       if (0 == platform.find("win")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/" + apps_postfix + "/projicons.exe", root_dir + "/DesktopEditors.exe")
+        if not isWindowsXP:
+          base.copy_file(git_dir + "/desktop-apps/win-linux/extras/update-daemon/" + apps_postfix + "/updatesvc.exe", root_dir + "/updatesvc.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors.exe", root_dir + "/editors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
       elif (0 == platform.find("linux")):
@@ -186,19 +220,6 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
-    # desktopeditors-help
-    root_help_dir = root_dir + "-help"
-    if (base.is_dir(root_help_dir)):
-      base.delete_dir(root_help_dir)
-    for i in ["common", "documenteditor", "presentationeditor", "spreadsheeteditor"]:
-      base.copy_dir(
-          base_dir + "/js/" + branding + "/desktop/web-apps/apps/%s/main/resources/help" % i,
-          root_help_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
-
-      if ("1" != config.option("preinstalled-help") and not isWindowsXP):
-        # remove help from install until web-apps containes help
-        base.delete_dir(root_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
-
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)
     # remove some default plugins
@@ -212,12 +233,13 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", root_dir + "/editors/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(root_dir + "/editors/sdkjs-plugins")
 
-    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt", root_dir + "/editors/sdkjs-plugins", "advanced2", True)
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
-
+    
+    deploy_marketplace_plugin(git_dir, root_dir)
+    
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
 
     if isWindowsXP:

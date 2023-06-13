@@ -1,16 +1,30 @@
 #!/usr/bin/env python
 
-platforms = {
-  "windows_x64":      { "title": "Windows x64",     "prefix": "win_64"      },
-  "windows_x64_xp":   { "title": "Windows x64 XP",  "prefix": "win_64_xp"   },
-  "windows_x86":      { "title": "Windows x86",     "prefix": "win_32"      },
-  "windows_x86_xp":   { "title": "Windows x86 XP",  "prefix": "win_32_xp"   },
-  "darwin_x86_64":    { "title": "macOS x86_64",    "prefix": "mac_64"      },
-  "darwin_x86_64_v8": { "title": "macOS x86_64 V8", "prefix": "mac_64"      },
-  "darwin_arm64":     { "title": "macOS arm64",     "prefix": "mac_arm64"   },
-  "linux_x86_64":     { "title": "Linux x86_64",    "prefix": "linux_64"    },
-  "linux_aarch64":    { "title": "Linux aarch64",   "prefix": "linux_arm64" },
-  "android":          { "title": "Android" }
+platformTitles = {
+  "windows_x64":      "Windows x64",
+  "windows_x86":      "Windows x86",
+  "windows_x64_xp":   "Windows x64 XP",
+  "windows_x86_xp":   "Windows x86 XP",
+  "darwin_x86_64":    "macOS x86_64",
+  "darwin_arm64":     "macOS arm64",
+  "darwin_x86_64_v8": "macOS x86_64 V8",
+  "linux_x86_64":     "Linux x86_64",
+  "linux_aarch64":    "Linux aarch64",
+  "linux_x86_64_cef": "Linux x86_64 cef107",
+  "android":          "Android",
+}
+
+platformPrefixes = {
+  "windows_x64":      "win_64",
+  "windows_x86":      "win_32",
+  "windows_x64_xp":   "win_64_xp",
+  "windows_x86_xp":   "win_32_xp",
+  "darwin_x86_64":    "mac_64",
+  "darwin_arm64":     "mac_arm64",
+  "darwin_x86_64_v8": "mac_64",
+  "linux_x86_64":     "linux_64",
+  "linux_aarch64":    "linux_arm64",
+  "linux_x86_64_cef": "linux_64",
 }
 
 out_dir = "build_tools/out"
@@ -19,11 +33,11 @@ vcredist_links = {
   "2022": {
     "x64": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "119dde89a20674349a51893114eae5ed"
+      "md5": "077f0abdc2a3881d5c6c774af821f787"
     },
     "x86": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "ca8c521c30f57c0c199d526b9a23fc4a"
+      "md5": "ae427c1329c3b211a6d09f8d9506eb74"
     }
   },
   "2015": {

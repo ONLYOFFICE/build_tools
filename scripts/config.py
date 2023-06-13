@@ -69,23 +69,19 @@ def parse():
   if check_option("platform", "android"):
     options["platform"] += " android_arm64_v8a android_armv7 android_x86 android_x86_64"
 
-  #if check_option("platform", "ios"):
-  #  extend_option("config", "core_ios_32")
-
   # check vs-version
-  if ("" == option("vs-version")):
-    options["vs-version"] = "2015"
-
-  # enable v8 8.9 version, if compiler support sources
-  if ("linux" == host_platform) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
-    extend_option("config", "v8_version_89")
+  if ("windows" == host_platform) and ("" == option("vs-version")):
+    options["vs-version"] = "2019"
+    if check_option("platform", "win_64_xp") or check_option("platform", "win_32_xp"):
+      options["vs-version"] = "2015"
 
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
-    extend_option("config", "v8_version_89")
-    extend_option("config", "vs2019")
+      extend_option("config", "vs2019")
 
-  if check_option("platform", "linux_arm64"):
-    extend_option("config", "v8_version_89")
+  if is_cef_107():
+    extend_option("config", "cef_version_107")
+  if is_v8_60():
+    extend_option("config", "v8_version_60")
 
   # check vs-path
   if ("windows" == host_platform) and ("" == option("vs-path")):
@@ -111,9 +107,22 @@ def parse():
   if not "arm64-toolchain-bin" in options:
     options["arm64-toolchain-bin"] = "/usr/bin"
 
+  if check_option("platform", "ios"):
+    if not check_option("config", "no_bundle_xcframeworks"):
+      if not check_option("config", "bundle_xcframeworks"):
+        extend_option("config", "bundle_xcframeworks")
+
   if check_option("config", "bundle_xcframeworks"):
     if not check_option("config", "bundle_dylibs"):
       extend_option("config", "bundle_dylibs")
+
+  if check_option("use-system-qt", "1"):
+    base.cmd_in_dir(base.get_script_dir() + "/../tools/linux", "python", ["use_system_qt.py"])
+    options["qt-dir"] = base.get_script_dir() + "/../tools/linux/system_qt"
+
+  # disable all warnings (enable if needed with core_enable_all_warnings options)
+  if not check_option("config", "core_enable_all_warnings"):
+    extend_option("config", "core_disable_all_warnings")
 
   return
 
@@ -211,3 +220,23 @@ def parse_defaults():
     else:
       options[name] = defaults_options[name]
   return
+
+def is_cef_107():
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+    return True
+  return False
+
+def is_v8_60():
+  if check_option("platform", "linux_arm64"):
+    return False
+
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+    return True
+
+  if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):
+    return True
+
+  #if check_option("config", "use_v8"):
+  #  return True
+
+  return False

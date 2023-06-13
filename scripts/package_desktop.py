@@ -5,6 +5,7 @@ import os
 import package_utils as utils
 import package_common as common
 import package_branding as branding
+import config
 
 def make():
   utils.log_h1("DESKTOP")
@@ -24,11 +25,16 @@ def aws_s3_upload(files, key, ptype=None):
   ret = True
   key = "desktop/" + key
   for file in files:
+    if not utils.is_file(file):
+      utils.log_err("file not exist: " + file)
+      ret &= False
+      continue
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
       "s3", "cp", "--no-progress", "--acl", "public-read",
+      "--metadata", "md5=" + utils.get_md5(file),
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":
@@ -39,10 +45,7 @@ def aws_s3_upload(files, key, ptype=None):
     if upload and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data(
-          "desktop", ptype, file, full_key,
-          branding.s3_bucket, branding.s3_region
-      )
+      utils.add_deploy_data("desktop", ptype, file, full_key)
   return ret
 
 #
@@ -50,40 +53,30 @@ def aws_s3_upload(files, key, ptype=None):
 #
 
 def make_windows():
-  global package_version, iscc_args, source_dir, source_help_dir, \
-    inno_file, inno_help_file, inno_update_file, advinst_file, zip_file, \
-    arch_list, inno_arch_list
+  global package_version, arch_list, source_dir, desktop_dir, viewer_dir, \
+    inno_file, inno_help_file, inno_sa_file, inno_update_file, advinst_file, zip_file
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
-  prefix = common.platforms[common.platform]["prefix"]
-  company = branding.company_name.lower()
-  product = branding.desktop_product_name.replace(" ","").lower()
   package_name = branding.desktop_package_name
   package_version = common.version + "." + common.build
-  source_dir = "..\\..\\..\\..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)
-  source_help_dir = source_dir + "-help"
   arch_list = {
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
     "windows_x86":    "x86",
     "windows_x86_xp": "x86"
   }
-  inno_arch_list = {
-    "windows_x64":    "64",
-    "windows_x86":    "32",
-    "windows_x64_xp": "64",
-    "windows_x86_xp": "32"
-  }
   suffix = arch_list[common.platform]
-  if common.platform.endswith("_xp"): suffix += "_xp"
-  zip_file = "%s_%s_%s.zip" % (package_name, package_version, suffix)
-  inno_file = "%s_%s_%s.exe" % (package_name, package_version, suffix)
-  inno_help_file = "%s_Help_%s_%s.exe" % (package_name, package_version, suffix)
-  inno_update_file = "update\\editors_update_%s.exe" % suffix
-  advinst_file = "%s_%s_%s.msi" % (package_name, package_version, suffix)
+  if common.platform.endswith("_xp"): suffix += "-xp"
+  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
+  inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_sa_file = "%s-Standalone-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
+  advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
 
   if common.clean:
     utils.log_h2("desktop clean")
+    utils.delete_dir("build")
     # utils.delete_dir("data\\vcredist")
     utils.delete_dir("DesktopEditors-cache")
     utils.delete_files("*.exe")
@@ -95,6 +88,16 @@ def make_windows():
     utils.delete_files("update\\*.xml")
     utils.delete_files("update\\*.html")
 
+  utils.log_h2("copy arifacts")
+  source_dir = "%s\\build_tools\\out\\%s\\%s" \
+    % (common.workspace_dir, common.prefix, branding.company_name)
+  utils.create_dir("build")
+  desktop_dir = "build\\" + branding.desktop_product_name_s
+  utils.copy_dir(source_dir + "\\" + branding.desktop_product_name_s, desktop_dir)
+  if not branding.onlyoffice:
+    viewer_dir = "build\\" + branding.viewer_product_name_s
+    utils.copy_dir(source_dir + "\\" + branding.viewer_product_name_s, viewer_dir)
+
   make_zip()
 
   vcdl = True
@@ -103,18 +106,13 @@ def make_windows():
 
   if not vcdl:
     utils.set_summary("desktop inno build", False)
-    utils.set_summary("desktop inno help build", False)
+    utils.set_summary("desktop inno standalone build", False)
     utils.set_summary("desktop inno update build", False)
     utils.set_summary("desktop advinst build", False)
     utils.set_cwd(common.workspace_dir)
     return
 
   make_inno()
-
-  if branding.onlyoffice and common.platform in ["windows_x64", "windows_x86"]:
-    make_inno_help()
-
-  make_inno_update()
 
   if common.platform == "windows_x64":
     make_update_files()
@@ -127,19 +125,20 @@ def make_windows():
 
 def make_zip():
   utils.log_h2("desktop zip build")
-  ret = utils.cmd(
-      "7z", "a", "-y", zip_file, source_dir + "\\*",
-      creates=zip_file, verbose=True
+
+  args = ["-DesktopPath", desktop_dir, "-OutFile", zip_file]
+  if common.sign:
+    args += ["-Sign", "-CertName", branding.cert_name]
+  if branding.onlyoffice and not common.platform.endswith("_xp"):
+    args += ["-ExcludeHelp"]
+  ret = utils.ps1(
+    "make_zip.ps1", args, creates=zip_file, verbose=True
   )
   utils.set_summary("desktop zip build", ret)
 
   if common.deploy and ret:
     utils.log_h2("desktop zip deploy")
-    ret = aws_s3_upload(
-        [zip_file],
-        "win/generic/%s/" % common.channel,
-        "Portable"
-    )
+    ret = aws_s3_upload([zip_file], "win/generic/", "Portable")
     utils.set_summary("desktop zip deploy", ret)
   return
 
@@ -158,104 +157,91 @@ def download_vcredist(year):
   return ret
 
 def make_inno():
-  global iscc_args
   utils.log_h2("desktop inno build")
-  utils.log_h3(inno_file)
 
+  inno_arch_list = {
+    "windows_x64":    "64",
+    "windows_x86":    "32",
+    "windows_x64_xp": "64",
+    "windows_x86_xp": "32"
+  }
   iscc_args = [
     "/Qp",
+    "/DVERSION=" + package_version,
     "/DsAppVersion=" + package_version,
-    "/DDEPLOY_PATH=" + source_dir,
-    "/D_ARCH=" + inno_arch_list[common.platform]
+    "/DDEPLOY_PATH=" + desktop_dir,
+    "/DARCH=" + arch_list[common.platform],
+    "/D_ARCH=" + inno_arch_list[common.platform],
   ]
   if branding.onlyoffice:
     iscc_args.append("/D_ONLYOFFICE=1")
   else:
     iscc_args.append("/DsBrandingFolder=" + \
         utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
-  if common.platform in ["windows_x64_xp", "windows_x86_xp"]:
+  if common.platform.endswith("_xp"):
     iscc_args.append("/D_WIN_XP=1")
   if common.sign:
     iscc_args.append("/DENABLE_SIGNING=1")
-    iscc_args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
+    iscc_args.append("/Sbyparam=signtool.exe sign /a /v /n $q" + \
         branding.cert_name + "$q /t " + common.tsa_server + " $f")
   args = ["iscc"] + iscc_args + ["common.iss"]
   ret = utils.cmd(*args, creates=inno_file, verbose=True)
   utils.set_summary("desktop inno build", ret)
 
-  if common.deploy and ret:
+  if branding.onlyoffice and not common.platform.endswith("_xp"):
+    args = ["iscc"] + iscc_args + ["help.iss"]
+    ret = utils.cmd(*args, creates=inno_help_file, verbose=True)
+    utils.set_summary("desktop inno help build", ret)
+
+    args = ["iscc"] + iscc_args + ["/DEMBED_HELP", "/DsPackageEdition=Standalone", "common.iss"]
+    ret = utils.cmd(*args, creates=inno_sa_file, verbose=True)
+    utils.set_summary("desktop inno standalone build", ret)
+
+  if not (hasattr(branding, 'desktop_updates_skip_iss_wrapper') and branding.desktop_updates_skip_iss_wrapper):
+    args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
+    ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
+    utils.set_summary("desktop inno update build", ret)
+
+  if common.deploy:
     utils.log_h2("desktop inno deploy")
-    ret = aws_s3_upload(
-        [inno_file],
-        "win/inno/%s/%s/" % (common.version, common.build),
-        "Installer"
-    )
+    ret = aws_s3_upload([inno_file], "win/inno/","Installer")
     utils.set_summary("desktop inno deploy", ret)
-  return
 
-def make_inno_help():
-  utils.log_h2("desktop inno help build")
-  utils.log_h3(inno_help_file)
+    if branding.onlyoffice and not common.platform.endswith("_xp"):
+      utils.log_h2("desktop inno help deploy")
+      ret = aws_s3_upload([inno_help_file], "win/inno/","Installer")
+      utils.set_summary("desktop inno help deploy", ret)
 
-  args = [
-    "iscc",
-    "/Qp",
-    "/DsAppVersion=" + package_version,
-    "/DDEPLOY_PATH=" + source_help_dir,
-    "/D_ARCH=" + inno_arch_list[common.platform]
-  ]
-  if branding.onlyoffice:
-    args.append("/D_ONLYOFFICE=1")
-  else:
-    args.append("/DsBrandingFolder=" + \
-        utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
-  if common.sign:
-    args.append("/DENABLE_SIGNING=1")
-    args.append("/Sbyparam=signtool.exe sign /v /n $q" + \
-        branding.cert_name + "$q /t " + common.tsa_server + " $f")
-  args.append("help.iss")
-  ret = utils.cmd(*args, creates=inno_help_file, verbose=True)
-  utils.set_summary("desktop inno help build", ret)
+      utils.log_h2("desktop inno standalone deploy")
+      ret = aws_s3_upload([inno_sa_file], "win/inno/","Installer")
+      utils.set_summary("desktop inno standalone deploy", ret)
 
-  if common.deploy and ret:
-    utils.log_h2("desktop inno help deploy")
-    ret = aws_s3_upload(
-        [inno_help_file],
-        "win/inno/%s/%s/" % (common.version, common.build),
-        "Installer"
-    )
-    utils.set_summary("desktop inno help deploy", ret)
-  return
-
-def make_inno_update():
-  utils.log_h2("desktop inno update build")
-  utils.log_h3(inno_update_file)
-
-  args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
-  ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
-  utils.set_summary("desktop inno update build", ret)
-
-  if common.deploy and ret:
     utils.log_h2("desktop inno update deploy")
-    ret = aws_s3_upload(
+    if utils.is_file(inno_update_file):
+      ret = aws_s3_upload(
         [inno_update_file],
         "win/inno/%s/%s/" % (common.version, common.build),
-        "WinSparkle"
-    )
+        "Update"
+      )
+    elif utils.is_file(inno_file):
+      ret = aws_s3_upload(
+        [inno_file],
+        "win/inno/%s/%s/%s" % (common.version, common.build, utils.get_basename(inno_update_file)),
+        "Update"
+      )
+    else:
+      ret = False
     utils.set_summary("desktop inno update deploy", ret)
   return
 
 def make_update_files():
   utils.log_h2("desktop update files build")
 
-  if branding.onlyoffice:
-    changes_dir = "update\\changes\\" + common.version
-  else:
-    changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
-        "win-linux\\package\\windows\\update\\changes\\" + common.version
-  for lang, base in branding.desktop_update_changes_list.items():
-    utils.log_h3("changes " + lang + " html")
-    utils.copy_file(changes_dir + "\\" + lang + ".html", "update\\" + base + ".html")
+  # changes_dir = "update\\changes\\" + common.version
+  # if not branding.onlyoffice:
+  #   changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
+  #       "win-linux\\package\\windows\\update\\changes\\" + common.version
+  # utils.copy_dir_content(changes_dir, "update")
 
   appcast_args = [
     "-Version", package_version,
@@ -267,30 +253,30 @@ def make_update_files():
     "-UpdatesUrlPrefix", branding.desktop_updates_url,
     "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
   ]
-  appcast_test_base_url = "%s/desktop/win/inno/%s/%s" % (branding.s3_base_url, common.version, common.build)
+  appcast_test_base_url = "%s/desktop/win/update/%s/%s" % (branding.s3_base_url, common.version, common.build)
   appcast_test_args = [
     "-UpdatesUrlPrefix", appcast_test_base_url,
     "-ReleaseNotesUrlPrefix", appcast_test_base_url
   ]
 
-  utils.log_h3("appcast prod json")
-  utils.ps1(
-      "update\\make_appcast.ps1",
-      appcast_args + appcast_prod_args,
-      creates="update\\appcast.json", verbose=True
-  )
+  # utils.log_h3("appcast prod json")
+  # utils.ps1(
+  #     "update\\make_appcast.ps1",
+  #     appcast_args + appcast_prod_args,
+  #     creates="update\\appcast.json", verbose=True
+  # )
   utils.log_h3("appcast prod xml")
   utils.ps1(
       "update\\make_appcast_xml.ps1",
       appcast_args + appcast_prod_args,
       creates="update\\appcast.xml", verbose=True
   )
-  utils.log_h3("appcast test json")
-  utils.ps1(
-      "update\\make_appcast.ps1",
-      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
-      creates="update\\appcast-test.json", verbose=True
-  )
+  # utils.log_h3("appcast test json")
+  # utils.ps1(
+  #     "update\\make_appcast.ps1",
+  #     appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
+  #     creates="update\\appcast-test.json", verbose=True
+  # )
   utils.log_h3("appcast test xml")
   utils.ps1(
       "update\\make_appcast_xml.ps1",
@@ -301,9 +287,10 @@ def make_update_files():
   if common.deploy:
     utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
-        utils.glob_path("update/*.json") + utils.glob_path("update/*.xml") + \
-            utils.glob_path("update/*.html"),
-        "win/inno/%s/%s/" % (common.version, common.build),
+        utils.glob_path("update\\*.json") \
+        + utils.glob_path("update\\*.xml") \
+        + utils.glob_path("update\\*.html"),
+        "win/update/%s/%s/" % (common.version, common.build),
         "Update"
     )
     utils.set_summary("desktop update files deploy", ret)
@@ -311,7 +298,6 @@ def make_update_files():
 
 def make_advinst():
   utils.log_h2("desktop advinst build")
-  utils.log_h3(advinst_file)
 
   arch = arch_list[common.platform]
 
@@ -360,6 +346,8 @@ def make_advinst():
       'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if branding.onlyoffice:
+    for path in utils.glob_path(desktop_dir + "\\editors\\web-apps\\apps\\*\\main\\resources\\help"):
+      utils.delete_dir(path)
     aic_content += [
       "DelFolder CUSTOM_PATH"
     ]
@@ -381,15 +369,16 @@ def make_advinst():
       "DelLanguage 3082 -buildname DefaultBuild",
       "DelLanguage 1033 -buildname DefaultBuild",
       "SetCurrentFeature ExtendedFeature",
-      "NewSync CUSTOM_PATH " + source_dir + "\\..\\MediaViewer",
-      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + source_dir + "\\..\\MediaViewer\\ImageViewer.exe",
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + source_dir + "\\..\\MediaViewer\\VideoPlayer.exe",
+      "NewSync CUSTOM_PATH " + viewer_dir,
+      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
+      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + viewer_dir + "\\VideoPlayer.exe",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [
     "SetCurrentFeature MainFeature",
-    "NewSync APPDIR " + source_dir,
-    "UpdateFile APPDIR\\DesktopEditors.exe " + source_dir + "\\DesktopEditors.exe",
+    "NewSync APPDIR " + desktop_dir,
+    "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
+    "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname DefaultBuild",
     "Rebuild -buildslist DefaultBuild"
@@ -401,11 +390,7 @@ def make_advinst():
 
   if common.deploy and ret:
     utils.log_h2("desktop advinst deploy")
-    ret = aws_s3_upload(
-        [advinst_file],
-        "win/advinst/%s/" % common.channel,
-        "Installer"
-    )
+    ret = aws_s3_upload([advinst_file], "win/advinst/", "Installer")
     utils.set_summary("desktop advinst deploy", ret)
   return
 
@@ -435,6 +420,13 @@ def make_macos():
     utils.log_h2("clean")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Developer/Xcode/Archives")
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
+
+  source_dir = "%s/build_tools/out/%s/%s" \
+    % (common.workspace_dir, common.prefix, branding.company_name)
+  if branding.onlyoffice:
+    for path in utils.glob_path(source_dir \
+        + "/desktopeditors/editors/web-apps/apps/*/main/resources/help"):
+      utils.delete_dir(path)
 
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_bundle_version_string = utils.sh_output(
@@ -481,7 +473,7 @@ def make_dmg():
     utils.log_h2("desktop dmg deploy")
     ret = aws_s3_upload(
         utils.glob_path("build/*.dmg"),
-        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "mac/%s/%s/%s/" % (common.version, common.build, suffix),
         "Disk Image"
     )
     utils.set_summary("desktop dmg deploy", ret)
@@ -489,7 +481,7 @@ def make_dmg():
     utils.log_h2("desktop zip deploy")
     ret = aws_s3_upload(
         ["build/%s-%s.zip" % (scheme, app_version)],
-        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "mac/%s/%s/%s/" % (common.version, common.build, suffix),
         "Archive"
     )
     utils.set_summary("desktop zip deploy", ret)
@@ -504,14 +496,10 @@ def make_sparkle_updates():
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
   utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
-  utils.copy_file(
-      changes_dir + "/" + app_version + "/ReleaseNotes.html",
-      updates_dir + "/" + zip_filename + ".html"
-  )
-  utils.copy_file(
-      changes_dir + "/" + app_version + "/ReleaseNotesRU.html",
-      updates_dir + "/" + zip_filename + ".ru.html"
-  )
+
+  for file in utils.glob_path(changes_dir + "/" + app_version + "/*.html"):
+    filename = utils.get_basename(file).replace("changes", zip_filename)
+    utils.copy_file(file, updates_dir + "/" + filename)
 
   sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
   ret = utils.sh(
@@ -554,7 +542,7 @@ def make_sparkle_updates():
         utils.glob_path("build/update/*.delta") \
         + utils.glob_path("build/update/*.xml") \
         + utils.glob_path("build/update/*.html"),
-        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "mac/%s/%s/%s/" % (common.version, common.build, suffix),
         "Sparkle"
     )
     utils.set_summary("desktop sparkle files deploy", ret)
@@ -562,7 +550,7 @@ def make_sparkle_updates():
     utils.log_h2("desktop checksums deploy")
     ret = aws_s3_upload(
         utils.glob_path("build/update/*.txt"),
-        "mac/%s/%s/%s/" % (suffix, common.version, common.build),
+        "mac/%s/%s/%s/" % (common.version, common.build, suffix),
         "Checksums"
     )
     utils.set_summary("desktop checksums deploy", ret)
@@ -593,25 +581,22 @@ def make_linux():
       utils.log_h2("desktop tar deploy")
       if "tar" in branding.desktop_make_targets:
         ret = aws_s3_upload(
-            utils.glob_path("tar/*.tar.gz") + utils.glob_path("tar/*.tar.xz"),
-            "linux/generic/%s/" % common.channel,
-            "Portable"
+            utils.glob_path("tar/*.tar*"),
+            "linux/generic/", "Portable"
         )
         utils.set_summary("desktop tar deploy", ret)
       if "deb" in branding.desktop_make_targets:
         utils.log_h2("desktop deb deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb/*.deb"),
-            "linux/debian/%s/" % common.channel,
-            "Debian"
+            "linux/debian/", "Debian"
         )
         utils.set_summary("desktop deb deploy", ret)
       if "deb-astra" in branding.desktop_make_targets:
         utils.log_h2("desktop deb-astra deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb-astra/*.deb"),
-            "linux/astra/",
-            "Astra Linux Signed"
+            "linux/astra/", "Astra Linux Special Edition"
         )
         utils.set_summary("desktop deb-astra deploy", ret)
       if "rpm" in branding.desktop_make_targets:
@@ -619,8 +604,7 @@ def make_linux():
         ret = aws_s3_upload(
             utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
             + utils.glob_path("rpm/builddir/RPMS/noarch/*.rpm"),
-            "linux/rhel/%s/" % common.channel,
-            "CentOS"
+            "linux/rhel/", "CentOS"
         )
         utils.set_summary("desktop rpm deploy", ret)
       if "suse-rpm" in branding.desktop_make_targets:
@@ -628,8 +612,7 @@ def make_linux():
         ret = aws_s3_upload(
             utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
             + utils.glob_path("suse-rpm/builddir/RPMS/noarch/*.rpm"),
-            "linux/suse/%s/" % common.channel,
-            "SUSE Linux"
+            "linux/suse/", "SUSE Linux"
         )
         utils.set_summary("desktop suse-rpm deploy", ret)
       if "apt-rpm" in branding.desktop_make_targets:
@@ -637,8 +620,7 @@ def make_linux():
         ret = aws_s3_upload(
             utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm") \
             + utils.glob_path("apt-rpm/builddir/RPMS/noarch/*.rpm"),
-            "linux/altlinux/%s/" % common.channel,
-            "ALT Linux"
+            "linux/altlinux/", "ALT Linux"
         )
         utils.set_summary("desktop apt-rpm deploy", ret)
       if "urpmi" in branding.desktop_make_targets:
@@ -646,8 +628,7 @@ def make_linux():
         ret = aws_s3_upload(
             utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm") \
             + utils.glob_path("urpmi/builddir/RPMS/noarch/*.rpm"),
-            "linux/rosa/%s/" % common.channel,
-            "ROSA"
+            "linux/rosa/", "ROSA"
         )
         utils.set_summary("desktop urpmi deploy", ret)
     else:

@@ -14,7 +14,7 @@ def make():
   return
 
 def make_core():
-  prefix = common.platforms[common.platform]["prefix"]
+  prefix = common.platformPrefixes[common.platform]
   company = branding.company_name.lower()
   repos = {
     "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },
@@ -34,19 +34,20 @@ def make_core():
     utils.set_summary("core deploy", False)
     return
   if not utils.is_file(core_7z):
-    utils.log_err("core.7z does not exist")
+    utils.log_err("file not exist: " + core_7z)
     utils.set_summary("core deploy", False)
     return
 
   utils.log_h2("core deploy")
   args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+          "--metadata", "md5=" + utils.get_md5(core_7z),
           core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
   if common.os_family == "windows":
     ret = utils.cmd(*args, verbose=True)
   else:
     ret = utils.sh(" ".join(args), verbose=True)
   if ret:
-    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z", branding.s3_bucket, branding.s3_region)
+    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
     args = ["aws", "s3", "sync", "--delete",
             "--acl", "public-read", "--no-progress",
             "s3://" + branding.s3_bucket + "/" + dest_version,
@@ -61,7 +62,7 @@ def make_core():
 def deploy_closure_maps(license):
   if not common.deploy: return
   utils.log_h1("CLOSURE MAPS")
-  utils.set_cwd(utils.get_path("sdkjs/build"))
+  utils.set_cwd(utils.get_path("sdkjs/build/maps"))
 
   branch = utils.get_env("BRANCH_NAME")
   maps = utils.glob_path("*.js.map")
@@ -76,15 +77,15 @@ def deploy_closure_maps(license):
     return
 
   utils.log_h2("closure maps " + license + " deploy")
-  dest = "closure-maps/%s/%s/%s/%s" % (branch, common.build, license, common.platform)
+  dest = "closure-maps/%s/%s/%s" % (common.version, common.build, license)
   ret = True
   for file in maps:
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
-      "s3", "cp", "--no-progress", file,
-      "s3://" + branding.s3_bucket + "/" + dest + "/"
+      "s3", "cp", "--no-progress", "--metadata", "md5=" + utils.get_md5(file),
+      file, "s3://" + branding.s3_bucket + "/" + dest + "/"
     ]
     if common.os_family == "windows":
       upload = utils.cmd(*args, verbose=True)
@@ -92,10 +93,7 @@ def deploy_closure_maps(license):
       upload = utils.sh(" ".join(args), verbose=True)
     ret &= upload
     if upload:
-      utils.add_deploy_data(
-          "core", "Closure maps " + license, file, dest + "/" + file,
-          branding.s3_bucket, branding.s3_region
-      )
+      utils.add_deploy_data("core", "Closure maps " + license, file, dest + "/" + file)
   utils.set_summary("closure maps " + license + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

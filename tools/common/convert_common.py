@@ -125,9 +125,20 @@ def getFormatByFile(file_path):
 def convertFile(directory_x2t, file_input, file_output, convert_params):
   cur_path = os.getcwd()
 
+  # fonts directory -----------------------------------
   directory_fonts = directory_x2t + "/sdkjs/common"
-  if not base.is_file(directory_fonts + "/AllFonts.js"):
+  directory_fonts_local = ""
+  if "windows" == base.host_platform():
+    directory_fonts_local = os.getenv("LOCALAPPDATA") + "/ONLYOFFICE/docbuilder"
+  else:
+    directory_fonts_local = os.path.expanduser('~') + "/.local/share/ONLYOFFICE/docbuilder"
+
+  if not base.is_file(directory_fonts + "/AllFonts.js") and not base.is_file(directory_fonts_local + "/AllFonts.js"):
     base.cmd_in_dir(directory_x2t, "docbuilder", [], True)
+    
+  if base.is_file(directory_fonts_local + "/AllFonts.js"):
+    directory_fonts = directory_fonts_local
+  # ---------------------------------------------------  
 
   temp_dir = os.getcwd().replace("\\", "/") + "/temp"
   if base.is_dir(temp_dir):

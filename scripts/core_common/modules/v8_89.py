@@ -24,6 +24,8 @@ def make_args(args, platform, is_64=True, is_debug=False):
   
   if is_debug:
     args_copy.append("is_debug=true")
+    if (platform == "windows"):
+      args_copy.append("enable_iterator_debugging=true")
   else:
     args_copy.append("is_debug=false")
   
@@ -31,7 +33,7 @@ def make_args(args, platform, is_64=True, is_debug=False):
     args_copy.append("is_clang=true")
     args_copy.append("use_sysroot=false")
   if (platform == "windows"):
-    args_copy.append("is_clang=false")    
+    args_copy.append("is_clang=false")
 
   return "--args=\"" + " ".join(args_copy) + "\""
 
@@ -49,6 +51,28 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   base.delete_file("./" + directory_out + "/obj/v8_wrappers.ninja")
   base.move_file("./" + directory_out + "/obj/v8_wrappers.ninja.bak", "./" + directory_out + "/obj/v8_wrappers.ninja")
   return
+
+# patch v8 for build ---------------------------------------------------
+def patch_windows_debug():
+  # v8 8.9 version does not built with enable_iterator_debugging flag
+  # patch heap.h file:
+  file_patch = "./src/heap/heap.h"
+  base.copy_file(file_patch, file_patch + ".bak")
+  content_old = base.readFile(file_patch)
+  posStart = content_old.find("class StrongRootBlockAllocator {")
+  posEnd = content_old.find("};", posStart + 1)
+  posEnd = content_old.find("};", posEnd + 1)
+  content = content_old[0:posStart]
+  content += base.readFile("./../../../../../build_tools/scripts/core_common/modules/v8_89.patch")
+  content += content_old[posEnd + 2:]
+  base.writeFile(file_patch, content)
+  return
+
+def unpatch_windows_debug():
+  file_patch = "./src/heap/heap.h"
+  base.move_file(file_patch + ".bak", file_patch)
+  return
+# ----------------------------------------------------------------------
 
 def make():
   old_env = dict(os.environ)
@@ -75,7 +99,10 @@ def make():
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
-    base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
+    v8_branch_version = "remotes/branch-heads/8.9"
+    if ("mac" == base.host_platform()):
+      v8_branch_version = "remotes/branch-heads/9.9"
+    base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)
     base.cmd("gclient", ["sync", "--force"], True)
     base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
 
@@ -84,6 +111,10 @@ def make():
 
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
+
+  if not base.is_file("v8/third_party/jinja2/tests.py.bak"):
+    base.copy_file("v8/third_party/jinja2/tests.py", "v8/third_party/jinja2/tests.py.bak")
+    base.replaceInFile("v8/third_party/jinja2/tests.py", "from collections import Mapping", "try:\n    from collections.abc import Mapping\nexcept ImportError:\n    from collections import Mapping")
 
   os.chdir("v8")
   
@@ -114,7 +145,9 @@ def make():
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):
       if not base.is_file("out.gn/win_64/debug/obj/v8_monolith.lib"):
+        patch_windows_debug()
         ninja_windows_make(gn_args, True, True)
+        unpatch_windows_debug()
 
     if not base.is_file("out.gn/win_64/release/obj/v8_monolith.lib"):
       ninja_windows_make(gn_args)
@@ -122,7 +155,9 @@ def make():
   if config.check_option("platform", "win_32"):
     if (-1 != config.option("config").lower().find("debug")):
       if not base.is_file("out.gn/win_32/debug/obj/v8_monolith.lib"):
+        patch_windows_debug()
         ninja_windows_make(gn_args, False, True)
+        unpatch_windows_debug()
 
     if not base.is_file("out.gn/win_32/release/obj/v8_monolith.lib"):
       ninja_windows_make(gn_args, False)

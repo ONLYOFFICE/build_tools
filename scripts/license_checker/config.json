@@ -1,17 +1,14 @@
 {
 	"basePath": "../../../",
 	"reportFolder": "build_tools/scripts/license_checker/reports",
-	"licensePath": "build_tools/scripts/license_checker/header.license",
 	"printChecking": false,
 	"printReports": false,
 	"fix": ["OUTDATED"],
 	"configs": [
 		{
 			"dir": "core",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".cs", ".js", ".m", ".mm", ".license"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"core/build",
 				"core/Common/cfcpp/test",
@@ -58,10 +55,8 @@
 		},
 		{
 			"dir": "core-ext",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"core-ext/AutoTester",
 				"core-ext/cell_android",
@@ -82,10 +77,8 @@
 		},
 		{
 			"dir": "sdkjs",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"sdkjs/deploy",
 				"sdkjs/develop",
@@ -105,10 +98,8 @@
 		},
 		{
 			"dir": "sdkjs-forms",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -116,10 +107,8 @@
 		},
 		{
 			"dir": "sdkjs-ooxml",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -127,10 +116,8 @@
 		},
 		{
 			"dir": "web-apps",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor",
@@ -153,10 +140,8 @@
 		},
 		{
 			"dir": "web-apps-mobile",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -164,10 +149,8 @@
 		},
 		{
 			"dir": "server",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"server/FileConverter/bin"
 			],
@@ -177,10 +160,8 @@
 		},
 		{
 			"dir": "server-lockstorage",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"server/FileConverter/bin"
 			],
@@ -190,10 +171,8 @@
 		},
 		{
 			"dir": "server-license",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDir": [
 				"server/FileConverter/bin"
 			],
@@ -203,10 +182,8 @@
 		},
 		{
 			"dir": "editors-ios",
+			"licensePath": "build_tools/scripts/license_checker/licenses/header.license",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
 			"ignoreListDirName": [
 				"vendor",
 				"Vendor",
@@ -218,6 +195,22 @@
 				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.h",
 				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.m"
 			]
+		},
+		{
+			"dir": "onlyoffice.github.io",
+			"isSingleYear": true,
+			"licensePath": "build_tools/scripts/license_checker/licenses/apache_js.license",
+			"fileExtensions": [".js"],
+			"ignoreListDirName": [
+				"vendor",
+				"thirdparty"
+			]
+		},
+		{
+			"dir": "onlyoffice.github.io",
+			"isSingleYear": true,
+			"licensePath": "build_tools/scripts/license_checker/licenses/apache_html.license",
+			"fileExtensions": [".html"]
 		}
 	]
 }

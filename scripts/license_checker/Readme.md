@@ -56,13 +56,6 @@ save text files with reports.
   "reportFolder": "build_tools/scripts/license_checker/reports"
   ```
 
-* `licensePath` specifies the path to the license template.
-**For example:**
-
-  ```json
-  "licensePath": "build_tools/scripts/license_checker/license_template.txt"
-  ```
-
 * `printChecking` specifies whether to output
 information about which file is
 being checked to the console.
@@ -104,6 +97,13 @@ Possible array values:
     "dir": "sdkjs"
     ```
 
+  * `licensePath` specifies the path to the license template.
+  **For example:**
+
+    ```json
+    "licensePath": "build_tools/scripts/license_checker/license_template.txt"
+    ```
+
   * `fileExtensions` file extensions to check.
   **For example:**
 
@@ -111,35 +111,6 @@ Possible array values:
     "fileExtensions": [".js"]
     ```
   
-  * `startMultiComm` the line that starts the multiline comment.
-  **For example:**
-
-    ```json
-    "startMultiComm": "/*"
-    ```
-
-  * `endMultiComm` the line that ends the multiline comment.
-  You should carefully consider the formatting
-  of the string, all spaces are taken into account.
-  This affects how the license check works.
-  **For example:**
-
-    ```json
-    "endMultiComm": " */"
-    ```
-
-    Space at the beginning for a prettier comment.
-
-  * `prefix` the line on which each comment
-  line will begin, except for the
-  beginning and end.
-  **For example:**
-
-      ```json
-      "prefix": " *"
-      ```
-
-      Space at the beginning for a prettier comment.
   * `ignoreListDir` folder paths to ignore.
   **For example:**
 
@@ -169,6 +140,15 @@ Possible array values:
     ```json
     "ignoreListFile": [
       "sdkjs/develop/awesomeFileToIgnore.js",
+    ]
+    ```
+
+  * `allowListFile` file paths to allow (throw ignore paths).
+  **For example:**
+
+    ```json
+    "allowListFile": [
+      "sdkjs/deploy/dontIgnoreMe.js"
     ]
     ```
 

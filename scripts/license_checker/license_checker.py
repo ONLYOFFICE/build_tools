@@ -19,15 +19,20 @@ FIX_TYPES = {
 	'LEN_MISMATCH': ErrorType.LEN_MISMATCH
 }
 
+def getLicense(path: str) -> list[str]:
+	"""Returns a license from file"""
+	with open(path, 'r') as f:
+		license: list[str] = f.readlines()
+		if not license:
+			raise Exception(f'Error getting license template. Cannot read {path} file. Is not it empty?')
+		return license
+
 class Config(object):
 	"""
 	License checker configuration.
 	Attributes:
 		dir: Directory to check.
 		fileExtensions: file extensions to check.
-		startMultiComm: characters to start a multi-line comment.
-		endMultiComm: characters to end a multi-line comment.
-		prefix: prefix for multiline comments
 		ignoreListDir: Ignored folder paths.
 		ignoreListDirName: Ignored folder names.
 		ignoreListFile: Ignored file paths.
@@ -36,34 +41,27 @@ class Config(object):
 	def __init__(self,
 		dir: str,
 		fileExtensions: list[str],
-		startMultiComm: str,
-		endMultiComm: str,
-		prefix: str = '',
 		allowListFile: list[str] = [],
 		ignoreListDir: list[str] = [],
 		ignoreListDirName: list[str] = [],
-		ignoreListFile: list[str] = []) -> None:
+		ignoreListFile: list[str] = [],
+		licensePath: str = '',
+		isSingleYear: bool = False) -> None:
 
 		self._dir = dir
 		self._fileExtensions = fileExtensions
-		self._startMultiComm = startMultiComm
-		self._endMultiComm = endMultiComm
-		self._prefix = prefix
 		self._allowListFile = allowListFile
 		self._ignoreListDir = ignoreListDir
 		self._ignoreListDirName = ignoreListDirName
 		self._ignoreListFile = ignoreListFile
+		self._licensePath = licensePath
+		self._isSingleYear = isSingleYear
+		self._license = getLicense(licensePath)
 
 	def getDir(self) -> str:
 		return self._dir
 	def getFileExtensions(self) -> list[str]:
 		return self._fileExtensions
-	def getStartMultiComm(self) -> str:
-		return self._startMultiComm
-	def getEndMultiComm(self) -> str:
-		return self._endMultiComm
-	def getPrefix(self) -> str:
-		return self._prefix
 	def getAllowListFile(self) -> list[str]:
 		return self._allowListFile
 	def getIgnoreListDir(self) -> list[str]:
@@ -72,12 +70,16 @@ class Config(object):
 		return self._ignoreListDirName
 	def getIgnoreListFile(self) -> list[str]:
 		return self._ignoreListFile
+	def getLicense(self) -> str:
+		return self._license
+	def getIsSingleYear(self) -> bool:
+		return self._isSingleYear
 
 with open(CONFIG_PATH, 'r') as j:
 	_json: dict = json.load(j)
 	BASE_PATH: str = _json.get('basePath') or '../../../'
+	os.chdir(BASE_PATH)
 	REPORT_FOLDER: str = _json.get('reportFolder') or 'build_tools/scripts/license_checker/reports'
-	LICENSE_TEMPLATE_PATH: str = _json.get('licensePath') or 'build_tools/scripts/license_checker/header.license'
 	if (_json.get('fix')):
 		try:
 			FIX: list[ErrorType] = list(map(lambda x: FIX_TYPES[x], _json.get('fix')))
@@ -90,25 +92,6 @@ with open(CONFIG_PATH, 'r') as j:
 	CONFIGS: list[Config] = []
 	for i in _json.get('configs'):
 		CONFIGS.append(Config(**i))
-
-os.chdir(BASE_PATH)
-
-with open(LICENSE_TEMPLATE_PATH, 'r') as f:
-	LICENSE: list[str] = f.readlines()
-	if not LICENSE:
-		raise Exception(f'Error getting license template. Cannot read {LICENSE_TEMPLATE_PATH} file. Is not it empty?')	
-
-def getLicense(start: str, prefix: str, end: str) -> list[str]:
-	"""Returns a valid license for any kind of comment prefix."""
-	result = [start]
-	for i in LICENSE:
-		if i == '\n':
-			result.append(prefix)
-		else:
-			result.append(f'{" ".join([prefix, i.strip()])}')
-	result.append(prefix)
-	result.append(end)
-	return result
 
 class Error(object):
 	def __init__(self, errorType: ErrorType) -> None:
@@ -144,8 +127,6 @@ class Checker(object):
 		self._reports: list[Report] = []
 	def getReports(self):
 		return self._reports
-	def getLicense(self):
-		return getLicense(start=self._config.getStartMultiComm(), prefix=self._config.getPrefix(), end=self._config.getEndMultiComm())
 	def _checkLine(self, line: str, prefix: str) -> bool:
 		"""Checks if a line has a prefix."""
 		"""Trim to catch invalid license without leading spaces"""
@@ -154,16 +135,28 @@ class Checker(object):
 			return True
 		else:
 			return False
+	def getCommaOperator(self, line: str, reverse: bool = False) -> str:
+		r = r'\W'
+		result = ''
+		line = reversed(line) if reverse else line
+		for char in line:
+			if re.search(r, char) and not re.search(r'\s', char):
+				result = char + result if reverse else result + char
+			else:
+				break
+		return result
 	def findLicense(self, lines: list[str]) -> list[str]:
 		"""Looks for consecutive comments in a list of strings."""
 		result = []
 		isStarted = False
+		license = self._config.getLicense()
+		startComma = self.getCommaOperator(license[0])
+		endComma = self.getCommaOperator(license[-1], True)
 		for line in lines:
-			if line == '\n': continue
-			if (self._checkLine(line=line, prefix=self._config.getStartMultiComm())):
+			if (self._checkLine(line=line, prefix=startComma)):
 				result.append(line)
 				isStarted = True
-			elif(self._checkLine(line=line, prefix=self._config.getEndMultiComm())):
+			elif(self._checkLine(line=line, prefix=endComma)):
 				result.append(line)
 				break
 			elif (isStarted):
@@ -172,7 +165,7 @@ class Checker(object):
 				break
 		return result
 	def _checkLicense(self, test: list[str], pathToFile: str) -> Report:
-		license = self.getLicense()
+		license = self._config.getLicense()
 		if len(license) != len(test):
 			return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.LEN_MISMATCH),
@@ -180,11 +173,11 @@ class Checker(object):
 		invalidLinesCount = 0
 		lastWrongLine = 0
 		for i in range(len(license)):
-			if (license[i] != test[i].strip('\n')):
+			if (license[i].strip('\n') != test[i].strip('\n')):
 				invalidLinesCount += 1
 				lastWrongLine = i
 		if (invalidLinesCount == 1):
-			r = r'\d\d\d\d\-\d\d\d\d'
+			r =  r'\d\d\d\d' if self._config.getIsSingleYear() else r'\d\d\d\d\-\d\d\d\d'
 			testDate = re.search(r, test[lastWrongLine])
 			licenseDate = re.search(r, license[lastWrongLine])
 
@@ -194,10 +187,10 @@ class Checker(object):
 			else:
 				return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.INVALID_LICENSE),
-				message=f'Something wrong...')
+				message=f'Invalid line number: {lastWrongLine}')
 
-			testLastYear = testDate.split('-')[1]
-			licenseLastYear = licenseDate.split('-')[1]
+			testLastYear = testDate if self._config.getIsSingleYear() else testDate.split('-')[1]
+			licenseLastYear = licenseDate if self._config.getIsSingleYear() else licenseDate.split('-')[1]
 			if (int(testLastYear) < int(licenseLastYear)):
 				return Report(pathToFile=pathToFile,
 					error=Error(errorType=ErrorType.OUTDATED),
@@ -258,7 +251,6 @@ class Walker(object):
 		for file in files:
 			if (PRINT_CHECKING):
 				print(f'Checking {file}...')
-			# self._checker.checkFile(file)
 			try:
 				self._checker.checkFile(file)
 			except Exception as e:
@@ -286,8 +278,9 @@ class Fixer(object):
 		with open(pathToFile, 'r', encoding="utf8") as file:
 			buffer = file.readlines()
 		with open(pathToFile, 'w', encoding="utf8") as file:
-			license = self._checker.getLicense()
-			file.writelines(map(lambda x: "".join([x, '\n']), license))
+			license = self._checker._config.getLicense()
+			file.writelines(license)
+			file.write('\n')
 			file.writelines(buffer)
 		return
 	def _fixLicense(self, pathToFile: str):
@@ -301,8 +294,9 @@ class Fixer(object):
 			for i in oldLicense:
 				buffer.remove(i)
 		with open(pathToFile, 'w', encoding=writeEncoding) as file:
-			license = self._checker.getLicense()
-			file.writelines(map(lambda x: "".join([x, '\n']), license))
+			license = self._checker._config.getLicense()
+			file.writelines(license)
+			file.write('\n')
 			file.writelines(buffer)
 		return
 

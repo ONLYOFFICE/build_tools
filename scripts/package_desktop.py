@@ -372,6 +372,7 @@ def make_advinst():
       "NewSync CUSTOM_PATH " + viewer_dir,
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
       "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + viewer_dir + "\\VideoPlayer.exe",
+      "SetProperty ProductName=\"" + branding.desktop_product_name_full + "\"",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [

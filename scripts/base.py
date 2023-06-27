@@ -634,9 +634,15 @@ def qt_config(platform):
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
 
+  is_disable_pch = False
   if ("ios" == platform):
-    config_param += " disable_precompiled_header"
+    is_disable_pch = True
   if (0 == platform.find("android")):
+    is_disable_pch = True
+  if not config.check_option("config", "debug"):
+    is_disable_pch = True
+
+  if is_disable_pch:
     config_param += " disable_precompiled_header"
 
   if ("linux_arm64" == platform):

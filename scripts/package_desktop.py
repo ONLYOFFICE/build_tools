@@ -237,59 +237,12 @@ def make_inno():
 def make_update_files():
   utils.log_h2("desktop update files build")
 
-  # changes_dir = "update\\changes\\" + common.version
-  # if not branding.onlyoffice:
-  #   changes_dir = "..\\..\\..\\..\\" + common.branding + "\\desktop-apps\\" + \
-  #       "win-linux\\package\\windows\\update\\changes\\" + common.version
-  # utils.copy_dir_content(changes_dir, "update")
-
-  appcast_args = [
-    "-Version", package_version,
-    "-Timestamp", common.timestamp
-  ]
-  if branding.onlyoffice:
-    appcast_args.append("-Multilang")
-  appcast_prod_args = [
-    "-UpdatesUrlPrefix", branding.desktop_updates_url,
-    "-ReleaseNotesUrlPrefix", branding.desktop_changes_url
-  ]
-  appcast_test_base_url = "%s/desktop/win/update/%s/%s" % (branding.s3_base_url, common.version, common.build)
-  appcast_test_args = [
-    "-UpdatesUrlPrefix", appcast_test_base_url,
-    "-ReleaseNotesUrlPrefix", appcast_test_base_url
-  ]
-
-  # utils.log_h3("appcast prod json")
-  # utils.ps1(
-  #     "update\\make_appcast.ps1",
-  #     appcast_args + appcast_prod_args,
-  #     creates="update\\appcast.json", verbose=True
-  # )
-  utils.log_h3("appcast prod xml")
-  utils.ps1(
-      "update\\make_appcast_xml.ps1",
-      appcast_args + appcast_prod_args,
-      creates="update\\appcast.xml", verbose=True
-  )
-  # utils.log_h3("appcast test json")
-  # utils.ps1(
-  #     "update\\make_appcast.ps1",
-  #     appcast_args + appcast_test_args + ["-OutFile", "appcast-test.json"],
-  #     creates="update\\appcast-test.json", verbose=True
-  # )
-  utils.log_h3("appcast test xml")
-  utils.ps1(
-      "update\\make_appcast_xml.ps1",
-      appcast_args + appcast_test_args + ["-OutFile", "appcast-test.xml"],
-      creates="update\\appcast-test.xml", verbose=True
-  )
+  changes_dir = common.workspace_dir + "\\" + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
 
   if common.deploy:
     utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
-        utils.glob_path("update\\*.json") \
-        + utils.glob_path("update\\*.xml") \
-        + utils.glob_path("update\\*.html"),
+        utils.glob_path(changes_dir + "\\*.html"),
         "win/update/%s/%s/" % (common.version, common.build),
         "Update"
     )
@@ -372,6 +325,7 @@ def make_advinst():
       "NewSync CUSTOM_PATH " + viewer_dir,
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
       "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + viewer_dir + "\\VideoPlayer.exe",
+      "SetProperty ProductName=\"" + branding.desktop_product_name_full + "\"",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
   aic_content += [

@@ -139,7 +139,8 @@ def make():
     base.create_dir(tools_dir)
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allfontsgen")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
-    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "pluginsmanager")
+    if ("1" != config.option("preinstalled-plugins")):
+      base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "pluginsmanager")
     
     branding_dir = server_dir + "/branding"
     if("" != config.option("branding") and "onlyoffice" != config.option("branding")):

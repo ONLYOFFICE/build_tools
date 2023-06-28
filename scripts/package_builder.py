@@ -21,11 +21,16 @@ def aws_s3_upload(files, key, ptype=None):
   ret = True
   key = "builder/" + key
   for file in files:
+    if not utils.is_file(file):
+      utils.log_err("file not exist: " + file)
+      ret &= False
+      continue
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
       "s3", "cp", "--no-progress", "--acl", "public-read",
+      "--metadata", "md5=" + utils.get_md5(file),
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":
@@ -43,7 +48,7 @@ def make_windows():
   global inno_file, zip_file, suffix, key_prefix
   utils.set_cwd("document-builder-package")
 
-  prefix = common.platforms[common.platform]["prefix"]
+  prefix = common.platformPrefixes[common.platform]
   company = branding.company_name
   product = branding.builder_product_name.replace(" ","")
   source_dir = "..\\build_tools\\out\\%s\\%s\\%s" % (prefix, company, product)

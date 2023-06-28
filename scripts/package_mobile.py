@@ -28,9 +28,13 @@ def make_mobile():
 
   if common.deploy:
     utils.log_h2("mobile deploy")
-    if ret:
+    if not utils.is_file(zip_file):
+      utils.log_err("file not exist: " + zip_file)
+      ret = False
+    elif ret:
       ret = utils.sh(
           "aws s3 cp --acl public-read --no-progress " \
+          + "--metadata md5=" + utils.get_md5(zip_file) + " " \
           + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
           verbose=True
       )

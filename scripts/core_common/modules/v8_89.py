@@ -99,7 +99,10 @@ def make():
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"])
       os.chdir("../")
-    base.cmd("./depot_tools/gclient", ["sync", "-r", "remotes/branch-heads/8.9"], True)
+    v8_branch_version = "remotes/branch-heads/8.9"
+    if ("mac" == base.host_platform()):
+      v8_branch_version = "remotes/branch-heads/9.9"
+    base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)
     base.cmd("gclient", ["sync", "--force"], True)
     base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
 

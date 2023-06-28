@@ -28,6 +28,9 @@ def make():
     elif (config.check_option("config", "cef_version_107")):
       url += "5304/"
       archive_name = "./cef_binary_107.7z"
+    elif ("mac_64" == platform) and (config.check_option("config", "use_v8")):
+      url += "5060/"
+      archive_name = "./cef_binary_103.7z"
     else:
       url += "5414/"
 
@@ -45,6 +48,8 @@ def make():
     build_dir_name = "build"
     if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
       build_dir_name = "build_107"
+    if ("mac_64" == platform) and (config.check_option("config", "use_v8")):
+      build_dir_name = "build_103"
 
     if (data_url != old_data_url):
       if base.is_file(archive_name):
@@ -70,7 +75,7 @@ def make():
 
     # deploy
     if (0 == platform.find("mac")):
-      base.cmd("mv", ["Chromium Embedded Framework.framework", "build/Chromium Embedded Framework.framework"])
+      base.cmd("mv", ["Chromium Embedded Framework.framework", build_dir_name + "/Chromium Embedded Framework.framework"])
       base.delete_dir("./Chromium Embedded Framework.framework")
     else:
       base.copy_files("cef_binary/Release/*", build_dir_name + "/")

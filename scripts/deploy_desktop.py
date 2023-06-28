@@ -12,7 +12,7 @@ def deploy_marketplace_plugin(git_dir, root_dir):
 
   # plugin manager with local paths
   sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
-  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False, "K0R0L")
+  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
       
   # store with local paths
   manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
@@ -126,6 +126,8 @@ def make():
     build_dir_name = "build"
     if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
       build_dir_name = "build_107"
+    elif (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
+      build_dir_name = "build_103"
 
     if not isWindowsXP:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/" + build_dir_name + "/*", root_dir)
@@ -217,19 +219,6 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
-
-    # desktopeditors-help
-    root_help_dir = root_dir + "-help"
-    if (base.is_dir(root_help_dir)):
-      base.delete_dir(root_help_dir)
-    for i in ["common", "documenteditor", "presentationeditor", "spreadsheeteditor"]:
-      base.copy_dir(
-          base_dir + "/js/" + branding + "/desktop/web-apps/apps/%s/main/resources/help" % i,
-          root_help_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
-
-      if ("1" != config.option("preinstalled-help") and not isWindowsXP):
-        # remove help from install until web-apps containes help
-        base.delete_dir(root_dir + "/editors/web-apps/apps/%s/main/resources/help" % i)
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)

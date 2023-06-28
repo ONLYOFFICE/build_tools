@@ -14,7 +14,7 @@ def make():
   return
 
 def make_core():
-  prefix = common.platforms[common.platform]["prefix"]
+  prefix = common.platformPrefixes[common.platform]
   company = branding.company_name.lower()
   repos = {
     "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },
@@ -34,12 +34,13 @@ def make_core():
     utils.set_summary("core deploy", False)
     return
   if not utils.is_file(core_7z):
-    utils.log_err("core.7z does not exist")
+    utils.log_err("file not exist: " + core_7z)
     utils.set_summary("core deploy", False)
     return
 
   utils.log_h2("core deploy")
   args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
+          "--metadata", "md5=" + utils.get_md5(core_7z),
           core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
   if common.os_family == "windows":
     ret = utils.cmd(*args, verbose=True)
@@ -63,7 +64,14 @@ def deploy_closure_maps(license):
   utils.log_h1("CLOSURE MAPS")
   utils.set_cwd(utils.get_path("sdkjs/build/maps"))
 
+  branch = utils.get_env("BRANCH_NAME")
   maps = utils.glob_path("*.js.map")
+
+  if branch is None:
+    utils.log_err("BRANCH_NAME variable is undefined")
+    utils.set_summary("closure maps " + license + " deploy", False)
+    return
+
   if not maps:
     utils.log_err("files do not exist")
     utils.set_summary("closure maps " + license + " deploy", False)
@@ -77,8 +85,8 @@ def deploy_closure_maps(license):
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
-      "s3", "cp", "--no-progress", file,
-      "s3://" + branding.s3_bucket + "/" + dest + "/"
+      "s3", "cp", "--no-progress", "--metadata", "md5=" + utils.get_md5(file),
+      file, "s3://" + branding.s3_bucket + "/" + dest + "/"
     ]
     if common.os_family == "windows":
       upload = utils.cmd(*args, verbose=True)

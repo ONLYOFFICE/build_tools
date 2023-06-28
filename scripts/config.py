@@ -107,6 +107,11 @@ def parse():
   if not "arm64-toolchain-bin" in options:
     options["arm64-toolchain-bin"] = "/usr/bin"
 
+  if check_option("platform", "ios"):
+    if not check_option("config", "no_bundle_xcframeworks"):
+      if not check_option("config", "bundle_xcframeworks"):
+        extend_option("config", "bundle_xcframeworks")
+
   if check_option("config", "bundle_xcframeworks"):
     if not check_option("config", "bundle_dylibs"):
       extend_option("config", "bundle_dylibs")
@@ -228,13 +233,10 @@ def is_v8_60():
   if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
     return True
 
-  if check_option("platform", "android"):
-    return True
-
   if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):
     return True
 
-  if check_option("config", "use_v8"):
-    return True
+  #if check_option("config", "use_v8"):
+  #  return True
 
   return False

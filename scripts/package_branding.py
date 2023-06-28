@@ -18,6 +18,7 @@ if utils.is_windows():
   desktop_product_name_s = desktop_product_name.replace(" ","")
   desktop_package_name = company_name + "-" + desktop_product_name_s
   desktop_vcredist_list = ["2022"]
+  desktop_changes_dir = "desktop-apps/win-linux/package/windows/update/changes"
   desktop_changes_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/changes"
   desktop_updates_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/updates"
 

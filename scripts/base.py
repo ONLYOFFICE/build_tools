@@ -12,6 +12,7 @@ import config
 import codecs
 import re
 import stat
+import json
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -480,6 +481,7 @@ def get_repositories():
   result["web-apps"] = [False, False]
   result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
+  result["core-fonts"] = [False, False]
 
   if config.check_option("module", "builder"):
     result["document-templates"] = [False, False]
@@ -494,9 +496,6 @@ def get_repositories():
     result.update(get_server_addons())
     result["document-server-integration"] = [False, False]
     result["document-templates"] = [False, False]
-    
-  if (config.check_option("module", "server") or config.check_option("platform", "ios")):
-    result["core-fonts"] = [False, False]
 
   get_branding_repositories(result)
   return result
@@ -1161,10 +1160,13 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
   if is_dir(dst_dir_path):
     delete_dir(dst_dir_path)
   create_dir(dst_dir_path)
-  copy_dir_content(src_dir_path, dst_dir + "/" + guid, "", ".git")
+  copy_dir_content(src_dir_path, dst_dir_path, "", ".git")
   if is_desktop_local:
-    for file in glob.glob(dst_dir + "/" + guid + "/*.html"):
+    for file in glob.glob(dst_dir_path + "/*.html"):
       replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+  dst_deploy_dir = dst_dir_path + "/deploy"
+  if is_dir(dst_deploy_dir):
+    delete_dir(dst_deploy_dir)
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
@@ -1203,6 +1205,14 @@ def support_old_versions_plugins(out_dir):
     file.write(content_plugin_base)
   delete_file(out_dir + "/plugins.js")
   delete_file(out_dir + "/plugins-ui.js")  
+  return
+
+def generate_sdkjs_plugin_list(dst):
+  plugins_list = config.option("sdkjs-plugin").rsplit(", ") \
+               + config.option("sdkjs-plugin-server").rsplit(", ")
+  with open(get_path(dst), 'w') as file:
+    dump = json.dumps(sorted(plugins_list), indent=4)
+    file.write(re.sub(r"^(\s{4})", '\t', dump, 0, re.MULTILINE))
   return
 
 def get_xcode_major_version():

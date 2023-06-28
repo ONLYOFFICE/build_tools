@@ -25,6 +25,7 @@ args = parser.parse_args()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.os_family = utils.host_platform()
 common.platform = args.platform
+common.prefix = common.platformPrefixes[common.platform] if common.platform in common.platformPrefixes else ""
 common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
@@ -39,6 +40,7 @@ common.deploy_data = []
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
+utils.log("prefix:        " + str(common.prefix))
 utils.log("targets:       " + str(common.targets))
 utils.log("clean:         " + str(common.clean))
 utils.log("sign:          " + str(common.sign))

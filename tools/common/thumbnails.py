@@ -36,9 +36,20 @@ if base.is_dir(temp_dir):
   base.delete_dir(temp_dir)
 base.create_dir(temp_dir)
 
+# fonts directory -----------------------------------
 directory_fonts = directory_x2t + "/sdkjs/common"
-if not base.is_file(directory_fonts + "/AllFonts.js"):
+directory_fonts_local = ""
+if "windows" == base.host_platform():
+  directory_fonts_local = os.getenv("LOCALAPPDATA") + "/ONLYOFFICE/docbuilder"
+else:
+  directory_fonts_local = os.path.expanduser('~') + "/.local/share/ONLYOFFICE/docbuilder"
+
+if not base.is_file(directory_fonts + "/AllFonts.js") and not base.is_file(directory_fonts_local + "/AllFonts.js"):
   base.cmd_in_dir(directory_x2t, "docbuilder", [], True)
+
+if base.is_file(directory_fonts_local + "/AllFonts.js"):
+  directory_fonts = directory_fonts_local
+# ---------------------------------------------------
 
 json_params = "{'spreadsheetLayout':{'fitToWidth':1,'fitToHeight':1},"
 json_params += "'documentLayout':{'drawPlaceHolders':true,'drawFormHighlight':true,'isPrint':true}}"
@@ -61,7 +72,7 @@ for input_file in input_files:
   xml_convert += u"<m_oThumbnail>"
   xml_convert += u"<first>false</first>"
   if ((0 != th_width) and (0 != th_height)):
-    xml_convert += u"<aspect>0</aspect>"
+    xml_convert += u"<aspect>16</aspect>"
     xml_convert += (u"<width>" + str(th_width) + u"</width>")
     xml_convert += (u"<height>" + str(th_height) + u"</height>")
   xml_convert += u"</m_oThumbnail>"

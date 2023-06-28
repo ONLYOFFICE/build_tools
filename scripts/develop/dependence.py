@@ -174,7 +174,7 @@ def check_nodejs():
   nodejs_min_version_major = int(major_minor_min_version[0])
   if len(major_minor_min_version) > 1:
     nodejs_min_version_minor = int(major_minor_min_version[1])
-  nodejs_max_version = '14'
+  nodejs_max_version = '18.16'
   nodejs_max_version_minor = float("inf")
   major_minor_max_version = nodejs_max_version.split('.')
   nodejs_max_version_major = int(major_minor_max_version[0])
@@ -182,7 +182,7 @@ def check_nodejs():
     nodejs_max_version_minor = int(major_minor_max_version[1])
 
   if (nodejs_min_version_major > nodejs_cur_version_major or nodejs_cur_version_major > nodejs_max_version_major):
-    print('Installed Node.js version must be 14.14 to 14.x')
+    print('Installed Node.js version must be 14.14 to 18.x')
     isNeedReinstall = True
   elif (nodejs_min_version_major == nodejs_cur_version_major):
     if (nodejs_min_version_minor > nodejs_cur_version_minor):

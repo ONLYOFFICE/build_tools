@@ -174,7 +174,7 @@ def check_nodejs():
   nodejs_min_version_major = int(major_minor_min_version[0])
   if len(major_minor_min_version) > 1:
     nodejs_min_version_minor = int(major_minor_min_version[1])
-  nodejs_max_version = '18.16'
+  nodejs_max_version = '18'
   nodejs_max_version_minor = float("inf")
   major_minor_max_version = nodejs_max_version.split('.')
   nodejs_max_version_major = int(major_minor_max_version[0])

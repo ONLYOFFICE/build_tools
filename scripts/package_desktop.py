@@ -385,13 +385,11 @@ def make_macos():
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_bundle_version_string = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
-    + ' | cut -f2 -d\\\"',
+    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:shortVersionString\']/text()" -',
     verbose=True).rstrip()
   release_bundle_version = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
-    + ' | cut -f2 -d\\\"',
+    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:version\']/text()" -',
     verbose=True).rstrip()
 
   app_version = common.version

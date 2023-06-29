@@ -239,7 +239,7 @@ def make_update_files():
 
   changes_dir = common.workspace_dir + "\\" + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
 
-  if common.deploy:
+  if common.deploy and utils.glob_path(changes_dir + "\\*.html"):
     utils.log_h2("desktop update files deploy")
     ret = aws_s3_upload(
         utils.glob_path(changes_dir + "\\*.html"),

@@ -9,6 +9,8 @@ def make():
   utils.log_h1("BUILDER")
   if utils.is_windows():
     make_windows()
+  elif utils.is_macos():
+    make_macos()
   elif utils.is_linux():
     make_linux()
   else:
@@ -116,6 +118,36 @@ def make_inno():
     utils.log_h2("builder inno deploy")
     ret = aws_s3_upload(["build\\" + inno_file], "win/inno/", "Installer")
     utils.set_summary("builder inno deploy", ret)
+  return
+
+def make_macos():
+  company = branding.company_name.lower()
+  product = branding.builder_product_name.replace(" ","").lower()
+  source_dir = "build_tools/out/%s/%s/%s" % (common.prefix, company, product)
+  arch_list = {
+    "darwin_x86_64": "x86_64",
+    "darwin_arm64": "arm64"
+  }
+  suffix = arch_list[common.platform]
+  builder_tar = "../%s-%s-%s-%s-%s.tar.xz" % \
+    (company, product, common.version, common.build, suffix)
+
+  utils.set_cwd(source_dir)
+
+  if common.clean:
+    utils.log_h2("builder clean")
+    utils.delete_files("../*.tar*")
+
+  utils.log_h2("builder build")
+  ret = utils.sh("tar --xz -cvf %s *" % builder_tar, creates=builder_tar, verbose=True)
+  utils.set_summary("builder build", ret)
+
+  if common.deploy and ret:
+    utils.log_h2("builder deploy")
+    ret = aws_s3_upload([builder_tar], "mac/", "Portable")
+    utils.set_summary("builder deploy", ret)
+
+  utils.set_cwd(common.workspace_dir)
   return
 
 def make_linux():

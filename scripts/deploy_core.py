@@ -59,6 +59,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "standardtester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2ttester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "ooxml_crypt")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "vboxtester")
 
 
     if base.is_file(archive_dir + ".7z"):

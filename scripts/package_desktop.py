@@ -400,7 +400,7 @@ def make_macos():
       % (common.version, plist_path), verbose=True)
   utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
       % (bundle_version, plist_path), verbose=True)
-  utils.sh('/usr/libexec/PlistBuddy -c "Set :ASCWebappsHelpUrl %s" %s' \
+  utils.sh('/usr/libexec/PlistBuddy -c "Add :ASCWebappsHelpUrl string %s" %s' \
       % ("https://download.onlyoffice.com/install/desktop/editors/help/v" + app_version + "-1/apps", plist_path), verbose=True)
 
   utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \

@@ -252,7 +252,10 @@ def make_update_files():
 def make_advinst():
   utils.log_h2("desktop advinst build")
 
-  arch = arch_list[common.platform]
+  msi_build = {
+    "windows_x64": "MsiBuild64",
+    "windows_x86": "MsiBuild32"
+  }[common.platform]
 
   if not branding.onlyoffice:
     branding_path = common.workspace_dir + "\\" + common.branding
@@ -281,23 +284,6 @@ def make_advinst():
     aic_content += [
       "ResetSig"
     ]
-  if arch == "x64": 
-    aic_content += [
-      "SetPackageType x64 -buildname DefaultBuild",
-      "AddOsLc -buildname DefaultBuild -arch x64",
-      "DelOsLc -buildname DefaultBuild -arch x86",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
-    ]
-  if arch == "x86": 
-    aic_content += [
-      "SetPackageType x86 -buildname DefaultBuild",
-      "AddOsLc -arch x86 -buildname DefaultBuild",
-      "DelOsLc -arch x64 -buildname DefaultBuild",
-      "SetAppdir -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER] -buildname DefaultBuild",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
-    ]
   if branding.onlyoffice:
     for path in utils.glob_path(desktop_dir + "\\editors\\web-apps\\apps\\*\\main\\resources\\help"):
       utils.delete_dir(path)
@@ -305,22 +291,22 @@ def make_advinst():
       "DelFolder CUSTOM_PATH"
     ]
   else:
-    utils.replace_in_file('DesktopEditors.aip','(<ROW Property="UpgradeCode" Value=")(.*)("/>)', r'\1%s\3' % (branding.desktop_upgrade_code))
     aic_content += [
+      "SetProperty UpgradeCode=\"" + branding.desktop_upgrade_code + "\"",
       "AddUpgradeCode {47EEF706-B0E4-4C43-944B-E5F914B92B79} \
         -min_ver 7.1.1 -include_min_ver \
         -max_ver 7.2.2 -include_max_ver \
         -include_lang 1049 \
         -property_name UPGRADE_2 -enable_migrate",
-      "DelLanguage 1029 -buildname DefaultBuild",
-      "DelLanguage 1031 -buildname DefaultBuild",
-      "DelLanguage 1041 -buildname DefaultBuild",
-      "DelLanguage 1046 -buildname DefaultBuild",
-      "DelLanguage 2070 -buildname DefaultBuild",
-      "DelLanguage 1060 -buildname DefaultBuild",
-      "DelLanguage 1036 -buildname DefaultBuild",
-      "DelLanguage 3082 -buildname DefaultBuild",
-      "DelLanguage 1033 -buildname DefaultBuild",
+      "DelLanguage 1029 -buildname " + msi_build,
+      "DelLanguage 1031 -buildname " + msi_build,
+      "DelLanguage 1041 -buildname " + msi_build,
+      "DelLanguage 1046 -buildname " + msi_build,
+      "DelLanguage 2070 -buildname " + msi_build,
+      "DelLanguage 1060 -buildname " + msi_build,
+      "DelLanguage 1036 -buildname " + msi_build,
+      "DelLanguage 3082 -buildname " + msi_build,
+      "DelLanguage 1033 -buildname " + msi_build,
       "SetCurrentFeature ExtendedFeature",
       "NewSync CUSTOM_PATH " + viewer_dir,
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
@@ -328,14 +314,23 @@ def make_advinst():
       "SetProperty ProductName=\"" + branding.desktop_product_name_full + "\"",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
+    if common.platform == "windows_x86":
+      aic_content += [
+        "SetComponentAttribute -feature_name ExtendedFeature -unset -64bit_component"
+      ]
+  if common.platform == "windows_x86":
+    aic_content += [
+      "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileProgramAssociation -unset -64bit_component"
+    ]
   aic_content += [
     "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + desktop_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
     "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
     "SetVersion " + package_version,
-    "SetPackageName " + advinst_file + " -buildname DefaultBuild",
-    "Rebuild -buildslist DefaultBuild"
+    "SetPackageName " + advinst_file + " -buildname " + msi_build,
+    "Rebuild -buildslist " + msi_build
   ]
   utils.write_file("DesktopEditors.aic", "\r\n".join(aic_content), "utf-8-sig")
   ret = utils.cmd("AdvancedInstaller.com", "/execute", \

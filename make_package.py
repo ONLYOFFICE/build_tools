@@ -25,13 +25,14 @@ args = parser.parse_args()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.os_family = utils.host_platform()
 common.platform = args.platform
+common.prefix = common.platformPrefixes[common.platform] if common.platform in common.platformPrefixes else ""
 common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
 common.version = args.version if (args.version is not None) else utils.get_env("PRODUCT_VERSION", "1.0.0")
 common.build = args.build if (args.build is not None) else utils.get_env("BUILD_NUMBER", "1")
-common.release_branch = utils.get_env("RELEASE_BRANCH", "experimental")
+common.channel = utils.get_env("BUILD_CHANNEL", "other")
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.summary = []
@@ -39,6 +40,7 @@ common.deploy_data = []
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
+utils.log("prefix:        " + str(common.prefix))
 utils.log("targets:       " + str(common.targets))
 utils.log("clean:         " + str(common.clean))
 utils.log("sign:          " + str(common.sign))
@@ -57,12 +59,17 @@ import package_core
 import package_desktop
 import package_server
 import package_builder
+import package_mobile
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
 utils.delete_file("deploy.json")
 if "core" in common.targets:
   package_core.make()
+if "closure-maps-os" in common.targets:
+  package_core.deploy_closure_maps("opensource")
+if "closure-maps-com" in common.targets:
+  package_core.deploy_closure_maps("commercial")
 if "desktop" in common.targets:
   package_desktop.make()
 if "builder" in common.targets:
@@ -73,8 +80,8 @@ if "server-enterprise" in common.targets:
   package_server.make("enterprise")
 if "server-developer" in common.targets:
   package_server.make("developer")
-# if "mobile" in common.targets:
-#   package_mobile.make()
+if "mobile" in common.targets:
+  package_mobile.make()
 
 # summary
 utils.log_h1("Build summary")

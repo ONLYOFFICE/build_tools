@@ -33,7 +33,7 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
       base.cmd("git", ["clone", config.option("branding-url"), branding_dir])
 
     base.cmd_in_dir(branding_dir, "git", ["fetch"], True)
-   
+
     if not is_exist or ("1" != config.option("update-light")):
       base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")], True)
 
@@ -75,18 +75,8 @@ if config.check_option("module", "desktop"):
 
   if "windows" == base.host_platform():
     config.extend_option("config", "updmodule")
-    config.extend_option("qmake_addon", "LINK=https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.xml")
-
-    if not base.is_file(base_dir + "/tools/WinSparkle-0.7.0.zip"):
-      base.cmd("curl.exe", ["https://d2ettrnqo7v976.cloudfront.net/winsparkle/WinSparkle-0.7.0.zip", "--output", base_dir + "/tools/WinSparkle-0.7.0.zip"])
-
-    if not base.is_dir(base_dir + "/tools/WinSparkle-0.7.0"):
-      base.cmd("7z.exe", ["x", base_dir + "/tools/WinSparkle-0.7.0.zip", "-otools"])
-
-    base.create_dir(base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle")
-    #base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/include", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/include")
-    base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_32")
-    base.copy_dir(base_dir + "/tools/WinSparkle-0.7.0/x64/Release", base_dir + "/../desktop-apps/win-linux/3dparty/WinSparkle/win_64")
+    base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
+    base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
     if ("windows" == base.host_platform()):
       base.set_env("VIDEO_PLAYER_VLC_DIR", base_dir + "/../desktop-sdk/ChromiumBasedEditors/videoplayerlib/vlc")

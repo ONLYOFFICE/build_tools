@@ -7,3 +7,8 @@ config
 *.*~
 **~
 *.DS_Store
+scripts/license_checker/reports
+tests/puppeteer/node_modules
+tests/puppeteer/work_directory
+tests/puppeteer/package.json
+tests/puppeteer/package-lock.json

@@ -3,7 +3,7 @@ name: Bug Report
 about: Report an issue with build_tools you've discovered.
 ---
 
-**Describe your problem**:
+# Describe your problem:
 
 *Be clear in your description of the problem.
 Open an issue with a descriptive title and a summary in complete sentences.*

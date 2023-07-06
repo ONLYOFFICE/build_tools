@@ -73,6 +73,8 @@ def make():
       win_toolset = "msvc-14.2"
       win_boot_arg = "vc142"
       win_vs_version = "vc142"
+
+    # add "define=_ITERATOR_DEBUG_LEVEL=0" to b2 args before install for disable _ITERATOR_DEBUG_LEVEL
     if (-1 != config.option("platform").find("win_64")) and not base.is_file("../build/win_64/lib/libboost_system-" + win_vs_version + "-mt-x64-1_72.lib"):
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
@@ -101,9 +103,15 @@ def make():
     base.copy_files(directory_build + "/linux_arm64/*.a", directory_build)
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
+    old_cur2 = os.getcwd()
     clang_correct()
     os.chdir("../")
     base.bash("./boost_ios")
+    os.chdir(old_cur2)
+
+  if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios_xcframework"):
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios_simulator", "xcframework_platform_ios_simulator")
+    boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios")
 
   if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])

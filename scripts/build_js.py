@@ -27,6 +27,8 @@ def correct_sdkjs_licence(directory):
 def make():
   if ("1" == base.get_env("OO_NO_BUILD_JS")):
     return
+  if not base.is_need_build_js():
+    return
 
   base.set_env('NODE_ENV', 'production')
 

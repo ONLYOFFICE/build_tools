@@ -1470,3 +1470,7 @@ def correct_elf_rpath_directory(directory, origin, is_recursion = True):
       correct_elf_rpath_directory(file, origin)
   return
 
+def is_need_build_js():
+  if "osign" == config.option("module"):
+    return False
+  return True

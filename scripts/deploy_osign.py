@@ -38,24 +38,23 @@ def make():
     # correct ios frameworks
     if ("ios" == platform):
       base.generate_plist(root_dir)
-      deploy_fonts(git_dir, root_dir)
 
   for native_platform in platforms:
     if native_platform == "android":
       # make full version
-      root_dir = base_dir + "/android/" + branding + "/mobile"
+      root_dir = base_dir + "/android/" + branding + "/osign"
       if (base.is_dir(root_dir)):
         base.delete_dir(root_dir)
       base.create_dir(root_dir)
       libs_dir = root_dir + "/lib"
       base.create_dir(libs_dir + "/arm64-v8a")
-      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")
+      base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/osign/*.so", libs_dir + "/arm64-v8a")
       base.create_dir(libs_dir + "/armeabi-v7a")
-      base.copy_files(base_dir + "/android_armv7/" + branding + "/mobile/*.so", libs_dir + "/armeabi-v7a")
+      base.copy_files(base_dir + "/android_armv7/" + branding + "/osign/*.so", libs_dir + "/armeabi-v7a")
       base.create_dir(libs_dir + "/x86")
-      base.copy_files(base_dir + "/android_x86/" + branding + "/mobile/*.so", libs_dir + "/x86")
+      base.copy_files(base_dir + "/android_x86/" + branding + "/osign/*.so", libs_dir + "/x86")
       base.create_dir(libs_dir + "/x86_64")
-      base.copy_files(base_dir + "/android_x86_64/" + branding + "/mobile/*.so", libs_dir + "/x86_64")
+      base.copy_files(base_dir + "/android_x86_64/" + branding + "/osign/*.so", libs_dir + "/x86_64")
       break
 
   return

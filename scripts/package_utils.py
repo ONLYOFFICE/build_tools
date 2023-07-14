@@ -158,7 +158,7 @@ def copy_file(src, dst, verbose=True):
     log("    src: " + src)
     log("    dst: " + dst)
   if is_file(dst):
-    delete_file(dst)
+    delete_file(dst, False)
   if not is_file(src):
     log_err("file not exist: " + src)
     return

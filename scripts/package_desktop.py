@@ -260,6 +260,7 @@ def make_advinst():
   branding_dir = "."
   if not branding.onlyoffice:
     branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
+    multimedia_dir = common.workspace_dir + "\\" + common.branding + "\\multimedia"
     utils.copy_file(branding_dir + "\\dictionary.ail", "dictionary.ail")
     utils.copy_dir_content(branding_dir + "\\data", "data", ".bmp")
     utils.copy_dir_content(branding_dir + "\\data", "data", ".png")
@@ -271,10 +272,10 @@ def make_advinst():
       branding_dir + "\\..\\..\\..\\common\\package\\license\\eula_" + common.branding + ".rtf",
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     utils.copy_file(
-      branding_dir + "\\..\\..\\..\\..\\multimedia\\imageviewer\\icons\\" + common.branding + ".ico",
+      multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
     utils.copy_file(
-      branding_dir + "\\..\\..\\..\\..\\multimedia\\videoplayer\\icons\\" + common.branding + ".ico",
+      multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\media.ico")
 
   utils.copy_file(

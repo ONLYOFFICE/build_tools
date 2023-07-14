@@ -257,28 +257,35 @@ def make_advinst():
     "windows_x86": "MsiBuild32"
   }[common.platform]
 
+  branding_dir = "."
   if not branding.onlyoffice:
-    branding_path = common.workspace_dir + "\\" + common.branding
+    branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
+    multimedia_dir = common.workspace_dir + "\\" + common.branding + "\\multimedia"
+    utils.copy_file(branding_dir + "\\dictionary.ail", "dictionary.ail")
+    utils.copy_dir_content(branding_dir + "\\data", "data", ".bmp")
+    utils.copy_dir_content(branding_dir + "\\data", "data", ".png")
     utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".bmp")
-    utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".png")
-    utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\extras\\projicons\\res",
-      "..\\..\\extras\\projicons\\res", ".ico")
+      branding_dir + "\\..\\..\\extras\\projicons\\res",
+      "..\\..\\extras\\projicons\\res",
+      ".ico")
     utils.copy_file(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\dictionary.ail",
-      "dictionary.ail")
-    utils.copy_file(
-      branding_path + "\\desktop-apps\\common\\package\\license\\eula_" + common.branding + ".rtf",
+      branding_dir + "\\..\\..\\..\\common\\package\\license\\eula_" + common.branding + ".rtf",
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     utils.copy_file(
-      branding_path + "\\multimedia\\videoplayer\\icons\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\media.ico")
-    utils.copy_file(
-      branding_path + "\\multimedia\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
+      multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
+    utils.copy_file(
+      multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
+      "..\\..\\extras\\projicons\\res\\media.ico")
 
+  utils.copy_file(
+    branding_dir + "\\data\\VisualElementsManifest.xml",
+    desktop_dir + "\\DesktopEditors.VisualElementsManifest.xml")
+  utils.create_dir(desktop_dir + "\\browser")
+  utils.copy_dir_content(
+    branding_dir + "\\data",
+    desktop_dir + "\\browser",
+    "visual_elements_icon")
   utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
 
   aic_content = [";aic"]

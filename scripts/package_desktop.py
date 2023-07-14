@@ -279,6 +279,8 @@ def make_advinst():
       branding_path + "\\multimedia\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
 
+  utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
+
   aic_content = [";aic"]
   if not common.sign:
     aic_content += [

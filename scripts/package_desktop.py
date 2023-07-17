@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import package_utils as utils
 import package_common as common
 import package_branding as branding
-import config
 
 def make():
   utils.log_h1("DESKTOP")
@@ -337,6 +337,8 @@ def make_advinst():
     "NewSync APPDIR " + desktop_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
     "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
+    "SetProperty VERSION=\"" + package_version + "\"",
+    "SetProperty VERSION_SHORT=\"" + re.sub(r"^(\d+\.\d+).+", "\\1", package_version) + "\"",
     "SetVersion " + package_version,
     "SetPackageName " + advinst_file + " -buildname " + msi_build,
     "Rebuild -buildslist " + msi_build

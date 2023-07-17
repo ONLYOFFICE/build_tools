@@ -14,7 +14,7 @@ def docker_build(image_name, dockerfile_dir, vlc_dir):
 
 def copy_build(src_dir, dest_dir):
   if not base.is_dir(dest_dir):
-      base.create_dir(dest_dir)
+    base.create_dir(dest_dir)
   # copy include
   base.copy_dir(src_dir + '/sdk/include', dest_dir + '/include')
   # form lib dir
@@ -52,17 +52,47 @@ def make():
 
   if "windows" == base.host_platform():
     if config.check_option("platform", "win_64"):
-      docker_build('libvlc-win64', base_dir + '/docker-images/win_64', vlc_dir)
+      docker_build('libvlc-win64', base_dir + '/tools/win_64', vlc_dir)
       copy_build(vlc_dir + '/build/win64/vlc-' + vlc_version, base_dir + '/build/win_64')
       
     if config.check_option("platform", "win_32"):
-      docker_build('libvlc-win32', base_dir + '/docker-images/win_32', vlc_dir)
+      docker_build('libvlc-win32', base_dir + '/tools/win_32', vlc_dir)
       copy_build(vlc_dir + '/build/win32/vlc-' + vlc_version, base_dir + '/build/win_32')
 
 
-  # TODO: build on linux
-  # if config.check_option("platform", "win_64"):
-  #   ...
+  if (-1 != config.option("platform").find("linux")):
+    if not base.is_file("tools/linux_64/.deps_complete"):
+      print("Dependencies for building libvlc are not installed!\n")
+      print("Please, run " + base_dir + "/tools/linux_64/deps.py to install all neccessary dependencies.")
+      exit(0)
+    
+    os.chdir("vlc")
+    base.cmd("./bootstrap")
+    # build contribs
+    os.chdir("contrib")
+    base.cmd("mkdir", ["-p", "native"])
+    os.chdir("native")
+    base.cmd("../bootstrap")
+    base.cmd("make")
+    # configure
+    os.chdir(vlc_dir)
+    base.cmd("mkdir", ["-p", "build"])
+    base.cmd("./configure", ["--prefix=/home/mihail/main/libvlc/vlc/build", "--disable-vlc", "--disable-qt", "--disable-skins2", "--disable-chromecast"])
+    # build libvlc
+    base.cmd("make", ["-j$(nproc)"])
+    # install in build
+    base.cmd("make", ["-j$(nproc)", "install-strip"])
+    
+    # form build
+    os.chdir(base_dir)
+    base.create_dir(base_dir + "/build/linux_64")
+    os.chdir("build/linux_64")
+    base.copy_dir(vlc_dir + "build/lib", "./lib")
+    base.copy_dir(vlc_dir + "build/include", "./include")
+    base.cmd("find", [".", "-name", "*.la", "-type", "f", "-delete"])
+    base.delete_dir("lib/pkgconfig")
+    base.delete_dir("lib/vlc/lua")
+    base.cmd("lib/vlc/vlc-cache-gen", ["lib/vlc/plugins"])
 
   os.chdir(old_cur)
   return

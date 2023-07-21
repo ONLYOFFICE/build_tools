@@ -126,11 +126,17 @@ def make_windows():
 def make_zip():
   utils.log_h2("desktop zip build")
 
-  args = ["-DesktopPath", desktop_dir, "-OutFile", zip_file]
-  if common.sign:
-    args += ["-Sign", "-CertName", branding.cert_name]
+  args = [
+    "-OutFile", zip_file,
+    "-BuildDir", "build",
+    "-DesktopDir", branding.desktop_product_name_s
+  ]
+  if not branding.onlyoffice:
+    args += ["-MultimediaDir", branding.viewer_product_name_s]
   if branding.onlyoffice and not common.platform.endswith("_xp"):
     args += ["-ExcludeHelp"]
+  if common.sign:
+    args += ["-Sign", "-CertName", branding.cert_name]
   ret = utils.ps1(
     "make_zip.ps1", args, creates=zip_file, verbose=True
   )

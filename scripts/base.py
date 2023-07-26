@@ -13,6 +13,7 @@ import codecs
 import re
 import stat
 import json
+from io import open
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -273,6 +274,18 @@ def replaceInFile(path, text, textReplace):
   delete_file(path)
   with open(get_path(path), "w") as file:
     file.write(filedata)
+  return
+def replaceInFileUtf8(path, text, textReplace):
+  if not is_file(path):
+    print("[replaceInFile] file not exist: " + path)
+    return
+  filedata = ""
+  with open(get_path(path), "rb") as file:
+    filedata = file.read().decode("UTF-8")
+  filedata = filedata.replace(text, textReplace)
+  delete_file(path)
+  with open(get_path(path), "wb") as file:
+    file.write(filedata.encode("UTF-8"))
   return
 def replaceInFileRE(path, pattern, textReplace):
   if not is_file(path):

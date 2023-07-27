@@ -22,7 +22,7 @@ def docker_build(image_name, dockerfile_dir, base_dir, mount_build=False):
 def form_build_win(src_dir, dest_dir):
   if not base.is_dir(dest_dir):
     base.create_dir(dest_dir)
-  # copy include
+  # copy include dir
   base.copy_dir(src_dir + '/sdk/include', dest_dir + '/include')
   # form lib dir
   base.create_dir(dest_dir + '/lib')
@@ -36,6 +36,21 @@ def form_build_win(src_dir, dest_dir):
   base.cmd_exe(dest_dir + '/lib/vlc-cache-gen', [dest_dir + '/lib/plugins'])
   return
 
+def form_build_mac(src_dir, dest_dir):
+  if not base.is_dir(dest_dir):
+    base.create_dir(dest_dir)
+  # copy include dir
+  base.copy_dir(src_dir + '/include', dest_dir + '/include')
+  # copy and form lib dir
+  base.copy_dir(src_dir + '/lib', dest_dir + '/lib')
+  base.cmd('find', [dest_dir + '/lib', '-name', '\"*.la\"', '-type', 'f', '-delete'])
+  base.delete_dir(dest_dir + '/lib/pkgconfig')
+  base.delete_dir(dest_dir + '/lib/vlc/lua')
+  # generate cache file 'plugins.dat' for plugins loading
+  # this won't work without setting DYLD_LIBRARY_PATH
+  # TODO: move this step to libvlc.pri
+  # base.cmd(dest_dir + '/lib/vlc/vlc-cache-gen', [dest_dir + '/lib/vlc/plugins'])
+  return
 
 def make():
 
@@ -70,6 +85,26 @@ def make():
   # linux
   if config.check_option("platform", "linux_64"):
     docker_build('libvlc-linux64', base_dir + '/tools/linux_64', base_dir, True)
+  
+  # mac
+  if "mac" == base.host_platform():
+    os.chdir(vlc_dir)
+
+    if config.check_option("platform", "mac_64"):
+      base.cmd('git', ['reset', '--hard'])
+      base.cmd('patch', ['-p1', 'extras/package/macosx/build.sh', '../tools/mac_64/build.patch'])
+      base.create_dir('build/mac_64')
+      os.chdir('build/mac_64')
+      base.cmd('../../extras/package/macosx/build.sh', ['-c'])
+      form_build_mac(vlc_dir + '/build/mac_64/vlc_install_dir', base_dir + '/build/mac_64')
+
+    if config.check_option("platform", "mac_arm64"):
+      base.cmd('git', ['reset', '--hard'])
+      base.cmd('patch', ['-p1', 'extras/package/macosx/build.sh', '../tools/mac_arm64/build.patch'])
+      base.create_dir('build/mac_arm64')
+      os.chdir('build/mac_arm64')
+      base.cmd('../../extras/package/macosx/build.sh', ['-c'])
+      form_build_mac(vlc_dir + '/build/mac_64/vlc_install_dir', base_dir + '/build/mac_arm64')
 
   os.chdir(old_cur)
   return

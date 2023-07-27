@@ -13,7 +13,6 @@ import codecs
 import re
 import stat
 import json
-from io import open
 
 # common functions --------------------------------------
 def get_script_dir(file=""):

@@ -104,7 +104,7 @@ def make():
       base.create_dir('build/mac_arm64')
       os.chdir('build/mac_arm64')
       base.cmd('../../extras/package/macosx/build.sh', ['-c'])
-      form_build_mac(vlc_dir + '/build/mac_64/vlc_install_dir', base_dir + '/build/mac_arm64')
+      form_build_mac(vlc_dir + '/build/mac_arm64/vlc_install_dir', base_dir + '/build/mac_arm64')
 
   os.chdir(old_cur)
   return

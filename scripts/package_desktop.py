@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import package_utils as utils
 import package_common as common
 import package_branding as branding
-import config
 
 def make():
   utils.log_h1("DESKTOP")
@@ -126,11 +126,17 @@ def make_windows():
 def make_zip():
   utils.log_h2("desktop zip build")
 
-  args = ["-DesktopPath", desktop_dir, "-OutFile", zip_file]
-  if common.sign:
-    args += ["-Sign", "-CertName", branding.cert_name]
+  args = [
+    "-OutFile", zip_file,
+    "-BuildDir", "build",
+    "-DesktopDir", branding.desktop_product_name_s
+  ]
+  if not branding.onlyoffice:
+    args += ["-MultimediaDir", branding.viewer_product_name_s]
   if branding.onlyoffice and not common.platform.endswith("_xp"):
     args += ["-ExcludeHelp"]
+  if common.sign:
+    args += ["-Sign", "-CertName", branding.cert_name]
   ret = utils.ps1(
     "make_zip.ps1", args, creates=zip_file, verbose=True
   )
@@ -252,51 +258,46 @@ def make_update_files():
 def make_advinst():
   utils.log_h2("desktop advinst build")
 
-  arch = arch_list[common.platform]
+  msi_build = {
+    "windows_x64": "MsiBuild64",
+    "windows_x86": "MsiBuild32"
+  }[common.platform]
 
+  branding_dir = "."
   if not branding.onlyoffice:
-    branding_path = common.workspace_dir + "\\" + common.branding
+    branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
+    multimedia_dir = common.workspace_dir + "\\" + common.branding + "\\multimedia"
+    utils.copy_file(branding_dir + "\\dictionary.ail", "dictionary.ail")
+    utils.copy_dir_content(branding_dir + "\\data", "data", ".bmp")
+    utils.copy_dir_content(branding_dir + "\\data", "data", ".png")
     utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".bmp")
-    utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\data", "data", ".png")
-    utils.copy_dir_content(
-      branding_path + "\\desktop-apps\\win-linux\\extras\\projicons\\res",
-      "..\\..\\extras\\projicons\\res", ".ico")
+      branding_dir + "\\..\\..\\extras\\projicons\\res",
+      "..\\..\\extras\\projicons\\res",
+      ".ico")
     utils.copy_file(
-      branding_path + "\\desktop-apps\\win-linux\\package\\windows\\dictionary.ail",
-      "dictionary.ail")
-    utils.copy_file(
-      branding_path + "\\desktop-apps\\common\\package\\license\\eula_" + common.branding + ".rtf",
+      branding_dir + "\\..\\..\\..\\common\\package\\license\\eula_" + common.branding + ".rtf",
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     utils.copy_file(
-      branding_path + "\\multimedia\\videoplayer\\icons\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\media.ico")
-    utils.copy_file(
-      branding_path + "\\multimedia\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
+      multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\gallery.ico")
+    utils.copy_file(
+      multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
+      "..\\..\\extras\\projicons\\res\\media.ico")
+
+  utils.copy_file(
+    branding_dir + "\\data\\VisualElementsManifest.xml",
+    desktop_dir + "\\DesktopEditors.VisualElementsManifest.xml")
+  utils.create_dir(desktop_dir + "\\browser")
+  utils.copy_dir_content(
+    branding_dir + "\\data",
+    desktop_dir + "\\browser",
+    "visual_elements_icon")
+  utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
 
   aic_content = [";aic"]
   if not common.sign:
     aic_content += [
       "ResetSig"
-    ]
-  if arch == "x64": 
-    aic_content += [
-      "SetPackageType x64 -buildname DefaultBuild",
-      "AddOsLc -buildname DefaultBuild -arch x64",
-      "DelOsLc -buildname DefaultBuild -arch x86",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x86)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x86)"'
-    ]
-  if arch == "x86": 
-    aic_content += [
-      "SetPackageType x86 -buildname DefaultBuild",
-      "AddOsLc -arch x86 -buildname DefaultBuild",
-      "DelOsLc -arch x64 -buildname DefaultBuild",
-      "SetAppdir -path [ProgramFilesFolder][MANUFACTURER_INSTALL_FOLDER]\\[PRODUCT_INSTALL_FOLDER] -buildname DefaultBuild",
-      'DelPrerequisite "Microsoft Visual C++ 2015-2022 Redistributable (x64)"',
-      'DelPrerequisite "Microsoft Visual C++ 2013 Redistributable (x64)"'
     ]
   if branding.onlyoffice:
     for path in utils.glob_path(desktop_dir + "\\editors\\web-apps\\apps\\*\\main\\resources\\help"):
@@ -305,22 +306,22 @@ def make_advinst():
       "DelFolder CUSTOM_PATH"
     ]
   else:
-    utils.replace_in_file('DesktopEditors.aip','(<ROW Property="UpgradeCode" Value=")(.*)("/>)', r'\1%s\3' % (branding.desktop_upgrade_code))
     aic_content += [
+      "SetProperty UpgradeCode=\"" + branding.desktop_upgrade_code + "\"",
       "AddUpgradeCode {47EEF706-B0E4-4C43-944B-E5F914B92B79} \
         -min_ver 7.1.1 -include_min_ver \
         -max_ver 7.2.2 -include_max_ver \
         -include_lang 1049 \
         -property_name UPGRADE_2 -enable_migrate",
-      "DelLanguage 1029 -buildname DefaultBuild",
-      "DelLanguage 1031 -buildname DefaultBuild",
-      "DelLanguage 1041 -buildname DefaultBuild",
-      "DelLanguage 1046 -buildname DefaultBuild",
-      "DelLanguage 2070 -buildname DefaultBuild",
-      "DelLanguage 1060 -buildname DefaultBuild",
-      "DelLanguage 1036 -buildname DefaultBuild",
-      "DelLanguage 3082 -buildname DefaultBuild",
-      "DelLanguage 1033 -buildname DefaultBuild",
+      "DelLanguage 1029 -buildname " + msi_build,
+      "DelLanguage 1031 -buildname " + msi_build,
+      "DelLanguage 1041 -buildname " + msi_build,
+      "DelLanguage 1046 -buildname " + msi_build,
+      "DelLanguage 2070 -buildname " + msi_build,
+      "DelLanguage 1060 -buildname " + msi_build,
+      "DelLanguage 1036 -buildname " + msi_build,
+      "DelLanguage 3082 -buildname " + msi_build,
+      "DelLanguage 1033 -buildname " + msi_build,
       "SetCurrentFeature ExtendedFeature",
       "NewSync CUSTOM_PATH " + viewer_dir,
       "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
@@ -328,14 +329,25 @@ def make_advinst():
       "SetProperty ProductName=\"" + branding.desktop_product_name_full + "\"",
       "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
     ]
+    if common.platform == "windows_x86":
+      aic_content += [
+        "SetComponentAttribute -feature_name ExtendedFeature -unset -64bit_component"
+      ]
+  if common.platform == "windows_x86":
+    aic_content += [
+      "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileProgramAssociation -unset -64bit_component"
+    ]
   aic_content += [
     "SetCurrentFeature MainFeature",
     "NewSync APPDIR " + desktop_dir,
     "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
     "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
+    "SetProperty VERSION=\"" + package_version + "\"",
+    "SetProperty VERSION_SHORT=\"" + re.sub(r"^(\d+\.\d+).+", "\\1", package_version) + "\"",
     "SetVersion " + package_version,
-    "SetPackageName " + advinst_file + " -buildname DefaultBuild",
-    "Rebuild -buildslist DefaultBuild"
+    "SetPackageName " + advinst_file + " -buildname " + msi_build,
+    "Rebuild -buildslist " + msi_build
   ]
   utils.write_file("DesktopEditors.aic", "\r\n".join(aic_content), "utf-8-sig")
   ret = utils.cmd("AdvancedInstaller.com", "/execute", \
@@ -385,13 +397,11 @@ def make_macos():
   appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
   release_bundle_version_string = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:shortVersionString\']" -' \
-    + ' | cut -f2 -d\\\"',
+    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:shortVersionString\']/text()" -',
     verbose=True).rstrip()
   release_bundle_version = utils.sh_output(
     'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/enclosure/@*[name()=\'sparkle:version\']" -' \
-    + ' | cut -f2 -d\\\"',
+    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:version\']/text()" -',
     verbose=True).rstrip()
 
   app_version = common.version
@@ -402,6 +412,8 @@ def make_macos():
       % (common.version, plist_path), verbose=True)
   utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
       % (bundle_version, plist_path), verbose=True)
+  utils.sh('/usr/libexec/PlistBuddy -c "Add :ASCWebappsHelpUrl string %s" %s' \
+      % ("https://download.onlyoffice.com/install/desktop/editors/help/v" + app_version + "/apps", plist_path), verbose=True)
 
   utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \
         + "\nCURRENT=" + common.version + "(" + bundle_version + ")")

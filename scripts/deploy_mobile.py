@@ -6,6 +6,18 @@ import base
 def exclude_arch(directory, frameworks):
   for lib in frameworks:
     base.cmd("lipo", ["-remove", "arm64", directory + "/" + lib + ".framework/" + lib, "-o", directory + "/" + lib + ".framework/" + lib])
+  return
+
+def deploy_fonts(git_dir, root_dir, platform=""):
+  base.create_dir(root_dir + "/fonts")
+  base.copy_file(git_dir + "/core-fonts/ASC.ttf", root_dir + "/fonts/ASC.ttf")
+  base.copy_dir(git_dir + "/core-fonts/asana", root_dir + "/fonts/asana")
+  base.copy_dir(git_dir + "/core-fonts/caladea", root_dir + "/fonts/caladea")
+  base.copy_dir(git_dir + "/core-fonts/crosextra", root_dir + "/fonts/crosextra")
+  base.copy_dir(git_dir + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+  if (platform == "android"):
+    base.copy_dir(git_dir + "/core-fonts/dejavu", root_dir + "/fonts/dejavu")
+    base.copy_dir(git_dir + "/core-fonts/liberation", root_dir + "/fonts/liberation")
   return 
 
 def make():
@@ -82,19 +94,10 @@ def make():
     # correct ios frameworks
     if ("ios" == platform):
       base.generate_plist(root_dir)
+      deploy_fonts(git_dir, root_dir)
 
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
-
-    base.create_dir(root_dir + "/fonts")
-    base.copy_file(git_dir + "/core-fonts/ASC.ttf", root_dir + "/fonts/ASC.ttf")
-    base.copy_dir(git_dir + "/core-fonts/asana", root_dir + "/fonts/asana")
-    base.copy_dir(git_dir + "/core-fonts/caladea", root_dir + "/fonts/caladea")
-    base.copy_dir(git_dir + "/core-fonts/crosextra", root_dir + "/fonts/crosextra")
-    base.copy_dir(git_dir + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
-    if (0 == platform.find("android")):
-      base.copy_dir(git_dir + "/core-fonts/dejavu", root_dir + "/fonts/dejavu")
-      base.copy_dir(git_dir + "/core-fonts/liberation", root_dir + "/fonts/liberation")
 
   for native_platform in platforms:
     if native_platform == "android":
@@ -106,7 +109,7 @@ def make():
       # js
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
       # fonts
-      base.copy_dir(base_dir + "/js/" + branding + "/mobile/fonts", root_dir + "/fonts")
+      deploy_fonts(git_dir, root_dir, "android")
       # app
       base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
       libs_dir = root_dir + "/lib"

@@ -6,7 +6,7 @@ but don't want to compile pretty compilcated core product to make those changes.
 
 ## Installing ONLYOFFICE Docs
 
-## How to use - Linux or macOS
+## How to use
 
 **Note**: You need the latest Docker version installed.
 
@@ -47,4 +47,11 @@ The folders `sdkjs` and `web-apps` are required for proper development workflow
 docker run -i -t -d -p 80:80 --restart=always \
     -v /host-dir/sdkjs:/var/www/onlyoffice/documentserver/sdkjs \
     -v /host-dir/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
+```
+
+On windows systems you may need to escape current
+directory so mount param looks like this:
+
+```shell
+ -v "/$(pwd)"/sdkjs:/var/www/onlyoffice/documentserver/sdkjs
 ```

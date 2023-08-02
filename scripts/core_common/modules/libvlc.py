@@ -6,16 +6,10 @@ import config
 import base
 import os
 
-def docker_build(image_name, dockerfile_dir, base_dir, mount_build=False):
+def docker_build(image_name, dockerfile_dir, base_dir):
   base.cmd('docker', ['build', '-t', image_name, dockerfile_dir])
   vlc_dir = base_dir + '/vlc'
-  if mount_build:
-    build_dir = base_dir + '/build'
-    if not base.is_dir(build_dir):
-      base.create_dir(build_dir)
-    base.cmd('docker', ['run', '--rm', '-v', vlc_dir + ':/vlc', '-v', build_dir + ':/build', image_name])
-  else:
-    base.cmd('docker', ['run', '--rm', '-v', vlc_dir + ':/vlc', image_name])
+  base.cmd('docker', ['run', '--rm', '-v', vlc_dir + ':/vlc', image_name])
   base.cmd('docker', ['image', 'rm', image_name])
   return
 
@@ -36,6 +30,16 @@ def form_build_win(src_dir, dest_dir):
   base.cmd_exe(dest_dir + '/lib/vlc-cache-gen', [dest_dir + '/lib/plugins'])
   return
 
+def form_build_linux(src_dir, dest_dir):
+  if not base.is_dir(dest_dir):
+    base.create_dir(dest_dir)
+  # copy include dir
+  base.copy_dir(src_dir + '/include', dest_dir + '/include')
+  # copy and form lib dir
+  base.copy_dir(src_dir + '/lib', dest_dir + '/lib')
+  base.delete_dir(dest_dir + '/lib/pkgconfig')
+  base.delete_dir(dest_dir + '/lib/vlc/lua')
+
 def form_build_mac(src_dir, dest_dir):
   if not base.is_dir(dest_dir):
     base.create_dir(dest_dir)
@@ -47,8 +51,7 @@ def form_build_mac(src_dir, dest_dir):
   base.delete_dir(dest_dir + '/lib/pkgconfig')
   base.delete_dir(dest_dir + '/lib/vlc/lua')
   # generate cache file 'plugins.dat' for plugins loading
-  # this won't work without setting DYLD_LIBRARY_PATH
-  # TODO: move this step to libvlc.pri
+  # TODO: this won't work without setting DYLD_LIBRARY_PATH
   # base.cmd(dest_dir + '/lib/vlc/vlc-cache-gen', [dest_dir + '/lib/vlc/plugins'])
   return
 
@@ -71,6 +74,9 @@ def make():
     base.cmd("git", ["clone", "https://code.videolan.org/videolan/vlc.git", "--branch", vlc_version])
     if "windows" == base.host_platform():
       base.cmd("git", ["config", "--global", "core.autocrlf", autocrlf_old])
+  
+  base.create_dir("build")
+  base.copy_file("tools/ignore-cache-time.patch", "vlc")
 
   # windows
   if "windows" == base.host_platform():
@@ -84,14 +90,18 @@ def make():
 
   # linux
   if config.check_option("platform", "linux_64"):
-    docker_build('libvlc-linux64', base_dir + '/tools/linux_64', base_dir, True)
+    docker_build('libvlc-linux64', base_dir + '/tools/linux_64', base_dir)
+    form_build_linux(vlc_dir + '/build/linux_64', base_dir + '/build/linux_64')
   
   # mac
   if "mac" == base.host_platform():
     os.chdir(vlc_dir)
 
+    base.cmd('git', ['restore', 'src/modules/bank.c'])
+    base.cmd('patch', ['-p1', 'src/modules/bank.c', '../tools/ignore-cache-time.patch'])
+
     if config.check_option("platform", "mac_64"):
-      base.cmd('git', ['reset', '--hard'])
+      base.cmd('git', ['restore', 'extras/package/macosx/build.sh'])
       base.cmd('patch', ['-p1', 'extras/package/macosx/build.sh', '../tools/mac_64/build.patch'])
       base.create_dir('build/mac_64')
       os.chdir('build/mac_64')
@@ -99,7 +109,7 @@ def make():
       form_build_mac(vlc_dir + '/build/mac_64/vlc_install_dir', base_dir + '/build/mac_64')
 
     if config.check_option("platform", "mac_arm64"):
-      base.cmd('git', ['reset', '--hard'])
+      base.cmd('git', ['restore', 'extras/package/macosx/build.sh'])
       base.cmd('patch', ['-p1', 'extras/package/macosx/build.sh', '../tools/mac_arm64/build.patch'])
       base.create_dir('build/mac_arm64')
       os.chdir('build/mac_arm64')

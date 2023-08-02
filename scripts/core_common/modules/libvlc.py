@@ -51,8 +51,7 @@ def form_build_mac(src_dir, dest_dir):
   base.delete_dir(dest_dir + '/lib/pkgconfig')
   base.delete_dir(dest_dir + '/lib/vlc/lua')
   # generate cache file 'plugins.dat' for plugins loading
-  # TODO: this won't work without setting DYLD_LIBRARY_PATH
-  # base.cmd(dest_dir + '/lib/vlc/vlc-cache-gen', [dest_dir + '/lib/vlc/plugins'])
+  base.run_command("DYLD_LIBRARY_PATH=" + dest_dir + "/lib " + dest_dir + "/lib/vlc/vlc-cache-gen " + dest_dir + "/lib/vlc/plugins")
   return
 
 def make():

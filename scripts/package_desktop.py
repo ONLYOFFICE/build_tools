@@ -54,7 +54,7 @@ def aws_s3_upload(files, key, ptype=None):
 
 def make_windows():
   global package_version, arch_list, source_dir, desktop_dir, viewer_dir, \
-    inno_file, inno_help_file, inno_sa_file, inno_update_file, advinst_file, zip_file
+    inno_file, inno_sa_file, inno_update_file, advinst_file
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
   package_name = branding.desktop_package_name
@@ -67,9 +67,7 @@ def make_windows():
   }
   suffix = arch_list[common.platform]
   if common.platform.endswith("_xp"): suffix += "-xp"
-  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
   inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
-  inno_help_file = "%s-Help-%s-%s.exe" % (package_name, package_version, suffix)
   inno_sa_file = "%s-Standalone-%s-%s.exe" % (package_name, package_version, suffix)
   inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
   advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
@@ -127,7 +125,7 @@ def make_zip():
   utils.log_h2("desktop zip build")
 
   args = [
-    "-OutFile", zip_file,
+    "-Target", common.platform,
     "-BuildDir", "build",
     "-DesktopDir", branding.desktop_product_name_s
   ]
@@ -137,14 +135,12 @@ def make_zip():
     args += ["-ExcludeHelp"]
   if common.sign:
     args += ["-Sign", "-CertName", branding.cert_name]
-  ret = utils.ps1(
-    "make_zip.ps1", args, creates=zip_file, verbose=True
-  )
+  ret = utils.ps1("make_zip.ps1", args, verbose=True)
   utils.set_summary("desktop zip build", ret)
 
   if common.deploy and ret:
     utils.log_h2("desktop zip deploy")
-    ret = aws_s3_upload([zip_file], "win/generic/", "Portable")
+    ret = aws_s3_upload(utils.glob_path("*.zip"), "win/generic/", "Portable")
     utils.set_summary("desktop zip deploy", ret)
   return
 
@@ -195,10 +191,6 @@ def make_inno():
   utils.set_summary("desktop inno build", ret)
 
   if branding.onlyoffice and not common.platform.endswith("_xp"):
-    args = ["iscc"] + iscc_args + ["help.iss"]
-    ret = utils.cmd(*args, creates=inno_help_file, verbose=True)
-    utils.set_summary("desktop inno help build", ret)
-
     args = ["iscc"] + iscc_args + ["/DEMBED_HELP", "/DsPackageEdition=Standalone", "common.iss"]
     ret = utils.cmd(*args, creates=inno_sa_file, verbose=True)
     utils.set_summary("desktop inno standalone build", ret)
@@ -214,10 +206,6 @@ def make_inno():
     utils.set_summary("desktop inno deploy", ret)
 
     if branding.onlyoffice and not common.platform.endswith("_xp"):
-      utils.log_h2("desktop inno help deploy")
-      ret = aws_s3_upload([inno_help_file], "win/inno/","Installer")
-      utils.set_summary("desktop inno help deploy", ret)
-
       utils.log_h2("desktop inno standalone deploy")
       ret = aws_s3_upload([inno_sa_file], "win/inno/","Installer")
       utils.set_summary("desktop inno standalone deploy", ret)

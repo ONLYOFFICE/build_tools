@@ -366,7 +366,7 @@ def make_advinst():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    suffix, lane, scheme, app_version
+    suffix, lane, scheme, released_updates_dir
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
@@ -379,6 +379,7 @@ def make_macos():
   }[common.platform]
   lane = "release_" + suffix
   scheme = package_name + "-" + suffix
+  sparkle_updates = False
 
   utils.set_cwd(branding_dir)
 
@@ -394,32 +395,38 @@ def make_macos():
         + "/desktopeditors/editors/web-apps/apps/*/main/resources/help"):
       utils.delete_dir(path)
 
-  appcast_url = branding.sparkle_base_url + "/" + suffix + "/" + branding.desktop_package_name.lower() + ".xml"
-  release_bundle_version_string = utils.sh_output(
-    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:shortVersionString\']/text()" -',
-    verbose=True).rstrip()
-  release_bundle_version = utils.sh_output(
-    'curl -Ls ' + appcast_url + ' 2> /dev/null' \
-    + ' | xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:version\']/text()" -',
-    verbose=True).rstrip()
+  if utils.get_env("ARCHIVES_DIR"):
+    sparkle_updates = True
+    released_updates_dir = "%s/%s/_updates" % (utils.get_env("ARCHIVES_DIR"), scheme)
+    plistbuddy = "/usr/libexec/PlistBuddy"
+    plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
+        % (common.workspace_dir, branding_dir, package_name, suffix)
 
-  app_version = common.version
-  bundle_version = str(int(release_bundle_version) + 1)
-  plist_path = "%s/%s/ONLYOFFICE/Resources/%s-%s/Info.plist" \
-      % (common.workspace_dir, branding.desktop_branding_dir, branding.desktop_package_name, suffix)
-  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString %s" %s' \
-      % (common.version, plist_path), verbose=True)
-  utils.sh('/usr/libexec/PlistBuddy -c "Set :CFBundleVersion %s" %s' \
-      % (bundle_version, plist_path), verbose=True)
-  utils.sh('/usr/libexec/PlistBuddy -c "Add :ASCWebappsHelpUrl string %s" %s' \
-      % ("https://download.onlyoffice.com/install/desktop/editors/help/v" + app_version + "/apps", plist_path), verbose=True)
+    appcast = utils.sh_output('%s -c "Print :SUFeedURL" %s' \
+        % (plistbuddy, plist_path), verbose=True).rstrip()
+    appcast = released_updates_dir + "/" + appcast[appcast.rfind("/")+1:]
 
-  utils.log("RELEASE=" + release_bundle_version_string + "(" + release_bundle_version + ")" \
-        + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
+    release_version_string = utils.sh_output(
+        'xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:shortVersionString\']/text()" ' + appcast,
+        verbose=True).rstrip()
+    release_version = utils.sh_output(
+        'xmllint --xpath "/rss/channel/item[1]/*[name()=\'sparkle:version\']/text()" ' + appcast,
+        verbose=True).rstrip()
+    bundle_version = str(int(release_version) + 1)
+    help_url = "https://download.onlyoffice.com/install/desktop/editors/help/v" + common.version + "/apps"
+
+    utils.sh('%s -c "Set :CFBundleShortVersionString %s" %s' \
+        % (plistbuddy, common.version, plist_path), verbose=True)
+    utils.sh('%s -c "Set :CFBundleVersion %s" %s' \
+        % (plistbuddy, bundle_version, plist_path), verbose=True)
+    utils.sh('%s -c "Add :ASCWebappsHelpUrl string %s" %s' \
+        % (plistbuddy, help_url, plist_path), verbose=True)
+
+    utils.log("RELEASE=" + release_version_string + "(" + release_version + ")" \
+          + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
   dmg = make_dmg()
-  if dmg:
+  if dmg and sparkle_updates:
     make_sparkle_updates()
 
   utils.set_cwd(common.workspace_dir)
@@ -446,7 +453,7 @@ def make_dmg():
 
     utils.log_h2("desktop zip deploy")
     ret = aws_s3_upload(
-        ["build/%s-%s.zip" % (scheme, app_version)],
+        ["build/%s-%s.zip" % (scheme, common.version)],
         "mac/%s/%s/%s/" % (common.version, common.build, suffix),
         "Archive"
     )
@@ -456,14 +463,13 @@ def make_dmg():
 def make_sparkle_updates():
   utils.log_h2("desktop sparkle files build")
 
-  zip_filename = scheme + '-' + app_version
+  zip_filename = scheme + '-' + common.version
   macos_zip = "build/" + zip_filename + ".zip"
-  updates_storage_dir = "%s/%s/_updates" % (utils.get_env('ARCHIVES_DIR'), scheme)
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
-  utils.copy_dir_content(updates_storage_dir, updates_dir, ".zip")
+  utils.copy_dir_content(released_updates_dir, updates_dir, ".zip")
 
-  for file in utils.glob_path(changes_dir + "/" + app_version + "/*.html"):
+  for file in utils.glob_path(changes_dir + "/" + common.version + "/*.html"):
     filename = utils.get_basename(file).replace("changes", zip_filename)
     utils.copy_file(file, updates_dir + "/" + filename)
 
@@ -477,19 +483,6 @@ def make_sparkle_updates():
       verbose=True
   )
   utils.set_summary("desktop sparkle files build", ret)
-
-  # utils.log_h3("edit sparkle appcast links")
-  # appcast_url = branding.sparkle_base_url + "/" + suffix
-  # appcast = "%s/%s.xml" % (updates_dir, package_name.lower())
-  # for lang, base in update_changes_list.items():
-  #   if base == "ReleaseNotes":
-  #     utils.replace_in_file(appcast,
-  #         r'(<sparkle:releaseNotesLink>.+/).+(\.html</sparkle:releaseNotesLink>)',
-  #         "\\1" + base + "\\2")
-  #   else:
-  #     utils.replace_in_file(appcast,
-  #         r'(<sparkle:releaseNotesLink xml:lang="' + lang + r'">).+(\.html</sparkle:releaseNotesLink>)',
-  #         "\\1" + base + "\\2")
 
   utils.log("")
   utils.log_h3("generate checksums")

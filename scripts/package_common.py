@@ -1,19 +1,5 @@
 #!/usr/bin/env python
 
-platformTitles = {
-  "windows_x64":      "Windows x64",
-  "windows_x86":      "Windows x86",
-  "windows_x64_xp":   "Windows x64 XP",
-  "windows_x86_xp":   "Windows x86 XP",
-  "darwin_x86_64":    "macOS x86_64",
-  "darwin_arm64":     "macOS arm64",
-  "darwin_x86_64_v8": "macOS x86_64 V8",
-  "linux_x86_64":     "Linux x86_64",
-  "linux_aarch64":    "Linux aarch64",
-  "linux_x86_64_cef": "Linux x86_64 cef107",
-  "android":          "Android",
-}
-
 platformPrefixes = {
   "windows_x64":      "win_64",
   "windows_x86":      "win_32",

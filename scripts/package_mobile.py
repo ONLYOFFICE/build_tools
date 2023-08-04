@@ -32,7 +32,7 @@ def make_mobile():
       aws_kwargs = { "acl": "public-read" }
       if hasattr(branding, "s3_endpoint_url"):
         aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
-      ret = utils.aws_s3_upload(
+      ret = utils.s3_upload(
         zip_file, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
       if ret:
         utils.add_deploy_data(key)

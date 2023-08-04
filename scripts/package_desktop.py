@@ -19,7 +19,7 @@ def make():
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(files, dst):
+def s3_upload(files, dst):
   if not files: return False
   ret = True
   for f in files:
@@ -27,7 +27,7 @@ def aws_s3_upload(files, dst):
     aws_kwargs = { "acl": "public-read" }
     if hasattr(branding, "s3_endpoint_url"):
       aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
-    upload = utils.aws_s3_upload(
+    upload = utils.s3_upload(
       f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
     if upload:
       utils.add_deploy_data(key)
@@ -128,7 +128,7 @@ def make_zip():
 
   if common.deploy and ret:
     utils.log_h2("desktop zip deploy")
-    ret = aws_s3_upload(utils.glob_path("*.zip"), "desktop/win/generic/")
+    ret = s3_upload(utils.glob_path("*.zip"), "desktop/win/generic/")
     utils.set_summary("desktop zip deploy", ret)
   return
 
@@ -190,20 +190,20 @@ def make_inno():
 
   if common.deploy:
     utils.log_h2("desktop inno deploy")
-    ret = aws_s3_upload([inno_file], "desktop/win/inno/")
+    ret = s3_upload([inno_file], "desktop/win/inno/")
     utils.set_summary("desktop inno deploy", ret)
 
     if branding.onlyoffice and not common.platform.endswith("_xp"):
       utils.log_h2("desktop inno standalone deploy")
-      ret = aws_s3_upload([inno_sa_file], "desktop/win/inno/")
+      ret = s3_upload([inno_sa_file], "desktop/win/inno/")
       utils.set_summary("desktop inno standalone deploy", ret)
 
     utils.log_h2("desktop inno update deploy")
     if utils.is_file(inno_update_file):
-      ret = aws_s3_upload(
+      ret = s3_upload(
         [inno_update_file], "desktop/win/inno/" + inno_update_file_new)
     elif utils.is_file(inno_file):
-      ret = aws_s3_upload(
+      ret = s3_upload(
         [inno_file], "desktop/win/inno/" + inno_update_file_new)
     else:
       ret = False
@@ -217,7 +217,7 @@ def make_update_files():
 
   if common.deploy and utils.glob_path(changes_dir + "\\*.html"):
     utils.log_h2("desktop update files deploy")
-    ret = aws_s3_upload(
+    ret = s3_upload(
       utils.glob_path(changes_dir + "\\*.html"),
       "desktop/win/update/%s/%s/" % (common.version, common.build))
     utils.set_summary("desktop update files deploy", ret)
@@ -324,7 +324,7 @@ def make_advinst():
 
   if common.deploy and ret:
     utils.log_h2("desktop advinst deploy")
-    ret = aws_s3_upload([advinst_file], "desktop/win/advinst/")
+    ret = s3_upload([advinst_file], "desktop/win/advinst/")
     utils.set_summary("desktop advinst deploy", ret)
   return
 
@@ -413,13 +413,13 @@ def make_dmg():
 
   if common.deploy and dmg:
     utils.log_h2("desktop dmg deploy")
-    ret = aws_s3_upload(
+    ret = s3_upload(
       utils.glob_path("build/*.dmg"),
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
     utils.set_summary("desktop dmg deploy", ret)
 
     utils.log_h2("desktop zip deploy")
-    ret = aws_s3_upload(
+    ret = s3_upload(
       ["build/%s-%s.zip" % (scheme, common.version)],
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
     utils.set_summary("desktop zip deploy", ret)
@@ -462,7 +462,7 @@ def make_sparkle_updates():
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")
-    ret = aws_s3_upload(
+    ret = s3_upload(
       utils.glob_path("build/update/*.delta") \
       + utils.glob_path("build/update/*.xml") \
       + utils.glob_path("build/update/*.html"),
@@ -493,43 +493,43 @@ def make_linux():
     if ret:
       utils.log_h2("desktop tar deploy")
       if "tar" in branding.desktop_make_targets:
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("tar/*.tar*"),
           "desktop/linux/generic/")
         utils.set_summary("desktop tar deploy", ret)
       if "deb" in branding.desktop_make_targets:
         utils.log_h2("desktop deb deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("deb/*.deb"),
           "desktop/linux/debian/")
         utils.set_summary("desktop deb deploy", ret)
       if "deb-astra" in branding.desktop_make_targets:
         utils.log_h2("desktop deb-astra deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("deb-astra/*.deb"),
           "desktop/linux/astra/")
         utils.set_summary("desktop deb-astra deploy", ret)
       if "rpm" in branding.desktop_make_targets:
         utils.log_h2("desktop rpm deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/rhel/")
         utils.set_summary("desktop rpm deploy", ret)
       if "suse-rpm" in branding.desktop_make_targets:
         utils.log_h2("desktop suse-rpm deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/suse/")
         utils.set_summary("desktop suse-rpm deploy", ret)
       if "apt-rpm" in branding.desktop_make_targets:
         utils.log_h2("desktop apt-rpm deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/altlinux/")
         utils.set_summary("desktop apt-rpm deploy", ret)
       if "urpmi" in branding.desktop_make_targets:
         utils.log_h2("desktop urpmi deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/rosa/")
         utils.set_summary("desktop urpmi deploy", ret)

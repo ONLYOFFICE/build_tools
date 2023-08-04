@@ -392,7 +392,7 @@ def sh_output(command, **kwargs):
     set_cwd(oldcwd, verbose=False)
   return ret
 
-def aws_s3_upload(src, dst, **kwargs):
+def s3_upload(src, dst, **kwargs):
   if not is_file(src):
     log_err("file not exist: " + src)
     return False
@@ -412,7 +412,7 @@ def aws_s3_upload(src, dst, **kwargs):
     ret = sh(" ".join(args), verbose=True)
   return ret
 
-def aws_s3_sync(src, dst, **kwargs):
+def s3_sync(src, dst, **kwargs):
   args = ["aws"]
   if kwargs.get("endpoint_url"):
     args += ["--endpoint-url", kwargs["endpoint_url"]]

@@ -14,7 +14,7 @@ def make(edition):
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(files, dst):
+def s3_upload(files, dst):
   if not files: return False
   ret = True
   for f in files:
@@ -22,7 +22,7 @@ def aws_s3_upload(files, dst):
     aws_kwargs = { "acl": "public-read" }
     if hasattr(branding, "s3_endpoint_url"):
       aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
-    upload = utils.aws_s3_upload(
+    upload = utils.s3_upload(
       f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
     if upload:
       utils.add_deploy_data(key)
@@ -49,7 +49,7 @@ def make_windows(edition):
 
   if common.deploy and ret:
     utils.log_h2("server " + edition + " inno deploy")
-    ret = aws_s3_upload(utils.glob_path("exe/*.exe"), "server/win/inno/")
+    ret = s3_upload(utils.glob_path("exe/*.exe"), "server/win/inno/")
     utils.set_summary("server " + edition + " inno deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
@@ -77,25 +77,25 @@ def make_linux(edition):
     if ret:
       if "deb" in branding.server_make_targets:
         utils.log_h2("server " + edition + " deb deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("deb/*.deb"),
           "server/linux/debian/")
         utils.set_summary("server " + edition + " deb deploy", ret)
       if "rpm" in branding.server_make_targets:
         utils.log_h2("server " + edition + " rpm deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("rpm/builddir/RPMS/*/*.rpm"),
           "server/linux/rhel/")
         utils.set_summary("server " + edition + " rpm deploy", ret)
       if "apt-rpm" in branding.server_make_targets:
         utils.log_h2("server " + edition + " apt-rpm deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("apt-rpm/builddir/RPMS/*/*.rpm"),
           "server/linux/altlinux/")
         utils.set_summary("server " + edition + " apt-rpm deploy", ret)
       if "tar" in branding.server_make_targets:
         utils.log_h2("server " + edition + " snap deploy")
-        ret = aws_s3_upload(
+        ret = s3_upload(
           utils.glob_path("*.tar.gz"),
           "server/linux/snap/")
         utils.set_summary("server " + edition + " snap deploy", ret)

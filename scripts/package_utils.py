@@ -4,7 +4,6 @@
 import codecs
 import glob
 import hashlib
-import json
 import os
 import platform
 import re
@@ -107,11 +106,25 @@ def glob_file(path):
     return glob.glob(path)[0]
   return
 
-def get_md5(path):
+def get_hash_sha256(path):
   if os.path.exists(path):
-    md5_hash = hashlib.md5()
-    md5_hash.update(open(path, "rb").read())
-    return md5_hash.hexdigest()
+    h = hashlib.sha256()
+    h.update(open(path, "rb").read())
+    return h.hexdigest()
+  return
+
+def get_hash_sha1(path):
+  if os.path.exists(path):
+    h = hashlib.sha1()
+    h.update(open(path, "rb").read())
+    return h.hexdigest()
+  return
+
+def get_hash_md5(path):
+  if os.path.exists(path):
+    h = hashlib.md5()
+    h.update(open(path, "rb").read())
+    return h.hexdigest()
   return
 
 def create_dir(path, verbose=True):
@@ -258,18 +271,9 @@ def set_summary(target, status):
   common.summary.append({target: status})
   return
 
-def add_deploy_data(product, ptype, src, dst):
-  common.deploy_data.append({
-    "platform": common.platformTitles[common.platform],
-    "product": product,
-    "type": ptype,
-    # "local": get_path(src),
-    "size": get_file_size(get_path(src)),
-    "key": dst
-  })
-  file = open(get_path(common.workspace_dir + "/deploy.json"), 'w')
-  file.write(json.dumps(common.deploy_data, sort_keys=True, indent=4))
-  file.close()
+def add_deploy_data(key):
+  with open(common.deploy_data, 'a+') as f:
+    f.write(key + "\n")
   return
 
 def cmd(*args, **kwargs):
@@ -334,7 +338,7 @@ def download_file(url, path, md5, verbose=False):
     log("    path: " + url)
     log("    md5: " + md5)
   if is_file(path):
-    if get_md5(path) == md5:
+    if get_hash_md5(path) == md5:
       log_err("file already exist (match checksum)")
       return True
     else:
@@ -344,7 +348,7 @@ def download_file(url, path, md5, verbose=False):
       "(New-Object System.Net.WebClient).DownloadFile('%s','%s')" % (url, path),
       verbose=True
   )
-  md5_new = get_md5(path)
+  md5_new = get_hash_md5(path)
   if md5 != md5_new:
     log_err("checksum didn't match (%s != %s)" % (md5, md5_new))
     return False
@@ -363,18 +367,63 @@ def sh(command, **kwargs):
     return False
   if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
     oldcwd = get_cwd()
-    set_cwd(kwargs["chdir"])
+    set_cwd(kwargs["chdir"], verbose=False)
   ret = subprocess.call(
       command, stderr=subprocess.STDOUT, shell=True
   ) == 0
   if kwargs.get("chdir") and oldcwd:
-    set_cwd(oldcwd)
+    set_cwd(oldcwd, verbose=False)
   return ret
 
 def sh_output(command, **kwargs):
   if kwargs.get("verbose"):
     log("- sh_output:")
     log("    command: " + command)
-  return subprocess.check_output(
+    if kwargs.get("chdir"):
+      log("    chdir: " + kwargs["chdir"])
+  if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
+    oldcwd = get_cwd()
+    set_cwd(kwargs["chdir"], verbose=False)
+  ret = subprocess.check_output(
       command, stderr=subprocess.STDOUT, shell=True
   ).decode("utf-8")
+  log(ret)
+  if kwargs.get("chdir") and oldcwd:
+    set_cwd(oldcwd, verbose=False)
+  return ret
+
+def s3_upload(src, dst, **kwargs):
+  if not is_file(src):
+    log_err("file not exist: " + src)
+    return False
+  metadata = "sha256=" + get_hash_sha256(src) \
+          + ",sha1=" + get_hash_sha1(src) \
+          + ",md5=" + get_hash_md5(src)
+  args = ["aws"]
+  if kwargs.get("endpoint_url"):
+    args += ["--endpoint-url", kwargs["endpoint_url"]]
+  args += ["s3", "cp", "--no-progress"]
+  if kwargs.get("acl"):
+    args += ["--acl", kwargs["acl"]]
+  args += ["--metadata", metadata, src, dst]
+  if is_windows():
+    ret = cmd(*args, verbose=True)
+  else:
+    ret = sh(" ".join(args), verbose=True)
+  return ret
+
+def s3_sync(src, dst, **kwargs):
+  args = ["aws"]
+  if kwargs.get("endpoint_url"):
+    args += ["--endpoint-url", kwargs["endpoint_url"]]
+  args += ["s3", "sync", "--no-progress"]
+  if kwargs.get("acl"):
+    args += ["--acl", kwargs["acl"]]
+  if kwargs.get("delete") and kwargs["delete"]:
+    args += ["--delete"]
+  args += [src, dst]
+  if is_windows():
+    ret = cmd(*args, verbose=True)
+  else:
+    ret = sh(" ".join(args), verbose=True)
+  return ret

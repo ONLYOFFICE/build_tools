@@ -15,31 +15,28 @@ def make():
 def make_mobile():
   utils.set_cwd("build_tools/out")
 
+  zip_file = "build-" + common.version + "-" + common.build + ".zip"
+
   if common.clean:
     utils.log_h2("mobile clean")
     utils.sh("rm -rfv *.zip", verbose=True)
-
-  zip_file = "build-" + common.version + "-" + common.build + ".zip"
-  s3_key = "mobile/android/" + zip_file
 
   utils.log_h2("mobile build")
   ret = utils.sh("zip -r " + zip_file + " ./android* ./js", verbose=True)
   utils.set_summary("mobile build", ret)
 
   if common.deploy:
-    utils.log_h2("mobile deploy")
-    if not utils.is_file(zip_file):
-      utils.log_err("file not exist: " + zip_file)
-      ret = False
-    elif ret:
-      ret = utils.sh(
-          "aws s3 cp --acl public-read --no-progress " \
-          + "--metadata md5=" + utils.get_md5(zip_file) + " " \
-          + zip_file + " s3://" + branding.s3_bucket + "/" + s3_key,
-          verbose=True
-      )
     if ret:
-      utils.add_deploy_data("mobile", "Android", zip_file, s3_key)
+      utils.log_h2("mobile deploy")
+      key = "mobile/android/" + zip_file
+      aws_kwargs = { "acl": "public-read" }
+      if hasattr(branding, "s3_endpoint_url"):
+        aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
+      ret = utils.s3_upload(
+        zip_file, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
+      if ret:
+        utils.add_deploy_data(key)
+        utils.log("URL: " + branding.s3_base_url + "/" + key)
     utils.set_summary("mobile deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

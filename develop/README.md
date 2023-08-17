@@ -81,7 +81,7 @@ and takes 20 minutes with `server`
 
 **Note**: Run command from work dir with development modules
 
-### Windows (PowerShell)
+### docker run on Windows (PowerShell)
 
 **Note**: Run PowerShell as administrator to fix EACCES error when installing
 node_modules
@@ -98,7 +98,7 @@ or run with `sdkjs`, `web-apps` and `server`
 docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/server:/var/www/onlyoffice/documentserver/server documentserver-develop
 ```
 
-### Linux or macOS
+### docker run on Linux or macOS
 
 run with `sdkjs` and `web-apps`
 
@@ -138,13 +138,13 @@ after event
 in file  
 `sdkjs/common/apiBase.js`
 
-### Windows (PowerShell)
+### change sdkjs on Windows (PowerShell)
 
 ```bash
 (Get-Content sdkjs/common/apiBase.js) -replace "this\.sendEvent\('asc_onDocumentContentReady'\);", "this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);"  | Set-Content sdkjs/common/apiBase.js
 ```
 
-### Linux or macOS
+### change sdkjs on Linux or macOS
 
 ```bash
 sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs/common/apiBase.js
@@ -165,13 +165,13 @@ in function
 in file  
 `server/DocService/sources/DocsCoServer.js`
 
-### Windows (PowerShell)
+### change server on Windows (PowerShell)
 
 ```bash
 (Get-Content server/DocService/sources/DocsCoServer.js) -replace 'opt_hasForgotten, opt_openedAt\) \{', 'opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});' | Set-Content server/DocService/sources/DocsCoServer.js
 ```
 
-### Linux or macOS
+### change server on Linux or macOS
 
 ```bash
 sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});#' server/DocService/sources/DocsCoServer.js

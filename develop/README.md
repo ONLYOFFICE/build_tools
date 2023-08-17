@@ -89,13 +89,13 @@ node_modules
 run with `sdkjs` and `web-apps`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
 ```
 
 or run with `sdkjs`, `web-apps` and `server`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/server:/var/www/onlyoffice/documentserver/server documentserver-develop
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/server:/var/www/onlyoffice/documentserver/server documentserver-develop
 ```
 
 **Linux or macOS**
@@ -103,13 +103,13 @@ docker run -i -t -p 80:80 --restart=always -v $pwd/sdkjs:/var/www/onlyoffice/doc
 run with `sdkjs` and `web-apps`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps documentserver-develop
 ```
 
 or run with `sdkjs`, `web-apps` and `server`
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $(pwd)/server:/var/www/onlyoffice/documentserver/server documentserver-develop
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $(pwd)/server:/var/www/onlyoffice/documentserver/server documentserver-develop
 ```
 
 ## Open editor
@@ -130,8 +130,13 @@ It may block some scripts (like Analytics.js)
 
 ### To change something in `sdkjs` do the following steps
 
-1)Edit source file. Let's insert an image url into each open document.
-Do the following command.
+1)Edit source file. Let's insert an image url into each open document.  
+Following command inserts (in case of problems, you can replace URL) 
+`this.AddImageUrl(['http://localhost/example/images/logo.png']);`  
+after event  
+`this.sendEvent('asc_onDocumentContentReady');`  
+in file  
+`sdkjs/common/apiBase.js`
 
 **Windows (PowerShell)**
 
@@ -152,7 +157,13 @@ sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDo
 ### To change something in `server` do the following steps
 
 1)Edit source file. Let's send `"Hello World!"`
-chart message every time a document is opened.Do the following command
+chart message every time a document is opened.  
+Following command inserts  
+`yield* onMessage(ctx, conn, {"message": "Hello World!"});`  
+in function  
+`sendAuthInfo`  
+in file  
+`server/DocService/sources/DocsCoServer.js`
 
 **Windows (PowerShell)**
 

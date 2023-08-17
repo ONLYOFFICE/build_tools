@@ -14,6 +14,10 @@ def build_docker_server():
   dependence.check__docker_dependencies()
   build_develop_server()
 
+def build_docker_sdk_web_apps(dir):
+  dependence.check__docker_dependencies()
+  build_js.build_js_develop(dir)
+
 def build_develop_server():
   build_server.build_server_develop()
   build_js.build_js_develop(base_dir + "/../../..")

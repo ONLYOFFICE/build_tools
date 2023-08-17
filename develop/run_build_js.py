@@ -37,6 +37,6 @@ else:
   base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-docservice.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/DocService/docservice")
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-converter.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/FileConverter/converter")
   base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-converter.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/FileConverter/converter")
-  base.print_info('build_js_develop: ' + git_dir)
-  build_js.build_js_develop(git_dir)
+  base.print_info('run_server.run_docker_sdk_web_apps: ' + git_dir)
+  run_server.run_docker_sdk_web_apps(git_dir)
   

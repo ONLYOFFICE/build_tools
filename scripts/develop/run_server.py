@@ -113,6 +113,18 @@ def run_docker_server(args = []):
   except:
     input("Unexpected error. " + traceback.format_exc() + "Press Enter to continue...")
 	
+def run_docker_sdk_web_apps(dir):
+  try:
+    develop.build_docker_server(dir)
+
+  except SystemExit:
+    input("Ignoring SystemExit. Press Enter to continue...")
+    exit(0)
+  except KeyboardInterrupt:
+    pass
+  except:
+    input("Unexpected error. " + traceback.format_exc() + "Press Enter to continue...")
+
 def make(args = []):
   try:
     make_start()

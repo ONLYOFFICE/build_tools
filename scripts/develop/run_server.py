@@ -115,7 +115,7 @@ def run_docker_server(args = []):
 	
 def run_docker_sdk_web_apps(dir):
   try:
-    develop.build_docker_server(dir)
+    develop.build_docker_sdk_web_apps(dir)
 
   except SystemExit:
     input("Ignoring SystemExit. Press Enter to continue...")

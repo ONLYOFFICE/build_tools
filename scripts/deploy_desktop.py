@@ -209,7 +209,7 @@ def make():
         if (0 == platform.find("win")):
           base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")          
           base.copy_files(vlc_dir + "/*.dll", root_dir)
-        else (0 == platform.find("linux")):
+        elif (0 == platform.find("linux")):
           base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
           base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
           copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_pulse.so", "0.0.0")

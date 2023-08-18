@@ -32,6 +32,18 @@ def deploy_marketplace_plugin(git_dir, root_dir):
   base.delete_dir_with_access_error(sys_plugins_dir + "/onlyoffice.github.io")
   return
 
+def copy_lib_with_links(src_dir, dst_dir, lib, version):
+  lib_full_name = lib + "." + version
+  major_version = version[:version.find(".")]
+  lib_major_name = lib + "." + major_version
+
+  base.copy_file(src_dir + "/" + lib_full_name, dst_dir + "/" + lib_full_name)
+  
+  base.cmd_in_dir(dst_dir, "ln", ["-s", "./" + lib_full_name, "./" + lib_major_name])
+  base.cmd_in_dir(dst_dir, "ln", ["-s", "./" + lib_major_name, "./" + lib])
+
+  return
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -191,27 +203,25 @@ def make():
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
-      if ("" != base.get_env("VIDEO_PLAYER_VLC_DIR")):
-        vlc_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/videoplayerlib/vlc/"
+      if config.check_option("libvlc"):
+        vlc_dir = git_dir + "/core/Common/3dParty/libvlc/build/" + platform + "/lib"
+        
         if (0 == platform.find("win")):
-          base.copy_file(vlc_dir + platform + "/bin/libvlc.dll", root_dir + "/libvlc.dll")
-          base.copy_file(vlc_dir + platform + "/bin/libvlccore.dll", root_dir + "/libvlccore.dll")
-          base.copy_file(vlc_dir + platform + "/bin/VLCQtCore.dll", root_dir + "/VLCQtCore.dll")
-          base.copy_file(vlc_dir + platform + "/bin/VLCQtWidgets.dll", root_dir + "/VLCQtWidgets.dll")
-        else:
-          base.copy_file(vlc_dir + platform + "/bin/libvlc.so", root_dir + "/libvlc.so")
-          base.copy_file(vlc_dir + platform + "/bin/libvlc.so.5", root_dir + "/libvlc.so.5")
-          base.copy_file(vlc_dir + platform + "/bin/libvlccore.so", root_dir + "/libvlccore.so")
-          base.copy_file(vlc_dir + platform + "/bin/libvlccore.so.8", root_dir + "/libvlccore.so.8")
-          base.copy_file(vlc_dir + platform + "/bin/VLCQtCore.so", root_dir + "/VLCQtCore.so")
-          base.copy_file(vlc_dir + platform + "/bin/VLCQtWidgets.so", root_dir + "/VLCQtWidgets.so")
+          base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")          
+          base.copy_files(vlc_dir + "/*.dll", root_dir)
+        else (0 == platform.find("linux")):
+          base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
+          base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_pulse.so", "0.0.0")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_vdpau.so", "0.0.0")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
+          copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
 
         if isWindowsXP:
           base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer/xp", root_dir, "videoplayer")
         else:
           base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer", root_dir, "videoplayer")
-
-        base.copy_dir(vlc_dir + platform + "/bin/plugins", root_dir + "/plugins")
       else:
         base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 

@@ -203,7 +203,7 @@ def make():
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
-      if config.check_option("libvlc"):
+      if config.check_option("config", "libvlc"):
         vlc_dir = git_dir + "/core/Common/3dParty/libvlc/build/" + platform + "/lib"
         
         if (0 == platform.find("win")):

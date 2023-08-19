@@ -40,6 +40,15 @@ def is_os_arm():
 def is_python_64bit():
   return (struct.calcsize("P") == 8)
 
+def correct_long_path(path):
+  if "windows" != host_platform():
+    return path
+  if (0 == path.find("\\\\?\\")):
+    return path
+  if (1 == path.find(":\\")):
+    return "\\\\?\\" + path
+  return path
+
 def get_path(path):
   if "windows" == host_platform():
     return path.replace("/", "\\")
@@ -202,7 +211,7 @@ def delete_dir_with_access_error(path):
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
+  shutil.rmtree(correct_long_path(get_path(path)), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):

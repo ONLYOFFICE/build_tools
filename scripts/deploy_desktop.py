@@ -80,23 +80,25 @@ def make():
 
     platform_postfix = platform + base.qt_dst_postfix()
 
+    build_libraries_path = core_build_dir + "/lib/" + platform_postfix
+
     # x2t
     base.create_dir(root_dir + "/converter")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "kernel")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "kernel_network")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "UnicodeConverter")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "graphics")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "PdfFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DjVuFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "XpsFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlFile2")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "HtmlRenderer")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "Fb2File")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "EpubFile")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "DocxRenderer")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "kernel")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "kernel_network")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "UnicodeConverter")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "graphics")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "PdfFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "DjVuFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "XpsFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlFile2")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlRenderer")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
     
     if ("ios" == platform):
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "x2t")
+      base.copy_lib(build_libraries_path, root_dir + "/converter", "x2t")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "x2t")
 
@@ -119,9 +121,9 @@ def make():
 
     # doctrenderer
     if isWindowsXP:
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + "/xp", root_dir + "/converter", "doctrenderer")
+      base.copy_lib(build_libraries_path + "/xp", root_dir + "/converter", "doctrenderer")
     else:
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir + "/converter", "doctrenderer")      
+      base.copy_lib(build_libraries_path, root_dir + "/converter", "doctrenderer")      
     base.copy_v8_files(core_dir, root_dir + "/converter", platform, isWindowsXP)
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
@@ -151,11 +153,11 @@ def make():
       isUseQt = False
 
     # libraries
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "hunspell")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ooxmlsignature")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
+    base.copy_lib(build_libraries_path, root_dir, "hunspell")
+    base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "ooxmlsignature")
+    base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
     if (0 != platform.find("mac")):
-      base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")
+      base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")
     
     if (0 == platform.find("mac")):
       base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")
@@ -219,11 +221,11 @@ def make():
           copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
 
         if isWindowsXP:
-          base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer/xp", root_dir, "videoplayer")
+          base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")
         else:
-          base.copy_lib(core_build_dir + "/lib/" + platform + "/mediaplayer", root_dir, "videoplayer")
+          base.copy_lib(build_libraries_path + "/mediaplayer", root_dir, "videoplayer")
       else:
-        base.copy_lib(core_build_dir + "/lib/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
+        base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "videoplayer")
 
     base.create_dir(root_dir + "/editors")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")

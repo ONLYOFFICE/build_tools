@@ -221,7 +221,7 @@ def parse_defaults():
       options[name] = defaults_options[name]
 
   if ("config_addon" in defaults_options):
-    extend_option("config", defaults_options[name])
+    extend_option("config", defaults_options["config_addon"])
 
   return
 

@@ -40,15 +40,6 @@ def is_os_arm():
 def is_python_64bit():
   return (struct.calcsize("P") == 8)
 
-def correct_long_path(path):
-  if "windows" != host_platform():
-    return path
-  if (0 == path.find("\\\\?\\")):
-    return path
-  if (1 == path.find(":\\")):
-    return "\\\\?\\" + path
-  return path
-
 def get_path(path):
   if "windows" == host_platform():
     return path.replace("/", "\\")
@@ -204,14 +195,29 @@ def copy_dir(src, dst):
 
 def delete_dir_with_access_error(path):
   def delete_file_on_error(func, path, exc_info):
-    if not os.access(path, os.W_OK):
-      os.chmod(path, stat.S_IWUSR)
-      func(path)
+    if ("windows" != host_platform()):
+      if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+      return
+    elif (0 != path.find("\\\\?\\")):
+      # abspath not work with long names
+      full_path = path
+      drive_pos = full_path.find(":")
+      if (drive_pos < 0) or (drive_pos > 2):
+        full_path = os.getcwd() + "\\" + full_path
+      else:
+        full_path = full_path
+      if (len(full_path) >= 260):
+        full_path = "\\\\?\\" + full_path
+      if not os.access(full_path, os.W_OK):
+        os.chmod(full_path, stat.S_IWUSR)
+      func(full_path)
     return
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(correct_long_path(get_path(path)), ignore_errors=False, onerror=delete_file_on_error)
+  shutil.rmtree(os.path.normpath(get_path(path)), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):

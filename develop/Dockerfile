@@ -8,7 +8,7 @@ RUN apt-get update -y && \
 	npm install -g grunt grunt-cli -y && \
 	ln -s /usr/bin/python3 /usr/bin/python && \
 	ln -s /usr/bin/pip3 /usr/bin/pip && \
-	git clone --depth 1 -b feature/docker-instruction https://github.com/ONLYOFFICE/build_tools.git var/www/onlyoffice/documentserver/build_tools && \
+	git clone --depth 1 https://github.com/ONLYOFFICE/build_tools.git var/www/onlyoffice/documentserver/build_tools && \
 	sed -i '/documentserver-static-gzip.sh ${ONLYOFFICE_DATA_CONTAINER}/d' /app/ds/run-document-server.sh && \
 	#Set Up Debug Logging
 	sed -i 's/WARN/ALL/g' /etc/onlyoffice/documentserver/log4js/production.json && \

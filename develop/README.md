@@ -50,6 +50,8 @@ docker build -t documentserver-develop .
 
 **Note**: The dot at the end is required.
 
+**Note**: Sometimes script may fail due to network errors. Just restart it.
+
 ## Clone development modules
 
 Clone development modules to the work dir

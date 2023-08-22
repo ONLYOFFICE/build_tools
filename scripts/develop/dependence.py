@@ -906,7 +906,7 @@ def install_postgresql():
   return code
 
 def install_nodejs():
-  os.system('curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -')
+  os.system('curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -')
   base.print_info("Install node.js...")
   install_command = 'yes | sudo apt install nodejs'
   print(install_command)

@@ -1475,3 +1475,59 @@ def correct_elf_rpath_directory(directory, origin, is_recursion = True):
       correct_elf_rpath_directory(file, origin)
   return
 
+def copy_dictionaries(src, dst, is_hyphen = True, is_spell = True):
+  if (False == is_hyphen) and (False == is_spell):
+    return
+
+  if not is_dir(dst):
+    create_dir(dst)
+
+  src_folder = src
+  if ("/" != src[-1:]):
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    if is_file(file):
+      copy_file(file, dst)
+      continue
+
+    basename = os.path.basename(file)
+    if (".git" == basename):
+      continue
+
+    if (True == is_hyphen) and (True == is_spell):
+      copy_dir(file, dst + "/" + basename)
+      continue
+
+    is_spell_present = is_file(file + "/" + basename + ".dic")
+    is_hyphen_present = is_file(file + "/hyph_" + basename + ".dic")
+
+    is_dir_need = False
+    if (is_hyphen and is_hyphen_present) or (is_spell and is_spell_present):
+      is_dir_need = True
+
+    if not is_dir_need:
+      continue
+
+    lang_folder = dst + "/" + basename
+    create_dir(lang_folder)
+
+    if is_hyphen and is_hyphen_present:
+      copy_dir_content(file, lang_folder, "hyph_", "")
+    
+    if is_spell and is_spell_present:
+      copy_dir_content(file, lang_folder, "", "hyph_")
+
+  if is_file(dst + "/en_US/en_US_thes.dat"):
+    delete_file(dst + "/en_US/en_US_thes.dat")
+    delete_file(dst + "/en_US/en_US_thes.idx")
+  
+  if is_file(dst + "/ru_RU/ru_RU_oo3.dic"):
+    delete_file(dst + "/ru_RU/ru_RU_oo3.dic")
+    delete_file(dst + "/ru_RU/ru_RU_oo3.aff")
+
+  if is_file(dst + "/uk_UA/th_uk_UA.dat"):
+    delete_file(dst + "/uk_UA/th_uk_UA.dat")
+    delete_file(dst + "/uk_UA/th_uk_UA.idx")
+
+  return

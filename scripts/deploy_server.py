@@ -58,7 +58,6 @@ def make():
     base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
     base.copy_file(bin_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node", build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
 
-
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
 
@@ -147,10 +146,7 @@ def make():
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries
-    spellchecker_dictionaries = root_dir + '/dictionaries'
-    spellchecker_dictionaries_files = server_dir + '/../dictionaries/*_*'
-    base.create_dir(spellchecker_dictionaries)
-    base.copy_files(spellchecker_dictionaries_files, spellchecker_dictionaries)
+    base.copy_dictionaries(server_dir + "/../dictionaries", root_dir + "/dictionaries")
 
     if (0 == platform.find("win")):
       exec_ext = '.exe'

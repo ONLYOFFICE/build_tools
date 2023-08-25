@@ -130,8 +130,7 @@ def make():
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
 
     # dictionaries
-    base.create_dir(root_dir + "/dictionaries")
-    base.copy_dir_content(git_dir + "/dictionaries", root_dir + "/dictionaries", "", ".git")
+    base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
 
     base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")

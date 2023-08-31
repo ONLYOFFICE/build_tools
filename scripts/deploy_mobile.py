@@ -95,6 +95,7 @@ def make():
     if ("ios" == platform):
       base.generate_plist(root_dir)
       deploy_fonts(git_dir, root_dir)
+      base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
@@ -110,6 +111,7 @@ def make():
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
       # fonts
       deploy_fonts(git_dir, root_dir, "android")
+      base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
       # app
       base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
       libs_dir = root_dir + "/lib"

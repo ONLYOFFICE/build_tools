@@ -195,14 +195,29 @@ def copy_dir(src, dst):
 
 def delete_dir_with_access_error(path):
   def delete_file_on_error(func, path, exc_info):
-    if not os.access(path, os.W_OK):
-      os.chmod(path, stat.S_IWUSR)
-      func(path)
+    if ("windows" != host_platform()):
+      if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+      return
+    elif (0 != path.find("\\\\?\\")):
+      # abspath not work with long names
+      full_path = path
+      drive_pos = full_path.find(":")
+      if (drive_pos < 0) or (drive_pos > 2):
+        full_path = os.getcwd() + "\\" + full_path
+      else:
+        full_path = full_path
+      if (len(full_path) >= 260):
+        full_path = "\\\\?\\" + full_path
+      if not os.access(full_path, os.W_OK):
+        os.chmod(full_path, stat.S_IWUSR)
+      func(full_path)
     return
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
+  shutil.rmtree(os.path.normpath(get_path(path)), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):
@@ -1486,3 +1501,60 @@ def is_need_build_js():
   if "osign" == config.option("module"):
     return False
   return True
+
+def copy_dictionaries(src, dst, is_hyphen = True, is_spell = True):
+  if (False == is_hyphen) and (False == is_spell):
+    return
+
+  if not is_dir(dst):
+    create_dir(dst)
+
+  src_folder = src
+  if ("/" != src[-1:]):
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    if is_file(file):
+      copy_file(file, dst)
+      continue
+
+    basename = os.path.basename(file)
+    if (".git" == basename):
+      continue
+
+    if (True == is_hyphen) and (True == is_spell):
+      copy_dir(file, dst + "/" + basename)
+      continue
+
+    is_spell_present = is_file(file + "/" + basename + ".dic")
+    is_hyphen_present = is_file(file + "/hyph_" + basename + ".dic")
+
+    is_dir_need = False
+    if (is_hyphen and is_hyphen_present) or (is_spell and is_spell_present):
+      is_dir_need = True
+
+    if not is_dir_need:
+      continue
+
+    lang_folder = dst + "/" + basename
+    create_dir(lang_folder)
+
+    if is_hyphen and is_hyphen_present:
+      copy_dir_content(file, lang_folder, "hyph_", "")
+    
+    if is_spell and is_spell_present:
+      copy_dir_content(file, lang_folder, "", "hyph_")
+
+  if is_file(dst + "/en_US/en_US_thes.dat"):
+    delete_file(dst + "/en_US/en_US_thes.dat")
+    delete_file(dst + "/en_US/en_US_thes.idx")
+  
+  if is_file(dst + "/ru_RU/ru_RU_oo3.dic"):
+    delete_file(dst + "/ru_RU/ru_RU_oo3.dic")
+    delete_file(dst + "/ru_RU/ru_RU_oo3.aff")
+
+  if is_file(dst + "/uk_UA/th_uk_UA.dat"):
+    delete_file(dst + "/uk_UA/th_uk_UA.dat")
+    delete_file(dst + "/uk_UA/th_uk_UA.idx")
+
+  return

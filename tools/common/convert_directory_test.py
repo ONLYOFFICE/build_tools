@@ -22,9 +22,9 @@ editor_type = params[2].replace("\\", "/")
 directory_input = params[3].replace("\\", "/")
 directory_output = params[4].replace("\\", "/")
 
-input_files = []
-for file in glob.glob(os.path.join(u"" + directory_input, u'*')):
-  input_files.append(file.replace("\\", "/"))
+input_files = [os.path.join(dirpath, f)
+    for dirpath, dirnames, files in os.walk(directory_input)
+    for f in files]
 
 output_len = len(input_files)
 output_cur = 1

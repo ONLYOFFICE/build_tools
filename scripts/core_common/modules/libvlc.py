@@ -49,7 +49,7 @@ def form_build_mac(src_dir, dest_dir):
   base.copy_dir(src_dir + "/lib", dest_dir + "/lib")
   base.cmd("find", [dest_dir + "/lib", "-name", "\"*.la\"", "-type", "f", "-delete"])
   base.delete_dir(dest_dir + "/lib/pkgconfig")
-  base.delete_dir(dest_dir + "/lib/vlc/lua")
+  base.delete_file(dest_dir + "/lib/vlc/libcompat.a")
   # generate cache file 'plugins.dat' for plugins loading
   base.run_command("DYLD_LIBRARY_PATH=" + dest_dir + "/lib " + dest_dir + "/lib/vlc/vlc-cache-gen " + dest_dir + "/lib/vlc/plugins")
   return

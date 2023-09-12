@@ -74,7 +74,7 @@ def deploy_closuremaps(license):
     aws_kwargs["endpoint_url"]=branding.s3_endpoint_url
   ret = True
   for f in maps:
-    key = "closuremaps/%s/%s/%s/%s" % (license, common.version, common.build, f)
+    key = "closure-maps/%s/%s/%s/%s" % (license, common.version, common.build, f)
     upload = utils.s3_upload(
       f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
     ret &= upload

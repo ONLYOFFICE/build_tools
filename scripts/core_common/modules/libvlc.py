@@ -38,7 +38,7 @@ def form_build_linux(src_dir, dest_dir):
   # copy and form lib dir
   base.copy_dir(src_dir + "/lib", dest_dir + "/lib")
   base.delete_dir(dest_dir + "/lib/pkgconfig")
-  base.delete_dir(dest_dir + "/lib/vlc/lua")
+  base.delete_file(dest_dir + "/lib/vlc/libcompat.a")
 
 def form_build_mac(src_dir, dest_dir):
   if not base.is_dir(dest_dir):
@@ -49,7 +49,7 @@ def form_build_mac(src_dir, dest_dir):
   base.copy_dir(src_dir + "/lib", dest_dir + "/lib")
   base.cmd("find", [dest_dir + "/lib", "-name", "\"*.la\"", "-type", "f", "-delete"])
   base.delete_dir(dest_dir + "/lib/pkgconfig")
-  base.delete_dir(dest_dir + "/lib/vlc/lua")
+  base.delete_file(dest_dir + "/lib/vlc/libcompat.a")
   # generate cache file 'plugins.dat' for plugins loading
   base.run_command("DYLD_LIBRARY_PATH=" + dest_dir + "/lib " + dest_dir + "/lib/vlc/vlc-cache-gen " + dest_dir + "/lib/vlc/plugins")
   return
@@ -80,10 +80,12 @@ def make():
   # windows
   if "windows" == base.host_platform():
     if config.check_option("platform", "win_64"):
+      base.copy_file("tools/win_64/build.patch", "vlc")
       docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
       form_build_win(vlc_dir + "/build/win64/vlc-" + vlc_version, base_dir + "/build/win_64")
       
     if config.check_option("platform", "win_32"):
+      base.copy_file("tools/win_32/build.patch", "vlc")
       docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
       form_build_win(vlc_dir + "/build/win32/vlc-" + vlc_version, base_dir + "/build/win_32")
 

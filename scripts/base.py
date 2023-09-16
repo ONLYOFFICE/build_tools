@@ -787,7 +787,7 @@ def app_make():
   return "make"
 
 # doctrenderer.config
-def generate_doctrenderer_config(path, root, product, vendor = ""):
+def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries = ""):
   content = "<Settings>\n"
 
   content += ("<file>" + root + "sdkjs/common/Native/native.js</file>\n")
@@ -805,6 +805,9 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
   content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
+
+  if ("" != dictionaries):
+    content += ("<dictionaries>" + dictionaries + "</dictionaries>")
 
   if (False): # old html file
     content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")

@@ -89,7 +89,7 @@ def make():
     #if (native_platform == "linux_64"):
     #  base.generate_check_linux_system(git_dir + "/build_tools", converter_dir)
 
-    base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
+    base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server", "", "../../../dictionaries")
 
     # icu
     if (0 == platform.find("win")):

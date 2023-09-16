@@ -126,7 +126,7 @@ def make():
       base.copy_lib(build_libraries_path, root_dir + "/converter", "doctrenderer")      
     base.copy_v8_files(core_dir, root_dir + "/converter", platform, isWindowsXP)
 
-    base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
+    base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
 
     # dictionaries

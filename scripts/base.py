@@ -643,6 +643,22 @@ def qt_version():
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
+def qt_config_platform_addon(platform):
+  config_addon = ""
+  if (0 == platform.find("win")):
+    config_addon += (" " + config.option("config_addon_windows"))
+  elif (0 == platform.find("linux")):
+    config_addon += (" " + config.option("config_addon_linux"))
+  elif (0 == platform.find("mac")):
+    config_addon += (" " + config.option("config_addon_macos"))
+  elif (0 == platform.find("ios")):
+    config_addon += (" " + config.option("config_addon_ios"))
+  elif (0 == platform.find("android")):
+    config_addon += (" " + config.option("config_addon_android"))
+  if (config_addon == " "):
+    config_addon = ""
+  return config_addon
+
 def qt_config(platform):
   config_param = config.option("module") + " " + config.option("config") + " " + config.option("features")
   config_param_lower = config_param.lower()
@@ -674,6 +690,7 @@ def qt_config(platform):
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
 
+  config_param += qt_config_platform_addon()
   return config_param
 
 def qt_major_version():

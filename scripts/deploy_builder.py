@@ -83,7 +83,7 @@ def make():
     base.copy_dir(git_dir + "/document-templates/new/en-US", root_dir + "/empty")
 
     # dictionaries
-    base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
+    base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", root_dir + "/sdkjs")

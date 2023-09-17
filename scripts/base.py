@@ -807,7 +807,7 @@ def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries 
   content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
 
   if ("" != dictionaries):
-    content += ("<dictionaries>" + dictionaries + "</dictionaries>")
+    content += ("<dictionaries>" + dictionaries + "</dictionaries>\n")
 
   if (False): # old html file
     content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")

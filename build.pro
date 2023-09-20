@@ -104,7 +104,7 @@ core_libraries {
 !no_tests {
     addSubProject(standardtester,  $$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro)
     addSubProject(x2ttester,       $$CORE_ROOT_DIR/Test/Applications/x2tTester/x2ttester.pro)
-	addSubProject(metafiletester,  $$CORE_ROOT_DIR/Test/Applications/MetafileTester/MetafileTester.pro)
+    addSubProject(metafiletester,  $$CORE_ROOT_DIR/Test/Applications/MetafileTester/MetafileTester.pro)
 
     #TODO:
     !linux_arm64:addSubProject(ooxml_crypt, $$CORE_ROOT_DIR/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro)

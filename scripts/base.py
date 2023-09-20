@@ -619,6 +619,17 @@ def get_gcc_version():
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
+
+  # qt bug
+  if (host_platform() == "mac"):
+    for compiler_folder in glob.glob(qt_dir + "/*"):
+      if is_dir(compiler_folder):
+        old_path_file = compiler_folder + "/mkspecs/features/toolchain.prf"
+        new_path_file = compiler_folder + "/mkspecs/features/toolchain.prf.bak"
+        if (is_file(old_path_file) and not is_file(new_path_file)):
+          copy_file(old_path_file, new_path_file)
+          copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
+
   compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
   qt_dir = qt_dir + "/" + compiler_platform
 

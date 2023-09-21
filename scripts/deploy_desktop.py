@@ -132,7 +132,8 @@ def make():
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
 
-    base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
+    # base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts") # TODO: remove for ver 7.7 if core-fonts enough
+    base.copy_dir(git_dir + "/core-fonts/opensans", root_dir + "/fonts")
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
     # cef

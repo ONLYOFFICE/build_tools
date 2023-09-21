@@ -16,7 +16,7 @@ def make():
   if("" != config.option("branding")):
     branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
-  base.cmd_in_dir(server_dir, "npm", ["install"])
+  base.cmd_in_dir(server_dir, "npm", ["ci"])
   base.cmd_in_dir(server_dir, "grunt", ["--no-color", "-v"] + base.server_addons_param())
 
     #env variables
@@ -41,7 +41,7 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_build_dir + '/Common/sources')
 
-  pkg_target = "node14"
+  pkg_target = "node18"
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"
@@ -57,7 +57,7 @@ def make():
 
   example_dir = base.get_script_dir() + "/../../document-server-integration/web/documentserver-example/nodejs"
   base.delete_dir(example_dir  + "/node_modules")
-  base.cmd_in_dir(example_dir, "npm", ["install"])
+  base.cmd_in_dir(example_dir, "npm", ["ci"])
   base.cmd_in_dir(example_dir, "pkg", [".", "-t", pkg_target, "-o", "example"])
 
 def build_server_develop():

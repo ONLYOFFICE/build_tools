@@ -627,8 +627,11 @@ def qt_setup(platform):
         old_path_file = compiler_folder + "/mkspecs/features/toolchain.prf"
         new_path_file = compiler_folder + "/mkspecs/features/toolchain.prf.bak"
         if (is_file(old_path_file) and not is_file(new_path_file)):
-          copy_file(old_path_file, new_path_file)
-          copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
+          try:
+            copy_file(old_path_file, new_path_file)
+            copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
+          except IOError as e:
+            print("Unable to copy file: " + old_path_file)
 
   compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
   qt_dir = qt_dir + "/" + compiler_platform

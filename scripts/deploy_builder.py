@@ -79,8 +79,11 @@ def make():
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
-    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
+    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
     base.copy_dir(git_dir + "/document-templates/new/en-US", root_dir + "/empty")
+
+    # dictionaries
+    base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", root_dir + "/sdkjs")

@@ -619,6 +619,20 @@ def get_gcc_version():
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
+
+  # qt bug
+  if (host_platform() == "mac"):
+    for compiler_folder in glob.glob(qt_dir + "/*"):
+      if is_dir(compiler_folder):
+        old_path_file = compiler_folder + "/mkspecs/features/toolchain.prf"
+        new_path_file = compiler_folder + "/mkspecs/features/toolchain.prf.bak"
+        if (is_file(old_path_file) and not is_file(new_path_file)):
+          try:
+            copy_file(old_path_file, new_path_file)
+            copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
+          except IOError as e:
+            print("Unable to copy file: " + old_path_file)
+
   compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
   qt_dir = qt_dir + "/" + compiler_platform
 
@@ -642,6 +656,22 @@ def qt_version():
   qt_dir = get_env("QT_DEPLOY")
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
+
+def qt_config_platform_addon(platform):
+  config_addon = ""
+  if (0 == platform.find("win")):
+    config_addon += (" " + config.option("config_addon_windows"))
+  elif (0 == platform.find("linux")):
+    config_addon += (" " + config.option("config_addon_linux"))
+  elif (0 == platform.find("mac")):
+    config_addon += (" " + config.option("config_addon_macos"))
+  elif (0 == platform.find("ios")):
+    config_addon += (" " + config.option("config_addon_ios"))
+  elif (0 == platform.find("android")):
+    config_addon += (" " + config.option("config_addon_android"))
+  if (config_addon == " "):
+    config_addon = ""
+  return config_addon
 
 def qt_config(platform):
   config_param = config.option("module") + " " + config.option("config") + " " + config.option("features")
@@ -674,6 +704,7 @@ def qt_config(platform):
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
 
+  config_param += qt_config_platform_addon(platform)
   return config_param
 
 def qt_major_version():
@@ -770,7 +801,7 @@ def app_make():
   return "make"
 
 # doctrenderer.config
-def generate_doctrenderer_config(path, root, product, vendor = ""):
+def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries = ""):
   content = "<Settings>\n"
 
   content += ("<file>" + root + "sdkjs/common/Native/native.js</file>\n")
@@ -788,6 +819,9 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
   content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
+
+  if ("" != dictionaries):
+    content += ("<dictionaries>" + dictionaries + "</dictionaries>\n")
 
   if (False): # old html file
     content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")

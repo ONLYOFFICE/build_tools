@@ -61,7 +61,7 @@ def make():
     print("Core is up to date. ---------------------------------------")
     print("-----------------------------------------------------------")
 
-  base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
+  base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/", "../../../dictionaries")
 
   if not base.is_dir(git_dir + "/sdkjs-plugins"):
     base.create_dir(git_dir + "/sdkjs-plugins")

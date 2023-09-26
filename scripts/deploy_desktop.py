@@ -126,7 +126,7 @@ def make():
       base.copy_lib(build_libraries_path, root_dir + "/converter", "doctrenderer")      
     base.copy_v8_files(core_dir, root_dir + "/converter", platform, isWindowsXP)
 
-    base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop")
+    base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
 
     # dictionaries
@@ -169,9 +169,7 @@ def make():
       base.qt_copy_lib("Qt5Gui", root_dir)
       base.qt_copy_lib("Qt5PrintSupport", root_dir)
       base.qt_copy_lib("Qt5Svg", root_dir)
-      base.qt_copy_lib("Qt5Widgets", root_dir)
-      base.qt_copy_lib("Qt5Multimedia", root_dir)
-      base.qt_copy_lib("Qt5MultimediaWidgets", root_dir)
+      base.qt_copy_lib("Qt5Widgets", root_dir)      
       base.qt_copy_lib("Qt5Network", root_dir)
       base.qt_copy_lib("Qt5OpenGL", root_dir)
 
@@ -180,12 +178,16 @@ def make():
       base.qt_copy_plugin("imageformats", root_dir)
       base.qt_copy_plugin("platforms", root_dir)
       base.qt_copy_plugin("platforminputcontexts", root_dir)
-      base.qt_copy_plugin("printsupport", root_dir)
-      base.qt_copy_plugin("mediaservice", root_dir)
-      base.qt_copy_plugin("playlistformats", root_dir)
+      base.qt_copy_plugin("printsupport", root_dir)      
 
       base.qt_copy_plugin("platformthemes", root_dir)
       base.qt_copy_plugin("xcbglintegrations", root_dir)
+
+      if not config.check_option("config", "libvlc"):
+        base.qt_copy_lib("Qt5Multimedia", root_dir)
+        base.qt_copy_lib("Qt5MultimediaWidgets", root_dir)
+        base.qt_copy_plugin("mediaservice", root_dir)
+        base.qt_copy_plugin("playlistformats", root_dir)
 
       base.qt_copy_plugin("styles", root_dir)
 

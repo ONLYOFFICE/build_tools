@@ -30,7 +30,7 @@ else:
   #Fix theme generation for external sdkjs volume
   if base.is_exist(git_dir + "/server/FileConverter/bin/DoctRenderer.config"):
     base.print_info('replace DoctRenderer.config for external sdkjs volume')
-    base.generate_doctrenderer_config(git_dir + "/server/FileConverter/bin/DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
+    base.generate_doctrenderer_config(git_dir + "/server/FileConverter/bin/DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/", "../../../dictionaries")
 
   base.print_info('replace supervisor cfg to run docservice and converter from pkg')
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-docservice.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/DocService/docservice")

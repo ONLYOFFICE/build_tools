@@ -86,6 +86,13 @@ def make_windows():
 
   make_zip()
 
+  utils.log_h2("vlc plugins cache")
+  utils.cmd("vlc-cache-gen.exe", "plugins", chdir=desktop_dir, verbose=True)
+  utils.delete_file(desktop_dir + "/vlc-cache-gen.exe")
+  if not branding.onlyoffice:
+    utils.cmd("vlc-cache-gen.exe", "plugins", chdir=viewer_dir, verbose=True)
+    utils.delete_file(viewer_dir + "/vlc-cache-gen.exe")
+
   vcdl = True
   vcdl &= download_vcredist("2013")
   vcdl &= download_vcredist("2022")

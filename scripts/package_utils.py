@@ -289,12 +289,12 @@ def cmd(*args, **kwargs):
     return False
   if kwargs.get("chdir") and is_dir(kwargs["chdir"]):
     oldcwd = get_cwd()
-    set_cwd(kwargs["chdir"])
+    set_cwd(kwargs["chdir"], verbose=False)
   ret = subprocess.call(
       [i for i in args], stderr=subprocess.STDOUT, shell=True
   ) == 0
   if kwargs.get("chdir") and oldcwd:
-    set_cwd(oldcwd)
+    set_cwd(oldcwd, verbose=False)
   return ret
 
 def cmd_output(*args, **kwargs):

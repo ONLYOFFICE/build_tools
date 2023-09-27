@@ -657,6 +657,21 @@ def qt_version():
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
+def check_congig_option_with_platfom(platform, option_name):
+  if config.check_option("config", option_name):
+    return True
+  if (0 == platform.find("win")) and config.check_option("config_addon_windows", option_name):
+    return True
+  elif (0 == platform.find("linux")) and config.check_option("config_addon_linux", option_name):
+    return True
+  elif (0 == platform.find("mac")) and config.check_option("config_addon_macos", option_name):
+    return True
+  elif (0 == platform.find("ios")) and config.check_option("config_addon_ios", option_name):
+    return True
+  elif (0 == platform.find("android")) and config.check_option("config_addon_android", option_name):
+    return True
+  return False
+
 def qt_config_platform_addon(platform):
   config_addon = ""
   if (0 == platform.find("win")):

@@ -207,13 +207,13 @@ def make():
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
-      if config.check_option("config", "libvlc"):
+      if base.check_congig_option_with_platfom(platform, "libvlc"):
         vlc_dir = git_dir + "/core/Common/3dParty/libvlc/build/" + platform + "/lib"
         
         if (0 == platform.find("win")):
           base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")          
           base.copy_files(vlc_dir + "/*.dll", root_dir)
-          bace.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
+          base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
           base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
           base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
@@ -222,7 +222,7 @@ def make():
           copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
           copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
           copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
-          bace.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
+          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")

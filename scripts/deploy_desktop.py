@@ -182,7 +182,7 @@ def make():
       base.qt_copy_plugin("platformthemes", root_dir)
       base.qt_copy_plugin("xcbglintegrations", root_dir)
 
-      if not config.check_option("config", "libvlc"):
+      if not base.check_congig_option_with_platfom(platform, "libvlc"):
         base.qt_copy_lib("Qt5Multimedia", root_dir)
         base.qt_copy_lib("Qt5MultimediaWidgets", root_dir)
         base.qt_copy_plugin("mediaservice", root_dir)
@@ -195,7 +195,7 @@ def make():
         base.qt_copy_lib("Qt5X11Extras", root_dir)
         base.qt_copy_lib("Qt5XcbQpa", root_dir)
         base.qt_copy_icu(root_dir)
-        if not config.check_option("config", "libvlc"):
+        if not base.check_congig_option_with_platfom(platform, "libvlc"):
           base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
       if (0 == platform.find("win")):

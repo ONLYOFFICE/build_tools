@@ -88,10 +88,14 @@ def make_windows():
 
   utils.log_h2("vlc plugins cache")
   if utils.is_file(desktop_dir + "/vlc-cache-gen.exe"):
-    utils.cmd("vlc-cache-gen.exe", "plugins", chdir=desktop_dir, verbose=True)
+    utils.cmd(
+      "vlc-cache-gen.exe", utils.get_abspath("plugins"),
+      chdir=desktop_dir, verbose=True)
     utils.delete_file(desktop_dir + "/vlc-cache-gen.exe")
   if not branding.onlyoffice and utils.is_file(viewer_dir + "/vlc-cache-gen.exe"):
-    utils.cmd("vlc-cache-gen.exe", "plugins", chdir=viewer_dir, verbose=True)
+    utils.cmd(
+      "vlc-cache-gen.exe", utils.get_abspath("plugins"),
+      chdir=viewer_dir, verbose=True)
     utils.delete_file(viewer_dir + "/vlc-cache-gen.exe")
 
   vcdl = True

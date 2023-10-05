@@ -197,17 +197,23 @@ additional addon folders and pass command line arguments
 For example run with `onlyoffice` branding and
 addons:`sdkjs-forms`, `sdkjs-ooxml`, `web-apps-mobile`
 
-### docker run on Windows (PowerShell)
+### docker run on Windows (PowerShell) with branding
 
 **Note**: Run PowerShell as administrator to fix EACCES error when installing
 node_modules
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $pwd/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $pwd/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $pwd/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true `
+    -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps `
+    -v $pwd/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $pwd/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $pwd/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $pwd/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile `
+    documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
 ```
 
-### docker run on Linux or macOS
+### docker run on Linux or macOS with branding
 
 ```bash
-docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $(pwd)/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $(pwd)/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $(pwd)/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $(pwd)/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true \
+    -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps \
+    -v $(pwd)/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $(pwd)/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $(pwd)/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $(pwd)/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile \
+    documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
 ```

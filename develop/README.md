@@ -188,3 +188,26 @@ docker exec -it CONTAINER_ID supervisorctl restart all
 ```
 
 3)Open new file in browser
+
+## Start server with additional functionality(addons)
+
+To get additional functionality and branding you need to connect a branding folder,
+additional addon folders and pass command line arguments
+
+For example run with `onlyoffice` branding and
+addons:`sdkjs-forms`, `sdkjs-ooxml`, `web-apps-mobile`
+
+### docker run on Windows (PowerShell)
+
+**Note**: Run PowerShell as administrator to fix EACCES error when installing
+node_modules
+
+```bash
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $pwd/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $pwd/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $pwd/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $pwd/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $pwd/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $pwd/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
+```
+
+### docker run on Linux or macOS
+
+```bash
+docker run -i -t -p 80:80 --restart=always -e ALLOW_PRIVATE_IP_ADDRESS=true -v $(pwd)/sdkjs:/var/www/onlyoffice/documentserver/sdkjs -v $(pwd)/web-apps:/var/www/onlyoffice/documentserver/web-apps -v $(pwd)/onlyoffice:/var/www/onlyoffice/documentserver/onlyoffice -v $(pwd)/sdkjs-ooxml:/var/www/onlyoffice/documentserver/sdkjs-ooxml -v $(pwd)/sdkjs-forms:/var/www/onlyoffice/documentserver/sdkjs-forms -v $(pwd)/web-apps-mobile:/var/www/onlyoffice/documentserver/web-apps-mobile documentserver-develop args --branding onlyoffice --branding-url 'https://github.com/ONLYOFFICE/onlyoffice.git' --siteUrl localhost
+```

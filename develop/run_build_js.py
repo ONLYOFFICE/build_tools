@@ -10,8 +10,11 @@ import base
 
 git_dir = sys.argv[1];
 
-base.cmd_in_dir(git_dir + '/build_tools/', 'python3', ['configure.py', '--develop', '1'])
+base.print_info('argv :'+' '.join(sys.argv))
+base.cmd_in_dir(git_dir + '/build_tools/', 'python3', ['configure.py', '--develop', '1'] + sys.argv[2:])
+
 config.parse()
+config.parse_defaults()
 
 if base.is_exist(git_dir + "/server/FileConverter/bin/fonts.log"):
   base.print_info('remove font cache to regenerate fonts in external sdkjs volume')
@@ -31,6 +34,18 @@ else:
   if base.is_exist(git_dir + "/server/FileConverter/bin/DoctRenderer.config"):
     base.print_info('replace DoctRenderer.config for external sdkjs volume')
     base.generate_doctrenderer_config(git_dir + "/server/FileConverter/bin/DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
+  
+  addons = {}
+  addons.update(base.get_sdkjs_addons())
+  addons.update(base.get_web_apps_addons())
+  staticContent = ""
+  for addon in addons:
+      if (addon):
+        staticContent += '"/' + addon + '": {"path": "/var/www/onlyoffice/documentserver/' + addon + '","options": {"maxAge": "7d"}},'
+  
+  if staticContent:
+    base.print_info('replace production-linux.json for addons'+staticContent)
+    base.replaceInFileRE("/etc/onlyoffice/documentserver/production-linux.json", '"static_content": {.*', '"static_content": {' + staticContent)
 
   base.print_info('replace supervisor cfg to run docservice and converter from pkg')
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-docservice.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/DocService/docservice")

@@ -190,10 +190,20 @@ def copy_dir(src, dst):
   if is_dir(dst):
     delete_dir(dst)
   try:
-    shutil.copytree(get_path(src), get_path(dst))    
-  except OSError as e:
+    shutil.copytree(get_path(src), get_path(dst))
+  except:
+    if ("windows" == host_platform()) and copy_dir_windows(src, dst):
+      return
     print('Directory not copied. Error: %s' % e)
   return
+
+def copy_dir_windows(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
+  err = cmd("robocopy", [get_path(src), get_path(dst), "/e", "/NFL", "/NDL", "/NJH", "/NJS", "/nc", "/ns", "/np"], True)
+  if (1 == err):
+    return True
+  return False
 
 def delete_dir_with_access_error(path):
   def delete_file_on_error(func, path, exc_info):

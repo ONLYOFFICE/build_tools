@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import package_common as common
+import base
 
 def host_platform():
   return platform.system().lower()
@@ -204,12 +205,7 @@ def copy_dir(src, dst, override=True, verbose=True):
     log("    src: " + src)
     log("    dst: " + dst)
     log("    override: " + str(override))
-  if is_dir(dst):
-    delete_dir(dst)
-  try:
-    shutil.copytree(get_path(src), get_path(dst))    
-  except OSError as e:
-    log_err('directory not copied. Error: %s' % e)
+  base.copy_dir(src, dst)
   return
 
 def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose=True):

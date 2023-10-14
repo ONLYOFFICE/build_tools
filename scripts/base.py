@@ -14,6 +14,8 @@ import re
 import stat
 import json
 
+__file__script__path__ = os.path.dirname( os.path.realpath(__file__))
+
 # common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
@@ -1249,8 +1251,30 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     delete_dir(dst_deploy_dir)
   return
 
+def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+  git_dir = __file__script__path__ + "/../.."
+  if False:
+    # old version
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", dst_dir, "manager", is_name_as_guid, is_desktop_local)
+    return
+  src_dir_path = git_dir + "/onlyoffice.github.io/store/plugin"
+  name = "marketplace"
+  if is_name_as_guid:
+    name = "{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+
+  dst_dir_path = dst_dir + "/" + name
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+  create_dir(dst_dir_path)
+
+  copy_dir_content(src_dir_path, dst_dir_path)
+  if is_desktop_local:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+  return
+
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
@@ -1260,7 +1284,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   return
 
 def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
     return
@@ -1414,7 +1438,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):  
   old_cur = os.getcwd()
   os.chdir(out_dir)
   git_update("onlyoffice.github.io", False, True, git_owner)

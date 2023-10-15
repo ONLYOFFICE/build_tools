@@ -236,7 +236,10 @@ def delete_dir(path):
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=True)
+  if ("windows" == host_platform()):
+    delete_dir_with_access_error(path)
+  else:
+    shutil.rmtree(get_path(path), ignore_errors=True)
   return
 
 def copy_lib(src, dst, name):

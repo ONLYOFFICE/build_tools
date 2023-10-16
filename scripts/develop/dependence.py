@@ -209,18 +209,24 @@ def check_java():
   dependence = CDependencies()
 
   base.print_info('Check installed Java')
-  java_version = base.run_command('java -version')['stderr']
+  java_info = base.run_command('java -version')['stderr']
 
-  if (java_version.find('64-Bit') != -1):
+  version_pos = java_info.find('version "')
+  java_v = 0
+  if (version_pos != -1):
+    try:
+      java_v = float(java_info[version_pos + len('version "'): version_pos + len('version "') + 2])
+    except:
+      pass
+
+  if (java_info.find('64-Bit') != -1 and java_v >= 11):
     print('Installed Java is valid')
-    return dependence
-
-  if (java_version.find('32-Bit') != -1):
-    print('Installed Java must be x64')
-  else:
-    print('Java not found')
-
-  dependence.append_install('Java')
+  else: 
+    print('Requires Java version 11+ x64-bit')
+    dependence.append_install('Java')
+    if (version_pos != -1):
+      dependence.append_uninstall('Java')
+  
   return dependence
 
 def get_erlang_path_to_bin():
@@ -825,6 +831,7 @@ def installProgram(sName):
       print(install_command)
       code = os.system(install_command)
       base.delete_file(file_name)
+      
   elif (host_platform == 'linux'):
     if (sName in install_special):
       code = install_special[sName]()
@@ -909,7 +916,7 @@ downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
     'Node.js': 'https://nodejs.org/download/release/v14.17.6/node-v14.17.6-x64.msi',
-    'Java': 'https://javadl.oracle.com/webapps/download/AutoDL?BundleId=242990_a4634525489241b9a9e1aa73d9e118e6',
+    'Java': 'https://aka.ms/download-jdk/microsoft-jdk-11.0.18-windows-x64.msi',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',
     'VC2019x64': 'https://aka.ms/vs/17/release/vc_redist.x64.exe',
@@ -944,7 +951,6 @@ uninstall_special = {
 install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
   'Git': '/VERYSILENT /NORESTART',
-  'Java': '/s',
   'MySQLServer': {
     'port': '3306',
 	'user': 'root',
@@ -963,4 +969,3 @@ install_params = {
 uninstall_params = {
   'PostgreSQL': '--mode unattended --unattendedmodeui none'
 }
-

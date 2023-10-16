@@ -20,11 +20,16 @@ def aws_s3_upload(files, key, edition, ptype=None):
   ret = True
   key = "server/" + key
   for file in files:
+    if not utils.is_file(file):
+      utils.log_err("file not exist: " + file)
+      ret &= False
+      continue
     args = ["aws"]
     if hasattr(branding, "s3_endpoint_url"):
       args += ["--endpoint-url=" + branding.s3_endpoint_url]
     args += [
       "s3", "cp", "--no-progress", "--acl", "public-read",
+      "--metadata", "md5=" + utils.get_md5(file),
       file, "s3://" + branding.s3_bucket + "/" + key
     ]
     if common.os_family == "windows":
@@ -35,10 +40,7 @@ def aws_s3_upload(files, key, edition, ptype=None):
     if upload and ptype is not None:
       full_key = key
       if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data(
-          "server_" + edition, ptype, file, full_key,
-          branding.s3_bucket, branding.s3_region
-      )
+      utils.add_deploy_data("server_" + edition, ptype, file, full_key)
   return ret
 
 def make_windows(edition):
@@ -62,9 +64,7 @@ def make_windows(edition):
     utils.log_h2("server " + edition + " inno deploy")
     ret = aws_s3_upload(
         utils.glob_path("exe/*.exe"),
-        "win/inno/%s/" % common.channel,
-        edition,
-        "Installer"
+        "win/inno/", edition, "Installer"
     )
     utils.set_summary("server " + edition + " inno deploy", ret)
 
@@ -99,36 +99,28 @@ def make_linux(edition):
         utils.log_h2("server " + edition + " deb deploy")
         ret = aws_s3_upload(
             utils.glob_path("deb/*.deb"),
-            "linux/debian/%s/" % common.channel,
-            edition,
-            "Debian"
+            "linux/debian/", edition, "Debian"
         )
         utils.set_summary("server " + edition + " deb deploy", ret)
       if "rpm" in branding.server_make_targets:
         utils.log_h2("server " + edition + " rpm deploy")
         ret = aws_s3_upload(
             utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-            "linux/rhel/%s/" % common.channel,
-            edition,
-            "CentOS"
+            "linux/rhel/", edition, "CentOS"
         )
         utils.set_summary("server " + edition + " rpm deploy", ret)
       if "apt-rpm" in branding.server_make_targets:
         utils.log_h2("server " + edition + " apt-rpm deploy")
         ret = aws_s3_upload(
             utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-            "linux/altlinux/%s/" % common.channel,
-            edition,
-            "ALT Linux"
+            "linux/altlinux/", edition, "ALT Linux"
         )
         utils.set_summary("server " + edition + " apt-rpm deploy", ret)
       if "tar" in branding.server_make_targets:
         utils.log_h2("server " + edition + " snap deploy")
         ret = aws_s3_upload(
             utils.glob_path("*.tar.gz"),
-            "linux/generic/%s/" % common.channel,
-            edition,
-            "Snap"
+            "linux/generic/", edition, "Snap"
         )
         utils.set_summary("server " + edition + " snap deploy", ret)
     else:

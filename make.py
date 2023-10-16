@@ -33,7 +33,7 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
       base.cmd("git", ["clone", config.option("branding-url"), branding_dir])
 
     base.cmd_in_dir(branding_dir, "git", ["fetch"], True)
-   
+
     if not is_exist or ("1" != config.option("update-light")):
       base.cmd_in_dir(branding_dir, "git", ["checkout", "-f", config.option("branch")], True)
 
@@ -71,13 +71,12 @@ make_common.make()
 
 # build updmodule for desktop (only for windows version)
 if config.check_option("module", "desktop"):
-  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://www.biz-software.com.cn/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "-1/apps")
-
+  config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://www.biz-software.com.cn/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "/apps")
   if "windows" == base.host_platform():
     config.extend_option("config", "updmodule")
     config.extend_option("qmake_addon", "LINK=https://download.biz-software.com.cn/install/desktop/editors/windows/onlyoffice/appcast.json")
-
-
+    base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
+    base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
     if ("windows" == base.host_platform()):
       base.set_env("VIDEO_PLAYER_VLC_DIR", base_dir + "/../desktop-sdk/ChromiumBasedEditors/videoplayerlib/vlc")

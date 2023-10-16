@@ -41,4 +41,14 @@ def make():
     base.replaceInFile(dst_dir + "/sio_client.h", "SIO_CLIENT_H", "SIO_CLIENT_NO_TLS_H")
     base.replaceInFile(dst_dir + "/sio_message.h", "__SIO_MESSAGE_H__", "__SIO_MESSAGE_NO_TLS_H__")
     base.replaceInFile(dst_dir + "/internal/sio_packet.h", "SIO_PACKET_H", "SIO_PACKET_NO_TLS_H")
+
+    old_ping = "        m_ping_timeout_timer->expires_from_now(milliseconds(m_ping_interval + m_ping_timeout), ec);"
+    new_ping = "#if defined(PING_TIMEOUT_INTERVAL)\n"
+    new_ping += "        m_ping_timeout_timer->expires_from_now(milliseconds(PING_TIMEOUT_INTERVAL), ec);\n"
+    new_ping += "#else\n"
+    new_ping += old_ping
+    new_ping += "\n#endif"
+
+    base.replaceInFile(base_dir + "/socket.io-client-cpp/src/internal/sio_client_impl.cpp", old_ping, new_ping)
+    base.replaceInFile(base_dir + "/socket.io-client-cpp/src_no_tls/internal/sio_client_impl.cpp", old_ping, new_ping)
   return

@@ -1264,7 +1264,7 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     delete_dir(dst_deploy_dir)
   return
 
-def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False, is_store_copy=False):
   git_dir = __file__script__path__ + "/../.."
   if False:
     # old version
@@ -1284,6 +1284,11 @@ def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=Fal
   if is_desktop_local:
     for file in glob.glob(dst_dir_path + "/*.html"):
       replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+
+  if is_store_copy:
+    copy_dir(git_dir + "/onlyoffice.github.io/store", dst_dir_path + "/store")
+    delete_dir(dst_dir_path + "/store/plugin")
+    delete_dir(dst_dir_path + "/store/plugin-dev")
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):

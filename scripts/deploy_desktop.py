@@ -211,7 +211,7 @@ def make():
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
-    base.copy_marketplace_plugin(root_dir + "/editors/sdkjs-plugins", True, True)
+    base.copy_marketplace_plugin(root_dir + "/editors/sdkjs-plugins", True, True, True)
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)
     # remove some default plugins
     if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech"):

@@ -9,39 +9,28 @@ def make():
   utils.log_h1("BUILDER")
   if utils.is_windows():
     make_windows()
+  elif utils.is_macos():
+    make_macos()
   elif utils.is_linux():
     make_linux()
   else:
     utils.log("Unsupported host OS")
   return
 
-def aws_s3_upload(files, key, ptype=None):
-  if not files:
-    return False
+def s3_upload(files, dst):
+  if not files: return False
   ret = True
-  key = "builder/" + key
-  for file in files:
-    if not utils.is_file(file):
-      utils.log_err("file not exist: " + file)
-      ret &= False
-      continue
-    args = ["aws"]
+  for f in files:
+    key = dst + utils.get_basename(f) if dst.endswith("/") else dst
+    aws_kwargs = { "acl": "public-read" }
     if hasattr(branding, "s3_endpoint_url"):
-      args += ["--endpoint-url=" + branding.s3_endpoint_url]
-    args += [
-      "s3", "cp", "--no-progress", "--acl", "public-read",
-      "--metadata", "md5=" + utils.get_md5(file),
-      file, "s3://" + branding.s3_bucket + "/" + key
-    ]
-    if common.os_family == "windows":
-      upload = utils.cmd(*args, verbose=True)
-    else:
-      upload = utils.sh(" ".join(args), verbose=True)
+      aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
+    upload = utils.s3_upload(
+      f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
+    if upload:
+      utils.add_deploy_data(key)
+      utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
-    if upload and ptype is not None:
-      full_key = key
-      if full_key.endswith("/"): full_key += utils.get_basename(file)
-      utils.add_deploy_data("builder", ptype, file, full_key)
   return ret
 
 def make_windows():
@@ -85,7 +74,7 @@ def make_zip():
 
   if common.deploy and ret:
     utils.log_h2("builder zip deploy")
-    ret = aws_s3_upload(["build\\" + zip_file], "win/generic/", "Portable")
+    ret = s3_upload(["build\\" + zip_file], "builder/win/generic/")
     utils.set_summary("builder zip deploy", ret)
   return
 
@@ -114,8 +103,38 @@ def make_inno():
 
   if common.deploy and ret:
     utils.log_h2("builder inno deploy")
-    ret = aws_s3_upload(["build\\" + inno_file], "win/inno/", "Installer")
+    ret = s3_upload(["build\\" + inno_file], "builder/win/inno/")
     utils.set_summary("builder inno deploy", ret)
+  return
+
+def make_macos():
+  company = branding.company_name.lower()
+  product = branding.builder_product_name.replace(" ","").lower()
+  source_dir = "build_tools/out/%s/%s/%s" % (common.prefix, company, product)
+  arch_list = {
+    "darwin_x86_64": "x86_64",
+    "darwin_arm64": "arm64"
+  }
+  suffix = arch_list[common.platform]
+  builder_tar = "../%s-%s-%s-%s-%s.tar.xz" % \
+    (company, product, common.version, common.build, suffix)
+
+  utils.set_cwd(source_dir)
+
+  if common.clean:
+    utils.log_h2("builder clean")
+    utils.delete_files("../*.tar*")
+
+  utils.log_h2("builder build")
+  ret = utils.sh("tar --xz -cvf %s *" % builder_tar, creates=builder_tar, verbose=True)
+  utils.set_summary("builder build", ret)
+
+  if common.deploy and ret:
+    utils.log_h2("builder deploy")
+    ret = s3_upload([builder_tar], "builder/mac/")
+    utils.set_summary("builder deploy", ret)
+
+  utils.set_cwd(common.workspace_dir)
   return
 
 def make_linux():
@@ -130,32 +149,25 @@ def make_linux():
   ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("builder build", ret)
 
-  rpm_arch = "x86_64"
-  if common.platform == "linux_aarch64": rpm_arch = "aarch64"
-
   if common.deploy:
-    utils.log_h2("builder deploy")
     if ret:
       if "tar" in branding.builder_make_targets:
         utils.log_h2("builder tar deploy")
-        ret = aws_s3_upload(
-            utils.glob_path("tar/*.tar.gz"),
-            "linux/generic/", "Portable"
-        )
+        ret = s3_upload(
+          utils.glob_path("tar/*.tar.gz"),
+          "builder/linux/generic/")
         utils.set_summary("builder tar deploy", ret)
       if "deb" in branding.builder_make_targets:
         utils.log_h2("builder deb deploy")
-        ret = aws_s3_upload(
-            utils.glob_path("deb/*.deb"),
-            "linux/debian/", "Debian"
-        )
+        ret = s3_upload(
+          utils.glob_path("deb/*.deb"),
+          "builder/linux/debian/")
         utils.set_summary("builder deb deploy", ret)
       if "rpm" in branding.builder_make_targets:
         utils.log_h2("builder rpm deploy")
-        ret = aws_s3_upload(
-            utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
-            "linux/rhel/", "CentOS"
-        )
+        ret = s3_upload(
+          utils.glob_path("rpm/builddir/RPMS/*/*.rpm"),
+          "builder/linux/rhel/")
         utils.set_summary("builder rpm deploy", ret)
     else:
       if "tar" in branding.builder_make_targets:

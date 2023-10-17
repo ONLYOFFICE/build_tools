@@ -219,6 +219,10 @@ def parse_defaults():
       options[name] = options[name].replace("default", defaults_options[name])
     else:
       options[name] = defaults_options[name]
+
+  if ("config_addon" in defaults_options):
+    extend_option("config", defaults_options["config_addon"])
+
   return
 
 def is_cef_107():

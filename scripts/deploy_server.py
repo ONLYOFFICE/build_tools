@@ -58,7 +58,6 @@ def make():
     base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
     base.copy_file(bin_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node", build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
 
-
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
 
@@ -90,7 +89,7 @@ def make():
     #if (native_platform == "linux_64"):
     #  base.generate_check_linux_system(git_dir + "/build_tools", converter_dir)
 
-    base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server")
+    base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server", "", "../../../dictionaries")
 
     # icu
     if (0 == platform.find("win")):
@@ -121,6 +120,7 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
+    base.copy_marketplace_plugin(js_dir + "/sdkjs-plugins", False, True)
     if ("1" == config.option("preinstalled-plugins")):
       base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins", False, True)
       base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins", False, True)
@@ -132,8 +132,6 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
 
-    base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins")
-    
     # tools
     tools_dir = root_dir + "/server/tools"
     base.create_dir(tools_dir)
@@ -147,10 +145,7 @@ def make():
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
     #dictionaries
-    spellchecker_dictionaries = root_dir + '/dictionaries'
-    spellchecker_dictionaries_files = server_dir + '/../dictionaries/*_*'
-    base.create_dir(spellchecker_dictionaries)
-    base.copy_files(spellchecker_dictionaries_files, spellchecker_dictionaries)
+    base.copy_dictionaries(server_dir + "/../dictionaries", root_dir + "/dictionaries")
 
     if (0 == platform.find("win")):
       exec_ext = '.exe'

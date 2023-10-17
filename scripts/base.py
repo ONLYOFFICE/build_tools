@@ -14,6 +14,8 @@ import re
 import stat
 import json
 
+__file__script__path__ = os.path.dirname( os.path.realpath(__file__))
+
 # common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
@@ -188,28 +190,56 @@ def copy_dir(src, dst):
   if is_dir(dst):
     delete_dir(dst)
   try:
-    shutil.copytree(get_path(src), get_path(dst))    
-  except OSError as e:
+    shutil.copytree(get_path(src), get_path(dst))
+  except:
+    if ("windows" == host_platform()) and copy_dir_windows(src, dst):
+      return
     print('Directory not copied. Error: %s' % e)
   return
 
+def copy_dir_windows(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
+  err = cmd("robocopy", [get_path(src), get_path(dst), "/e", "/NFL", "/NDL", "/NJH", "/NJS", "/nc", "/ns", "/np"], True)
+  if (1 == err):
+    return True
+  return False
+
 def delete_dir_with_access_error(path):
   def delete_file_on_error(func, path, exc_info):
-    if not os.access(path, os.W_OK):
-      os.chmod(path, stat.S_IWUSR)
-      func(path)
+    if ("windows" != host_platform()):
+      if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+      return
+    elif (0 != path.find("\\\\?\\")):
+      # abspath not work with long names
+      full_path = path
+      drive_pos = full_path.find(":")
+      if (drive_pos < 0) or (drive_pos > 2):
+        full_path = os.getcwd() + "\\" + full_path
+      else:
+        full_path = full_path
+      if (len(full_path) >= 260):
+        full_path = "\\\\?\\" + full_path
+      if not os.access(full_path, os.W_OK):
+        os.chmod(full_path, stat.S_IWUSR)
+      func(full_path)
     return
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=False, onerror=delete_file_on_error)
+  shutil.rmtree(os.path.normpath(get_path(path)), ignore_errors=False, onerror=delete_file_on_error)
   return
 
 def delete_dir(path):
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=True)
+  if ("windows" == host_platform()):
+    delete_dir_with_access_error(path)
+  else:
+    shutil.rmtree(get_path(path), ignore_errors=True)
   return
 
 def copy_lib(src, dst, name):
@@ -273,6 +303,18 @@ def replaceInFile(path, text, textReplace):
   delete_file(path)
   with open(get_path(path), "w") as file:
     file.write(filedata)
+  return
+def replaceInFileUtf8(path, text, textReplace):
+  if not is_file(path):
+    print("[replaceInFile] file not exist: " + path)
+    return
+  filedata = ""
+  with open(get_path(path), "rb") as file:
+    filedata = file.read().decode("UTF-8")
+  filedata = filedata.replace(text, textReplace)
+  delete_file(path)
+  with open(get_path(path), "wb") as file:
+    file.write(filedata.encode("UTF-8"))
   return
 def replaceInFileRE(path, pattern, textReplace):
   if not is_file(path):
@@ -592,6 +634,20 @@ def get_gcc_version():
 def qt_setup(platform):
   compiler = config.check_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
+
+  # qt bug
+  if (host_platform() == "mac"):
+    for compiler_folder in glob.glob(qt_dir + "/*"):
+      if is_dir(compiler_folder):
+        old_path_file = compiler_folder + "/mkspecs/features/toolchain.prf"
+        new_path_file = compiler_folder + "/mkspecs/features/toolchain.prf.bak"
+        if (is_file(old_path_file) and not is_file(new_path_file)):
+          try:
+            copy_file(old_path_file, new_path_file)
+            copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
+          except IOError as e:
+            print("Unable to copy file: " + old_path_file)
+
   compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
   qt_dir = qt_dir + "/" + compiler_platform
 
@@ -616,6 +672,37 @@ def qt_version():
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
+def check_congig_option_with_platfom(platform, option_name):
+  if config.check_option("config", option_name):
+    return True
+  if (0 == platform.find("win")) and config.check_option("config_addon_windows", option_name):
+    return True
+  elif (0 == platform.find("linux")) and config.check_option("config_addon_linux", option_name):
+    return True
+  elif (0 == platform.find("mac")) and config.check_option("config_addon_macos", option_name):
+    return True
+  elif (0 == platform.find("ios")) and config.check_option("config_addon_ios", option_name):
+    return True
+  elif (0 == platform.find("android")) and config.check_option("config_addon_android", option_name):
+    return True
+  return False
+
+def qt_config_platform_addon(platform):
+  config_addon = ""
+  if (0 == platform.find("win")):
+    config_addon += (" " + config.option("config_addon_windows"))
+  elif (0 == platform.find("linux")):
+    config_addon += (" " + config.option("config_addon_linux"))
+  elif (0 == platform.find("mac")):
+    config_addon += (" " + config.option("config_addon_macos"))
+  elif (0 == platform.find("ios")):
+    config_addon += (" " + config.option("config_addon_ios"))
+  elif (0 == platform.find("android")):
+    config_addon += (" " + config.option("config_addon_android"))
+  if (config_addon == " "):
+    config_addon = ""
+  return config_addon
+
 def qt_config(platform):
   config_param = config.option("module") + " " + config.option("config") + " " + config.option("features")
   config_param_lower = config_param.lower()
@@ -633,14 +720,21 @@ def qt_config(platform):
   if config.check_option("module", "mobile"):
     config_param += " support_web_socket"
 
+  is_disable_pch = False
   if ("ios" == platform):
-    config_param += " disable_precompiled_header"
+    is_disable_pch = True
   if (0 == platform.find("android")):
+    is_disable_pch = True
+  if not config.check_option("config", "debug"):
+    is_disable_pch = True
+
+  if is_disable_pch:
     config_param += " disable_precompiled_header"
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
 
+  config_param += qt_config_platform_addon(platform)
   return config_param
 
 def qt_major_version():
@@ -737,7 +831,7 @@ def app_make():
   return "make"
 
 # doctrenderer.config
-def generate_doctrenderer_config(path, root, product, vendor = ""):
+def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries = ""):
   content = "<Settings>\n"
 
   content += ("<file>" + root + "sdkjs/common/Native/native.js</file>\n")
@@ -755,6 +849,9 @@ def generate_doctrenderer_config(path, root, product, vendor = ""):
 
   content += ("<file>" + vendor_dir + "xregexp/xregexp-all-min.js</file>\n")
   content += ("<sdkjs>" + root + "sdkjs</sdkjs>\n")
+
+  if ("" != dictionaries):
+    content += ("<dictionaries>" + dictionaries + "</dictionaries>\n")
 
   if (False): # old html file
     content += ("<htmlfile>" + vendor_dir + "jquery/jquery.min.js</htmlfile>\n")
@@ -1070,6 +1167,10 @@ def mac_correct_rpath_x2t(dir):
     cmd("chmod", ["-v", "+x", "./pluginsmanager"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
     mac_correct_rpath_binary("./pluginsmanager", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
+  if is_file("./vboxtester"):
+    cmd("chmod", ["-v", "+x", "./vboxtester"])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./vboxtester"], True)
+    mac_correct_rpath_binary("./vboxtester", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
   os.chdir(cur_dir)
   return
 
@@ -1163,8 +1264,35 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     delete_dir(dst_deploy_dir)
   return
 
+def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False, is_store_copy=False):
+  git_dir = __file__script__path__ + "/../.."
+  if False:
+    # old version
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", dst_dir, "manager", is_name_as_guid, is_desktop_local)
+    return
+  src_dir_path = git_dir + "/onlyoffice.github.io/store/plugin"
+  name = "marketplace"
+  if is_name_as_guid:
+    name = "{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+
+  dst_dir_path = dst_dir + "/" + name
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+  create_dir(dst_dir_path)
+
+  copy_dir_content(src_dir_path, dst_dir_path)
+  if is_desktop_local:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+
+  if is_store_copy:
+    copy_dir(git_dir + "/onlyoffice.github.io/store", dst_dir_path + "/store")
+    delete_dir(dst_dir_path + "/store/plugin")
+    delete_dir(dst_dir_path + "/store/plugin-dev")
+  return
+
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
@@ -1174,7 +1302,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   return
 
 def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
     return
@@ -1328,7 +1456,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):  
   old_cur = os.getcwd()
   os.chdir(out_dir)
   git_update("onlyoffice.github.io", False, True, git_owner)
@@ -1460,3 +1588,64 @@ def correct_elf_rpath_directory(directory, origin, is_recursion = True):
       correct_elf_rpath_directory(file, origin)
   return
 
+def is_need_build_js():
+  if "osign" == config.option("module"):
+    return False
+  return True
+
+def copy_dictionaries(src, dst, is_hyphen = True, is_spell = True):
+  if (False == is_hyphen) and (False == is_spell):
+    return
+
+  if not is_dir(dst):
+    create_dir(dst)
+
+  src_folder = src
+  if ("/" != src[-1:]):
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    if is_file(file):
+      copy_file(file, dst)
+      continue
+
+    basename = os.path.basename(file)
+    if (".git" == basename):
+      continue
+
+    if (True == is_hyphen) and (True == is_spell):
+      copy_dir(file, dst + "/" + basename)
+      continue
+
+    is_spell_present = is_file(file + "/" + basename + ".dic")
+    is_hyphen_present = is_file(file + "/hyph_" + basename + ".dic")
+
+    is_dir_need = False
+    if (is_hyphen and is_hyphen_present) or (is_spell and is_spell_present):
+      is_dir_need = True
+
+    if not is_dir_need:
+      continue
+
+    lang_folder = dst + "/" + basename
+    create_dir(lang_folder)
+
+    if is_hyphen and is_hyphen_present:
+      copy_dir_content(file, lang_folder, "hyph_", "")
+    
+    if is_spell and is_spell_present:
+      copy_dir_content(file, lang_folder, "", "hyph_")
+
+  if is_file(dst + "/en_US/en_US_thes.dat"):
+    delete_file(dst + "/en_US/en_US_thes.dat")
+    delete_file(dst + "/en_US/en_US_thes.idx")
+  
+  if is_file(dst + "/ru_RU/ru_RU_oo3.dic"):
+    delete_file(dst + "/ru_RU/ru_RU_oo3.dic")
+    delete_file(dst + "/ru_RU/ru_RU_oo3.aff")
+
+  if is_file(dst + "/uk_UA/th_uk_UA.dat"):
+    delete_file(dst + "/uk_UA/th_uk_UA.dat")
+    delete_file(dst + "/uk_UA/th_uk_UA.idx")
+
+  return

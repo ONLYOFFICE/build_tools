@@ -8,6 +8,16 @@ include($$PWD/common.pri)
 
 CONFIG += ordered
 
+core:CONFIG += core_libraries
+builder:CONFIG += core_libraries
+desktop:CONFIG += core_libraries
+server:CONFIG += core_libraries
+mobile:CONFIG += core_libraries
+
+!core_libraries:CONFIG += no_x2t
+!core_libraries:CONFIG += no_use_common_binary
+!core_libraries:CONFIG += no_tests
+
 core_windows {
     desktop:CONFIG += core_and_multimedia
 }
@@ -28,34 +38,36 @@ core_android {
     CONFIG += no_tests
 }
 
-addSubProject(cryptopp,         $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro)
-addSubProject(cfcpp,            $$CORE_ROOT_DIR/Common/cfcpp/cfcpp.pro)
-addSubProject(unicodeconverter, $$CORE_ROOT_DIR/UnicodeConverter/UnicodeConverter.pro,\
-                                    cryptopp)
-addSubProject(kernel,           $$CORE_ROOT_DIR/Common/kernel.pro,\
-                                    unicodeconverter)
-addSubProject(network,          $$CORE_ROOT_DIR/Common/Network/network.pro,\
-                                    kernel unicodeconverter)
-addSubProject(graphics,         $$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro,\
-                                    kernel unicodeconverter)
-addSubProject(pdffile,          $$CORE_ROOT_DIR/PdfFile/PdfFile.pro,\
-                                    kernel unicodeconverter graphics)
-addSubProject(djvufile,         $$CORE_ROOT_DIR/DjVuFile/DjVuFile.pro,\
-                                    kernel unicodeconverter graphics pdffile)
-addSubProject(xpsfile,          $$CORE_ROOT_DIR/XpsFile/XpsFile.pro,\
-                                    kernel unicodeconverter graphics pdffile)
-addSubProject(htmlrenderer,     $$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro,\
-                                    kernel unicodeconverter graphics)
-addSubProject(docxrenderer,     $$CORE_ROOT_DIR/DocxRenderer/DocxRenderer.pro,\
-                                    kernel unicodeconverter graphics)
-addSubProject(htmlfile2,        $$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro,\
-                                    kernel unicodeconverter graphics network)
-addSubProject(doctrenderer,     $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro,\
-                                    kernel unicodeconverter graphics)
-addSubProject(fb2file,          $$CORE_ROOT_DIR/Fb2File/Fb2File.pro,\
-                                    kernel unicodeconverter graphics)
-addSubProject(epubfile,         $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
-                                    kernel unicodeconverter graphics htmlfile2)
+core_libraries {
+    addSubProject(cryptopp,         $$CORE_ROOT_DIR/Common/3dParty/cryptopp/project/cryptopp.pro)
+    addSubProject(cfcpp,            $$CORE_ROOT_DIR/Common/cfcpp/cfcpp.pro)
+    addSubProject(unicodeconverter, $$CORE_ROOT_DIR/UnicodeConverter/UnicodeConverter.pro,\
+                                        cryptopp)
+    addSubProject(kernel,           $$CORE_ROOT_DIR/Common/kernel.pro,\
+                                        unicodeconverter)
+    addSubProject(network,          $$CORE_ROOT_DIR/Common/Network/network.pro,\
+                                        kernel unicodeconverter)
+    addSubProject(graphics,         $$CORE_ROOT_DIR/DesktopEditor/graphics/pro/graphics.pro,\
+                                        kernel unicodeconverter)
+    addSubProject(pdffile,          $$CORE_ROOT_DIR/PdfFile/PdfFile.pro,\
+                                        kernel unicodeconverter graphics)
+    addSubProject(djvufile,         $$CORE_ROOT_DIR/DjVuFile/DjVuFile.pro,\
+                                        kernel unicodeconverter graphics pdffile)
+    addSubProject(xpsfile,          $$CORE_ROOT_DIR/XpsFile/XpsFile.pro,\
+                                        kernel unicodeconverter graphics pdffile)
+    addSubProject(htmlrenderer,     $$CORE_ROOT_DIR/HtmlRenderer/htmlrenderer.pro,\
+                                        kernel unicodeconverter graphics)
+    addSubProject(docxrenderer,     $$CORE_ROOT_DIR/DocxRenderer/DocxRenderer.pro,\
+                                        kernel unicodeconverter graphics)
+    addSubProject(htmlfile2,        $$CORE_ROOT_DIR/HtmlFile2/HtmlFile2.pro,\
+                                        kernel unicodeconverter graphics network)
+    addSubProject(doctrenderer,     $$CORE_ROOT_DIR/DesktopEditor/doctrenderer/doctrenderer.pro,\
+                                        kernel unicodeconverter graphics)
+    addSubProject(fb2file,          $$CORE_ROOT_DIR/Fb2File/Fb2File.pro,\
+                                        kernel unicodeconverter graphics)
+    addSubProject(epubfile,         $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
+                                        kernel unicodeconverter graphics htmlfile2)
+}
 !no_x2t {
     addSubProject(docxformat,   $$CORE_ROOT_DIR/OOXML/Projects/Linux/DocxFormatLib/DocxFormatLib.pro)
     addSubProject(pptxformat,   $$CORE_ROOT_DIR/OOXML/Projects/Linux/PPTXFormatLib/PPTXFormatLib.pro)
@@ -85,11 +97,14 @@ addSubProject(epubfile,         $$CORE_ROOT_DIR/EpubFile/CEpubFile.pro,\
                                       kernel unicodeconverter graphics doctrenderer)
     addSubProject(pluginsmanager, $$CORE_ROOT_DIR/DesktopEditor/pluginsmanager/pluginsmanager.pro,\
                                       kernel)
+    addSubProject(vboxtester,     $$CORE_ROOT_DIR/DesktopEditor/vboxtester/vboxtester.pro,\
+                                      kernel)
 }
 
 !no_tests {
     addSubProject(standardtester,  $$CORE_ROOT_DIR/Test/Applications/StandardTester/standardtester.pro)
     addSubProject(x2ttester,       $$CORE_ROOT_DIR/Test/Applications/x2tTester/x2ttester.pro)
+    addSubProject(metafiletester,  $$CORE_ROOT_DIR/Test/Applications/MetafileTester/MetafileTester.pro)
 
     #TODO:
     !linux_arm64:addSubProject(ooxml_crypt, $$CORE_ROOT_DIR/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro)
@@ -127,4 +142,8 @@ mobile {
     !desktop {
         addSubProject(hunspell, $$CORE_ROOT_DIR/Common/3dParty/hunspell/qt/hunspell.pro)
     }
+}
+
+osign {
+    addSubProject(osign, $$CORE_ROOT_DIR/DesktopEditor/xmlsec/src/osign/lib/osign.pro)
 }

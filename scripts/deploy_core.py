@@ -59,7 +59,11 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "standardtester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2ttester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "ooxml_crypt")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "vboxtester")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "metafiletester")
 
+    # dictionaries
+    base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)
 
     if base.is_file(archive_dir + ".7z"):
       base.delete_file(archive_dir + ".7z")

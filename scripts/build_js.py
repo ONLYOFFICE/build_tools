@@ -27,6 +27,8 @@ def correct_sdkjs_licence(directory):
 def make():
   if ("1" == base.get_env("OO_NO_BUILD_JS")):
     return
+  if not base.is_need_build_js():
+    return
 
   base.set_env('NODE_ENV', 'production')
 
@@ -53,8 +55,6 @@ def make():
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     correct_sdkjs_licence(out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
-    if not base.is_file(out_dir + "/desktop/sdkjs/common/AllFonts.js"):
-      base.copy_file(base_dir + "/../sdkjs/common/HtmlFileInternal/AllFonts.js", out_dir + "/desktop/sdkjs/common/AllFonts.js")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
     base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")
@@ -73,38 +73,22 @@ def make():
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"
     sdk_dir_src = base_dir + "/../sdkjs/deploy/sdkjs/"
-    
+
     base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
                    vendor_dir_src + "underscore/underscore-min.js",
                    base_dir + "/../sdkjs/common/Native/native.js",
                    base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
                    base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
-                   out_dir + "/mobile/sdkjs/banners_word.js")
-
-    base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
-                       vendor_dir_src + "underscore/underscore-min.js",
-                       base_dir + "/../sdkjs/common/Native/native.js",
-                       base_dir + "/../sdkjs/cell/native/common.js",
-                       base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
-                       out_dir + "/mobile/sdkjs/banners_cell.js")
-
-    base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
-                       vendor_dir_src + "underscore/underscore-min.js",
-                       base_dir + "/../sdkjs/common/Native/native.js",
-                       base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
-                       base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
-                       out_dir + "/mobile/sdkjs/banners_slide.js")
+                   out_dir + "/mobile/sdkjs/banners.js")
 
     base.create_dir(out_dir + "/mobile/sdkjs/word")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners_word.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"], out_dir + "/mobile/sdkjs/word/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"], out_dir + "/mobile/sdkjs/word/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/cell")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners_cell.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"], out_dir + "/mobile/sdkjs/cell/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"], out_dir + "/mobile/sdkjs/cell/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/slide")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners_slide.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"], out_dir + "/mobile/sdkjs/slide/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"], out_dir + "/mobile/sdkjs/slide/script.bin")
 
-    base.delete_file(out_dir + "/mobile/sdkjs/banners_word.js")
-    base.delete_file(out_dir + "/mobile/sdkjs/banners_cell.js")
-    base.delete_file(out_dir + "/mobile/sdkjs/banners_slide.js")
+    base.delete_file(out_dir + "/mobile/sdkjs/banners.js")
   return
 
 # JS build
@@ -161,14 +145,14 @@ def build_js_develop(root_dir):
   _run_grunt(root_dir + external_folder + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
   _run_grunt(root_dir + external_folder + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
   _run_npm(root_dir + external_folder + "/web-apps/build")
-  _run_npm(root_dir + external_folder + "/web-apps/build/sprites")
+  _run_npm_ci(root_dir + external_folder + "/web-apps/build/sprites")
   _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
 
   old_cur = os.getcwd()
   old_product_version = base.get_env("PRODUCT_VERSION")
   base.set_env("PRODUCT_VERSION", old_product_version + "d")
   os.chdir(root_dir + external_folder + "/web-apps/vendor/framework7-react")
-  base.cmd("npm", ["install"])
+  base.cmd("npm", ["ci"])
   base.cmd("npm", ["run", "deploy-word"])
   base.cmd("npm", ["run", "deploy-cell"])
   base.cmd("npm", ["run", "deploy-slide"])

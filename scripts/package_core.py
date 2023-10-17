@@ -26,8 +26,8 @@ def make_core():
   repo = repos[common.platform]
   branch = utils.get_env("BRANCH_NAME")
   core_7z = utils.get_path("build_tools/out/%s/%s/core.7z" % (prefix, company))
-  dest_version = "%s/core/%s/%s/%s/" % (repo["repo"], branch, repo["version"], repo["arch"])
-  dest_latest = "%s/core/%s/%s/%s/" % (repo["repo"], branch, "latest", repo["arch"])
+  dest_version = "%s/core/%s/%s/%s" % (repo["repo"], branch, repo["version"], repo["arch"])
+  dest_latest = "%s/core/%s/%s/%s" % (repo["repo"], branch, "latest", repo["arch"])
 
   if branch is None:
     utils.log_err("BRANCH_NAME variable is undefined")
@@ -39,61 +39,48 @@ def make_core():
     return
 
   utils.log_h2("core deploy")
-  args = ["aws", "s3", "cp", "--acl", "public-read", "--no-progress",
-          "--metadata", "md5=" + utils.get_md5(core_7z),
-          core_7z, "s3://" + branding.s3_bucket + "/" + dest_version + "core.7z"]
-  if common.os_family == "windows":
-    ret = utils.cmd(*args, verbose=True)
-  else:
-    ret = utils.sh(" ".join(args), verbose=True)
+  aws_kwargs = { "acl": "public-read" }
+  if hasattr(branding, "s3_endpoint_url"):
+    aws_kwargs["endpoint_url"]=branding.s3_endpoint_url
+  ret = utils.s3_upload(
+    core_7z,
+    "s3://" + branding.s3_bucket + "/" + dest_version + "/core.7z",
+    **aws_kwargs)
   if ret:
-    utils.add_deploy_data("core", "Archive", core_7z, dest_version + "core.7z")
-    args = ["aws", "s3", "sync", "--delete",
-            "--acl", "public-read", "--no-progress",
-            "s3://" + branding.s3_bucket + "/" + dest_version,
-            "s3://" + branding.s3_bucket + "/" + dest_latest]
-    if common.os_family == "windows":
-      ret &= utils.cmd(*args, verbose=True)
-    else:
-      ret &= utils.sh(" ".join(args), verbose=True)
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_version + "/core.7z")
+    utils.add_deploy_data(dest_version + "/core.7z")
+    ret = utils.s3_sync(
+      "s3://" + branding.s3_bucket + "/" + dest_version + "/",
+      "s3://" + branding.s3_bucket + "/" + dest_latest + "/",
+      delete=True, **aws_kwargs)
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_latest + "/core.7z")
   utils.set_summary("core deploy", ret)
   return
 
-def deploy_closure_maps(license):
+def deploy_closuremaps(license):
   if not common.deploy: return
   utils.log_h1("CLOSURE MAPS")
   utils.set_cwd(utils.get_path("sdkjs/build/maps"))
 
-  branch = utils.get_env("BRANCH_NAME")
   maps = utils.glob_path("*.js.map")
-
-  if branch is None:
-    utils.log_err("BRANCH_NAME variable is undefined")
-    utils.set_summary("closure maps " + license + " deploy", False)
-    return
   if not maps:
     utils.log_err("files do not exist")
     utils.set_summary("closure maps " + license + " deploy", False)
     return
 
   utils.log_h2("closure maps " + license + " deploy")
-  dest = "closure-maps/%s/%s/%s" % (common.version, common.build, license)
+  aws_kwargs = {}
+  if hasattr(branding, "s3_endpoint_url"):
+    aws_kwargs["endpoint_url"]=branding.s3_endpoint_url
   ret = True
-  for file in maps:
-    args = ["aws"]
-    if hasattr(branding, "s3_endpoint_url"):
-      args += ["--endpoint-url=" + branding.s3_endpoint_url]
-    args += [
-      "s3", "cp", "--no-progress", "--metadata", "md5=" + utils.get_md5(file),
-      file, "s3://" + branding.s3_bucket + "/" + dest + "/"
-    ]
-    if common.os_family == "windows":
-      upload = utils.cmd(*args, verbose=True)
-    else:
-      upload = utils.sh(" ".join(args), verbose=True)
+  for f in maps:
+    key = "closure-maps/%s/%s/%s/%s" % (license, common.version, common.build, f)
+    upload = utils.s3_upload(
+      f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
     ret &= upload
     if upload:
-      utils.add_deploy_data("core", "Closure maps " + license, file, dest + "/" + file)
+      utils.log("URL: " + branding.s3_base_url + "/" + key)
+      utils.add_deploy_data(key)
   utils.set_summary("closure maps " + license + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

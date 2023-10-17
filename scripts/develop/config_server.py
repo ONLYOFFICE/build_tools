@@ -61,13 +61,13 @@ def make():
     print("Core is up to date. ---------------------------------------")
     print("-----------------------------------------------------------")
 
-  base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/")
+  base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/", "../../../dictionaries")
 
   if not base.is_dir(git_dir + "/sdkjs-plugins"):
     base.create_dir(git_dir + "/sdkjs-plugins")
 
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
-  base.clone_marketplace_plugin(git_dir + "/sdkjs-plugins", False, False, False)
+  base.copy_marketplace_plugin(git_dir + "/sdkjs-plugins", False, False)
 
   if not base.is_dir(git_dir + "/fonts"):
     base.create_dir(git_dir + "/fonts")
@@ -144,8 +144,10 @@ def make():
   example_config["siteUrl"] = "http://" + config.option("siteUrl") + ":8000/"
   example_config["apiUrl"] = "web-apps/apps/api/documents/api.js"
   example_config["preloaderUrl"] = "web-apps/apps/api/documents/cache-scripts.html"
-  json_file = git_dir + "/document-server-integration/web/documentserver-example/nodejs/config/local-development-" + base.host_platform() + ".json"
-  base.writeFile(json_file, json.dumps({"server": example_config}, indent=2))
+  json_dir = git_dir + "/document-server-integration/web/documentserver-example/nodejs/config/"
+  json_file = json_dir + "/local-development-" + base.host_platform() + ".json"
+  if base.is_exist(json_dir):
+    base.writeFile(json_file, json.dumps({"server": example_config}, indent=2))
   
   os.chdir(old_cur)
   return

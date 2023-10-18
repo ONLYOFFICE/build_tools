@@ -120,6 +120,7 @@ def make():
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
+    base.copy_marketplace_plugin(js_dir + "/sdkjs-plugins", False, True)
     if ("1" == config.option("preinstalled-plugins")):
       base.copy_sdkjs_plugins(js_dir + "/sdkjs-plugins", False, True)
       base.copy_sdkjs_plugins_server(js_dir + "/sdkjs-plugins", False, True)
@@ -131,8 +132,6 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
 
-    base.clone_marketplace_plugin(root_dir + "/sdkjs-plugins")
-    
     # tools
     tools_dir = root_dir + "/server/tools"
     base.create_dir(tools_dir)

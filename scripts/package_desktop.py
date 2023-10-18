@@ -40,7 +40,7 @@ def s3_upload(files, dst):
 #
 
 def make_windows():
-  global package_version, arch_list, source_dir, desktop_dir, viewer_dir, \
+  global package_version, arch_list, source_dir, branding_dir, desktop_dir, viewer_dir, \
     inno_file, inno_sa_file, inno_update_file, inno_update_file_new, advinst_file
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
@@ -59,6 +59,10 @@ def make_windows():
   inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
   inno_update_file_new = "%s-Update-%s-%s.exe" % (package_name, package_version, suffix)
   advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
+  if branding.onlyoffice:
+    branding_dir = "."
+  else:
+    branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
 
   if common.clean:
     utils.log_h2("desktop clean")
@@ -119,6 +123,7 @@ def make_zip():
   ]
   if not branding.onlyoffice:
     args += ["-MultimediaDir", branding.viewer_product_name_s]
+    args += ["-BrandingDir", branding_dir]
   if branding.onlyoffice and not common.platform.endswith("_xp"):
     args += ["-ExcludeHelp"]
   if common.sign:
@@ -231,9 +236,7 @@ def make_advinst():
     "windows_x86": "MsiBuild32"
   }[common.platform]
 
-  branding_dir = "."
   if not branding.onlyoffice:
-    branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
     multimedia_dir = common.workspace_dir + "\\" + common.branding + "\\multimedia"
     utils.copy_file(branding_dir + "\\dictionary.ail", "dictionary.ail")
     utils.copy_dir_content(branding_dir + "\\data", "data", ".bmp")
@@ -252,14 +255,6 @@ def make_advinst():
       multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
       "..\\..\\extras\\projicons\\res\\media.ico")
 
-  utils.copy_file(
-    branding_dir + "\\data\\VisualElementsManifest.xml",
-    desktop_dir + "\\DesktopEditors.VisualElementsManifest.xml")
-  utils.create_dir(desktop_dir + "\\browser")
-  utils.copy_dir_content(
-    branding_dir + "\\data",
-    desktop_dir + "\\browser",
-    "visual_elements_icon")
   utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
 
   aic_content = [";aic"]

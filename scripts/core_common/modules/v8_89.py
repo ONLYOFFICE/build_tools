@@ -108,6 +108,8 @@ def make():
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
+  else:
+    base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
 
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")

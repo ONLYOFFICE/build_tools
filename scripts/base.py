@@ -14,6 +14,8 @@ import re
 import stat
 import json
 
+__file__script__path__ = os.path.dirname( os.path.realpath(__file__))
+
 # common functions --------------------------------------
 def get_script_dir(file=""):
   test_file = file
@@ -188,10 +190,20 @@ def copy_dir(src, dst):
   if is_dir(dst):
     delete_dir(dst)
   try:
-    shutil.copytree(get_path(src), get_path(dst))    
-  except OSError as e:
+    shutil.copytree(get_path(src), get_path(dst))
+  except:
+    if ("windows" == host_platform()) and copy_dir_windows(src, dst):
+      return
     print('Directory not copied. Error: %s' % e)
   return
+
+def copy_dir_windows(src, dst):
+  if is_dir(dst):
+    delete_dir(dst)
+  err = cmd("robocopy", [get_path(src), get_path(dst), "/e", "/NFL", "/NDL", "/NJH", "/NJS", "/nc", "/ns", "/np"], True)
+  if (1 == err):
+    return True
+  return False
 
 def delete_dir_with_access_error(path):
   def delete_file_on_error(func, path, exc_info):
@@ -224,7 +236,10 @@ def delete_dir(path):
   if not is_dir(path):
     print("delete warning [folder not exist]: " + path)
     return
-  shutil.rmtree(get_path(path), ignore_errors=True)
+  if ("windows" == host_platform()):
+    delete_dir_with_access_error(path)
+  else:
+    shutil.rmtree(get_path(path), ignore_errors=True)
   return
 
 def copy_lib(src, dst, name):
@@ -656,6 +671,21 @@ def qt_version():
   qt_dir = get_env("QT_DEPLOY")
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
+
+def check_congig_option_with_platfom(platform, option_name):
+  if config.check_option("config", option_name):
+    return True
+  if (0 == platform.find("win")) and config.check_option("config_addon_windows", option_name):
+    return True
+  elif (0 == platform.find("linux")) and config.check_option("config_addon_linux", option_name):
+    return True
+  elif (0 == platform.find("mac")) and config.check_option("config_addon_macos", option_name):
+    return True
+  elif (0 == platform.find("ios")) and config.check_option("config_addon_ios", option_name):
+    return True
+  elif (0 == platform.find("android")) and config.check_option("config_addon_android", option_name):
+    return True
+  return False
 
 def qt_config_platform_addon(platform):
   config_addon = ""
@@ -1234,8 +1264,35 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     delete_dir(dst_deploy_dir)
   return
 
+def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False, is_store_copy=False):
+  git_dir = __file__script__path__ + "/../.."
+  if False:
+    # old version
+    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", dst_dir, "manager", is_name_as_guid, is_desktop_local)
+    return
+  src_dir_path = git_dir + "/onlyoffice.github.io/store/plugin"
+  name = "marketplace"
+  if is_name_as_guid:
+    name = "{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
+
+  dst_dir_path = dst_dir + "/" + name
+  if is_dir(dst_dir_path):
+    delete_dir(dst_dir_path)
+  create_dir(dst_dir_path)
+
+  copy_dir_content(src_dir_path, dst_dir_path)
+  if is_desktop_local:
+    for file in glob.glob(dst_dir_path + "/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+
+  if is_store_copy:
+    copy_dir(git_dir + "/onlyoffice.github.io/store", dst_dir_path + "/store")
+    delete_dir(dst_dir_path + "/store/plugin")
+    delete_dir(dst_dir_path + "/store/plugin-dev")
+  return
+
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if ("" == plugins_list_config):
     return
@@ -1245,7 +1302,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
   return
 
 def copy_sdkjs_plugins_server(dst_dir, is_name_as_guid=False, is_desktop_local=False):
-  plugins_dir = get_script_dir() + "/../../onlyoffice.github.io/sdkjs-plugins/content"
+  plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin-server")
   if ("" == plugins_list_config):
     return
@@ -1399,7 +1456,7 @@ def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
     copy_files(directory_v8 + platform + "/icudt*.dat", deploy_dir + "/")
   return
 
-def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):
+def clone_marketplace_plugin(out_dir, is_name_as_guid=False, is_replace_paths=False, is_delete_git_dir=True, git_owner=""):  
   old_cur = os.getcwd()
   os.chdir(out_dir)
   git_update("onlyoffice.github.io", False, True, git_owner)

@@ -6,32 +6,6 @@ import os
 import platform
 import glob
 
-def deploy_marketplace_plugin(git_dir, root_dir):
-  # old manager
-  #base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "manager", True)
-
-  # plugin manager with local paths
-  sys_plugins_dir = root_dir + "/editors/sdkjs-plugins"
-  base.clone_marketplace_plugin(sys_plugins_dir, True, True, False)
-      
-  # store with local paths
-  manager_dir = sys_plugins_dir + "/{AA2EA9B6-9EC2-415F-9762-634EE8D9A95E}"
-  
-  store_dir_path = manager_dir + "/store"
-  if base.is_dir(store_dir_path):
-    base.delete_dir(store_dir_path)
-  base.create_dir(store_dir_path)
-  
-  base.copy_dir_content(sys_plugins_dir + "/onlyoffice.github.io/store", store_dir_path, "", ".git")
-  base.delete_dir(store_dir_path + "/plugin")
-  base.delete_file(store_dir_path + "/build.bat")
-  
-  for file in glob.glob(store_dir_path + "/*.html"):
-    base.replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
-      
-  base.delete_dir_with_access_error(sys_plugins_dir + "/onlyoffice.github.io")
-  return
-
 def copy_lib_with_links(src_dir, dst_dir, lib, version):
   lib_full_name = lib + "." + version
   major_version = version[:version.find(".")]
@@ -183,7 +157,7 @@ def make():
       base.qt_copy_plugin("platformthemes", root_dir)
       base.qt_copy_plugin("xcbglintegrations", root_dir)
 
-      if not config.check_option("config", "libvlc"):
+      if not base.check_congig_option_with_platfom(platform, "libvlc"):
         base.qt_copy_lib("Qt5Multimedia", root_dir)
         base.qt_copy_lib("Qt5MultimediaWidgets", root_dir)
         base.qt_copy_plugin("mediaservice", root_dir)
@@ -196,7 +170,7 @@ def make():
         base.qt_copy_lib("Qt5X11Extras", root_dir)
         base.qt_copy_lib("Qt5XcbQpa", root_dir)
         base.qt_copy_icu(root_dir)
-        if not config.check_option("config", "libvlc"):
+        if not base.check_congig_option_with_platfom(platform, "libvlc"):
           base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
       if (0 == platform.find("win")):
@@ -208,12 +182,13 @@ def make():
       elif (0 == platform.find("linux")):
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors", root_dir + "/DesktopEditors")
 
-      if config.check_option("config", "libvlc"):
+      if base.check_congig_option_with_platfom(platform, "libvlc"):
         vlc_dir = git_dir + "/core/Common/3dParty/libvlc/build/" + platform + "/lib"
         
         if (0 == platform.find("win")):
           base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")          
           base.copy_files(vlc_dir + "/*.dll", root_dir)
+          base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
           base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
           base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
@@ -222,6 +197,7 @@ def make():
           copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
           copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
           copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
+          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")
@@ -236,6 +212,7 @@ def make():
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
+    base.copy_marketplace_plugin(root_dir + "/editors/sdkjs-plugins", True, True, True)
     base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)
     # remove some default plugins
     if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech"):
@@ -252,9 +229,7 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
-    
-    deploy_marketplace_plugin(git_dir, root_dir)
-    
+  
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
 
     if isWindowsXP:

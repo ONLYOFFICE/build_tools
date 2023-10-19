@@ -41,7 +41,7 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_build_dir + '/Common/sources')
 
-  pkg_target = "node18"
+  pkg_target = "node16"
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"

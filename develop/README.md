@@ -33,7 +33,7 @@ use the following commands:
 ### Clone development environment to work dir
 
 ```bash
-git clone -b feature/docker-instruction https://github.com/ONLYOFFICE/build_tools.git
+git clone https://github.com/ONLYOFFICE/build_tools.git
 ```
 
 ### Modify Docker Images

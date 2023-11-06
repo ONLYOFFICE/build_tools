@@ -73,6 +73,8 @@ def make():
       win_toolset = "msvc-14.2"
       win_boot_arg = "vc142"
       win_vs_version = "vc142"
+
+    # add "define=_ITERATOR_DEBUG_LEVEL=0" to b2 args before install for disable _ITERATOR_DEBUG_LEVEL
     if (-1 != config.option("platform").find("win_64")) and not base.is_file("../build/win_64/lib/libboost_system-" + win_vs_version + "-mt-x64-1_72.lib"):
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])

@@ -51,8 +51,8 @@ def make():
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "x2t")
 
-    if (native_platform == "linux_64"):
-      base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
+    #if (native_platform == "linux_64"):
+    #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
     if (0 == platform.find("win")):
@@ -79,8 +79,11 @@ def make():
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
-    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")
+    base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
     base.copy_dir(git_dir + "/document-templates/new/en-US", root_dir + "/empty")
+
+    # dictionaries
+    base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", root_dir + "/sdkjs")
@@ -92,6 +95,8 @@ def make():
     base.create_dir(root_dir + "/include")
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/common_deploy.h", root_dir + "/include/common.h")
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.h", root_dir + "/include/docbuilder.h")
+    if (0 == platform.find("win")):
+      base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder_midl.h", root_dir + "/include/docbuilder_midl.h")
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
     
     if ("win_64" == platform):

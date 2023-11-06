@@ -6,6 +6,18 @@ import base
 def exclude_arch(directory, frameworks):
   for lib in frameworks:
     base.cmd("lipo", ["-remove", "arm64", directory + "/" + lib + ".framework/" + lib, "-o", directory + "/" + lib + ".framework/" + lib])
+  return
+
+def deploy_fonts(git_dir, root_dir, platform=""):
+  base.create_dir(root_dir + "/fonts")
+  base.copy_file(git_dir + "/core-fonts/ASC.ttf", root_dir + "/fonts/ASC.ttf")
+  base.copy_dir(git_dir + "/core-fonts/asana", root_dir + "/fonts/asana")
+  base.copy_dir(git_dir + "/core-fonts/caladea", root_dir + "/fonts/caladea")
+  base.copy_dir(git_dir + "/core-fonts/crosextra", root_dir + "/fonts/crosextra")
+  base.copy_dir(git_dir + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+  if (platform == "android"):
+    base.copy_dir(git_dir + "/core-fonts/dejavu", root_dir + "/fonts/dejavu")
+    base.copy_dir(git_dir + "/core-fonts/liberation", root_dir + "/fonts/liberation")
   return 
 
 def make():
@@ -82,6 +94,8 @@ def make():
     # correct ios frameworks
     if ("ios" == platform):
       base.generate_plist(root_dir)
+      deploy_fonts(git_dir, root_dir)
+      base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
@@ -95,8 +109,11 @@ def make():
       base.create_dir(root_dir)
       # js
       base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
+      # fonts
+      deploy_fonts(git_dir, root_dir, "android")
+      base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
       # app
-      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder")      
+      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")      
       libs_dir = root_dir + "/lib"
       base.create_dir(libs_dir + "/arm64-v8a")
       base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")

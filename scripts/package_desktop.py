@@ -299,7 +299,11 @@ def make_advinst():
   if common.platform == "windows_x86":
     aic_content += [
       "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileProgramAssociation -unset -64bit_component"
+      "SetComponentAttribute -feature_name FileProgIds -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileOpenWith -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileProgramCapatibilities -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileTypeAssociations -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileNewTemplates -unset -64bit_component"
     ]
   aic_content += [
     "SetCurrentFeature MainFeature",

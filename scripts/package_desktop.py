@@ -387,6 +387,8 @@ def make_macos():
         % (plistbuddy, common.version, plist_path), verbose=True)
     utils.sh('%s -c "Set :CFBundleVersion %s" %s' \
         % (plistbuddy, bundle_version, plist_path), verbose=True)
+    utils.sh('%s -c "Set :ASCBundleBuildNumber %s" %s' \
+        % (plistbuddy, common.build, plist_path), verbose=True)
     utils.sh('%s -c "Add :ASCWebappsHelpUrl string %s" %s' \
         % (plistbuddy, help_url, plist_path), verbose=True)
 

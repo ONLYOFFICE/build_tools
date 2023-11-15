@@ -230,8 +230,11 @@ def make_xp():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
+  # old variant
+  #path_to_python2 = "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin"
+  path_to_python2 = "/depot_tools/bootstrap-2@3_8_10_chromium_26_bin/python/bin"
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
-    base_dir + "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin", 
+    base_dir + path_to_python2, 
     config.option("vs-path") + "/../Common7/IDE",
     os.environ["PATH"]])
 

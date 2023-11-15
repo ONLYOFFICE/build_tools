@@ -194,7 +194,7 @@ def copy_dir(src, dst):
   except:
     if ("windows" == host_platform()) and copy_dir_windows(src, dst):
       return
-    print('Directory not copied. Error: %s' % e)
+    print("Directory not copied")
   return
 
 def copy_dir_windows(src, dst):

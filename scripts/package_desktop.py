@@ -90,11 +90,7 @@ def make_windows():
 
   make_zip()
 
-  vcdl = True
-  vcdl &= download_vcredist("2013")
-  vcdl &= download_vcredist("2022")
-
-  if not vcdl:
+  if not download_vcredist("2022"):
     utils.set_summary("desktop inno build", False)
     utils.set_summary("desktop inno standalone build", False)
     utils.set_summary("desktop inno update build", False)
@@ -299,7 +295,11 @@ def make_advinst():
   if common.platform == "windows_x86":
     aic_content += [
       "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileProgramAssociation -unset -64bit_component"
+      "SetComponentAttribute -feature_name FileProgIds -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileOpenWith -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileProgramCapatibilities -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileTypeAssociations -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileNewTemplates -unset -64bit_component"
     ]
   aic_content += [
     "SetCurrentFeature MainFeature",
@@ -383,6 +383,8 @@ def make_macos():
         % (plistbuddy, common.version, plist_path), verbose=True)
     utils.sh('%s -c "Set :CFBundleVersion %s" %s' \
         % (plistbuddy, bundle_version, plist_path), verbose=True)
+    utils.sh('%s -c "Set :ASCBundleBuildNumber %s" %s' \
+        % (plistbuddy, common.build, plist_path), verbose=True)
     utils.sh('%s -c "Add :ASCWebappsHelpUrl string %s" %s' \
         % (plistbuddy, help_url, plist_path), verbose=True)
 

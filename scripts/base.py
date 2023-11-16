@@ -297,11 +297,11 @@ def replaceInFile(path, text, textReplace):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding="utf-8") as file:
     filedata = file.read()
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding="utf-8") as file:
     file.write(filedata)
   return
 def replaceInFileUtf8(path, text, textReplace):
@@ -928,7 +928,7 @@ def generate_plist(path):
   return
 
 def correct_bundle_identifier(bundle_identifier):
-  return re.sub("[^a-zA-Z0-9\.\-]", "-", bundle_identifier)
+  return re.sub(r"[^a-zA-Z0-9\.\-]", "-", bundle_identifier)
 
 def get_sdkjs_addons():
   result = {}
@@ -1367,7 +1367,7 @@ def hack_xcode_ios():
 def find_mac_sdk_version():
   sdk_dir = run_command("xcode-select -print-path")['stdout']
   sdk_dir = os.path.join(sdk_dir, "Platforms/MacOSX.platform/Developer/SDKs")
-  sdks = [re.findall('^MacOSX(1\d\.\d+)\.sdk$', s) for s in os.listdir(sdk_dir)]
+  sdks = [re.findall(r"^MacOSX(1\d\.\d+)\.sdk$", s) for s in os.listdir(sdk_dir)]
   sdks = [s[0] for s in sdks if s]
   return sdks[0]
 

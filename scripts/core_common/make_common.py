@@ -13,7 +13,7 @@ import cef
 import icu
 import openssl
 import curl
-import websocket
+#import websocket
 import v8
 import html2
 import hunspell

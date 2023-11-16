@@ -25,7 +25,6 @@ base.set_env("BUILD_PLATFORM", config.option("platform"))
 # branding
 if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("branding")):
   branding_dir = base_dir + "/../" + config.option("branding")
-
   if ("1" == config.option("update")):
     is_exist = True
     if not base.is_dir(branding_dir):
@@ -39,12 +38,12 @@ if ("1" != base.get_env("OO_RUNNING_BRANDING")) and ("" != config.option("brandi
 
     base.cmd_in_dir(branding_dir, "git", ["pull"], True)
 
-  if base.is_file(branding_dir + "/build_tools/make.py"):
-    base.check_build_version(branding_dir + "/build_tools")
-    base.set_env("OO_RUNNING_BRANDING", "1")
-    base.set_env("OO_BRANDING", config.option("branding"))
-    base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make.py"])
-    exit(0)
+  # if base.is_file(branding_dir + "/build_tools/make.py"):
+  #   base.check_build_version(branding_dir + "/build_tools")
+  #   base.set_env("OO_RUNNING_BRANDING", "1")
+  #   base.set_env("OO_BRANDING", config.option("branding"))
+  #   base.cmd_in_dir(branding_dir + "/build_tools", "python", ["make.py"])
+  #   exit(0)
 
 # correct defaults (the branding repo is already updated)
 config.parse_defaults()
@@ -59,7 +58,7 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-develop.make();
+develop.make()
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
@@ -81,6 +80,7 @@ if config.check_option("module", "desktop"):
 # build
 build.make()
 
+print(123)
 # js
 build_js.make()
 

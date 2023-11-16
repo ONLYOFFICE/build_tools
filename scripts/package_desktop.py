@@ -90,10 +90,7 @@ def make_windows():
 
   make_zip()
 
-  vcdl = True
-  vcdl &= download_vcredist("2015-2022")
-
-  if not vcdl:
+  if not download_vcredist("2022"):
     utils.set_summary("desktop inno build", False)
     utils.set_summary("desktop inno standalone build", False)
     utils.set_summary("desktop inno update build", False)

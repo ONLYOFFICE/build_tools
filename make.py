@@ -80,7 +80,6 @@ if config.check_option("module", "desktop"):
 # build
 build.make()
 
-print(123)
 # js
 build_js.make()
 

@@ -321,11 +321,11 @@ def replaceInFileRE(path, pattern, textReplace):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding='utf-8') as file:
     filedata = file.read()
   filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding='utf-8') as file:
     file.write(filedata)
   return
 
@@ -333,14 +333,14 @@ def readFile(path):
   if not is_file(path):
     return ""
   filedata = ""
-  with open(get_path(path), "r") as file:
+  with open(get_path(path), "r", encoding='utf-8') as file:
     filedata = file.read()
   return filedata
 
 def writeFile(path, data):
   if is_file(path):
     delete_file(path)
-  with open(get_path(path), "w") as file:
+  with open(get_path(path), "w", encoding='utf-8') as file:
     file.write(data)
   return
 

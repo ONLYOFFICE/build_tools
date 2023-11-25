@@ -1705,3 +1705,14 @@ def copy_dictionaries(src, dst, is_hyphen = True, is_spell = True):
     delete_file(dst + "/uk_UA/th_uk_UA.idx")
 
   return
+
+def check_module_version(actual_version, clear_func):
+  module_file = "./module.version"
+  current_module_version = readFile(module_file)
+  if (actual_version == current_module_version):
+    return
+  if is_file(module_file):
+    delete_file(module_file)
+  writeFile(module_file, actual_version)
+  clear_func()
+  return

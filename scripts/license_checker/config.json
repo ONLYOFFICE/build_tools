@@ -181,9 +181,6 @@
 			"startMultiComm": "/*",
 			"endMultiComm": " */",
 			"prefix": " *",
-			"ignoreListDir": [
-				"server/FileConverter/bin"
-			],
 			"ignoreListDirName": [
 				"node_modules"
 			]
@@ -194,9 +191,16 @@
 			"startMultiComm": "/*",
 			"endMultiComm": " */",
 			"prefix": " *",
-			"ignoreListDir": [
-				"server/FileConverter/bin"
-			],
+			"ignoreListDirName": [
+				"node_modules"
+			]
+		},
+		{
+			"dir": "server-license-key",
+			"fileExtensions": [".js"],
+			"startMultiComm": "/*",
+			"endMultiComm": " */",
+			"prefix": " *",
 			"ignoreListDirName": [
 				"node_modules"
 			]

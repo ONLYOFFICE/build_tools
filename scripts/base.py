@@ -1264,6 +1264,62 @@ def copy_sdkjs_plugin(src_dir, dst_dir, name, is_name_as_guid=False, is_desktop_
     delete_dir(dst_deploy_dir)
   return
 
+def change_plugin_license(path, license, start, end, encoding='utf8'):
+  with open(path, 'r', encoding=encoding) as file:
+    content = file.read()
+    start_index = content.find(start)
+    end_index = content.find(end)
+    if start_index >= 0 and end_index >= 0:
+      old_license = content[start_index:end_index+len(end)]
+      if (re.search(r'ascensio', old_license, re.IGNORECASE)):
+        file.close()
+        replaceInFile(path, old_license, license)
+
+def check_correct_plugins(dir, license = '', branding=''):
+  js_license = license
+  html_license = license.replace('/*', '<!--')
+  html_license = html_license.replace('*/', '-->')
+  extensions = ['.js', '.html', '.md', '.txt', '.json']
+  ignoreNameDirs = ['vendor', 'thirdparty']
+  for address, dirs, files in os.walk(dir):
+    for i in ignoreNameDirs:
+      if (re.search(re.escape(i), address)):
+          break
+    else:
+      for i in files:
+        path = os.path.join(address, i)
+        filename, file_extension = os.path.splitext(i)
+        if file_extension in extensions:
+          if (file_extension == '.js'):
+            change_plugin_license(path, js_license, start='/*', end='*/')
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
+          elif (file_extension == '.html'):
+            change_plugin_license(path, html_license, start='<!--', end='-->')
+            replaceInFile(path, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
+          elif (file_extension == '.md' or file_extension == '.txt'):
+            check = readFile(path)
+            if (re.search(r'onlyoffice', check, re.IGNORECASE) or re.search(r'ascensio', check, re.IGNORECASE)):
+              delete_file(path)
+          elif (file_extension == '.json'):
+            replaceInFileRE(path, 'onlyoffice', branding.lower())
+            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
+
+# ATTENTION sdkjs-plugins\wordpress\scripts\wordpress.js -- changed proxy | https://onlyoffice-proxy.herokuapp.com/https://public-api.wordpress.com/oauth2/token | (Can kill the plugin)
+# ATTENTION sdkjs-plugins\wordpress\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-wordpress/tree/develop#configuration |
+# ATTENTION sdkjs-plugins\easybib\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-mendeley/tree/master#configuration |
+# ATTENTION sdkjs-plugins\easybib\scripts\easybibhelper.js -- changed proxy | https://onlyoffice-proxy.herokuapp.com/ | (Can kill the plugin)
+# ATTENTION sdkjs-plugins\deepl\index.html -- changed link to Learn More | https://github.com/ONLYOFFICE/plugin-deepl/tree/develop#configuration |
+# ATTENTION sdkjs-plugins\chess\index_about.html -- changed link to Source Code | https://github.com/ONLYOFFICE/onlyoffice.github.io/tree/master/sdkjs-plugins/content/chess |
+# ATTENTION sdkjs-plugins\macros\config.json -- changed link to API at "help" | https://api.onlyoffice.com/plugin/macros |
+# ATTENTION sdkjs-plugins\marketplace\index.html -- changed link | https://onlyoffice.github.io/store/index.html |
+def correct_plugins_branding(out_dir, license):
+  branding = config.option("branding")
+  if not "" == branding and not "onlyoffice" == branding:
+    check_correct_plugins(out_dir, license, branding)
+
 def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=False, is_store_copy=False):
   git_dir = __file__script__path__ + "/../.."
   if False:

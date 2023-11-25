@@ -316,14 +316,14 @@ def replaceInFileUtf8(path, text, textReplace):
   with open(get_path(path), "wb") as file:
     file.write(filedata.encode("UTF-8"))
   return
-def replaceInFileRE(path, pattern, textReplace):
+def replaceInFileRE(path, pattern, textReplace, flags=0):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
   filedata = ""
   with open(get_path(path), "r", encoding='utf-8') as file:
     filedata = file.read()
-  filedata = re.sub(pattern, textReplace, filedata)
+  filedata = re.sub(pattern, textReplace, filedata, flags=flags)
   delete_file(path)
   with open(get_path(path), "w", encoding='utf-8') as file:
     file.write(filedata)
@@ -1297,8 +1297,7 @@ def check_correct_plugins(dir, license = '', branding=''):
           elif (file_extension == '.html'):
             change_plugin_license(path, html_license, start='<!--', end='-->')
             replaceInFile(path, "https://onlyoffice.github.io/sdkjs-plugins/", "../")
-            replaceInFileRE(path, 'onlyoffice', branding.lower())
-            replaceInFileRE(path, 'ONLYOFFICE', branding.upper())
+            replaceInFileRE(path, 'onlyoffice', branding.lower(), re.IGNORECASE)
           elif (file_extension == '.md' or file_extension == '.txt'):
             check = readFile(path)
             if (re.search(r'onlyoffice', check, re.IGNORECASE) or re.search(r'ascensio', check, re.IGNORECASE)):

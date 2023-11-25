@@ -130,6 +130,8 @@ def make():
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", js_dir + "/sdkjs-plugins/v1/plugins-ui.js")
     base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", js_dir + "/sdkjs-plugins/v1/plugins.css")
     base.support_old_versions_plugins(js_dir + "/sdkjs-plugins")
+    license = base.readFileLicence(js_dir + "/sdkjs/word/sdk-all-min.js")
+    base.correct_plugins_branding(js_dir + "/sdkjs-plugins", license)
 
     # tools
     tools_dir = root_dir + "/server/tools"

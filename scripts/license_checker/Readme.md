@@ -172,6 +172,18 @@ Possible array values:
     ]
     ```
 
+  * `allowListFile` file paths to allow. It is needed if you ignore the directory, but there is a file in it that needs to be checked.
+  **For example:**
+
+    ```json
+    "ignoreListDir": [
+      "sdkjs/develop"
+    ],
+    "allowListFile": [
+      "sdkjs/develop/awesomeFileToAllow.js",
+    ]
+    ```
+
   Any number of configurations can be
   specified, they can overlap
   if we need to check

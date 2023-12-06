@@ -7,6 +7,18 @@ import base
 import os
 import icu_android
 
+def fetch_icu(major, minor):
+  base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + major, "https://github.com/unicode-org/icu.git", "./icu2"])
+  base.copy_dir("./icu2/icu4c", "./icu")
+  base.delete_dir_with_access_error("icu2")
+  #base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
+  return
+
+def clear_module():
+  if base.is_dir("icu"):
+    base.delete_dir_with_access_error("icu")
+  return
+
 def make():
   print("[fetch & build]: icu")
 
@@ -18,10 +30,12 @@ def make():
   os.chdir(base_dir)
 
   icu_major = "58"
-  icu_minor = "2"
+  icu_minor = "3"
+
+  base.check_module_version("1", clear_module)
 
   if not base.is_dir("icu"):
-    base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
+    fetch_icu(icu_major, icu_minor)  
 
   if ("windows" == base.host_platform()):
     platformToolset = "v140"

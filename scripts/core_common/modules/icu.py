@@ -5,6 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
+import glob
 import icu_android
 
 def fetch_icu(major, minor):
@@ -17,6 +18,12 @@ def fetch_icu(major, minor):
 def clear_module():
   if base.is_dir("icu"):
     base.delete_dir_with_access_error("icu")
+
+  # remove build
+  for child in glob.glob("./*"):
+    if base.is_dir(child):
+      base.delete_dir(child)
+
   return
 
 def make():
@@ -32,7 +39,7 @@ def make():
   icu_major = "58"
   icu_minor = "3"
 
-  base.check_module_version("1", clear_module)
+  base.check_module_version("2", clear_module)
 
   if not base.is_dir("icu"):
     fetch_icu(icu_major, icu_minor)  

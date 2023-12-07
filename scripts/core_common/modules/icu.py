@@ -29,14 +29,14 @@ def clear_module():
 def make():
   print("[fetch & build]: icu")
 
+  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"
+  old_cur = os.getcwd()
+  os.chdir(base_dir)
+
   base.check_module_version("3", clear_module)
 
   if (-1 != config.option("platform").find("android")):
     icu_android.make()
-
-  base_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"
-  old_cur = os.getcwd()
-  os.chdir(base_dir)
 
   icu_major = "58"
   icu_minor = "3"

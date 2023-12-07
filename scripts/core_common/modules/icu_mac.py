@@ -35,7 +35,7 @@ def restore_icu_defs(current_dir):
   return
 
 icu_major = "58"
-icu_minor = "2"
+icu_minor = "3"
 
 current_dir_old = os.getcwd()
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"

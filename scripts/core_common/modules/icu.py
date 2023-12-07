@@ -29,6 +29,8 @@ def clear_module():
 def make():
   print("[fetch & build]: icu")
 
+  base.check_module_version("3", clear_module)
+
   if (-1 != config.option("platform").find("android")):
     icu_android.make()
 
@@ -38,9 +40,7 @@ def make():
 
   icu_major = "58"
   icu_minor = "3"
-
-  base.check_module_version("2", clear_module)
-
+  
   if not base.is_dir("icu"):
     fetch_icu(icu_major, icu_minor)  
 

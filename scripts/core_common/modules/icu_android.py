@@ -6,7 +6,7 @@ import base
 import os
 
 def fetch_icu(major, minor):
-  base.cmd("git", ["clone", "--depth", "1", "--branch maint/maint-" + major, "https://github.com/unicode-org/icu.git", "./icu2"])
+  base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + major, "https://github.com/unicode-org/icu.git", "./icu2"])
   base.copy_dir("./icu2/icu4c", "./icu")
   base.delete_dir_with_access_error("icu2")
   #base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])

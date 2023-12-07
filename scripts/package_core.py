@@ -39,20 +39,16 @@ def make_core():
     return
 
   utils.log_h2("core deploy")
-  aws_kwargs = { "acl": "public-read" }
-  if hasattr(branding, "s3_endpoint_url"):
-    aws_kwargs["endpoint_url"]=branding.s3_endpoint_url
   ret = utils.s3_upload(
     core_7z,
-    "s3://" + branding.s3_bucket + "/" + dest_version + "/core.7z",
-    **aws_kwargs)
+    "s3://" + branding.s3_bucket + "/" + dest_version + "/core.7z")
   if ret:
     utils.log("URL: " + branding.s3_base_url + "/" + dest_version + "/core.7z")
     utils.add_deploy_data(dest_version + "/core.7z")
     ret = utils.s3_sync(
       "s3://" + branding.s3_bucket + "/" + dest_version + "/",
       "s3://" + branding.s3_bucket + "/" + dest_latest + "/",
-      delete=True, **aws_kwargs)
+      delete=True)
     utils.log("URL: " + branding.s3_base_url + "/" + dest_latest + "/core.7z")
   utils.set_summary("core deploy", ret)
   return
@@ -69,14 +65,10 @@ def deploy_closuremaps(license):
     return
 
   utils.log_h2("closure maps " + license + " deploy")
-  aws_kwargs = {}
-  if hasattr(branding, "s3_endpoint_url"):
-    aws_kwargs["endpoint_url"]=branding.s3_endpoint_url
   ret = True
   for f in maps:
     key = "closure-maps/%s/%s/%s/%s" % (license, common.version, common.build, f)
-    upload = utils.s3_upload(
-      f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
+    upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)

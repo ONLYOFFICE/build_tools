@@ -19,11 +19,7 @@ def s3_upload(files, dst):
   ret = True
   for f in files:
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
-    aws_kwargs = { "acl": "public-read" }
-    if hasattr(branding, "s3_endpoint_url"):
-      aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
-    upload = utils.s3_upload(
-      f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
+    upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
       utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)

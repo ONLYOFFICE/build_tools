@@ -242,10 +242,10 @@ def make_advinst():
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     utils.copy_file(
       multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\gallery.ico")
+      "..\\..\\extras\\projicons\\res\\icons\\gallery.ico")
     utils.copy_file(
       multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\media.ico")
+      "..\\..\\extras\\projicons\\res\\icons\\media.ico")
 
   utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
 

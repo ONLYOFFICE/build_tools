@@ -76,8 +76,8 @@ def make():
 
     base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
                    vendor_dir_src + "underscore/underscore-min.js",
-                   base_dir + "/../sdkjs/common/Native/native.js",
-                   base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
+                   base_dir + "/../sdkjs-native/common/native.js",
+                   base_dir + "/../sdkjs-native/common/common.js",
                    base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
                    out_dir + "/mobile/sdkjs/banners.js")
 
@@ -132,7 +132,10 @@ def build_sdk_builder(directory):
 def build_sdk_native(directory, minimize=True):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + base.sdkjs_addons_param())
+  addons = base.sdkjs_addons_param()
+  if not config.check_option("sdkjs-addons", "sdkjs-native"):
+    addons.append("--addon=sdkjs-native")
+  _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + addons)
   return
 
 def build_js_develop(root_dir):

@@ -102,7 +102,7 @@ build_tools_params = ["--branch", branch,
                       "--qt-dir", os.getcwd() + "/qt_build/Qt-5.9.9"] + params
 
 base.cmd_in_dir("../..", "./configure.py", build_tools_params)
-base.cmd_in_dir("../..", "./make.py")
+base.cmd_in_dir("../..", "./make.py>/build_tools/out/build.log 2>/build_tools/out/build_err.log")
 
 
 

@@ -236,6 +236,8 @@ def make():
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
   
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
+    base.create_dir(root_dir + "/editors/webext")
+    base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
 
     if isWindowsXP:
       base.create_dir(root_dir + "/providers")

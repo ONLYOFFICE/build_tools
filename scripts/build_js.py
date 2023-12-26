@@ -65,7 +65,8 @@ def make():
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
-  
+    base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/noconnect.html", out_dir + "/desktop/noconnect.html")
+
   # mobile
   if config.check_option("module", "mobile"):
     build_sdk_native(base_dir + "/../sdkjs/build", False)

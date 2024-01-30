@@ -106,7 +106,13 @@ def make():
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
 
-    base.copy_dir(git_dir + "/desktop-apps/common/package/fonts", root_dir + "/fonts")
+    base.copy_dir(git_dir  + "/core-fonts/opensans",   root_dir + "/fonts")
+    base.copy_dir(git_dir  + "/core-fonts/asana",      root_dir + "/fonts/asana")
+    base.copy_dir(git_dir  + "/core-fonts/caladea",    root_dir + "/fonts/caladea")
+    base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
+    base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+    base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
+
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
   
     # cef
@@ -211,8 +217,9 @@ def make():
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
-    base.copy_marketplace_plugin(root_dir + "/editors/sdkjs-plugins", True, True, True)
-    base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True)
+    if not isWindowsXP:
+      base.copy_marketplace_plugin(root_dir + "/editors/sdkjs-plugins", True, True, True)
+    base.copy_sdkjs_plugins(root_dir + "/editors/sdkjs-plugins", True, True, isWindowsXP)
     # remove some default plugins
     if base.is_dir(root_dir + "/editors/sdkjs-plugins/speech"):
       base.delete_dir(root_dir + "/editors/sdkjs-plugins/speech")
@@ -230,6 +237,8 @@ def make():
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
   
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
+    base.create_dir(root_dir + "/editors/webext")
+    base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
 
     if isWindowsXP:
       base.create_dir(root_dir + "/providers")

@@ -24,11 +24,7 @@ def s3_upload(files, dst):
   ret = True
   for f in files:
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
-    aws_kwargs = { "acl": "public-read" }
-    if hasattr(branding, "s3_endpoint_url"):
-      aws_kwargs["endpoint_url"] = branding.s3_endpoint_url
-    upload = utils.s3_upload(
-      f, "s3://" + branding.s3_bucket + "/" + key, **aws_kwargs)
+    upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
       utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)
@@ -90,11 +86,7 @@ def make_windows():
 
   make_zip()
 
-  vcdl = True
-  vcdl &= download_vcredist("2013")
-  vcdl &= download_vcredist("2022")
-
-  if not vcdl:
+  if not download_vcredist():
     utils.set_summary("desktop inno build", False)
     utils.set_summary("desktop inno standalone build", False)
     utils.set_summary("desktop inno update build", False)
@@ -137,18 +129,36 @@ def make_zip():
     utils.set_summary("desktop zip deploy", ret)
   return
 
-def download_vcredist(year):
-  utils.log_h2("vcredist " + year + " download")
+def download_vcredist():
+  vcredist = {
+    # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33130
+    "windows_x64": {
+      "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
+      "md5": "101b0b9f74cdc6cdbd2570bfe92e302c"
+    },
+    "windows_x86": {
+      "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
+      "md5": "0d762264d9765e21c15a58edc43f4706"
+    },
+    # Microsoft Visual C++ 2015-2019 Redistributable - 14.27.29114
+    "windows_x64_xp": {
+      "url": "https://download.visualstudio.microsoft.com/download/pr/722d59e4-0671-477e-b9b1-b8da7d4bd60b/591CBE3A269AFBCC025681B968A29CD191DF3C6204712CBDC9BA1CB632BA6068/VC_redist.x64.exe",
+      "md5": "bc8e3e714b727b3bb18614bd6a51a3d3"
+    },
+    "windows_x86_xp": {
+      "url": "https://download.visualstudio.microsoft.com/download/pr/c168313d-1754-40d4-8928-18632c2e2a71/D305BAA965C9CD1B44EBCD53635EE9ECC6D85B54210E2764C8836F4E9DEFA345/VC_redist.x86.exe",
+      "md5": "ec3bee79a85ae8e3581a8c181b336d1e"
+    }
+  }
+  vcredist_file = "data\\vcredist_%s.exe" % arch_list[common.platform]
 
-  arch = arch_list[common.platform]
-  link = common.vcredist_links[year][arch]["url"]
-  md5 = common.vcredist_links[year][arch]["md5"]
-  vcredist_file = "data\\vcredist\\vcredist_%s_%s.exe" % (year, arch)
-
-  utils.log_h2(vcredist_file)
-  utils.create_dir(utils.get_dirname(vcredist_file))
-  ret = utils.download_file(link, vcredist_file, md5, verbose=True)
-  utils.set_summary("vcredist " + year + " download", ret)
+  utils.log_h2("vcredist download " + vcredist_file)
+  ret = utils.download_file(
+    vcredist[common.platform]["url"],
+    vcredist_file,
+    vcredist[common.platform]["md5"],
+    verbose=True)
+  utils.set_summary("vcredist download", ret)
   return ret
 
 def make_inno():
@@ -250,10 +260,10 @@ def make_advinst():
       "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
     utils.copy_file(
       multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\gallery.ico")
+      "..\\..\\extras\\projicons\\res\\icons\\gallery.ico")
     utils.copy_file(
       multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\media.ico")
+      "..\\..\\extras\\projicons\\res\\icons\\media.ico")
 
   utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
 
@@ -299,7 +309,11 @@ def make_advinst():
   if common.platform == "windows_x86":
     aic_content += [
       "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileProgramAssociation -unset -64bit_component"
+      "SetComponentAttribute -feature_name FileProgIds -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileOpenWith -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileProgramCapatibilities -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileTypeAssociations -unset -64bit_component",
+      "SetComponentAttribute -feature_name FileNewTemplates -unset -64bit_component"
     ]
   aic_content += [
     "SetCurrentFeature MainFeature",
@@ -383,6 +397,8 @@ def make_macos():
         % (plistbuddy, common.version, plist_path), verbose=True)
     utils.sh('%s -c "Set :CFBundleVersion %s" %s' \
         % (plistbuddy, bundle_version, plist_path), verbose=True)
+    utils.sh('%s -c "Set :ASCBundleBuildNumber %s" %s' \
+        % (plistbuddy, common.build, plist_path), verbose=True)
     utils.sh('%s -c "Add :ASCWebappsHelpUrl string %s" %s' \
         % (plistbuddy, help_url, plist_path), verbose=True)
 

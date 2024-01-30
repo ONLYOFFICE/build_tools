@@ -292,17 +292,34 @@ def copy_exe(src, dst, name):
   copy_file(src + "/" + name + exe_ext, dst + "/" + name + exe_ext)
   return
 
+def readFileCommon(path):
+  file_data = ""
+  try:
+    with open(get_path(path), "r") as file:
+      file_data = file.read()
+  except Exception as e:
+    with open(get_path(path), "r", encoding="utf-8") as file:
+      file_data = file.read()
+  return file_data
+
+def writeFileCommon(path, data):
+  file_data = ""
+  try:
+    with open(get_path(path), "w") as file:
+      file.write(data)
+  except Exception as e:
+    with open(get_path(path), "w", encoding="utf-8") as file:
+      file.write(data)
+  return
+
 def replaceInFile(path, text, textReplace):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
-  filedata = ""
-  with open(get_path(path), "r") as file:
-    filedata = file.read()
+  filedata = readFileCommon(path)
   filedata = filedata.replace(text, textReplace)
   delete_file(path)
-  with open(get_path(path), "w") as file:
-    file.write(filedata)
+  writeFileCommon(path, filedata)
   return
 def replaceInFileUtf8(path, text, textReplace):
   if not is_file(path):
@@ -320,28 +337,21 @@ def replaceInFileRE(path, pattern, textReplace):
   if not is_file(path):
     print("[replaceInFile] file not exist: " + path)
     return
-  filedata = ""
-  with open(get_path(path), "r") as file:
-    filedata = file.read()
+  filedata = readFileCommon(path)
   filedata = re.sub(pattern, textReplace, filedata)
   delete_file(path)
-  with open(get_path(path), "w") as file:
-    file.write(filedata)
+  writeFileCommon(path, filedata)
   return
 
 def readFile(path):
   if not is_file(path):
     return ""
-  filedata = ""
-  with open(get_path(path), "r") as file:
-    filedata = file.read()
-  return filedata
+  return readFileCommon(path)
 
 def writeFile(path, data):
   if is_file(path):
     delete_file(path)
-  with open(get_path(path), "w") as file:
-    file.write(data)
+  writeFileCommon(path, data)
   return
 
 # system cmd methods ------------------------------------
@@ -1291,9 +1301,11 @@ def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=Fal
     delete_dir(dst_dir_path + "/store/plugin-dev")
   return
 
-def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False):
+def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, isXp=False):
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
+  if isXp:
+    plugins_list_config="photoeditor, macros, drawio, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")
@@ -1648,4 +1660,15 @@ def copy_dictionaries(src, dst, is_hyphen = True, is_spell = True):
     delete_file(dst + "/uk_UA/th_uk_UA.dat")
     delete_file(dst + "/uk_UA/th_uk_UA.idx")
 
+  return
+
+def check_module_version(actual_version, clear_func):
+  module_file = "./module.version"
+  current_module_version = readFile(module_file)
+  if (actual_version == current_module_version):
+    return
+  if is_file(module_file):
+    delete_file(module_file)
+  writeFile(module_file, actual_version)
+  clear_func()
   return

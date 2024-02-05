@@ -182,6 +182,9 @@ def extend_option(name, value):
   else:
     options[name] = value
 
+def set_option(name, value):
+  options[name] = value
+
 def branding():
   branding = option("branding-name")
   if ("" == branding):

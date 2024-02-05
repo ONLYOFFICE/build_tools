@@ -65,7 +65,8 @@ def make():
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
-  
+    base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/noconnect.html", out_dir + "/desktop/noconnect.html")
+
   # mobile
   if config.check_option("module", "mobile"):
     build_sdk_native(base_dir + "/../sdkjs/build", False)
@@ -73,20 +74,28 @@ def make():
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"
     sdk_dir_src = base_dir + "/../sdkjs/deploy/sdkjs/"
+  
+    prefix_js = [
+      vendor_dir_src + "xregexp/xregexp-all-min.js", 
+      vendor_dir_src + "underscore/underscore-min.js",
+      base_dir + "/../sdkjs/common/Native/native.js",
+      base_dir + "/../sdkjs-native/common/common.js",
+      base_dir + "/../sdkjs/common/Native/jquery_native.js"
+    ]
 
-    base.join_scripts([vendor_dir_src + "xregexp/xregexp-all-min.js", 
-                   vendor_dir_src + "underscore/underscore-min.js",
-                   base_dir + "/../sdkjs/common/Native/native.js",
-                   base_dir + "/../sdkjs/common/Native/Wrappers/common.js",
-                   base_dir + "/../sdkjs/common/Native/jquery_native.js"], 
-                   out_dir + "/mobile/sdkjs/banners.js")
+    postfix_js = [
+      base_dir + "/../sdkjs/common/libfont/engine/fonts_native.js",
+      base_dir + "/../sdkjs/common/Charts/ChartStyles.js"
+    ]
+
+    base.join_scripts(prefix_js, out_dir + "/mobile/sdkjs/banners.js")
 
     base.create_dir(out_dir + "/mobile/sdkjs/word")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"], out_dir + "/mobile/sdkjs/word/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "word/sdk-all-min.js", sdk_dir_src + "word/sdk-all.js"] + postfix_js, out_dir + "/mobile/sdkjs/word/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/cell")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"], out_dir + "/mobile/sdkjs/cell/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "cell/sdk-all-min.js", sdk_dir_src + "cell/sdk-all.js"] + postfix_js, out_dir + "/mobile/sdkjs/cell/script.bin")
     base.create_dir(out_dir + "/mobile/sdkjs/slide")
-    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"], out_dir + "/mobile/sdkjs/slide/script.bin")
+    base.join_scripts([out_dir + "/mobile/sdkjs/banners.js", sdk_dir_src + "slide/sdk-all-min.js", sdk_dir_src + "slide/sdk-all.js"] + postfix_js, out_dir + "/mobile/sdkjs/slide/script.bin")
 
     base.delete_file(out_dir + "/mobile/sdkjs/banners.js")
   return
@@ -132,7 +141,10 @@ def build_sdk_builder(directory):
 def build_sdk_native(directory, minimize=True):
   #_run_npm_cli(directory)
   _run_npm(directory)
-  _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + base.sdkjs_addons_param())
+  addons = base.sdkjs_addons_param()
+  if not config.check_option("sdkjs-addons", "sdkjs-native"):
+    addons.append("--addon=sdkjs-native")
+  _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + addons)
   return
 
 def build_js_develop(root_dir):

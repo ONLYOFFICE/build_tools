@@ -63,6 +63,12 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
+
+  win_toolset_wrapper_file = "build/toolchain/win/tool_wrapper.py"
+  win_toolset_wrapper_file_content = base.readFile("build/toolchain/win/tool_wrapper.py")
+  if (-1 == win_toolset_wrapper_file_content.find("line = line.decode('utf8')")):
+    base.replaceInFile(win_toolset_wrapper_file, "for line in link.stdout:\n", "for line in link.stdout:\n      line = line.decode('utf8')\n")
+
   base.cmd("ninja", ["-C", directory_out, "v8_wrappers"])
   base.cmd("ninja", ["-C", directory_out])
   base.delete_file("./" + directory_out + "/obj/v8_wrappers.ninja")

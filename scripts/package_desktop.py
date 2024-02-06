@@ -131,14 +131,14 @@ def make_zip():
 
 def download_vcredist():
   vcredist = {
-    # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33130
+    # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33135
     "windows_x64": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "101b0b9f74cdc6cdbd2570bfe92e302c"
+      "md5": "a8a68bcc74b5022467f12587baf1ef93"
     },
     "windows_x86": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "0d762264d9765e21c15a58edc43f4706"
+      "md5": "9882a328c8414274555845fa6b542d1e"
     },
     # Microsoft Visual C++ 2015-2019 Redistributable - 14.27.29114
     "windows_x64_xp": {

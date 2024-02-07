@@ -234,7 +234,7 @@ def make_xp():
   
   # old variant
   #path_to_python2 = "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin"
-  path_to_python2 = "/depot_tools/bootstrap-2@3_8_10_chromium_26_bin/python/bin"
+  path_to_python2 = "/depot_tools/bootstrap-2@3_8_10_chromium_23_bin/python/bin"
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + path_to_python2, 
     config.option("vs-path") + "/../Common7/IDE",

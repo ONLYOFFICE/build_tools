@@ -271,6 +271,13 @@ def make_xp():
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
     ]);
 
+  programFilesDir = base.get_env("ProgramFiles")
+  if ("" != base.get_env("ProgramFiles(x86)")):
+    programFilesDir = base.get_env("ProgramFiles(x86)")
+  dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
+  if (base.is_dir(dev_path)):
+    os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
+
   # add "SET CL=\"/D_ITERATOR_DEBUG_LEVEL=0\"" before devenv for disable _ITERATOR_DEBUG_LEVEL in debug
   if config.check_option("platform", "win_64_xp"):
     if not base.is_dir("win_64/release"):

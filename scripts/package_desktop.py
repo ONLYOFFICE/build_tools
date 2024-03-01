@@ -63,16 +63,14 @@ def make_windows():
   if common.clean:
     utils.log_h2("desktop clean")
     utils.delete_dir("build")
-    # utils.delete_dir("data\\vcredist")
     utils.delete_dir("DesktopEditors-cache")
     utils.delete_files("*.exe")
     utils.delete_files("*.msi")
     utils.delete_files("*.aic")
     utils.delete_files("*.tmp")
     utils.delete_files("*.zip")
+    utils.delete_files("data\\*.exe")
     utils.delete_files("update\\*.exe")
-    utils.delete_files("update\\*.xml")
-    utils.delete_files("update\\*.html")
 
   utils.log_h2("copy arifacts")
   source_dir = "%s\\build_tools\\out\\%s\\%s" \
@@ -241,94 +239,15 @@ def make_update_files():
 def make_advinst():
   utils.log_h2("desktop advinst build")
 
-  msi_build = {
-    "windows_x64": "MsiBuild64",
-    "windows_x86": "MsiBuild32"
-  }[common.platform]
-
-  if not branding.onlyoffice:
-    multimedia_dir = common.workspace_dir + "\\" + common.branding + "\\multimedia"
-    utils.copy_file(branding_dir + "\\dictionary.ail", "dictionary.ail")
-    utils.copy_dir_content(branding_dir + "\\data", "data", ".bmp")
-    utils.copy_dir_content(branding_dir + "\\data", "data", ".png")
-    utils.copy_dir_content(
-      branding_dir + "\\..\\..\\extras\\projicons\\res",
-      "..\\..\\extras\\projicons\\res",
-      ".ico")
-    utils.copy_file(
-      branding_dir + "\\..\\..\\..\\common\\package\\license\\eula_" + common.branding + ".rtf",
-      "..\\..\\..\\common\\package\\license\\agpl-3.0.rtf")
-    utils.copy_file(
-      multimedia_dir + "\\imageviewer\\icons\\ico\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\icons\\gallery.ico")
-    utils.copy_file(
-      multimedia_dir + "\\videoplayer\\icons\\" + common.branding + ".ico",
-      "..\\..\\extras\\projicons\\res\\icons\\media.ico")
-
-  utils.write_file(desktop_dir + "\\converter\\package.config", "package=msi")
-
-  aic_content = [";aic"]
-  if not common.sign:
-    aic_content += [
-      "ResetSig"
-    ]
-  if branding.onlyoffice:
-    for path in utils.glob_path(desktop_dir + "\\editors\\web-apps\\apps\\*\\main\\resources\\help"):
-      utils.delete_dir(path)
-    aic_content += [
-      "DelFolder CUSTOM_PATH"
-    ]
-  else:
-    aic_content += [
-      "SetProperty UpgradeCode=\"" + branding.desktop_upgrade_code + "\"",
-      "AddUpgradeCode {47EEF706-B0E4-4C43-944B-E5F914B92B79} \
-        -min_ver 7.1.1 -include_min_ver \
-        -max_ver 7.2.2 -include_max_ver \
-        -include_lang 1049 \
-        -property_name UPGRADE_2 -enable_migrate",
-      "DelLanguage 1029 -buildname " + msi_build,
-      "DelLanguage 1031 -buildname " + msi_build,
-      "DelLanguage 1041 -buildname " + msi_build,
-      "DelLanguage 1046 -buildname " + msi_build,
-      "DelLanguage 2070 -buildname " + msi_build,
-      "DelLanguage 1060 -buildname " + msi_build,
-      "DelLanguage 1036 -buildname " + msi_build,
-      "DelLanguage 3082 -buildname " + msi_build,
-      "DelLanguage 1033 -buildname " + msi_build,
-      "SetCurrentFeature ExtendedFeature",
-      "NewSync CUSTOM_PATH " + viewer_dir,
-      "UpdateFile CUSTOM_PATH\\ImageViewer.exe " + viewer_dir + "\\ImageViewer.exe",
-      "UpdateFile CUSTOM_PATH\\VideoPlayer.exe " + viewer_dir + "\\VideoPlayer.exe",
-      "SetProperty ProductName=\"" + branding.desktop_product_name_full + "\"",
-      "SetProperty ASCC_REG_PREFIX=" + branding.ascc_reg_prefix
-    ]
-    if common.platform == "windows_x86":
-      aic_content += [
-        "SetComponentAttribute -feature_name ExtendedFeature -unset -64bit_component"
-      ]
-  if common.platform == "windows_x86":
-    aic_content += [
-      "SetComponentAttribute -feature_name MainFeature -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileProgIds -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileOpenWith -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileProgramCapatibilities -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileTypeAssociations -unset -64bit_component",
-      "SetComponentAttribute -feature_name FileNewTemplates -unset -64bit_component"
-    ]
-  aic_content += [
-    "SetCurrentFeature MainFeature",
-    "NewSync APPDIR " + desktop_dir,
-    "UpdateFile APPDIR\\DesktopEditors.exe " + desktop_dir + "\\DesktopEditors.exe",
-    "UpdateFile APPDIR\\updatesvc.exe " + desktop_dir + "\\updatesvc.exe",
-    "SetProperty VERSION=\"" + package_version + "\"",
-    "SetProperty VERSION_SHORT=\"" + re.sub(r"^(\d+\.\d+).+", "\\1", package_version) + "\"",
-    "SetVersion " + package_version,
-    "SetPackageName " + advinst_file + " -buildname " + msi_build,
-    "Rebuild -buildslist " + msi_build
+  args = [
+    "-Version", ,
+    "-Arch", arch_list[common.platform]
   ]
-  utils.write_file("DesktopEditors.aic", "\r\n".join(aic_content), "utf-8-sig")
-  ret = utils.cmd("AdvancedInstaller.com", "/execute", \
-    "DesktopEditors.aip", "DesktopEditors.aic", verbose=True)
+  if common.sign:
+    args += ["-Sign"]
+  if not branding.onlyoffice:
+    args += ["-BrandingDir", branding_dir]
+  ret = utils.ps1("make_advinst.ps1", args, verbose=True)
   utils.set_summary("desktop advinst build", ret)
 
   if common.deploy and ret:
@@ -459,17 +378,6 @@ def make_sparkle_updates():
       verbose=True
   )
   utils.set_summary("desktop sparkle files build", ret)
-
-  utils.log("")
-  utils.log_h3("generate checksums")
-  utils.sh(
-      "md5 *.zip *.delta > md5sums.txt",
-      chdir="build/update", verbose=True
-  )
-  utils.sh(
-      "shasum -a 256 *.zip *.delta > sha256sums.txt",
-      chdir="build/update", verbose=True
-  )
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")

@@ -240,7 +240,7 @@ def make_advinst():
   utils.log_h2("desktop advinst build")
 
   args = [
-    "-Version", ,
+    "-Version", package_version,
     "-Arch", arch_list[common.platform]
   ]
   if common.sign:

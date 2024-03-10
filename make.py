@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+import os 
 import sys
-sys.path.append('scripts')
-sys.path.append('scripts/develop')
-sys.path.append('scripts/develop/vendor')
-sys.path.append('scripts/core_common')
-sys.path.append('scripts/core_common/modules')
+__dir__name__ = os.path.dirname(__file__)
+sys.path.append(__dir__name__ + '/scripts')
+sys.path.append(__dir__name__ + '/scripts/develop')
+sys.path.append(__dir__name__ + '/scripts/develop/vendor')
+sys.path.append(__dir__name__ + '/scripts/core_common')
+sys.path.append(__dir__name__ + '/scripts/core_common/modules')
+sys.path.append(__dir__name__ + '/scripts/core_common/modules/android')
 import config
 import base
 import build

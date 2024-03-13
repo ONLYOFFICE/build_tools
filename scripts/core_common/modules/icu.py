@@ -2,6 +2,7 @@
 
 import sys
 sys.path.append('../..')
+sys.path.append('android')
 import config
 import base
 import os

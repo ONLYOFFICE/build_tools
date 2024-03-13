@@ -697,6 +697,22 @@ def check_congig_option_with_platfom(platform, option_name):
     return True
   return False
 
+def correct_makefile_after_qmake(platform, file):
+  if (0 == platform.find("android")):
+    if ("android_arm64_v8a" == platform):
+      replaceInFile(file, "_arm64-v8a.a", ".a")
+      replaceInFile(file, "_arm64-v8a.so", ".so")
+    if ("android_armv7" == platform):
+      replaceInFile(file, "_armeabi-v7a.a", ".a")
+      replaceInFile(file, "_armeabi-v7a.so", ".so")
+    if ("android_x86_64" == platform):
+      replaceInFile(file, "_x86_64.a", ".a")
+      replaceInFile(file, "_x86_64.so", ".so")
+    if ("android_x86" == platform):
+      replaceInFile(file, "_x86.a", ".a")
+      replaceInFile(file, "_x86.so", ".so")
+  return
+
 def qt_config_platform_addon(platform):
   config_addon = ""
   if (0 == platform.find("win")):
@@ -750,6 +766,21 @@ def qt_config(platform):
 def qt_major_version():
   qt_dir = qt_version()
   return qt_dir.split(".")[0]
+
+def qt_version_decimal():
+  qt_dir = qt_version()
+  return 10 * int(qt_dir.split(".")[0]) + int(qt_dir.split(".")[1])
+
+def qt_config_as_param(value):
+  qt_version = qt_version_decimal()
+  ret_params = []
+  if (66 > qt_version):
+    ret_params.append("CONFIG+=" + value)
+  else:
+    params = value.split()
+    for name in params:
+      ret_params.append("CONFIG+=" + name)
+  return ret_params
 
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")

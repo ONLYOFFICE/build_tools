@@ -5,7 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
-import build
+import qmake
 
 def make(src_dir, modules, build_platform="android", qmake_addon=""):
   old_cur = os.getcwd()
@@ -23,16 +23,12 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
     pro_file_content.append("TARGET = boost_" + module)
     pro_file_content.append("TEMPLATE = lib")
     pro_file_content.append("CONFIG += staticlib")
+    if (build_platform == "android"):
+      pro_file_content.append("DEFINES += \"_HAS_AUTO_PTR_ETC=0\"")
     pro_file_content.append("")
     pro_file_content.append("CORE_ROOT_DIR = $$PWD/../../../../../..")
     pro_file_content.append("PWD_ROOT_DIR = $$PWD")
     pro_file_content.append("include($$PWD/../../../../../base.pri)")
-    pro_file_content.append("")
-    pro_file_content.append("MAKEFILE=$$PWD/build.makefile_$$CORE_BUILDS_PLATFORM_PREFIX")
-    pro_file_content.append("core_debug:MAKEFILE=$$join(MAKEFILE, MAKEFILE, \"\", \"_debug_\")")
-    pro_file_content.append("build_xp:MAKEFILE=$$join(MAKEFILE, MAKEFILE, \"\", \"_xp\")")
-    pro_file_content.append("OO_BRANDING_SUFFIX = $$(OO_BRANDING)")
-    pro_file_content.append("!isEmpty(OO_BRANDING_SUFFIX):MAKEFILE=$$join(MAKEFILE, MAKEFILE, \"\", \"$$OO_BRANDING_SUFFIX\")")
     pro_file_content.append("")
     pro_file_content.append("BOOST_SOURCES=$$PWD/../..")
     pro_file_content.append("INCLUDEPATH += $$BOOST_SOURCES")
@@ -43,7 +39,7 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
     pro_file_content.append("DESTDIR = $$BOOST_SOURCES/../build/" + build_platform + "/lib/$$CORE_BUILDS_PLATFORM_PREFIX")
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
     os.chdir(module_dir)
-    build.make_pro_file("./", module + ".pro", qmake_addon)
+    qmake.make_all_platforms(module_dir + "/" + module + ".pro", qmake_addon)
   
   os.chdir(old_cur)
   return

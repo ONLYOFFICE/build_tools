@@ -1461,7 +1461,8 @@ def make_sln_project(directory, sln_path):
   return
 
 def get_android_ndk_version():
-  return "26.2.11394342"
+  #return "26.2.11394342"
+  return "21.1.6352462"
 
 def get_android_sdk_home():
   ndk_root_path = get_env("ANDROID_NDK_ROOT")

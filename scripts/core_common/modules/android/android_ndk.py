@@ -5,6 +5,20 @@ sys.path.append('../../../scripts')
 import base
 import os
 
+def get_android_ndk_version():
+  env_val = base.get_env("ANDROID_NDK_ROOT")
+  if (env_val == "21.1.6352462"):
+    env_val = "21.1.6352462" 
+  return env_val.strip("/").split("/")[-1]
+
+def get_android_ndk_version_major():
+  return int(get_android_ndk_version().split(".")[0])
+
+def get_sdk_api():
+  if (23 > get_android_ndk_version_major()):
+    return "21"
+  return "23"
+
 global archs
 archs = ["arm64", "arm", "x86_64", "x86"]
 
@@ -14,25 +28,29 @@ platforms = {
     "abi"    : "arm64-v8a",
     "target" : "aarch64-linux-android",
     "dst"    : "arm64_v8a",
-    "api"    : "23"
+    "api"    : get_sdk_api(),
+    "old"    : "aarch64-linux-android"
   },
   "arm" : {
     "abi"    : "armeabi-v7a",
     "target" : "armv7a-linux-androideabi",
     "dst"    : "armv7",
-    "api"    : "23"
+    "api"    : get_sdk_api(),
+    "old"    : "arm-linux-android"
   },
   "x86_64" : {
     "arch"   : "x86_64",
     "target" : "x86_64-linux-android",
     "dst"    : "x86_64",
-    "api"    : "23"
+    "api"    : get_sdk_api(),
+    "old"    : "x86_64-linux-android"
   },
   "x86" : {
     "arch"   : "x86",
     "target" : "i686-linux-android",
     "dst"    : "x86",
-    "api"    : "23"
+    "api"    : get_sdk_api(),
+    "old"    : "i686-linux-android"
   }
 }
 
@@ -49,6 +67,13 @@ else:
     "name" : "darwin",
     "arch" : "darwin-x86_64"
   }
+
+def get_android_ndk_version():
+  #return "26.2.11394342"
+  return "21.1.6352462"
+
+def get_android_ndk_version_major():
+  return int(get_android_ndk_version().split(".")[0])
 
 def get_options_dict_as_array(opts):
   value = []
@@ -93,7 +118,12 @@ def prepare_platform(arch, cpp_standard=11):
   base.set_env("CC", target + api + "-clang")
   base.set_env("CXX", target + api + "-clang++")
 
-  base.set_env("LDFLAGS", "-lc -lstdc++ -Wl,--gc-sections,-rpath-link=" + toolchain + "/sysroot/usr/lib/")
+  ld_flags = "-Wl,--gc-sections,-rpath-link=" + toolchain + "/sysroot/usr/lib/"
+  if (23 > get_android_ndk_version_major()):
+    ld_flags += (" -L" + toolchain + "/" + platforms[arch]["old"] + "/lib")
+    ld_flags += (" -L" + toolchain + "/sysroot/usr/lib/" + platforms[arch]["old"] + "/" + api)
+
+  base.set_env("LDFLAGS", ld_flags)
   base.set_env("PATH", toolchain + "/bin" + os.pathsep + base.get_env("PATH"))
 
   cflags = [

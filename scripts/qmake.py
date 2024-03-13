@@ -67,7 +67,7 @@ def make(platform, project, qmake_config_addon=""):
   # setup android env
   if (-1 != platform.find("android")):
     base.set_env("ANDROID_NDK_HOST", android_ndk.host["arch"])
-    base.set_env("ANDROID_NDK_PLATFORM", "android-23")
+    base.set_env("ANDROID_NDK_PLATFORM", "android-" + android_ndk.get_sdk_api())
     base.set_env("PATH", qt_dir + "/bin:" + android_ndk.toolchain_dir() + "/bin:" + base.get_env("PATH"))
 
   # setup ios env

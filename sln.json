@@ -1,6 +1,6 @@
 {
   "root" : "../",
-  
+
   "core" : [
 
     "core/Common/3dParty/cryptopp/project/cryptopp.pro",
@@ -86,12 +86,11 @@
     "[win,linux]desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/qtascdocumentscore.pro",
     "[win,linux]desktop-apps/win-linux/ASCDocumentEditor.pro",
     
-    "[win]desktop-apps/desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
-    "[win,!win_xp]desktop-apps/desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
+    "[win]desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
+    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
   ],
 
   "osign" : [
     "[win,linux,mac]core/DesktopEditor/xmlsec/src/osign/lib/osign.pro"
   ]
-
 }

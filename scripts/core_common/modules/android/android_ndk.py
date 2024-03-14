@@ -4,6 +4,7 @@ import sys
 sys.path.append('../../../scripts')
 import base
 import os
+import re
 
 def get_android_ndk_version():
   env_val = base.get_env("ANDROID_NDK_ROOT")
@@ -12,7 +13,9 @@ def get_android_ndk_version():
   return env_val.strip("/").split("/")[-1]
 
 def get_android_ndk_version_major():
-  return int(get_android_ndk_version().split(".")[0])
+  val = get_android_ndk_version().split(".")[0]
+  val = re.sub("[^0-9]", "", val)
+  return int(val)
 
 def get_sdk_api():
   if (23 > get_android_ndk_version_major()):

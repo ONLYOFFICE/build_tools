@@ -61,11 +61,11 @@ def fetch_icu():
     base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + icu_major, "https://github.com/unicode-org/icu.git", current_dir + "icu2"])
     base.copy_dir(current_dir + "icu2/icu4c", current_dir + "icu")
     base.delete_dir_with_access_error(current_dir + "icu2")
-    if False:
-      if ("linux" == base.host_platform()):
-        base.replaceInFile(current_dir + "/icu/source/i18n/digitlst.cpp", "xlocale", "locale")
-      if ("mac" == base.host_platform()):
-        base.replaceInFile(current_dir + "/icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
+    
+    if ("linux" == base.host_platform()):
+      base.replaceInFile(current_dir + "/icu/source/i18n/digitlst.cpp", "xlocale", "locale")
+    if False and ("mac" == base.host_platform()):
+      base.replaceInFile(current_dir + "/icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
   return
 
 def build_host():

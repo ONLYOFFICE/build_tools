@@ -5,11 +5,11 @@ import base
 import os
 import sys
 sys.path.append(os.path.dirname(__file__) + "/..")
-import sources
+import sln
 import qmake
 
 # make solution
-def make():
+def make(solution=""):
   platforms = config.option("platform").split()
   for platform in platforms:
     if not platform in config.platforms:
@@ -19,13 +19,14 @@ def make():
     print("BUILD_PLATFORM: " + platform)
     print("------------------------------------------")
 
-    projects = sources.get_projects(platform)
+    if ("" == solution):
+      solution = "./sln.json"
+    projects = sln.get_projects(solution, platform)
 
     for pro in projects:
-      pro_file = os.path.abspath("../" + pro)
-      qmake.make(platform, pro_file)
+      qmake.make(platform, pro)
       if config.check_option("platform", "ios") and config.check_option("config", "bundle_xcframeworks"):
-        qmake.make(platform, pro_file, "xcframework_platform_ios_simulator")
+        qmake.make(platform, pro, "xcframework_platform_ios_simulator")
 
   if config.check_option("module", "builder") and base.is_windows() and "onlyoffice" == config.branding():
     # check replace

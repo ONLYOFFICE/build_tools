@@ -73,6 +73,9 @@ def get_path(path):
     return path.replace("/", "\\")
   return path
 
+def get_relpath(path, rel_path):
+  return os.path.relpath(get_path(path), get_path(rel_path))
+
 def get_abspath(path):
   return os.path.abspath(get_path(path))
 

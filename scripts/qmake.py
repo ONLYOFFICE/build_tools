@@ -115,11 +115,11 @@ def make(platform, project, qmake_config_addon=""):
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
-    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + pro_file + config_params_string + qmake_addon_string)
+    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
     if ("1" == config.option("clean")):
       qmake_bat.append("call nmake " + " ".join(clean_params))
       qmake_bat.append("call nmake " + " ".join(distclean_params))
-      qmake_bat.append("call \"" + qmake_app + "\" -nocache " + pro_file + config_params_string + qmake_addon_string)
+      qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
     if ("0" != config.option("multiprocess")):
       qmake_bat.append("set CL=/MP")
     qmake_bat.append("call nmake -f " + makefile)

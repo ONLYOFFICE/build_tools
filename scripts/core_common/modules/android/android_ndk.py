@@ -7,7 +7,7 @@ import os
 
 def get_android_ndk_version():
   env_val = base.get_env("ANDROID_NDK_ROOT")
-  if (env_val == "21.1.6352462"):
+  if (env_val == ""):
     env_val = "21.1.6352462" 
   return env_val.strip("/").split("/")[-1]
 

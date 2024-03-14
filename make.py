@@ -2,7 +2,7 @@
 
 import os 
 import sys
-__dir__name__ = os.path.dirname(__file__)
+__dir__name__ = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(__dir__name__ + '/scripts')
 sys.path.append(__dir__name__ + '/scripts/develop')
 sys.path.append(__dir__name__ + '/scripts/develop/vendor')

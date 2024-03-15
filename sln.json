@@ -90,6 +90,10 @@
     "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
   ],
 
+  "mobile" : [
+    "core"
+  ],
+
   "osign" : [
     "[win,linux,mac]core/DesktopEditor/xmlsec/src/osign/lib/osign.pro"
   ]

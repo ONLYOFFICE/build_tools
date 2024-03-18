@@ -90,7 +90,7 @@ def build_host():
 
     base.cmd("../source/runConfigureICU", [host_type, "--prefix=" + cross_build_dir] + android_ndk.get_options_dict_as_array(options))
     base.cmd("make", ["-j4"])
-    base.cmd("make", ["install"])
+    base.cmd("make", ["install"], True)
 
     base.create_dir(current_dir + "build")
     base.copy_dir(cross_build_dir + "/include", current_dir + "build/include")

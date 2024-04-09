@@ -250,6 +250,9 @@ def copy_lib(src, dst, name):
         create_dir(dst + "/simulator")
         copy_dir(src + "/simulator/" + name + ".framework", dst + "/simulator/" + name + ".framework")
 
+        if is_dir(dst + "/" + name + ".xcframework"):
+          delete_dir(dst + "/" + name + ".xcframework")
+
         cmd("xcodebuild", ["-create-xcframework", 
             "-framework", dst + "/" + name + ".framework", 
             "-framework", dst + "/simulator/" + name + ".framework", 

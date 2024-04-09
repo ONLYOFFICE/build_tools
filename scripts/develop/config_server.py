@@ -101,7 +101,8 @@ def make():
   server_addons = []
   if (config.option("server-addons") != ""):
     server_addons = config.option("server-addons").rsplit(", ")
-  if ("server-lockstorage" in server_addons):
+  #server-lockstorage is private
+  if ("server-lockstorage" in server_addons and base.is_dir(git_dir + "/server-lockstorage")):
     server_config["editorDataStorage"] = "editorDataRedis"
   
   sdkjs_addons = []

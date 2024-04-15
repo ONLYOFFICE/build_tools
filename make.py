@@ -17,6 +17,14 @@ import build_server
 import deploy
 import make_common
 import develop
+import argparse
+
+parser = argparse.ArgumentParser(description="options")
+parser.add_argument("--build-only-branding", action="store_true")
+args = parser.parse_args()
+
+if (args.build_only_branding):
+  base.set_env("OO_BUILD_ONLY_BRANDING", "1")
 
 # parse configuration
 config.parse()

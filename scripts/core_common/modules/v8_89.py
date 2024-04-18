@@ -26,12 +26,12 @@ def change_bootstrap():
 
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
-  if is_64:
-    args_copy.append("target_cpu=\\\"x64\\\"") 
-    args_copy.append("v8_target_cpu=\\\"x64\\\"")
-  else:
-    args_copy.append("target_cpu=\\\"x86\\\"") 
-    args_copy.append("v8_target_cpu=\\\"x86\\\"")
+  # if is_64:
+  #   args_copy.append("target_cpu=\\\"x64\\\"") 
+  #   args_copy.append("v8_target_cpu=\\\"x64\\\"")
+  # else:
+  #   args_copy.append("target_cpu=\\\"x86\\\"") 
+  #   args_copy.append("v8_target_cpu=\\\"x86\\\"")
 
   if (platform == "linux_arm64"):
     args_copy = args[:]
@@ -46,9 +46,9 @@ def make_args(args, platform, is_64=True, is_debug=False):
   else:
     args_copy.append("is_debug=false")
   
-  if (platform == "linux"):
-    args_copy.append("is_clang=true")
-    args_copy.append("use_sysroot=false")
+  # if (platform == "linux"):
+  #   args_copy.append("is_clang=true")
+  #   args_copy.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")
 

@@ -265,3 +265,12 @@ allow to run foreground processes in background mode.
     NODE_CONFIG_DIR=$PWD/../Common/config \
     ./docservice
     ```
+## common error
+
+Warning: Error: ～/web-apps/build/node_modules/optipng-bin/vendor/optipng: 1: @@8�@@@@@@@�@@@@����: not found
+```shell
+download https://sourceforge.net/projects/optipng/files/OptiPNG/optipng-0.7.7/optipng-0.7.7.tar.gz/download
+tar -zxvf optipng-0.7.7.tar.gz
+export CPPFLAGS="-DPNG_ARM_NEON_OPT=0"
+./configure --prefix=/opt/runtime/opting && make
+```

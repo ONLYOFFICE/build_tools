@@ -27,18 +27,19 @@ def change_bootstrap():
 
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
-  if config.check_option("platform", "linux_64"):
+  if config.is_linux_arm64:
+    args_copy = args[:]
+    args_copy.append("target_cpu=\\\"arm64\\\"")
+    args_copy.append("v8_target_cpu=\\\"arm64\\\"")
+    args_copy.append("use_sysroot=true")
+  else:
     if is_64:
       args_copy.append("target_cpu=\\\"x64\\\"")
       args_copy.append("v8_target_cpu=\\\"x64\\\"")
     else:
       args_copy.append("target_cpu=\\\"x86\\\"")
       args_copy.append("v8_target_cpu=\\\"x86\\\"")
-  else:
-    args_copy = args[:]
-    args_copy.append("target_cpu=\\\"arm64\\\"")
-    args_copy.append("v8_target_cpu=\\\"arm64\\\"")
-    args_copy.append("use_sysroot=true")
+    
   if is_debug:
     args_copy.append("is_debug=true")
     if (platform == "windows"):
@@ -48,7 +49,7 @@ def make_args(args, platform, is_64=True, is_debug=False):
 
   if (platform == "linux"):
     args_copy.append("is_clang=true")
-    if config.check_option("platform", "linux_64"):
+    if not config.is_linux_arm64:
       args_copy.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")
@@ -328,7 +329,7 @@ def make():
              "use_custom_libcxx=false",
              "treat_warnings_as_errors=false"]
 
-  if config.check_option("platform", "linux_arm64"):
+  if config.is_linux_arm64:
     if os.path.exists("./customnin"):
       base.cmd("rm", ["-rf", "customnin"], False)
     if os.path.exists("./customgn"):

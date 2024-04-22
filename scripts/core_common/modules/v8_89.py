@@ -328,7 +328,7 @@ def make():
              "use_custom_libcxx=false",
              "treat_warnings_as_errors=false"]
 
-  if os.uname()[len(os.uname()) - 1] == "aarch64":
+  if config.check_option("platform", "linux_arm64"):
     if os.path.exists("./customnin"):
       base.cmd("rm", ["-rf", "customnin"], False)
     if os.path.exists("./customgn"):

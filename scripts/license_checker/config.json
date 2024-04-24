@@ -125,6 +125,7 @@
 			],
 			"ignoreListDir": [
 				"web-apps/apps/common/mobile",
+				"web-apps/apps/common/main/lib/mods",
 				"web-apps/apps/documenteditor/mobile",
 				"web-apps/apps/spreadsheeteditor/mobile",
 				"web-apps/apps/presentationeditor/mobile",
@@ -132,7 +133,6 @@
 			],
 			"ignoreListFile": [
 				"web-apps/apps/api/documents/api.js",
-				"web-apps/apps/common/main/lib/mods/perfect-scrollbar.js",
 				"web-apps/apps/common/main/lib/core/application.js",
 				"web-apps/apps/common/main/lib/core/keymaster.js",
 				"web-apps/apps/presentationeditor/embed/resources/less/watch.js"

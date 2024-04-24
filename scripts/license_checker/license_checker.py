@@ -25,9 +25,6 @@ class Config(object):
 	Attributes:
 		dir: Directory to check.
 		fileExtensions: file extensions to check.
-		startMultiComm: characters to start a multi-line comment.
-		endMultiComm: characters to end a multi-line comment.
-		prefix: prefix for multiline comments
 		ignoreListDir: Ignored folder paths.
 		ignoreListDirName: Ignored folder names.
 		ignoreListFile: Ignored file paths.
@@ -36,9 +33,7 @@ class Config(object):
 	def __init__(self,
 		dir: str,
 		fileExtensions: list[str],
-		startMultiComm: str,
-		endMultiComm: str,
-		prefix: str = '',
+		licensePath: str = 'header.license',
 		allowListFile: list[str] = [],
 		ignoreListDir: list[str] = [],
 		ignoreListDirName: list[str] = [],
@@ -46,13 +41,19 @@ class Config(object):
 
 		self._dir = dir
 		self._fileExtensions = fileExtensions
-		self._startMultiComm = startMultiComm
-		self._endMultiComm = endMultiComm
-		self._prefix = prefix
 		self._allowListFile = allowListFile
 		self._ignoreListDir = ignoreListDir
 		self._ignoreListDirName = ignoreListDirName
 		self._ignoreListFile = ignoreListFile
+		"""Read license template."""
+		with open(licensePath, 'r', encoding="utf8") as file:
+			lines = file.readlines()
+			if not lines:
+				raise Exception(f'Error getting license template. Cannot read {licensePath} file. Is not it empty?')
+			non_empty_lines = [s for s in lines if not s.isspace()]
+			self._startMultiComm = non_empty_lines[0]
+			self._endMultiComm = non_empty_lines[-1]
+			self._license_lines = lines
 
 	def getDir(self) -> str:
 		return self._dir
@@ -62,8 +63,8 @@ class Config(object):
 		return self._startMultiComm
 	def getEndMultiComm(self) -> str:
 		return self._endMultiComm
-	def getPrefix(self) -> str:
-		return self._prefix
+	def getLicense(self) -> list[str]:
+		return self._license_lines
 	def getAllowListFile(self) -> list[str]:
 		return self._allowListFile
 	def getIgnoreListDir(self) -> list[str]:
@@ -77,7 +78,6 @@ with open(CONFIG_PATH, 'r') as j:
 	_json: dict = json.load(j)
 	BASE_PATH: str = _json.get('basePath') or '../../../'
 	REPORT_FOLDER: str = _json.get('reportFolder') or 'build_tools/scripts/license_checker/reports'
-	LICENSE_TEMPLATE_PATH: str = _json.get('licensePath') or 'build_tools/scripts/license_checker/header.license'
 	if (_json.get('fix')):
 		try:
 			FIX: list[ErrorType] = list(map(lambda x: FIX_TYPES[x], _json.get('fix')))
@@ -92,23 +92,6 @@ with open(CONFIG_PATH, 'r') as j:
 		CONFIGS.append(Config(**i))
 
 os.chdir(BASE_PATH)
-
-with open(LICENSE_TEMPLATE_PATH, 'r') as f:
-	LICENSE: list[str] = f.readlines()
-	if not LICENSE:
-		raise Exception(f'Error getting license template. Cannot read {LICENSE_TEMPLATE_PATH} file. Is not it empty?')	
-
-def getLicense(start: str, prefix: str, end: str) -> list[str]:
-	"""Returns a valid license for any kind of comment prefix."""
-	result = [start]
-	for i in LICENSE:
-		if i == '\n':
-			result.append(prefix)
-		else:
-			result.append(f'{" ".join([prefix, i.strip()])}')
-	result.append(prefix)
-	result.append(end)
-	return result
 
 class Error(object):
 	def __init__(self, errorType: ErrorType) -> None:
@@ -144,8 +127,6 @@ class Checker(object):
 		self._reports: list[Report] = []
 	def getReports(self):
 		return self._reports
-	def getLicense(self):
-		return getLicense(start=self._config.getStartMultiComm(), prefix=self._config.getPrefix(), end=self._config.getEndMultiComm())
 	def _checkLine(self, line: str, prefix: str) -> bool:
 		"""Checks if a line has a prefix."""
 		"""Trim to catch invalid license without leading spaces"""
@@ -172,7 +153,7 @@ class Checker(object):
 				break
 		return result
 	def _checkLicense(self, test: list[str], pathToFile: str) -> Report:
-		license = self.getLicense()
+		license = self._config.getLicense()
 		if len(license) != len(test):
 			return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.LEN_MISMATCH),
@@ -180,32 +161,29 @@ class Checker(object):
 		invalidLinesCount = 0
 		lastWrongLine = 0
 		for i in range(len(license)):
-			if (license[i] != test[i].strip('\n')):
+			if (license[i] != test[i]):
 				invalidLinesCount += 1
 				lastWrongLine = i
 		if (invalidLinesCount == 1):
-			r = r'\d\d\d\d\-\d\d\d\d'
-			testDate = re.search(r, test[lastWrongLine])
-			licenseDate = re.search(r, license[lastWrongLine])
+			r = r'\d\d\d\d'
+			testDate = re.findall(r, test[lastWrongLine])
+			licenseDate = re.findall(r, license[lastWrongLine])
 
-			if testDate and licenseDate:
-				testDate = testDate.group()
-				licenseDate = licenseDate.group()
-			else:
+			if not (testDate and licenseDate):
 				return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.INVALID_LICENSE),
 				message=f'Something wrong...')
 
-			testLastYear = testDate.split('-')[1]
-			licenseLastYear = licenseDate.split('-')[1]
-			if (int(testLastYear) < int(licenseLastYear)):
+			testLastYear = int(testDate[-1])
+			licenseLastYear = int(licenseDate[-1])
+			if (testLastYear < licenseLastYear):
 				return Report(pathToFile=pathToFile,
 					error=Error(errorType=ErrorType.OUTDATED),
-					message=f'Found date {testDate}, expected {licenseDate}')
+					message=f'Found date {testLastYear}, expected {licenseLastYear}')
 			else:
 				return Report(pathToFile=pathToFile,
 					error=Error(errorType=ErrorType.INVALID_LICENSE),
-					message=f"Found something similar to the date: {testDate}, but it's not correct. Expected: {licenseDate}")
+					message=f"Found something similar to the date: {testLastYear}, but it's not correct. Expected: {licenseLastYear}")
 		elif (invalidLinesCount > 0):
 			return Report(pathToFile=pathToFile,
 				error=Error(errorType=ErrorType.INVALID_LICENSE),
@@ -286,8 +264,9 @@ class Fixer(object):
 		with open(pathToFile, 'r', encoding="utf8") as file:
 			buffer = file.readlines()
 		with open(pathToFile, 'w', encoding="utf8") as file:
-			license = self._checker.getLicense()
-			file.writelines(map(lambda x: "".join([x, '\n']), license))
+			license = self._config.getLicense()
+			file.writelines(license)
+			file.write('\n')
 			file.writelines(buffer)
 		return
 	def _fixLicense(self, pathToFile: str):
@@ -301,8 +280,8 @@ class Fixer(object):
 			for i in oldLicense:
 				buffer.remove(i)
 		with open(pathToFile, 'w', encoding=writeEncoding) as file:
-			license = self._checker.getLicense()
-			file.writelines(map(lambda x: "".join([x, '\n']), license))
+			license = self._config.getLicense()
+			file.writelines(license)
 			file.writelines(buffer)
 		return
 
@@ -328,7 +307,7 @@ def writeReports(reports: list[Report]) -> None:
 	for i in reports:
 		files[i.getError().getErrorType().name].append(i)
 	for i in ErrorType:
-		with open(f'{REPORT_FOLDER}/{i.name}.txt', 'w') as f:
+		with open(f'{REPORT_FOLDER}/{i.name}.txt', 'w', encoding="utf8") as f:
 			f.writelines(map(lambda x: "".join([x.report(), '\n']), files.get(i.name)))
 
 for config in CONFIGS:

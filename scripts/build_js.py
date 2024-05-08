@@ -115,9 +115,9 @@ def _run_grunt(directory, params=[]):
 
 def build_interface(directory):
   _run_npm(directory)
-  if os.uname()[len(os.uname()) - 1] == "aarch64" and base.is_dir(directory + "/node_modules/optipng-bin"):
+  if config.is_linux_arm64 and base.is_dir(directory + "/node_modules/optipng-bin"):
     if not base.is_dir("optipng"):
-      base.cmd("git",["clone","https://github.com/fernfei/optipng.git"],False)
+      base.cmd("git",["clone","https://github.com/yiwen/optipng.git"],False)
     base.copy_file("optipng/src/optipng/optipng",directory+"/node_modules/optipng-bin/vendor/optipng")
   _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
   return

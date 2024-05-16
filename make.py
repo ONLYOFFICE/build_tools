@@ -19,6 +19,8 @@ import make_common
 import develop
 import argparse
 
+base.check_python()
+
 parser = argparse.ArgumentParser(description="options")
 parser.add_argument("--build-only-branding", action="store_true")
 args = parser.parse_args()

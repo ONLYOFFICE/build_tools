@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../../../scripts')
-import base
 import os
 import argparse
+
+__dir__name__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__name__ + '/../../../scripts')
+import base
 
 def docker_build(image_name, dockerfile_dir, build_dir):
   base.cmd("docker", ["build", "-t", image_name, dockerfile_dir])
@@ -25,4 +27,4 @@ if __name__ == "__main__":
 
   abs_build_path = os.path.abspath(build_dir)
   arch = args.arch
-  docker_build('qt-' + arch, arch, abs_build_path)
+  docker_build('qt-' + arch, __dir__name__ + "/" + arch, abs_build_path)

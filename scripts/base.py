@@ -1718,4 +1718,13 @@ def check_python():
     cmd("ln", ["-s", directory_bin + "/python3", directory_bin + "/python"])
   directory_bin = directory_bin.replace(" ", "\\ ")
   os.environ["PATH"] = directory_bin + os.pathsep + os.environ["PATH"]
-  return  
+  return
+
+def check_tools():
+  if ("linux" == host_platform()):
+    directory = __file__script__path__ + "/../tools/linux"
+    if not is_os_arm() and config.check_option("platform", "linux_arm64"):
+      if not is_dir(directory + "/qt"):
+        create_dir(directory + "/qt")
+      cmd("python", [directory + "/arm/build_qt.py", "--arch", "arm64", directory + "/qt/arm64"])
+  return

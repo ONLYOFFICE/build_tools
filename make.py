@@ -72,12 +72,14 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-develop.make();
+develop.make()
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
   build_js.make()
   exit(0)
+
+#base.check_tools()
 
 # core 3rdParty
 make_common.make()

@@ -78,7 +78,7 @@ def make():
     base.copy_v8_files(core_dir, root_dir, platform, isWindowsXP)
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.c")
 
-    base.copy_lib(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir, "docbuilder.py")
+    base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir + "/docbuilder.py")
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")

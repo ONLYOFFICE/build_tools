@@ -23,6 +23,7 @@
     "core/DocxRenderer/DocxRenderer.pro",   
 
     "core/DesktopEditor/doctrenderer/doctrenderer.pro",
+    "core/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder_func_lib.pro",
 
     "[!no_x2t]core/OOXML/Projects/Linux/DocxFormatLib/DocxFormatLib.pro",
     "[!no_x2t]core/OOXML/Projects/Linux/PPTXFormatLib/PPTXFormatLib.pro",

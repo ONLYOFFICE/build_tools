@@ -1224,7 +1224,8 @@ def mac_correct_rpath_docbuilder(dir):
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
   mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
-  mac_correct_rpath_library("docbuilder.c", ["UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer"])
+  mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer"])
+  cmd("install_name_tool", ["-add_rpath", "@loader_path", "libdocbuilder.c.dylib"], True)
   os.chdir(cur_dir)
   return
 
@@ -1258,6 +1259,19 @@ def mac_correct_rpath_desktop(dir):
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>editors_helper</string>", "<string>editors_helper (Renderer)</string>")
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>asc.onlyoffice.editors-helper</string>", "<string>asc.onlyoffice.editors-helper-renderer</string>")
   os.chdir(cur_dir)
+  return
+
+def linux_set_origin_rpath_libraries(dir, libs):
+  tools_dir = get_script_dir() + "/../tools/linux/elf/"
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  for lib in libs:
+    cmd(tools_dir + "patchelf", ["--set-rpath", "\\$ORIGIN", "lib" + lib], True)
+  os.chdir(cur_dir)
+  return
+
+def linux_correct_rpath_docbuilder(dir):
+  linux_set_origin_rpath_libraries(dir, ["docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so"])
   return
 
 def common_check_version(name, good_version, clean_func):

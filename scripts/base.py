@@ -1261,6 +1261,23 @@ def mac_correct_rpath_desktop(dir):
   os.chdir(cur_dir)
   return
 
+def linux_set_origin_rpath_library(lib):
+  tools_dir = get_script_dir() + "/../tools/linux/elf/"
+  cmd(tools_dir + "patchelf", ["--set-rpath", "\'$ORIGIN\'", "lib" + lib], True)
+  return
+
+def linux_set_origin_rpath_libraries(libs):
+  for lib in libs:
+    linux_set_origin_rpath_library(lib)
+  return
+
+def linux_correct_rpath_docbuilder(dir):
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  linux_set_origin_rpath_libraries(["docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so"])
+  os.chdir(cur_dir)
+  return
+
 def common_check_version(name, good_version, clean_func):
   version_good = name + "_version_" + good_version
   version_path = "./" + name + ".data"

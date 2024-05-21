@@ -114,6 +114,9 @@ def make():
     if ("ios" == platform):
       base.generate_plist(root_dir)
 
+    if (0 == platform.find("linux")):
+      base.linux_correct_rpath_docbuilder(root_dir)
+
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)

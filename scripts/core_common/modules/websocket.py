@@ -4,8 +4,8 @@ import sys
 sys.path.append('../..')
 import config
 import base
-import ixwebsocket
-import socketrocket
+#import ixwebsocket
+#import socketrocket
 import socket_io
 
 config_file = base.get_script_dir() + "/../../core/Common/WebSocket/websocket.pri"

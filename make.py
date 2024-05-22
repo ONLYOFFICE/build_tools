@@ -17,6 +17,16 @@ import build_server
 import deploy
 import make_common
 import develop
+import argparse
+
+base.check_python()
+
+parser = argparse.ArgumentParser(description="options")
+parser.add_argument("--build-only-branding", action="store_true")
+args = parser.parse_args()
+
+if (args.build_only_branding):
+  base.set_env("OO_BUILD_ONLY_BRANDING", "1")
 
 # parse configuration
 config.parse()
@@ -62,12 +72,14 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-develop.make();
+develop.make()
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
   build_js.make()
   exit(0)
+
+#base.check_tools()
 
 # core 3rdParty
 make_common.make()

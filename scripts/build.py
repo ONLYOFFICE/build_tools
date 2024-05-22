@@ -24,7 +24,13 @@ def make(solution=""):
     projects = sln.get_projects(solution, platform)
 
     for pro in projects:
-      qmake.make(platform, pro)
+      qmake_main_addon = ""
+      if (0 == platform.find("android")) and (-1 != pro.find("X2tConverter.pro")):
+        if config.check_option("config", "debug") and not config.check_option("config", "disable_x2t_debug_strip"):
+          print("[WARNING:] temporary enable strip for x2t library in debug")
+          qmake_main_addon += "build_strip_debug"
+
+      qmake.make(platform, pro, qmake_main_addon)
       if config.check_option("platform", "ios") and config.check_option("config", "bundle_xcframeworks"):
         qmake.make(platform, pro, "xcframework_platform_ios_simulator")
 

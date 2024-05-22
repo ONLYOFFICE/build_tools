@@ -132,11 +132,11 @@ def download_vcredist():
     # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33135
     "windows_x64": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "a8a68bcc74b5022467f12587baf1ef93"
+      "md5": "1d545507009cc4ec7409c1bc6e93b17b"
     },
     "windows_x86": {
       "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "9882a328c8414274555845fa6b542d1e"
+      "md5": "8457542fd4be74cb2c3a92b3386ae8e9"
     },
     # Microsoft Visual C++ 2015-2019 Redistributable - 14.27.29114
     "windows_x64_xp": {

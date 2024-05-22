@@ -45,7 +45,7 @@ instruction show how to use docker without sudo.
 ```bash
 cd build_tools/develop
 docker pull onlyoffice/documentserver
-docker build -t documentserver-develop .
+docker build --no-cache -t documentserver-develop .
 ```
 
 **Note**: The dot at the end is required.

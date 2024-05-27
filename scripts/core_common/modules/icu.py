@@ -39,6 +39,8 @@ def make():
   if (-1 != config.option("platform").find("android")):
     icu_android.make()
 
+  os.chdir(base_dir)
+
   icu_major = "58"
   icu_minor = "3"
   

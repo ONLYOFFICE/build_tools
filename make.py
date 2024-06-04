@@ -11,7 +11,7 @@ sys.path.append(__dir__name__ + '/scripts/core_common/modules')
 sys.path.append(__dir__name__ + '/scripts/core_common/modules/android')
 import config
 import base
-import build
+from scripts import build
 import build_js
 import build_server
 import deploy

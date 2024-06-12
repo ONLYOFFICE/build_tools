@@ -5,6 +5,7 @@ sys.path.append('../..')
 import config
 import base
 import os
+import shutil
 
 def make():
   print("[fetch & build]: cef")
@@ -13,7 +14,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "linux_arm64"]
 
   url = "http://d2ettrnqo7v976.cloudfront.net/cef/4280/"
 

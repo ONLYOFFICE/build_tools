@@ -164,10 +164,15 @@ def make():
   # build
   os.chdir("v8")
 
-  base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
-  base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
-  if config.check_option("platform", "linux_64"):
+  if config.is_linux_arm64:
+    base_args64 = "target_cpu=\\\"arm64\\\" v8_target_cpu=\\\"arm64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+    base_args32 = "target_cpu=\\\"arm\\\" v8_target_cpu=\\\"arm\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+  else:
+    base_args64 = "target_cpu=\\\"x64\\\" v8_target_cpu=\\\"x64\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+    base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
+
+  if config.check_option("platform", "linux_64") or config.is_linux_arm64:
     base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 

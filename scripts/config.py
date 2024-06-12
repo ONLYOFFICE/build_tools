@@ -61,7 +61,7 @@ def parse():
     if not check_option("platform", "linux_64"):
       # linux_64 binaries need only for desktop
       if check_option("module", "desktop"):
-        options["platform"] = "linux_64 " + options["platform"]
+        options["platform"] = options["platform"]
 
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
@@ -211,3 +211,7 @@ def parse_defaults():
     else:
       options[name] = defaults_options[name]
   return
+
+def is_linux_arm64():
+  uname_result = os.uname()
+  return uname_result.sysname == 'linux' and uname_result.machine == 'aarch64'

@@ -58,8 +58,14 @@ json_params = "{"
 
 json_params += "'spreadsheetLayout':{"
 
-if True:
-  json_params += "'fitToWidth':0,'fitToHeight':0,"
+# True for fit, False for 100%
+isScaleSheetToPage = False
+
+json_fit_text = "0"
+if isScaleSheetToPage:
+  json_fit_text = "1"
+
+json_params += "'fitToWidth':" + json_fit_text + ",'fitToHeight':" + json_fit_text + ","
 
 if True:
   json_params += "'orientation':'landscape',"

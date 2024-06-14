@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 sys.path.append('../../scripts')
@@ -51,19 +52,37 @@ if base.is_file(directory_fonts_local + "/AllFonts.js"):
   directory_fonts = directory_fonts_local
 # ---------------------------------------------------
 
-json_params = "{'spreadsheetLayout':{'fitToWidth':1,'fitToHeight':1},"
-json_params += "'documentLayout':{'drawPlaceHolders':true,'drawFormHighlight':true,'isPrint':true}}"
+
+
+json_params = "{"
+
+json_params += "'spreadsheetLayout':{"
+
+if True:
+  json_params += "'fitToWidth':0,'fitToHeight':0,"
+
+if True:
+  json_params += "'orientation':'landscape',"
+
+page_margins = "'pageMargins':{'bottom':10,'footer':5,'header':5,'left':5,'right':5,'top':10}"
+page_setup = "'pageSetup':{'orientation':1,'width':210,'height':297,'paperUnits':0,'scale':100,'printArea':false,'horizontalDpi':600,'verticalDpi':600,'usePrinterDefaults':true,'fitToHeight':0,'fitToWidth':0}"
+
+json_params += "'sheetsProps':{'0':{'headings':false,'printTitlesWidth':null,'printTitlesHeight':null," + page_margins + "," + page_setup + "}}},"
+
+json_params += "'documentLayout':{'drawPlaceHolders':true,'drawFormHighlight':true,'isPrint':true}"
+json_params += "}"
 json_params = json_params.replace("'", "&quot;")
 
 output_len = len(input_files)
 output_cur = 1
 for input_file in input_files:
   print("process [" + str(output_cur) + " of " + str(output_len) + "]: " + str(input_file.encode("utf-8")))
-  output_file = os.path.join(output_dir, os.path.splitext(os.path.basename(input_file))[0])
+  output_file_tmp = os.path.join(output_dir, "temp")
+  output_file = os.path.join(output_dir, os.path.splitext(os.path.basename(input_file))[0].strip())
   xml_convert = u"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
   xml_convert += u"<TaskQueueDataConvert>"
   xml_convert += (u"<m_sFileFrom>" + input_file + u"</m_sFileFrom>")
-  xml_convert += (u"<m_sFileTo>" + output_file + u".zip</m_sFileTo>")
+  xml_convert += (u"<m_sFileTo>" + output_file_tmp + u".zip</m_sFileTo>")
   xml_convert += u"<m_nFormatTo>1029</m_nFormatTo>"
   xml_convert += (u"<m_sAllFontsPath>" + directory_fonts + u"/AllFonts.js</m_sAllFontsPath>")
   xml_convert += (u"<m_sFontDir>" + directory_fonts + u"</m_sFontDir>")
@@ -79,12 +98,14 @@ for input_file in input_files:
   xml_convert += u"<m_nDoctParams>1</m_nDoctParams>"
   xml_convert += (u"<m_sTempDir>" + temp_dir + u"</m_sTempDir>")
   xml_convert += u"</TaskQueueDataConvert>"
+  print(xml_convert)
   base.save_as_script(temp_dir + "/to.xml", [xml_convert])
   base.cmd_in_dir(directory_x2t, "x2t", [temp_dir + "/to.xml"], True)
   base.delete_dir(temp_dir)
   base.create_dir(temp_dir)
-  base.extract_unicode(output_file + u".zip", output_file)
-  base.delete_file(output_dir + "/" + os.path.splitext(os.path.basename(input_file))[0] + ".zip")
+  base.extract_unicode(output_file_tmp + u".zip", output_file_tmp)
+  base.move_dir(str(output_file_tmp), str(output_file))
+  base.delete_file(output_file_tmp + u".zip")
   output_cur += 1
 
 base.delete_dir(temp_dir)

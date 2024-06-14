@@ -98,7 +98,6 @@ for input_file in input_files:
   xml_convert += u"<m_nDoctParams>1</m_nDoctParams>"
   xml_convert += (u"<m_sTempDir>" + temp_dir + u"</m_sTempDir>")
   xml_convert += u"</TaskQueueDataConvert>"
-  print(xml_convert)
   base.save_as_script(temp_dir + "/to.xml", [xml_convert])
   base.cmd_in_dir(directory_x2t, "x2t", [temp_dir + "/to.xml"], True)
   base.delete_dir(temp_dir)

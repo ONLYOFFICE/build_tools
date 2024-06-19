@@ -75,13 +75,14 @@ along with the relative paths to the required folders.
 The folders `sdkjs` and `web-apps` are required for proper development workflow.
 The folders `server` is optional
 
+**Note**: Run command with the current working directory
+containing `sdkjs`, `web-apps`...
+
 **Note**: ONLYOFFICE server uses port 80.
 Look for another application using port 80 and stop it
 
 **Note**: Server start with `sdkjs` and `web-apps` takes 15 minutes
 and takes 20 minutes with `server`
-
-**Note**: Run command from work dir with development modules
 
 ### docker run on Windows (PowerShell)
 

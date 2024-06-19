@@ -250,6 +250,9 @@ def copy_lib(src, dst, name):
         create_dir(dst + "/simulator")
         copy_dir(src + "/simulator/" + name + ".framework", dst + "/simulator/" + name + ".framework")
 
+        if is_dir(dst + "/" + name + ".xcframework"):
+          delete_dir(dst + "/" + name + ".xcframework")
+
         cmd("xcodebuild", ["-create-xcframework", 
             "-framework", dst + "/" + name + ".framework", 
             "-framework", dst + "/simulator/" + name + ".framework", 
@@ -697,6 +700,22 @@ def check_congig_option_with_platfom(platform, option_name):
     return True
   return False
 
+def correct_makefile_after_qmake(platform, file):
+  if (0 == platform.find("android")):
+    if ("android_arm64_v8a" == platform):
+      replaceInFile(file, "_arm64-v8a.a", ".a")
+      replaceInFile(file, "_arm64-v8a.so", ".so")
+    if ("android_armv7" == platform):
+      replaceInFile(file, "_armeabi-v7a.a", ".a")
+      replaceInFile(file, "_armeabi-v7a.so", ".so")
+    if ("android_x86_64" == platform):
+      replaceInFile(file, "_x86_64.a", ".a")
+      replaceInFile(file, "_x86_64.so", ".so")
+    if ("android_x86" == platform):
+      replaceInFile(file, "_x86.a", ".a")
+      replaceInFile(file, "_x86.so", ".so")
+  return
+
 def qt_config_platform_addon(platform):
   config_addon = ""
   if (0 == platform.find("win")):
@@ -750,6 +769,21 @@ def qt_config(platform):
 def qt_major_version():
   qt_dir = qt_version()
   return qt_dir.split(".")[0]
+
+def qt_version_decimal():
+  qt_dir = qt_version()
+  return 10 * int(qt_dir.split(".")[0]) + int(qt_dir.split(".")[1])
+
+def qt_config_as_param(value):
+  qt_version = qt_version_decimal()
+  ret_params = []
+  if (66 > qt_version):
+    ret_params.append("CONFIG+=" + value)
+  else:
+    params = value.split()
+    for name in params:
+      ret_params.append("CONFIG+=" + name)
+  return ret_params
 
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
@@ -1190,6 +1224,8 @@ def mac_correct_rpath_docbuilder(dir):
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
   mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
+  mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer"])
+  cmd("install_name_tool", ["-add_rpath", "@loader_path", "libdocbuilder.c.dylib"], True)
   os.chdir(cur_dir)
   return
 
@@ -1223,6 +1259,19 @@ def mac_correct_rpath_desktop(dir):
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>editors_helper</string>", "<string>editors_helper (Renderer)</string>")
   replaceInFile("./editors_helper (Renderer).app/Contents/Info.plist", "<string>asc.onlyoffice.editors-helper</string>", "<string>asc.onlyoffice.editors-helper-renderer</string>")
   os.chdir(cur_dir)
+  return
+
+def linux_set_origin_rpath_libraries(dir, libs):
+  tools_dir = get_script_dir() + "/../tools/linux/elf/"
+  cur_dir = os.getcwd()
+  os.chdir(dir)
+  for lib in libs:
+    cmd(tools_dir + "patchelf", ["--set-rpath", "\\$ORIGIN", "lib" + lib], True)
+  os.chdir(cur_dir)
+  return
+
+def linux_correct_rpath_docbuilder(dir):
+  linux_set_origin_rpath_libraries(dir, ["docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so"])
   return
 
 def common_check_version(name, good_version, clean_func):
@@ -1671,4 +1720,26 @@ def check_module_version(actual_version, clear_func):
     delete_file(module_file)
   writeFile(module_file, actual_version)
   clear_func()
+  return
+
+def check_python():
+  if ("linux" != host_platform()):
+    return
+  directory = __file__script__path__ + "/../tools/linux"
+  directory_bin = __file__script__path__ + "/../tools/linux/python3/bin"
+
+  if not is_dir(directory + "/python3"):
+    cmd("tar", ["xfz", directory + "/python3.tar.gz", "-C", directory])
+    cmd("ln", ["-s", directory_bin + "/python3", directory_bin + "/python"])
+  directory_bin = directory_bin.replace(" ", "\\ ")
+  os.environ["PATH"] = directory_bin + os.pathsep + os.environ["PATH"]
+  return
+
+def check_tools():
+  if ("linux" == host_platform()):
+    directory = __file__script__path__ + "/../tools/linux"
+    if not is_os_arm() and config.check_option("platform", "linux_arm64"):
+      if not is_dir(directory + "/qt"):
+        create_dir(directory + "/qt")
+      cmd("python", [directory + "/arm/build_qt.py", "--arch", "arm64", directory + "/qt/arm64"])
   return

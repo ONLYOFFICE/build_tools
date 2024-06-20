@@ -1,0 +1,101 @@
+{
+  "root" : "../",
+
+  "core" : [
+
+    "core/Common/3dParty/cryptopp/project/cryptopp.pro",
+    "core/Common/cfcpp/cfcpp.pro",
+
+    "core/UnicodeConverter/UnicodeConverter.pro",
+    "core/Common/kernel.pro",
+    "core/Common/Network/network.pro",
+    
+    "core/DesktopEditor/graphics/pro/graphics.pro",
+    
+    "core/PdfFile/PdfFile.pro",
+    "core/DjVuFile/DjVuFile.pro",
+    "core/XpsFile/XpsFile.pro",
+    "core/HtmlFile2/HtmlFile2.pro",
+    "core/Fb2File/Fb2File.pro",
+    "core/EpubFile/CEpubFile.pro",
+    
+    "core/HtmlRenderer/htmlrenderer.pro",
+    "core/DocxRenderer/DocxRenderer.pro",   
+
+    "core/DesktopEditor/doctrenderer/doctrenderer.pro",
+    "core/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder_func_lib.pro",
+
+    "[!no_x2t]core/OOXML/Projects/Linux/DocxFormatLib/DocxFormatLib.pro",
+    "[!no_x2t]core/OOXML/Projects/Linux/PPTXFormatLib/PPTXFormatLib.pro",
+    "[!no_x2t]core/OOXML/Projects/Linux/XlsbFormatLib/XlsbFormatLib.pro",
+
+    "[!no_x2t]core/MsBinaryFile/Projects/DocFormatLib/Linux/DocFormatLib.pro",
+    "[!no_x2t]core/MsBinaryFile/Projects/PPTFormatLib/Linux/PPTFormatLib.pro",
+    "[!no_x2t]core/MsBinaryFile/Projects/XlsFormatLib/Linux/XlsFormatLib.pro",
+    "[!no_x2t]core/MsBinaryFile/Projects/VbaFormatLib/Linux/VbaFormatLib.pro",
+
+    "[!no_x2t]core/TxtFile/Projects/Linux/TxtXmlFormatLib.pro",
+    "[!no_x2t]core/RtfFile/Projects/Linux/RtfFormatLib.pro",
+    "[!no_x2t]core/OdfFile/Projects/Linux/OdfFormatLib.pro",
+
+    "[!no_x2t]core/OOXML/Projects/Linux/BinDocument/BinDocument.pro",
+
+    "[!no_x2t]core/X2tConverter/build/Qt/X2tConverter.pro",
+
+    "[win,linux,mac]core/DesktopEditor/AllFontsGen/AllFontsGen.pro",
+    "[win,linux,mac]core/DesktopEditor/allthemesgen/allthemesgen.pro",
+
+    "[win,linux,mac]core/DesktopEditor/doctrenderer/app_builder/docbuilder.pro",
+
+    "[win,linux,mac]core/DesktopEditor/pluginsmanager/pluginsmanager.pro",
+
+    "[win,linux,mac,!linux_arm64]core/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro",
+
+    "[win,linux,mac,!no_tests]core/DesktopEditor/vboxtester/vboxtester.pro",
+    "[win,linux,mac,!no_tests]core/Test/Applications/StandardTester/standardtester.pro",
+    "[win,linux,mac,!no_tests]core/Test/Applications/x2tTester/x2ttester.pro",
+    "[win,linux,mac,!no_tests]core/Test/Applications/MetafileTester/MetafileTester.pro"
+
+  ],
+
+  "builder" : [
+    "core"
+  ],
+
+  "server" : [
+    "core"
+  ],
+
+  "multimedia" : [
+    "[win,linux]desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro"
+  ],
+  
+  "spell" : [
+    "[win,linux,mac]core/Common/3dParty/hunspell/qt/hunspell.pro"
+  ],
+
+  "desktop" : [
+    "core",
+    "spell",
+    "multimedia",
+    
+    "core/DesktopEditor/xmlsec/src/ooxmlsignature.pro",
+
+    "desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore.pro",
+    "desktop-sdk/ChromiumBasedEditors/lib/ascdocumentscore_helper.pro",
+
+    "[win,linux]desktop-sdk/ChromiumBasedEditors/lib/qt_wrapper/qtascdocumentscore.pro",
+    "[win,linux]desktop-apps/win-linux/ASCDocumentEditor.pro",
+    
+    "[win]desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
+    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
+  ],
+
+  "mobile" : [
+    "core"
+  ],
+
+  "osign" : [
+    "[win,linux,mac]core/DesktopEditor/xmlsec/src/osign/lib/osign.pro"
+  ]
+}

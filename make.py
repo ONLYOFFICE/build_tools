@@ -1,19 +1,32 @@
 #!/usr/bin/env python
 
+import os 
 import sys
-sys.path.append('scripts')
-sys.path.append('scripts/develop')
-sys.path.append('scripts/develop/vendor')
-sys.path.append('scripts/core_common')
-sys.path.append('scripts/core_common/modules')
+__dir__name__ = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(__dir__name__ + '/scripts')
+sys.path.append(__dir__name__ + '/scripts/develop')
+sys.path.append(__dir__name__ + '/scripts/develop/vendor')
+sys.path.append(__dir__name__ + '/scripts/core_common')
+sys.path.append(__dir__name__ + '/scripts/core_common/modules')
+sys.path.append(__dir__name__ + '/scripts/core_common/modules/android')
 import config
 import base
-import build
+import build_sln
 import build_js
 import build_server
 import deploy
 import make_common
 import develop
+import argparse
+
+base.check_python()
+
+parser = argparse.ArgumentParser(description="options")
+parser.add_argument("--build-only-branding", action="store_true")
+args = parser.parse_args()
+
+if (args.build_only_branding):
+  base.set_env("OO_BUILD_ONLY_BRANDING", "1")
 
 # parse configuration
 config.parse()
@@ -59,12 +72,14 @@ if ("1" == config.option("update")):
 base.configure_common_apps()
 
 # developing...
-develop.make();
+develop.make()
 
 # check only js builds
 if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
   build_js.make()
   exit(0)
+
+#base.check_tools()
 
 # core 3rdParty
 make_common.make()
@@ -79,7 +94,7 @@ if config.check_option("module", "desktop"):
     base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
 # build
-build.make()
+build_sln.make()
 
 # js
 build_js.make()

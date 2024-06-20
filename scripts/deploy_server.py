@@ -5,6 +5,7 @@ import base
 
 import re
 import shutil
+import glob
 from tempfile import mkstemp
 
 def make():
@@ -113,6 +114,9 @@ def make():
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps", js_dir + "/web-apps")
+    for file in glob.glob(js_dir + "/web-apps/apps/*/*/*.js.map") \
+              + glob.glob(js_dir + "/web-apps/apps/*/mobile/dist/js/*.js.map"):
+      base.delete_file(file)
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])

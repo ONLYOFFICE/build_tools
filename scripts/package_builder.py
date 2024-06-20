@@ -127,7 +127,7 @@ def make_macos():
 
   if common.deploy and ret:
     utils.log_h2("builder deploy")
-    ret = s3_upload([builder_tar], "builder/mac/")
+    ret = s3_upload([builder_tar], "builder/mac/generic/")
     utils.set_summary("builder deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

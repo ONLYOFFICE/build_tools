@@ -22,7 +22,7 @@ def make_mobile():
     utils.sh("rm -rfv *.zip", verbose=True)
 
   utils.log_h2("mobile build")
-  ret = utils.sh("zip -r " + zip_file + " ./android* ./js", verbose=True)
+  ret = utils.sh("zip -r " + zip_file + " ./android ./ios", verbose=True)
   utils.set_summary("mobile build", ret)
 
   if common.deploy:

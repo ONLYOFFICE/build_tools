@@ -59,7 +59,6 @@ sdk_dir_src = base_dir + "/../sdkjs/deploy/sdkjs/"
 
 prefix_js = [
   vendor_dir_src + "xregexp/xregexp-all-min.js", 
-  vendor_dir_src + "underscore/underscore-min.js",
   base_dir + "/../sdkjs/common/Native/native.js",
   base_dir + "/../sdkjs-native/common/common.js",
   base_dir + "/../sdkjs/common/Native/jquery_native.js"

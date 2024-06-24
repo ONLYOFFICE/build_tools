@@ -1,25 +1,24 @@
-name: Markdown check
+name: Markdown Lint
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - '*'
+      - '**'
     paths:
       - '*.md'
       - 'develop/*.md'
       - 'scripts/**.md'
+      - '.markdownlint.jsonc'
 
 jobs:
   markdownlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: DavidAnson/markdownlint-cli2-action@v9
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
         with:
-          command: config
           globs: |
-            .markdownlint.jsonc
             *.md
             develop/*.md
             scripts/**.md

@@ -11,7 +11,7 @@ sys.path.append(__dir__name__ + '/scripts/core_common/modules')
 sys.path.append(__dir__name__ + '/scripts/core_common/modules/android')
 import config
 import base
-import build
+import build_sln
 import build_js
 import build_server
 import deploy
@@ -94,7 +94,7 @@ if config.check_option("module", "desktop"):
     base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
 # build
-build.make()
+build_sln.make()
 
 # js
 build_js.make()

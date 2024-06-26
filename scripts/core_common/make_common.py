@@ -13,7 +13,7 @@ import cef
 import icu
 import openssl
 import curl
-import websocket
+import websocket_all
 import v8
 import html2
 import hunspell
@@ -54,5 +54,5 @@ def make():
   if config.check_option("module", "mobile"):
     if (config.check_option("platform", "android")):
       curl.make()
-    websocket.make()
+    websocket_all.make()
   return

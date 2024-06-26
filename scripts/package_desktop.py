@@ -36,33 +36,22 @@ def s3_upload(files, dst):
 #
 
 def make_windows():
-  global package_version, arch_list, source_dir, branding_dir, desktop_dir, viewer_dir, \
-    inno_file, inno_sa_file, inno_update_file, inno_update_file_new, advinst_file
+  global package_name, package_version, arch, xp, suffix
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
   package_name = branding.desktop_package_name
   package_version = common.version + "." + common.build
-  arch_list = {
+  arch = {
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
     "windows_x86":    "x86",
     "windows_x86_xp": "x86"
-  }
-  suffix = arch_list[common.platform]
-  if common.platform.endswith("_xp"): suffix += "-xp"
-  inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
-  inno_sa_file = "%s-Standalone-%s-%s.exe" % (package_name, package_version, suffix)
-  inno_update_file = "update\\editors_update_%s.exe" % suffix.replace("-","_")
-  inno_update_file_new = "%s-Update-%s-%s.exe" % (package_name, package_version, suffix)
-  advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
-  if branding.onlyoffice:
-    branding_dir = "."
-  else:
-    branding_dir = common.workspace_dir + "\\" + common.branding + "\\desktop-apps\\win-linux\\package\\windows"
+  }[common.platform]
+  xp = common.platform.endswith("_xp")
+  suffix = arch + ("-xp" if xp else "")
 
   if common.clean:
     utils.log_h2("desktop clean")
-    utils.delete_dir("build")
     utils.delete_dir("DesktopEditors-cache")
     utils.delete_files("*.exe")
     utils.delete_files("*.msi")
@@ -70,135 +59,81 @@ def make_windows():
     utils.delete_files("*.tmp")
     utils.delete_files("*.zip")
     utils.delete_files("data\\*.exe")
-    utils.delete_files("update\\*.exe")
 
-  utils.log_h2("copy arifacts")
-  source_dir = "%s\\build_tools\\out\\%s\\%s" \
-    % (common.workspace_dir, common.prefix, branding.company_name)
-  utils.create_dir("build")
-  desktop_dir = "build\\" + branding.desktop_product_name_s
-  utils.copy_dir(source_dir + "\\" + branding.desktop_product_name_s, desktop_dir)
-  if not branding.onlyoffice:
-    viewer_dir = "build\\" + branding.viewer_product_name_s
-    utils.copy_dir(source_dir + "\\" + branding.viewer_product_name_s, viewer_dir)
-
+  make_prepare()
   make_zip()
-
-  if not download_vcredist():
-    utils.set_summary("desktop inno build", False)
-    utils.set_summary("desktop inno standalone build", False)
-    utils.set_summary("desktop inno update build", False)
-    utils.set_summary("desktop advinst build", False)
-    utils.set_cwd(common.workspace_dir)
-    return
-
   make_inno()
-
-  if common.platform == "windows_x64":
-    make_update_files()
-
-  if common.platform in ["windows_x64", "windows_x86"]:
-    make_advinst()
+  make_advinst()
 
   utils.set_cwd(common.workspace_dir)
   return
 
-def make_zip():
-  utils.log_h2("desktop zip build")
-
+def make_prepare():
   args = [
-    "-Target", common.platform,
-    "-BuildDir", "build",
-    "-DesktopDir", branding.desktop_product_name_s
+    "-Version", package_version,
+    "-Arch", arch
   ]
-  if not branding.onlyoffice:
-    args += ["-MultimediaDir", branding.viewer_product_name_s]
-    args += ["-BrandingDir", branding_dir]
-  if branding.onlyoffice and not common.platform.endswith("_xp"):
-    args += ["-ExcludeHelp"]
+  if xp:
+    args += ["-Target", "xp"]
   if common.sign:
-    args += ["-Sign", "-CertName", branding.cert_name]
+    args += ["-Sign"]
+
+  utils.log_h2("desktop prepare")
+  ret = utils.ps1("make.ps1", args, verbose=True)
+  utils.set_summary("desktop prepare", ret)
+  return
+
+def make_zip():
+  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
+  args = [
+    "-Version", package_version,
+    "-Arch", arch
+  ]
+  if xp:
+    args += ["-Target", "xp"]
+  # if common.sign:
+  #   args += ["-Sign"]
+
+  utils.log_h2("desktop zip build")
   ret = utils.ps1("make_zip.ps1", args, verbose=True)
   utils.set_summary("desktop zip build", ret)
 
   if common.deploy and ret:
     utils.log_h2("desktop zip deploy")
-    ret = s3_upload(utils.glob_path("*.zip"), "desktop/win/generic/")
+    ret = s3_upload([zip_file], "desktop/win/generic/")
     utils.set_summary("desktop zip deploy", ret)
   return
 
-def download_vcredist():
-  vcredist = {
-    # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33135
-    "windows_x64": {
-      "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "1d545507009cc4ec7409c1bc6e93b17b"
-    },
-    "windows_x86": {
-      "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "8457542fd4be74cb2c3a92b3386ae8e9"
-    },
-    # Microsoft Visual C++ 2015-2019 Redistributable - 14.27.29114
-    "windows_x64_xp": {
-      "url": "https://download.visualstudio.microsoft.com/download/pr/722d59e4-0671-477e-b9b1-b8da7d4bd60b/591CBE3A269AFBCC025681B968A29CD191DF3C6204712CBDC9BA1CB632BA6068/VC_redist.x64.exe",
-      "md5": "bc8e3e714b727b3bb18614bd6a51a3d3"
-    },
-    "windows_x86_xp": {
-      "url": "https://download.visualstudio.microsoft.com/download/pr/c168313d-1754-40d4-8928-18632c2e2a71/D305BAA965C9CD1B44EBCD53635EE9ECC6D85B54210E2764C8836F4E9DEFA345/VC_redist.x86.exe",
-      "md5": "ec3bee79a85ae8e3581a8c181b336d1e"
-    }
-  }
-  vcredist_file = "data\\vcredist_%s.exe" % arch_list[common.platform]
-
-  utils.log_h2("vcredist download " + vcredist_file)
-  ret = utils.download_file(
-    vcredist[common.platform]["url"],
-    vcredist_file,
-    vcredist[common.platform]["md5"],
-    verbose=True)
-  utils.set_summary("vcredist download", ret)
-  return ret
-
 def make_inno():
-  utils.log_h2("desktop inno build")
-
-  inno_arch_list = {
-    "windows_x64":    "64",
-    "windows_x86":    "32",
-    "windows_x64_xp": "64",
-    "windows_x86_xp": "32"
-  }
-  iscc_args = [
-    "/Qp",
-    "/DVERSION=" + package_version,
-    "/DsAppVersion=" + package_version,
-    "/DDEPLOY_PATH=" + desktop_dir,
-    "/DARCH=" + arch_list[common.platform],
-    "/D_ARCH=" + inno_arch_list[common.platform],
+  inno_file = "%s-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_sa_file = "%s-Standalone-%s-%s.exe" % (package_name, package_version, suffix)
+  inno_update_file = "%s-Update-%s-%s.exe" % (package_name, package_version, suffix)
+  update_wrapper = not (hasattr(branding, 'desktop_updates_skip_iss_wrapper') and branding.desktop_updates_skip_iss_wrapper)
+  args = [
+    "-Version", package_version,
+    "-Arch", arch
   ]
-  if branding.onlyoffice:
-    iscc_args.append("/D_ONLYOFFICE=1")
-  else:
-    iscc_args.append("/DsBrandingFolder=" + \
-        utils.get_abspath(common.workspace_dir + "\\" + common.branding + "\\desktop-apps"))
-  if common.platform.endswith("_xp"):
-    iscc_args.append("/D_WIN_XP=1")
   if common.sign:
-    iscc_args.append("/DENABLE_SIGNING=1")
-    iscc_args.append("/Sbyparam=signtool.exe sign /a /v /n $q" + \
-        branding.cert_name + "$q /t " + common.tsa_server + " $f")
-  args = ["iscc"] + iscc_args + ["common.iss"]
-  ret = utils.cmd(*args, creates=inno_file, verbose=True)
+    args += ["-Sign"]
+
+  utils.log_h2("desktop inno build")
+  if xp:
+    ret = utils.ps1("make_inno.ps1", args + ["-Target", "xp"], verbose=True)
+  else:
+    ret = utils.ps1("make_inno.ps1", args, verbose=True)
   utils.set_summary("desktop inno build", ret)
 
-  if branding.onlyoffice and not common.platform.endswith("_xp"):
-    args = ["iscc"] + iscc_args + ["/DEMBED_HELP", "/DsPackageEdition=Standalone", "common.iss"]
-    ret = utils.cmd(*args, creates=inno_sa_file, verbose=True)
+  if branding.onlyoffice and not xp:
+    utils.log_h2("desktop inno standalone")
+    ret = utils.ps1("make_inno.ps1", args + ["-Target", "standalone"], verbose=True)
     utils.set_summary("desktop inno standalone build", ret)
 
-  if not (hasattr(branding, 'desktop_updates_skip_iss_wrapper') and branding.desktop_updates_skip_iss_wrapper):
-    args = ["iscc"] + iscc_args + ["/DTARGET_NAME=" + inno_file, "update_common.iss"]
-    ret = utils.cmd(*args, creates=inno_update_file, verbose=True)
+  if update_wrapper:
+    utils.log_h2("desktop inno update build")
+    if xp:
+      ret = utils.ps1("make_inno.ps1", args + ["-Target", "xp_update"], verbose=True)
+    else:
+      ret = utils.ps1("make_inno.ps1", args + ["-Target", "update"], verbose=True)
     utils.set_summary("desktop inno update build", ret)
 
   if common.deploy:
@@ -206,47 +141,44 @@ def make_inno():
     ret = s3_upload([inno_file], "desktop/win/inno/")
     utils.set_summary("desktop inno deploy", ret)
 
-    if branding.onlyoffice and not common.platform.endswith("_xp"):
+    if branding.onlyoffice and not xp:
       utils.log_h2("desktop inno standalone deploy")
       ret = s3_upload([inno_sa_file], "desktop/win/inno/")
       utils.set_summary("desktop inno standalone deploy", ret)
 
     utils.log_h2("desktop inno update deploy")
     if utils.is_file(inno_update_file):
-      ret = s3_upload(
-        [inno_update_file], "desktop/win/inno/" + inno_update_file_new)
+      ret = s3_upload([inno_update_file], "desktop/win/inno/")
     elif utils.is_file(inno_file):
-      ret = s3_upload(
-        [inno_file], "desktop/win/inno/" + inno_update_file_new)
+      ret = s3_upload([inno_file], "desktop/win/inno/" + inno_update_file)
     else:
       ret = False
     utils.set_summary("desktop inno update deploy", ret)
-  return
 
-def make_update_files():
-  utils.log_h2("desktop update files build")
-
-  changes_dir = common.workspace_dir + "\\" + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
-
-  if common.deploy and utils.glob_path(changes_dir + "\\*.html"):
-    utils.log_h2("desktop update files deploy")
+  changes_dir = common.workspace_dir + "\\" \
+    + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
+  if common.platform == "windows_x64" and \
+     common.deploy and \
+     utils.glob_path(changes_dir + "\\*.html"):
+    utils.log_h2("desktop changelog deploy")
     ret = s3_upload(
       utils.glob_path(changes_dir + "\\*.html"),
       "desktop/win/update/%s/%s/" % (common.version, common.build))
-    utils.set_summary("desktop update files deploy", ret)
+    utils.set_summary("desktop changelog deploy", ret)
   return
 
 def make_advinst():
-  utils.log_h2("desktop advinst build")
-
+  if not common.platform in ["windows_x64", "windows_x86"]:
+    return
+  advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
   args = [
     "-Version", package_version,
-    "-Arch", arch_list[common.platform]
+    "-Arch", arch
   ]
   if common.sign:
     args += ["-Sign"]
-  if not branding.onlyoffice:
-    args += ["-BrandingDir", branding_dir]
+
+  utils.log_h2("desktop advinst build")
   ret = utils.ps1("make_advinst.ps1", args, verbose=True)
   utils.set_summary("desktop advinst build", ret)
 

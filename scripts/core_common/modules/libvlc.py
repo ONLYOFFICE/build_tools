@@ -62,6 +62,7 @@ def make():
   vlc_dir = base_dir + "/vlc"
   vlc_version = "3.0.18"
 
+  tools_dir = base.get_script_dir() + "/../tools"
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
@@ -73,7 +74,7 @@ def make():
     base.cmd("git", ["clone", "https://code.videolan.org/videolan/vlc.git", "--branch", vlc_version])
     if "windows" == base.host_platform():
       base.cmd("git", ["config", "--global", "core.autocrlf", autocrlf_old])
-  
+
   base.create_dir("build")
   base.copy_file("tools/ignore-cache-time.patch", "vlc")
 
@@ -83,7 +84,7 @@ def make():
       base.copy_file("tools/win_64/build.patch", "vlc")
       docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
       form_build_win(vlc_dir + "/build/win64/vlc-" + vlc_version, base_dir + "/build/win_64")
-      
+
     if config.check_option("platform", "win_32"):
       base.copy_file("tools/win_32/build.patch", "vlc")
       docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
@@ -91,9 +92,11 @@ def make():
 
   # linux
   if config.check_option("platform", "linux_64"):
+    base.copy_file(tools_dir + "/linux/elf/patchelf", "vlc")
+    base.copy_file("tools/linux_64/change-rpaths.sh", "vlc")
     docker_build("libvlc-linux64", base_dir + "/tools/linux_64", base_dir)
     form_build_linux(vlc_dir + "/build/linux_64", base_dir + "/build/linux_64")
-  
+
   # mac
   if "mac" == base.host_platform():
     os.chdir(vlc_dir)

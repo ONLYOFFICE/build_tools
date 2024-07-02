@@ -15,16 +15,3 @@ platformPrefixes = {
 
 out_dir = "build_tools/out"
 tsa_server = "http://timestamp.digicert.com"
-vcredist_links = {
-  # Microsoft Visual C++ 2015-2022 Redistributable - 14.38.33130
-  "2022": {
-    "x64": {
-      "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
-      "md5": "101b0b9f74cdc6cdbd2570bfe92e302c"
-    },
-    "x86": {
-      "url": "https://aka.ms/vs/17/release/vc_redist.x86.exe",
-      "md5": "0d762264d9765e21c15a58edc43f4706"
-    }
-  }
-}

@@ -7,6 +7,23 @@ import base
 import os
 import subprocess
 
+def change_bootstrap():
+  base.move_file("./depot_tools/bootstrap/manifest.txt", "./depot_tools/bootstrap/manifest.txt.bak")
+  content = "# changed by build_tools\n\n"
+  content += "$VerifiedPlatform windows-amd64 windows-arm64 linux-amd64 mac-amd64 mac-arm64\n\n"
+
+  content += "@Subdir python\n"
+  content += "infra/3pp/tools/cpython/${platform} version:2@2.7.18.chromium.39\n\n"
+
+  content += "@Subdir python3\n"
+  content += "infra/3pp/tools/cpython3/${platform} version:2@3.8.10.chromium.23\n\n"
+
+  content += "@Subdir git\n"
+  content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"
+
+  base.writeFile("./depot_tools/bootstrap/manifest.txt", content)
+  return
+
 def make_args(args, platform, is_64=True, is_debug=False):
   args_copy = args[:]
   if is_64:
@@ -46,6 +63,12 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
+
+  win_toolset_wrapper_file = "build/toolchain/win/tool_wrapper.py"
+  win_toolset_wrapper_file_content = base.readFile("build/toolchain/win/tool_wrapper.py")
+  if (-1 == win_toolset_wrapper_file_content.find("line = line.decode('utf8')")):
+    base.replaceInFile(win_toolset_wrapper_file, "for line in link.stdout:\n", "for line in link.stdout:\n      line = line.decode('utf8')\n")
+
   base.cmd("ninja", ["-C", directory_out, "v8_wrappers"])
   base.cmd("ninja", ["-C", directory_out])
   base.delete_file("./" + directory_out + "/obj/v8_wrappers.ninja")
@@ -85,6 +108,7 @@ def make():
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
+    change_bootstrap()
 
   os.environ["PATH"] = base_dir + "/depot_tools" + os.pathsep + os.environ["PATH"]
 

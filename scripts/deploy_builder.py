@@ -76,6 +76,9 @@ def make():
       if (0 == platform.find("win")):
         base.copy_file(core_build_dir + "/lib/" + platform_postfix + "/doctrenderer.lib", root_dir + "/doctrenderer.lib")
     base.copy_v8_files(core_dir, root_dir, platform, isWindowsXP)
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.c")
+
+    base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir + "/docbuilder.py")
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
@@ -110,6 +113,9 @@ def make():
     # correct ios frameworks
     if ("ios" == platform):
       base.generate_plist(root_dir)
+
+    if (0 == platform.find("linux")):
+      base.linux_correct_rpath_docbuilder(root_dir)
 
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)

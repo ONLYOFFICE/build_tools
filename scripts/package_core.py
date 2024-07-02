@@ -53,27 +53,53 @@ def make_core():
   utils.set_summary("core deploy", ret)
   return
 
-def deploy_closuremaps(license):
+def deploy_closuremaps_sdkjs(license):
   if not common.deploy: return
-  utils.log_h1("CLOSURE MAPS")
-  utils.set_cwd(utils.get_path("sdkjs/build/maps"))
+  utils.log_h1("SDKJS CLOSURE MAPS")
 
-  maps = utils.glob_path("*.js.map")
-  if not maps:
+  maps = utils.glob_path("sdkjs/build/maps/*.js.map")
+  if maps:
+    for m in maps: utils.log("- " + m)
+  else:
     utils.log_err("files do not exist")
-    utils.set_summary("closure maps " + license + " deploy", False)
+    utils.set_summary("sdkjs closure maps %s deploy" % license, False)
     return
 
-  utils.log_h2("closure maps " + license + " deploy")
+  utils.log_h2("sdkjs closure maps %s deploy" % license)
   ret = True
   for f in maps:
-    key = "closure-maps/%s/%s/%s/%s" % (license, common.version, common.build, f)
+    base = utils.get_basename(f)
+    key = "closure-maps/sdkjs/%s/%s/%s/%s" % (license, common.version, common.build, base)
     upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)
       utils.add_deploy_data(key)
-  utils.set_summary("closure maps " + license + " deploy", ret)
+  utils.set_summary("sdkjs closure maps %s deploy" % license, ret)
+  return
 
-  utils.set_cwd(common.workspace_dir)
+def deploy_closuremaps_webapps(license):
+  if not common.deploy: return
+  utils.log_h1("WEB-APPS CLOSURE MAPS")
+
+  maps = utils.glob_path("web-apps/deploy/web-apps/apps/*/*/*.js.map") \
+       + utils.glob_path("web-apps/deploy/web-apps/apps/*/mobile/dist/js/*.js.map")
+  if maps:
+    for m in maps: utils.log("- " + m)
+  else:
+    utils.log_err("files do not exist")
+    utils.set_summary("web-apps closure maps %s deploy" % license, False)
+    return
+
+  utils.log_h2("web-apps closure maps %s deploy" % license)
+  ret = True
+  for f in maps:
+    base = utils.get_relpath(f, "web-apps/deploy/web-apps/apps").replace("/", "_")
+    key = "closure-maps/web-apps/%s/%s/%s/%s" % (license, common.version, common.build, base)
+    upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
+    ret &= upload
+    if upload:
+      utils.log("URL: " + branding.s3_base_url + "/" + key)
+      utils.add_deploy_data(key)
+  utils.set_summary("web-apps closure maps %s deploy" % license, ret)
   return

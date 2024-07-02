@@ -66,6 +66,12 @@ def make():
   if not base.is_dir(git_dir + "/sdkjs-plugins"):
     base.create_dir(git_dir + "/sdkjs-plugins")
 
+  if not base.is_dir(git_dir + "/sdkjs-plugins/v1"):
+    base.create_dir(git_dir + "/sdkjs-plugins/v1")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.js", git_dir + "/sdkjs-plugins/v1/plugins.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins-ui.js", git_dir + "/sdkjs-plugins/v1/plugins-ui.js")
+    base.download("https://onlyoffice.github.io/sdkjs-plugins/v1/plugins.css", git_dir + "/sdkjs-plugins/v1/plugins.css")
+
   base.support_old_versions_plugins(git_dir + "/sdkjs-plugins")
   base.copy_marketplace_plugin(git_dir + "/sdkjs-plugins", False, False)
 
@@ -101,7 +107,8 @@ def make():
   server_addons = []
   if (config.option("server-addons") != ""):
     server_addons = config.option("server-addons").rsplit(", ")
-  if ("server-lockstorage" in server_addons):
+  #server-lockstorage is private
+  if ("server-lockstorage" in server_addons and base.is_dir(git_dir + "/server-lockstorage")):
     server_config["editorDataStorage"] = "editorDataRedis"
   
   sdkjs_addons = []

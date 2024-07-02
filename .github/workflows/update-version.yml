@@ -3,16 +3,13 @@ name: Update hard-coded version
 on: workflow_dispatch
 
 jobs:
-
   update-version:
     if: >-
       ${{ contains(github.ref, 'refs/heads/hotfix/v') ||
           contains(github.ref, 'refs/heads/release/v') }}
     runs-on: ubuntu-latest
     steps:
-
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.PUSH_TOKEN }}
 
@@ -25,9 +22,9 @@ jobs:
         run: echo "${{ env.version }}" > version
 
       - name: Commit & push changes
-        uses: EndBug/add-and-commit@v8
+        uses: EndBug/add-and-commit@v9
         with:
           author_name: github-actions[bot]
           author_email: github-actions[bot]@users.noreply.github.com
-          message: Update hard-coded version to v${{ env.version }}
+          message: Update hard-coded version to ${{ env.version }}
           add: version

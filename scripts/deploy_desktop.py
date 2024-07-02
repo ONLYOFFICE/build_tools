@@ -195,14 +195,20 @@ def make():
           base.copy_files(vlc_dir + "/*.dll", root_dir)
           base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
-          base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
-          base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_pulse.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_vdpau.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
+          base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/vlc/plugins")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir + "/vlc", "libvlc_pulse.so", "0.0.0")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir + "/vlc", "libvlc_vdpau.so", "0.0.0")
+          copy_lib_with_links(vlc_dir + "/vlc", root_dir + "/vlc", "libvlc_xcb_events.so", "0.0.0")
           copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
           copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
-          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
+          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc/vlc-cache-gen")
+          # copy libva libs
+          base.create_dir(root_dir + "/system")
+          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-drm.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-glx.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-wayland.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-x11.so", "2.2100.0")
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")

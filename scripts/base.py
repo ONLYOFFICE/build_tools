@@ -685,7 +685,7 @@ def qt_version():
   qt_dir = qt_dir.split("/")[-3]
   return "".join(i for i in qt_dir if (i.isdigit() or i == "."))
 
-def check_congig_option_with_platfom(platform, option_name):
+def check_config_option_with_platfom(platform, option_name):
   if config.check_option("config", option_name):
     return True
   if (0 == platform.find("win")) and config.check_option("config_addon_windows", option_name):

@@ -61,7 +61,6 @@ Clone development modules to the work dir
 * `server` repo is located [here](https://github.com/ONLYOFFICE/server/)
 
 ```bash
-cd ../..
 git clone https://github.com/ONLYOFFICE/sdkjs.git
 git clone https://github.com/ONLYOFFICE/web-apps.git
 git clone https://github.com/ONLYOFFICE/server.git

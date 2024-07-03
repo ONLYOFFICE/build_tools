@@ -73,6 +73,11 @@ def make_prepare():
     "-Version", package_version,
     "-Arch", arch
   ]
+  if not branding.onlyoffice:
+    args += [
+      "-CompanyName", branding.company_name,
+      "-ProductName", branding.desktop_product_name_s
+    ]
   if xp:
     args += ["-Target", "xp"]
   if common.sign:
@@ -89,6 +94,11 @@ def make_zip():
     "-Version", package_version,
     "-Arch", arch
   ]
+  if not branding.onlyoffice:
+    args += [
+      "-CompanyName", branding.company_name,
+      "-ProductName", branding.desktop_product_name_s
+    ]
   if xp:
     args += ["-Target", "xp"]
   # if common.sign:
@@ -182,6 +192,11 @@ def make_advinst():
     "-Version", package_version,
     "-Arch", arch
   ]
+  if not branding.onlyoffice:
+    args += [
+      "-CompanyName", branding.company_name,
+      "-ProductName", branding.desktop_product_name_s
+    ]
   if common.sign:
     args += ["-Sign"]
 

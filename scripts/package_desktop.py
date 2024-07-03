@@ -127,8 +127,8 @@ def make_inno():
     args += [
       "-CompanyName", branding.company_name,
       "-ProductName", branding.desktop_product_name_s,
-      "-BrandingDir", utils.get_abspath(
-        common.workspace_dir + "\\" + common.branding + "\\desktop-apps")
+      "-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
+        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")
     ]
   if common.sign:
     args += ["-Sign"]

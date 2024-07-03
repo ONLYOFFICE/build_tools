@@ -203,12 +203,11 @@ def make():
           copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
           base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc/vlc-cache-gen")
           # copy libva libs
-          base.create_dir(root_dir + "/system")
-          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva.so", "2.2100.0")
-          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-drm.so", "2.2100.0")
-          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-glx.so", "2.2100.0")
-          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-wayland.so", "2.2100.0")
-          copy_lib_with_links(vlc_dir, root_dir + "/system", "libva-x11.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libva.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libva-drm.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libva-glx.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libva-wayland.so", "2.2100.0")
+          copy_lib_with_links(vlc_dir, root_dir, "libva-x11.so", "2.2100.0")
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")

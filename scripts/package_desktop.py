@@ -74,10 +74,8 @@ def make_prepare():
     "-Arch", arch
   ]
   if not branding.onlyoffice:
-    args += [
-      "-CompanyName", branding.company_name,
-      "-ProductName", branding.desktop_product_name_s
-    ]
+    args += ["-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
+        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")]
   if xp:
     args += ["-Target", "xp"]
   if common.sign:
@@ -95,10 +93,8 @@ def make_zip():
     "-Arch", arch
   ]
   if not branding.onlyoffice:
-    args += [
-      "-CompanyName", branding.company_name,
-      "-ProductName", branding.desktop_product_name_s
-    ]
+    args += ["-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
+        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")]
   if xp:
     args += ["-Target", "xp"]
   # if common.sign:
@@ -124,12 +120,8 @@ def make_inno():
     "-Arch", arch
   ]
   if not branding.onlyoffice:
-    args += [
-      "-CompanyName", branding.company_name,
-      "-ProductName", branding.desktop_product_name_s,
-      "-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
-        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")
-    ]
+    args += ["-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
+        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")]
   if common.sign:
     args += ["-Sign"]
 
@@ -193,10 +185,8 @@ def make_advinst():
     "-Arch", arch
   ]
   if not branding.onlyoffice:
-    args += [
-      "-CompanyName", branding.company_name,
-      "-ProductName", branding.desktop_product_name_s
-    ]
+    args += ["-BrandingDir", utils.get_abspath(common.workspace_dir + "\\" \
+        + common.branding + "\\desktop-apps\\win-linux\\package\\windows")]
   if common.sign:
     args += ["-Sign"]
 

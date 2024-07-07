@@ -1354,7 +1354,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, i
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if isXp:
-    plugins_list_config="photoeditor, macros, drawio, highlightcode, doc2md"
+    plugins_list_config="photoeditor, macros, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")

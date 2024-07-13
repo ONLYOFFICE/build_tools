@@ -525,7 +525,7 @@ def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   os.chdir(folder)
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
-    retCheckout = cmd("git", ["checkout", "-f", branch_to_checkout], True)
+     retCheckout = cmd("git", ["checkout", "-f", branch_to_checkout], True)
     if (retCheckout != 0):
       print("branch does not exist...")
       print("switching to master...")

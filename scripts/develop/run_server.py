@@ -71,7 +71,7 @@ def make_configure(args):
   if ("linux" == platform):
   	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
   else:
-  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
+  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-name', 'onlyoffice', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
   	
   base.cmd_in_dir(base_dir + '/../../', 'python', ['make.py'])
 def make_install():

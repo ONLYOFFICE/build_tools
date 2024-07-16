@@ -132,6 +132,8 @@ def make():
     sql["type"] = config.option("sql-type")
   if (config.option("db-port") != ""):
     sql["dbPort"] = config.option("db-port")
+  if (config.option("db-name") != ""):
+    sql["dbName"] = config.option("db-name")
   if (config.option("db-user") != ""):
     sql["dbUser"] = config.option("db-user")
   if (config.option("db-pass") != ""):

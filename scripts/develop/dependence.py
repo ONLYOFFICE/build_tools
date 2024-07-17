@@ -562,7 +562,7 @@ def check_MySQLConfig(mysqlPath = ''):
   mysqlLoginSrt = get_mysqlLoginString()
   mysql_path_to_bin = get_mysql_path_to_bin(mysqlPath)
 
-  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find(config.option("db-name")) == -1):
+  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].lower().find(config.option("db-name").lower()) == -1):
     print('Database "' + config.option("db-name") + '" not found')
     result = create_MySQLDb(mysql_path_to_bin, config.option("db-name"), config.option("db-user"), config.option("db-pass"))
     if (not result):

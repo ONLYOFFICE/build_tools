@@ -355,50 +355,50 @@ def make_linux():
           "desktop/linux/debian/")
         utils.set_summary("desktop deb deploy", ret)
       if "deb-astra" in branding.desktop_make_targets:
-        utils.log_h2("desktop deb-astra deploy")
+        utils.log_h2("desktop deb astra deploy")
         ret = s3_upload(
           utils.glob_path("deb-astra/*.deb"),
           "desktop/linux/astra/")
-        utils.set_summary("desktop deb-astra deploy", ret)
+        utils.set_summary("desktop deb astra deploy", ret)
       if "rpm" in branding.desktop_make_targets:
         utils.log_h2("desktop rpm deploy")
         ret = s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          utils.glob_path("rpm/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/rhel/")
         utils.set_summary("desktop rpm deploy", ret)
       if "suse-rpm" in branding.desktop_make_targets:
-        utils.log_h2("desktop suse-rpm deploy")
+        utils.log_h2("desktop rpm suse deploy")
         ret = s3_upload(
-          utils.glob_path("suse-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          utils.glob_path("rpm-suse/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/suse/")
-        utils.set_summary("desktop suse-rpm deploy", ret)
+        utils.set_summary("desktop rpm suse deploy", ret)
       if "apt-rpm" in branding.desktop_make_targets:
-        utils.log_h2("desktop apt-rpm deploy")
+        utils.log_h2("desktop rpm alt deploy")
         ret = s3_upload(
-          utils.glob_path("apt-rpm/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          utils.glob_path("rpm-alt/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/altlinux/")
-        utils.set_summary("desktop apt-rpm deploy", ret)
+        utils.set_summary("desktop rpm alt deploy", ret)
       if "urpmi" in branding.desktop_make_targets:
-        utils.log_h2("desktop urpmi deploy")
+        utils.log_h2("desktop rpm rosa deploy")
         ret = s3_upload(
-          utils.glob_path("urpmi/builddir/RPMS/" + rpm_arch + "/*.rpm"),
+          utils.glob_path("rpm-rosa/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/rosa/")
-        utils.set_summary("desktop urpmi deploy", ret)
+        utils.set_summary("desktop rpm rosa deploy", ret)
     else:
       if "tar" in branding.desktop_make_targets:
         utils.set_summary("desktop tar deploy", False)
       if "deb" in branding.desktop_make_targets:
         utils.set_summary("desktop deb deploy", False)
       if "deb-astra" in branding.desktop_make_targets:
-        utils.set_summary("desktop deb-astra deploy", False)
+        utils.set_summary("desktop deb astra deploy", False)
       if "rpm" in branding.desktop_make_targets:
         utils.set_summary("desktop rpm deploy", False)
-      if "suse-rpm" in branding.desktop_make_targets:
-        utils.set_summary("desktop suse-rpm deploy", False)
-      if "apt-rpm" in branding.desktop_make_targets:
-        utils.set_summary("desktop apt-rpm deploy", False)
-      if "urpmi" in branding.desktop_make_targets:
-        utils.set_summary("desktop urpmi deploy", False)
+      if "rpm-suse" in branding.desktop_make_targets:
+        utils.set_summary("desktop rpm suse deploy", False)
+      if "rpm-alt" in branding.desktop_make_targets:
+        utils.set_summary("desktop rpm alt deploy", False)
+      if "rpm-rosa" in branding.desktop_make_targets:
+        utils.set_summary("desktop rpm rosa deploy", False)
 
   utils.set_cwd(common.workspace_dir)
   return

@@ -112,6 +112,8 @@ class EditorApi(object):
       line = line.replace("}", "")
       lineWithoutSpaces = line.replace(" ", "")
       if not is_found_function and 0 == line.find("function "):
+        if -1 == decoration.find("@constructor"):
+          return
         codeCorrect += (line + addon_for_func + "\n")
         is_found_function = True
       if not is_found_function and -1 != line.find(".prototype."):

@@ -56,15 +56,10 @@ def update_config(args):
   branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
 
   if ("linux" == platform):
-    base.cmd_in_dir(base_dir + '/../../', 'python',
-                    ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server',
-                     '--update', '1', '--update-light', '1', '--clean', '0'] + args)
+  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
   else:
-    base.cmd_in_dir(base_dir + '/../../', 'python',
-                    ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server',
-                     '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306',
-                     '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
-
+  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-name', 'onlyoffice', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
+  	
 
 def make_start():
   base.configure_common_apps()

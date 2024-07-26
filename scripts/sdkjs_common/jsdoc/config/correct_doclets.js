@@ -1,23 +1,67 @@
 exports.handlers = {
     processingComplete: function(e) {
         // Инициализация массива для сохранения отфильтрованных doclets
-        const filteredDoclets = [];
+        let filteredDoclets = [];
 
         const cleanName = name => name ? name.replace('<anonymous>~', '').replaceAll('"', '') : name;
 
-        // Итерация по doclets и фильтрация
+        const classesDocletsMap = {}; // доклеты классов пишем в конце
+        let passedClasses = []; // те которые проходят для редактора
+
+        // набивка доступных классов текущего редактора
         for (let i = 0; i < e.doclets.length; i++) {
             const doclet = e.doclets[i];
             const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
             const hasTypeofEditorsTag = isMethod && doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value.includes(process.env.EDITOR));
 
-            const shouldAddMethod = 
+            const shouldAdd = 
                 doclet.kind !== 'member' &&
                 (!doclet.longname || doclet.longname.search('private') === -1) &&
                 doclet.scope !== 'inner' &&
                 (!isMethod || hasTypeofEditorsTag);
 
-            if (shouldAddMethod) {
+            if (shouldAdd) {
+                if (doclet.memberof && false == passedClasses.includes(cleanName(doclet.memberof))) {
+                    passedClasses.push(cleanName(doclet.memberof));
+                }
+            }
+            else if (doclet.kind == 'class') {
+                classesDocletsMap[cleanName(doclet.name)] = doclet;
+            }
+        }
+
+        // проходимся по классам и удаляем из мапы те, что недоступны в редакторе
+        passedClasses = passedClasses.filter(className => {
+            const doclet = classesDocletsMap[className];
+            if (!doclet) {
+                return true;
+            }
+
+            const hasTypeofEditorsTag = !!(doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors'));
+
+            // класс пропускаем если нет тега редактора или текущий редактор есть среди тегов 
+            const isPassed = false == hasTypeofEditorsTag || doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value && tag.value.includes(process.env.EDITOR));
+            return isPassed;
+        });
+
+        
+        for (let i = 0; i < e.doclets.length; i++) {
+            const doclet = e.doclets[i];
+            const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
+            const hasTypeofEditorsTag = isMethod && doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value.includes(process.env.EDITOR));
+
+            const shouldAdd = 
+                doclet.kind !== 'member' &&
+                (!doclet.longname || doclet.longname.search('private') === -1) &&
+                doclet.scope !== 'inner' &&
+                (!isMethod || hasTypeofEditorsTag);
+
+            if (shouldAdd) {
+                // если класса нет в нашей мапе, значит мы его удалили сами -> недоступен в редакторе
+                if (false == passedClasses.includes(cleanName(doclet.memberof))) {
+                    continue;
+                }
+
                 // Оставляем только нужные поля
                 doclet.memberof = cleanName(doclet.memberof);
                 doclet.longname = cleanName(doclet.longname);
@@ -77,14 +121,19 @@ exports.handlers = {
                     see: doclet.see 
                 };
 
-                if (!doclet.see) {
-                    delete doclet.see;
+                if (!filteredDoclet.see) {
+                    delete filteredDoclet.see;
                 }
                 
                 // Добавляем отфильтрованный doclet в массив
                 filteredDoclets.push(filteredDoclet);
             }
             else if (doclet.kind == 'class') {
+                // если класса нет в нашей мапе, значит мы его удалили сами -> недоступен в редакторе
+                if (false == passedClasses.includes(cleanName(doclet.name))) {
+                    continue;
+                }
+
                 const filteredDoclet = {
                     comment:        doclet.comment,
                     description:    doclet.description,
@@ -99,7 +148,7 @@ exports.handlers = {
                     } : doclet.meta,
                     see: doclet.see || undefined
                 };
-
+    
                 filteredDoclets.push(filteredDoclet);
             }
         }

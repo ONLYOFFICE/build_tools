@@ -1,0 +1,15 @@
+{
+  "source": {
+    "include": ["../../../../sdkjs/word/apiBuilder.js", "../../../../sdkjs/slide/apiBuilder.js", "../../../../sdkjs/cell/apiBuilder.js"]
+  },
+  "plugins": ["./correct_doclets.js"],
+  "opts": {
+    "destination": "./out",
+    "recurse": true
+  },
+  "templates": {
+    "json": {
+      "pretty": true
+    }
+  }
+}

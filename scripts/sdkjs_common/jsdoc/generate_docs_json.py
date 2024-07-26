@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 import argparse
+import re
 
 # Конфигурационные файлы
 configs = [
@@ -64,7 +65,7 @@ def generate(output_dir):
                             code_content = example_content
                         
                         # Форматирование содержимого для doclet['example']
-                        doclet['example'] = comment + "```js\n" + code_content + "\n```"
+                        doclet['example'] = remove_js_comments(comment) + "```js\n" + remove_builder_lines(code_content) + "\n```"
                         del doclet['see']
                     else:
                         # Запись пропущенного примера в файл missing_examples.txt
@@ -76,6 +77,18 @@ def generate(output_dir):
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     print("Documentation generation completed.")
+
+def remove_builder_lines(text):
+    lines = text.splitlines()  # Разделить текст на строки
+    filtered_lines = [line for line in lines if not line.strip().startswith("builder.")]
+    return "\n".join(filtered_lines)
+
+def remove_js_comments(text):
+    # Удаляем однострочные комментарии, оставляя текст после //
+    text = re.sub(r'^\s*//\s?', '', text, flags=re.MULTILINE)
+    # Удаляем многострочные комментарии, оставляя текст после /*
+    text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
+    return text.strip()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documentation")

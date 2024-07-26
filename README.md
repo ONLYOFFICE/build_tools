@@ -196,9 +196,8 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
     **Note**: The created database must have **onlyoffice** both for user and password.
 
     ```bash
-    sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice;"
-    sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH password 'onlyoffice';"
-    sudo -i -u postgres psql -c "GRANT ALL privileges ON DATABASE onlyoffice TO onlyoffice;"
+    sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH PASSWORD 'onlyoffice';"
+    sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice OWNER onlyoffice;"
     ```
 
 3. Configure the database:

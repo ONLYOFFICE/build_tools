@@ -1354,7 +1354,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, i
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if isXp:
-    plugins_list_config="photoeditor, macros, drawio, highlightcode, doc2md"
+    plugins_list_config="photoeditor, macros, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")
@@ -1742,4 +1742,15 @@ def check_tools():
       if not is_dir(directory + "/qt"):
         create_dir(directory + "/qt")
       cmd("python", [directory + "/arm/build_qt.py", "--arch", "arm64", directory + "/qt/arm64"])
+  return
+
+def apply_patch(file, patch):
+  patch_content = readFile(patch)
+  index1 = patch_content.find("<<<<<<<")
+  index2 = patch_content.find("=======")
+  index3 = patch_content.find(">>>>>>>")
+  file_content_old = patch_content[index1 + 7:index2].strip()
+  file_content_new = patch_content[index2 + 7:index3].strip()
+  #file_content_new = "\n#if 0" + file_content_old + "#else" + file_content_new + "#endif\n"
+  replaceInFile(file, file_content_old, file_content_new)
   return

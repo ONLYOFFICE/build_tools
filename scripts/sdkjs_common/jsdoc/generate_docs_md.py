@@ -5,7 +5,7 @@ import shutil
 import argparse
 import generate_docs_json
 
-# Конфигурационные файлы
+# Configuration files
 editors = [
     "word",
     "cell",
@@ -22,9 +22,9 @@ def write_markdown_file(file_path, content):
         md_file.write(content)
 
 def remove_js_comments(text):
-    # Удаляем однострочные комментарии, оставляя текст после //
+    # Remove single-line comments, leaving text after //
     text = re.sub(r'^\s*//\s?', '', text, flags=re.MULTILINE)
-    # Удаляем многострочные комментарии, оставляя текст после /*
+    # Remove multi-line comments, leaving text after /*
     text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
     return text.strip()
 
@@ -32,13 +32,12 @@ def correct_description(string):
     if string is None:
         return 'No description provided.'
     
-    # Заменяем открывающий тег <b> на **
+    # Replace opening <b> tag with **
     string = re.sub(r'<b>', '**', string)
-    # Заменяем закрывающий тег </b> на **
+    # Replace closing </b> tag with **
     string = re.sub(r'</b>', '**', string)
-    # Заметка
+    # Note
     return re.sub(r'<note>(.*?)</note>', r'💡 \1', string, flags=re.DOTALL)
-
 
 def correct_default_value(value, enumerations, classes):
     if value is None:
@@ -56,19 +55,19 @@ def correct_default_value(value, enumerations, classes):
 def remove_line_breaks(string):
     return re.sub(r'[\r\n]', '', string)
 
-def generate_data_types_markdown(types, enumerations, classes):
+def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     param_types_md = ' &#124;'.join(types)
 
     for enum in enumerations:
         if enum['name'] in types:
-            param_types_md = param_types_md.replace(enum['name'], f"[{enum['name']}](../../Enumeration/{enum['name']}.md)")
+            param_types_md = param_types_md.replace(enum['name'], f"[{enum['name']}]({root}Enumeration/{enum['name']}.md)")
     for cls in classes:
         if cls in types:
-            param_types_md = param_types_md.replace(cls, f"[{cls}](../../{cls}/{cls}.md)")
+            param_types_md = param_types_md.replace(cls, f"[{cls}]({root}{cls}/{cls}.md)")
 
     def replace_with_links(match):
         element = match.group(1).strip()
-        base_type = element.split('.')[0]  # Берем только первую часть до точки, если она есть
+        base_type = element.split('.')[0]  # Take only the first part before the dot, if any
         if any(enum['name'] == base_type for enum in enumerations):
             return f"<[{element}](../../Enumeration/{base_type}.md)>"
         elif base_type in classes:
@@ -80,7 +79,7 @@ def generate_data_types_markdown(types, enumerations, classes):
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
     
-    content += generate_properties_markdown(properties, enumerations, classes)
+    content += generate_properties_markdown(properties, enumerations, classes, '../')
 
     content += "## Methods\n\n"
     for method in methods:
@@ -140,7 +139,7 @@ def generate_method_markdown(method, enumerations, classes):
 
     return content
 
-def generate_properties_markdown(properties, enumerations, classes):
+def generate_properties_markdown(properties, enumerations, classes, root='../../'):
     if (properties is None):
         return ''
     
@@ -151,7 +150,7 @@ def generate_properties_markdown(properties, enumerations, classes):
         prop_name = prop['name']
         prop_description = prop.get('description', 'No description provided.')
         prop_description = remove_line_breaks(correct_description(prop_description))
-        param_types_md = generate_data_types_markdown(prop['type']['names'], enumerations, classes)
+        param_types_md = generate_data_types_markdown(prop['type']['names'], enumerations, classes, root)
         content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
     content += "\n"
 
@@ -238,7 +237,6 @@ def process_doclets(data, output_dir):
     for enum in enumerations:
         enum_content = generate_enumeration_markdown(enum, enumerations, classes)
         write_markdown_file(os.path.join(enum_dir, f"{enum['name']}.md"), enum_content)
-
 
 def generate(output_dir):
     print('Generating Markdown documentation...')

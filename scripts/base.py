@@ -384,7 +384,7 @@ def cmd2(prog, args=[], is_no_errors=False):
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
-def cmd_exe(prog, args):
+def cmd_exe(prog, args, is_no_errors=False):
   prog_dir = os.path.dirname(prog)
   env_dir = os.environ
   if ("linux" == host_platform()):
@@ -406,7 +406,7 @@ def cmd_exe(prog, args):
       command += (" \"" + arg + "\"")
     process = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True, env=env_dir)
     ret = process.wait()
-  if ret != 0:
+  if ret != 0 and True != is_no_errors:
     sys.exit("Error (" + prog + "): " + str(ret))
   return ret
 
@@ -1046,15 +1046,15 @@ def web_apps_addons_param():
 def download(url, dst):
   return cmd_exe("curl", ["-L", "-o", dst, url])
 
-def extract(src, dst):
+def extract(src, dst, is_no_errors=False):
   app = "7za" if ("mac" == host_platform()) else "7z"
-  return cmd_exe(app, ["x", "-y", src, "-o" + dst])
+  return cmd_exe(app, ["x", "-y", src, "-o" + dst], is_no_errors)
 
-def extract_unicode(src, dst):
+def extract_unicode(src, dst, is_no_errors=False):
   if "windows" == host_platform():
     run_as_bat_win_isolate([u"chcp 65001", u"call 7z.exe x -y \"" + src + u"\" \"-o" + dst + u"\"", u"exit"])
     return
-  return extract(src, dst)
+  return extract(src, dst, is_no_errors)
 
 def archive_folder(src, dst):
   app = "7za" if ("mac" == host_platform()) else "7z"

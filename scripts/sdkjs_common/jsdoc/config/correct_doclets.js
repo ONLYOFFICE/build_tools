@@ -8,6 +8,23 @@ exports.handlers = {
         const classesDocletsMap = {}; // доклеты классов пишем в конце
         let passedClasses = []; // те которые проходят для редактора
 
+        // Убираем повторения оставляя посление doclets
+        const latestDoclets = {};
+        e.doclets.forEach(doclet => {
+            const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
+            const hasTypeofEditorsTag = isMethod && doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value.includes(process.env.EDITOR));
+
+            const shouldAddMethod = 
+                doclet.kind !== 'member' &&
+                (!doclet.longname || doclet.longname.search('private') === -1) &&
+                doclet.scope !== 'inner' && hasTypeofEditorsTag;
+
+            if (shouldAddMethod || doclet.kind == 'typedef' || doclet.kind == 'class') {
+                latestDoclets[doclet.longname] = doclet;
+            }
+        });
+        e.doclets.splice(0, e.doclets.length, ...Object.values(latestDoclets));
+
         // набивка доступных классов текущего редактора
         for (let i = 0; i < e.doclets.length; i++) {
             const doclet = e.doclets[i];
@@ -44,19 +61,17 @@ exports.handlers = {
             return isPassed;
         });
 
-        
         for (let i = 0; i < e.doclets.length; i++) {
             const doclet = e.doclets[i];
             const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
             const hasTypeofEditorsTag = isMethod && doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value.includes(process.env.EDITOR));
 
-            const shouldAdd = 
+            const shouldAddMethod = 
                 doclet.kind !== 'member' &&
                 (!doclet.longname || doclet.longname.search('private') === -1) &&
-                doclet.scope !== 'inner' &&
-                (!isMethod || hasTypeofEditorsTag);
+                doclet.scope !== 'inner' && hasTypeofEditorsTag;
 
-            if (shouldAdd) {
+            if (shouldAddMethod) {
                 // если класса нет в нашей мапе, значит мы его удалили сами -> недоступен в редакторе
                 if (false == passedClasses.includes(cleanName(doclet.memberof))) {
                     continue;
@@ -121,10 +136,6 @@ exports.handlers = {
                     see: doclet.see 
                 };
 
-                if (!filteredDoclet.see) {
-                    delete filteredDoclet.see;
-                }
-                
                 // Добавляем отфильтрованный doclet в массив
                 filteredDoclets.push(filteredDoclet);
             }
@@ -146,9 +157,55 @@ exports.handlers = {
                         lineno:   doclet.meta.lineno,
                         columnno: doclet.meta.columnno
                     } : doclet.meta,
+                    properties: doclet.properties ? doclet.properties.map(property => ({
+                        type: property.type ? {
+                            names:      property.type.names,
+                            parsedType: property.type.parsedType
+                        } : property.type,
+
+                        name:           property.name,
+                        description:    property.description,
+                        optional:       property.optional,
+                        defaultvalue:   property.defaultvalue
+                    })) : doclet.properties,
                     see: doclet.see || undefined
                 };
     
+                filteredDoclets.push(filteredDoclet);
+            }
+            else if (doclet.kind == 'typedef') {
+                const filteredDoclet = {
+                    comment:        doclet.comment,
+                    description:    doclet.description,
+                    name:           cleanName(doclet.name),
+                    longname:       cleanName(doclet.longname),
+                    kind:           doclet.kind,
+                    scope:          "global",
+
+                    meta: doclet.meta ? {
+                        lineno:   doclet.meta.lineno,
+                        columnno: doclet.meta.columnno
+                    } : doclet.meta,
+
+                    properties: doclet.properties ? doclet.properties.map(property => ({
+                        type: property.type ? {
+                            names:      property.type.names,
+                            parsedType: property.type.parsedType
+                        } : property.type,
+
+                        name:           property.name,
+                        description:    property.description,
+                        optional:       property.optional,
+                        defaultvalue:   property.defaultvalue
+                    })) : doclet.properties,
+
+                    see: doclet.see,
+                    type: doclet.type ? {
+                        names: doclet.type.names,
+                        parsedType: doclet.type.parsedType
+                    } : doclet.type
+                };
+
                 filteredDoclets.push(filteredDoclet);
             }
         }

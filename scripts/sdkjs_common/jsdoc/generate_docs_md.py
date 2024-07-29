@@ -77,8 +77,11 @@ def generate_data_types_markdown(types, enumerations, classes):
     
     return re.sub(r'<([^<>]+)>', replace_with_links, param_types_md)
 
-def generate_class_markdown(class_name, methods):
+def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
+    
+    content += generate_properties_markdown(properties, enumerations, classes)
+
     content += "## Methods\n\n"
     for method in methods:
         method_name = method['name']
@@ -137,6 +140,24 @@ def generate_method_markdown(method, enumerations, classes):
 
     return content
 
+def generate_properties_markdown(properties, enumerations, classes):
+    if (properties is None):
+        return ''
+    
+    content = "## Properties\n\n"
+    content += "| Name | Type | Description |\n"
+    content += "| ---- | ---- | ----------- |\n"
+    for prop in properties:
+        prop_name = prop['name']
+        prop_description = prop.get('description', 'No description provided.')
+        prop_description = remove_line_breaks(correct_description(prop_description))
+        param_types_md = generate_data_types_markdown(prop['type']['names'], enumerations, classes)
+        content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
+    content += "\n"
+
+    return content
+        
+
 def generate_enumeration_markdown(enumeration, enumerations, classes):
     enum_name = enumeration['name']
     description = enumeration.get('description', 'No description provided.')
@@ -160,16 +181,7 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
                 content += f"- {element_name}\n"
     elif enumeration['properties'] is not None:
         content += "## Type\n\nObject\n\n"
-        content += "## Properties\n\n"
-        content += "| Name | Type | Description |\n"
-        content += "| ---- | ---- | ----------- |\n"
-        properties = enumeration['properties']
-        for prop in properties:
-            prop_name = prop['name']
-            prop_description = prop.get('description', 'No description provided.')
-            prop_description = remove_line_breaks(correct_description(prop_description))
-            param_types_md = generate_data_types_markdown(prop['type']['names'], enumerations, classes)
-            content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
+        content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
     else:
         content += "## Type\n\n"
         types = enumeration['type']['names']
@@ -187,12 +199,14 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
 
 def process_doclets(data, output_dir):
     classes = {}
+    classes_props = {}
     enumerations = []
 
     for doclet in data:
         if doclet['kind'] == 'class':
             class_name = doclet['name']
             classes[class_name] = []
+            classes_props[class_name] = doclet.get('properties', None)
         elif doclet['kind'] == 'function':
             class_name = doclet.get('memberof')
             if class_name:
@@ -209,7 +223,7 @@ def process_doclets(data, output_dir):
         os.makedirs(methods_dir, exist_ok=True)
 
         # Write class file
-        class_content = generate_class_markdown(class_name, methods)
+        class_content = generate_class_markdown(class_name, methods, classes_props[class_name], enumerations, classes)
         write_markdown_file(os.path.join(class_dir, f"{class_name}.md"), class_content)
 
         # Write method files

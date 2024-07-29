@@ -1,14 +1,14 @@
 exports.handlers = {
     processingComplete: function(e) {
-        // Инициализация массива для сохранения отфильтрованных doclets
+        // array for filtered doclets
         let filteredDoclets = [];
 
         const cleanName = name => name ? name.replace('<anonymous>~', '').replaceAll('"', '') : name;
 
-        const classesDocletsMap = {}; // доклеты классов пишем в конце
-        let passedClasses = []; // те которые проходят для редактора
+        const classesDocletsMap = {}; // doclets for classes write at the end
+        let passedClasses = []; // passed classes for current editor
 
-        // Убираем повторения оставляя посление doclets
+        // Remove dublicates doclets
         const latestDoclets = {};
         e.doclets.forEach(doclet => {
             const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
@@ -25,7 +25,7 @@ exports.handlers = {
         });
         e.doclets.splice(0, e.doclets.length, ...Object.values(latestDoclets));
 
-        // набивка доступных классов текущего редактора
+        // check available classess for current editor
         for (let i = 0; i < e.doclets.length; i++) {
             const doclet = e.doclets[i];
             const isMethod = doclet.kind === 'function' || doclet.kind === 'method';
@@ -47,7 +47,7 @@ exports.handlers = {
             }
         }
 
-        // проходимся по классам и удаляем из мапы те, что недоступны в редакторе
+        // remove unavailave classes in current editor
         passedClasses = passedClasses.filter(className => {
             const doclet = classesDocletsMap[className];
             if (!doclet) {
@@ -56,7 +56,7 @@ exports.handlers = {
 
             const hasTypeofEditorsTag = !!(doclet.tags && doclet.tags.some(tag => tag.title === 'typeofeditors'));
 
-            // класс пропускаем если нет тега редактора или текущий редактор есть среди тегов 
+            // class is passes if there is no editor tag or the current editor is among the tags
             const isPassed = false == hasTypeofEditorsTag || doclet.tags.some(tag => tag.title === 'typeofeditors' && tag.value && tag.value.includes(process.env.EDITOR));
             return isPassed;
         });
@@ -72,12 +72,12 @@ exports.handlers = {
                 doclet.scope !== 'inner' && hasTypeofEditorsTag;
 
             if (shouldAddMethod) {
-                // если класса нет в нашей мапе, значит мы его удалили сами -> недоступен в редакторе
+                // if the class is not in our map, then we deleted it ourselves -> not available in the editor
                 if (false == passedClasses.includes(cleanName(doclet.memberof))) {
                     continue;
                 }
 
-                // Оставляем только нужные поля
+                // We leave only the necessary fields
                 doclet.memberof = cleanName(doclet.memberof);
                 doclet.longname = cleanName(doclet.longname);
                 doclet.name     = cleanName(doclet.name);
@@ -136,11 +136,11 @@ exports.handlers = {
                     see: doclet.see 
                 };
 
-                // Добавляем отфильтрованный doclet в массив
+                // Add the filtered doclet to the array
                 filteredDoclets.push(filteredDoclet);
             }
             else if (doclet.kind == 'class') {
-                // если класса нет в нашей мапе, значит мы его удалили сами -> недоступен в редакторе
+                // if the class is not in our map, then we deleted it ourselves -> not available in the editor
                 if (false == passedClasses.includes(cleanName(doclet.name))) {
                     continue;
                 }
@@ -210,7 +210,7 @@ exports.handlers = {
             }
         }
 
-        // Заменяем doclets на отфильтрованный массив
+        // Replace doclets with a filtered array
         e.doclets.splice(0, e.doclets.length, ...filteredDoclets);
     }
 };

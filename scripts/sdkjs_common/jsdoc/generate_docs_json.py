@@ -4,7 +4,7 @@ import json
 import argparse
 import re
 
-# Конфигурационные файлы
+# Configuration files
 configs = [
     "./config/word.json",
     "./config/cell.json",
@@ -25,11 +25,11 @@ def generate(output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # Пересоздание файла missing_examples.txt
+    # Recreate missing_examples.txt file
     with open(missing_examples_file, 'w', encoding='utf-8') as f:
         f.write('')
 
-    # Генерация json документации
+    # Generate JSON documentation
     for config in configs:
         editor_name = config.split('/')[-1].replace('.json', '')
         output_file = os.path.join(output_dir, editor_name + ".json")
@@ -37,16 +37,16 @@ def generate(output_dir):
         print(f"Generating {editor_name}.json: {command}")
         subprocess.run(command, shell=True)
 
-    # дозапись примеров в json документацию
+    # Append examples to JSON documentation
     for config in configs:
         editor_name = config.split('/')[-1].replace('.json', '')
         output_file = os.path.join(output_dir, editor_name + ".json")
         
-        # Чтение JSON файла
+        # Read the JSON file
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Модификация JSON данных
+        # Modify JSON data
         for doclet in data:
             if 'see' in doclet:
                 if doclet['see'] is not None:
@@ -55,7 +55,7 @@ def generate(output_dir):
                         with open(file_path, 'r', encoding='utf-8') as see_file:
                             example_content = see_file.read()
                         
-                        # Извлечение первой строки как комментария, если она существует
+                        # Extract the first line as a comment if it exists
                         lines = example_content.split('\n')
                         if lines[0].startswith('//'):
                             comment = lines[0] + '\n'
@@ -64,28 +64,28 @@ def generate(output_dir):
                             comment = ''
                             code_content = example_content
                         
-                        # Форматирование содержимого для doclet['example']
+                        # Format content for doclet['example']
                         doclet['example'] = remove_js_comments(comment) + "```js\n" + remove_builder_lines(code_content) + "\n```"
                     else:
-                        # Запись пропущенного примера в файл missing_examples.txt
+                        # Record missing examples in missing_examples.txt
                         with open(missing_examples_file, 'a', encoding='utf-8') as missing_file:
                             missing_file.write(f"{file_path}\n")
         
-        # Запись измененного JSON файла обратно
+        # Write the modified JSON file back
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
     print("Documentation generation completed.")
 
 def remove_builder_lines(text):
-    lines = text.splitlines()  # Разделить текст на строки
+    lines = text.splitlines()  # Split text into lines
     filtered_lines = [line for line in lines if not line.strip().startswith("builder.")]
     return "\n".join(filtered_lines)
 
 def remove_js_comments(text):
-    # Удаляем однострочные комментарии, оставляя текст после //
+    # Remove single-line comments, leaving text after //
     text = re.sub(r'^\s*//\s?', '', text, flags=re.MULTILINE)
-    # Удаляем многострочные комментарии, оставляя текст после /*
+    # Remove multi-line comments, leaving text after /*
     text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
     return text.strip()
 

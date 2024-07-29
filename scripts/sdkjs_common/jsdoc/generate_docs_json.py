@@ -66,7 +66,6 @@ def generate(output_dir):
                         
                         # Форматирование содержимого для doclet['example']
                         doclet['example'] = remove_js_comments(comment) + "```js\n" + remove_builder_lines(code_content) + "\n```"
-                        del doclet['see']
                     else:
                         # Запись пропущенного примера в файл missing_examples.txt
                         with open(missing_examples_file, 'a', encoding='utf-8') as missing_file:

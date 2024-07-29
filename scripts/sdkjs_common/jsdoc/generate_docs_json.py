@@ -89,6 +89,25 @@ def remove_js_comments(text):
     text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
     return text.strip()
 
+def get_current_branch(path):
+    try:
+        # Navigate to the specified directory and get the current branch name
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+        else:
+            print(f"Error: {result.stderr}")
+            return None
+    except Exception as e:
+        print(f"Exception: {e}")
+        return None
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documentation")
     parser.add_argument(
@@ -99,5 +118,9 @@ if __name__ == "__main__":
         default="../../../../document-builder-declarations/document-builder"  # Default value
     )
     args = parser.parse_args()
+    
+    branch_name = get_current_branch("../../../../sdkjs")
+    if branch_name:
+        args.destination = f"{args.destination}/{branch_name}"
     
     generate(args.destination)

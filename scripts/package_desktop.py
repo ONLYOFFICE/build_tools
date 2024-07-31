@@ -366,19 +366,19 @@ def make_linux():
           utils.glob_path("rpm/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/rhel/")
         utils.set_summary("desktop rpm deploy", ret)
-      if "suse-rpm" in branding.desktop_make_targets:
+      if "rpm-suse" in branding.desktop_make_targets:
         utils.log_h2("desktop rpm suse deploy")
         ret = s3_upload(
           utils.glob_path("rpm-suse/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/suse/")
         utils.set_summary("desktop rpm suse deploy", ret)
-      if "apt-rpm" in branding.desktop_make_targets:
+      if "rpm-alt" in branding.desktop_make_targets:
         utils.log_h2("desktop rpm alt deploy")
         ret = s3_upload(
           utils.glob_path("rpm-alt/build/RPMS/" + rpm_arch + "/*.rpm"),
           "desktop/linux/altlinux/")
         utils.set_summary("desktop rpm alt deploy", ret)
-      if "urpmi" in branding.desktop_make_targets:
+      if "rpm-rosa" in branding.desktop_make_targets:
         utils.log_h2("desktop rpm rosa deploy")
         ret = s3_upload(
           utils.glob_path("rpm-rosa/build/RPMS/" + rpm_arch + "/*.rpm"),

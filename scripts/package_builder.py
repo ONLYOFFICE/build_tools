@@ -137,7 +137,7 @@ def make_linux():
   utils.set_cwd("document-builder-package")
 
   utils.log_h2("builder build")
-  make_args = branding.builder_make_targets
+  make_args = [t["make"] for t in branding.builder_make_targets]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
@@ -146,32 +146,10 @@ def make_linux():
   utils.set_summary("builder build", ret)
 
   if common.deploy:
-    if ret:
-      if "tar" in branding.builder_make_targets:
-        utils.log_h2("builder tar deploy")
-        ret = s3_upload(
-          utils.glob_path("tar/*.tar.gz"),
-          "builder/linux/generic/")
-        utils.set_summary("builder tar deploy", ret)
-      if "deb" in branding.builder_make_targets:
-        utils.log_h2("builder deb deploy")
-        ret = s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "builder/linux/debian/")
-        utils.set_summary("builder deb deploy", ret)
-      if "rpm" in branding.builder_make_targets:
-        utils.log_h2("builder rpm deploy")
-        ret = s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/*/*.rpm"),
-          "builder/linux/rhel/")
-        utils.set_summary("builder rpm deploy", ret)
-    else:
-      if "tar" in branding.builder_make_targets:
-        utils.set_summary("builder tar deploy", False)
-      if "deb" in branding.builder_make_targets:
-        utils.set_summary("builder deb deploy", False)
-      if "rpm" in branding.builder_make_targets:
-        utils.set_summary("builder rpm deploy", False)
+    for t in branding.builder_make_targets:
+      utils.log_h2("builder " + t["make"] + " deploy")
+      ret = s3_upload(utils.glob_path(t["src"]), t["dst"])
+      utils.set_summary("builder " + t["make"] + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return

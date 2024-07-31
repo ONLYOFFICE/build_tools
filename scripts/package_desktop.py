@@ -342,8 +342,8 @@ def make_linux():
 
   if common.deploy:
     if ret:
-      utils.log_h2("desktop tar deploy")
       if "tar" in branding.desktop_make_targets:
+        utils.log_h2("desktop tar deploy")
         ret = s3_upload(
           utils.glob_path("tar/*.tar*"),
           "desktop/linux/generic/")

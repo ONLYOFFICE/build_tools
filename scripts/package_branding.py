@@ -30,6 +30,6 @@ if utils.is_macos():
 builder_product_name = "Document Builder"
 
 if utils.is_linux():
-  desktop_make_targets = ["deb", "rpm", "suse-rpm", "tar"]
+  desktop_make_targets = ["deb", "rpm", "rpm-suse", "tar"]
   builder_make_targets = ["deb", "rpm"] # tar
   server_make_targets = ["deb", "rpm", "tar"]

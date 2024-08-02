@@ -19,7 +19,7 @@ editors_maps = {
     "forms":    "CFE"
 }
 
-def generate(output_dir):
+def generate(output_dir, md=False):
     missing_examples_file = f'{output_dir}/missing_examples.txt'
 
     if not os.path.exists(output_dir):
@@ -51,9 +51,12 @@ def generate(output_dir):
             if 'see' in doclet:
                 if doclet['see'] is not None:
                     if editor_name == 'forms':
-                        file_path = '../../../../' + doclet['see'][0].replace('{Editor}', 'Word')
+                        doclet['see'][0] = doclet['see'][0].replace('{Editor}', 'Word')
                     else:
-                        file_path = '../../../../' + doclet['see'][0].replace('{Editor}', editor_name.title())
+                        doclet['see'][0] = doclet['see'][0].replace('{Editor}', editor_name.title())
+
+                    file_path = '../../../../' + doclet['see'][0]
+
                     if os.path.exists(file_path):
                         with open(file_path, 'r', encoding='utf-8') as see_file:
                             example_content = see_file.read()
@@ -68,7 +71,11 @@ def generate(output_dir):
                             code_content = example_content
                         
                         # Format content for doclet['example']
-                        doclet['example'] = remove_js_comments(comment) + "```js\n" + remove_builder_lines(code_content) + "\n```"
+                        doclet['example'] = remove_js_comments(comment) + "```js\n" + code_content + "\n```"
+                        
+                        if md == False:
+                            doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{editor_name.title()}"}}\n{code_content}\n```'
+                        
                     else:
                         # Record missing examples in missing_examples.txt
                         with open(missing_examples_file, 'a', encoding='utf-8') as missing_file:

@@ -241,7 +241,7 @@ def process_doclets(data, output_dir):
 def generate(output_dir):
     print('Generating Markdown documentation...')
     
-    generate_docs_json.generate(output_dir + 'tmp_json')
+    generate_docs_json.generate(output_dir + 'tmp_json', md=True)
     for editor_name in editors:
         input_file = os.path.join(output_dir + 'tmp_json', editor_name + ".json")
         os.makedirs(output_dir + f'/{editor_name.title()}', exist_ok=True)

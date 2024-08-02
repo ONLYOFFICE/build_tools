@@ -50,7 +50,10 @@ def generate(output_dir):
         for doclet in data:
             if 'see' in doclet:
                 if doclet['see'] is not None:
-                    file_path = '../../../../' + doclet['see'][0]
+                    if editor_name == 'forms':
+                        file_path = '../../../../' + doclet['see'][0].replace('{Editor}', 'Word')
+                    else:
+                        file_path = '../../../../' + doclet['see'][0].replace('{Editor}', editor_name.title())
                     if os.path.exists(file_path):
                         with open(file_path, 'r', encoding='utf-8') as see_file:
                             example_content = see_file.read()

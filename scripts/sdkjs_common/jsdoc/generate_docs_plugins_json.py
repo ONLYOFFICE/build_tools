@@ -4,22 +4,16 @@ import json
 import argparse
 import re
 
-root = '../../../..'
-
 # Configuration files
 configs = [
-    "./config/builder/word.json",
-    "./config/builder/cell.json",
-    "./config/builder/slide.json",
-    "./config/builder/forms.json"
+    "./config/plugins/common.json",
+    "./config/plugins/word.json",
+    "./config/plugins/cell.json",
+    "./config/plugins/slide.json",
+    "./config/plugins/forms.json"
 ]
 
-editors_maps = {
-    "word":     "CDE",
-    "cell":     "CSE",
-    "slide":    "CPE",
-    "forms":    "CFE"
-}
+root = '../../../..'
 
 def generate(output_dir, md=False):
     missing_examples_file = f'{output_dir}/missing_examples.txt'
@@ -35,7 +29,7 @@ def generate(output_dir, md=False):
     for config in configs:
         editor_name = config.split('/')[-1].replace('.json', '')
         output_file = os.path.join(output_dir, editor_name + ".json")
-        command = f"set EDITOR={editors_maps[editor_name]} && npx jsdoc -c {config} -X > {output_file}"
+        command = f"npx jsdoc -c {config} -X > {output_file}"
         print(f"Generating {editor_name}.json: {command}")
         subprocess.run(command, shell=True)
 
@@ -127,7 +121,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default=f"{root}/document-builder-declarations/document-builder"  # Default value
+        default=f"{root}/document-builder-declarations/document-builder-plugin"  # Default value
     )
     args = parser.parse_args()
     

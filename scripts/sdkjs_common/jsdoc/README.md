@@ -1,7 +1,7 @@
 
 # Documentation Generation Guide
 
-This guide explains how to generate documentation for Onlyoffice API using the provided Python scripts, `generate_docs_json.py` and `generate_docs_md.py`. These scripts are used to create JSON and Markdown documentation for the `apiBuilder.js` files from the word, cell, and slide editors.
+This guide explains how to generate documentation for Onlyoffice Builder/Plugins API using the provided Python scripts: `generate_docs_json.py`, `generate_docs_plugins_json.py`, `generate_docs_md.py`. These scripts are used to create JSON and Markdown documentation for the `apiBuilder.js` files from the word, cell, and slide editors.
 
 ## Prerequisites
 
@@ -24,7 +24,19 @@ This script generates JSON documentation based on the `apiBuilder.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/sdkjs/deploy/api_builder/json`.
+  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/document-builder-declarations/document-builder`.
+
+### `generate_docs_plugins_json.py`
+
+This script generates JSON documentation based on the `api_plugins.js` files.
+
+- **Usage**:
+  ```bash
+  python generate_docs_plugins_json.py output_path
+  ```
+
+- **Parameters**:
+  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/document-builder-declarations/document-builder-plugin`.
 
 ### `generate_docs_md.py`
 
@@ -43,6 +55,11 @@ This script generates Markdown documentation from the `apiBuilder.js` files.
 To generate JSON documentation with the default output path:
 ```bash
 python generate_docs_json.py /path/to/save/json
+```
+
+To generate JSON documentation with the default output path:
+```bash
+python generate_docs_plugins_json.py /path/to/save/json
 ```
 
 To generate Markdown documentation and specify a custom output path:

@@ -76,7 +76,7 @@ def generate(output_dir, md=False):
                         doclet['example'] = remove_js_comments(comment) + "```js\n" + code_content + "\n```"
                         
                         if md == False:
-                            doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{editor_name.title()}"}}\n{code_content}\n```'
+                            doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{editor_name}"}}\n{code_content}\n```'
                         
                     else:
                         # Record missing examples in missing_examples.txt
@@ -133,6 +133,9 @@ if __name__ == "__main__":
     
     branch_name = get_current_branch(f"{root}/sdkjs")
     if branch_name:
+        index_last_name = branch_name.rfind("/")
+        if -1 != index_last_name:
+            branch_name = branch_name[index_last_name + 1:]
         args.destination = f"{args.destination}/{branch_name}"
     
     generate(args.destination)

@@ -70,7 +70,10 @@ def generate(output_dir, md=False):
                         doclet['example'] = remove_js_comments(comment) + "```js\n" + code_content + "\n```"
                         
                         if md == False:
-                            doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{editor_name}"}}\n{code_content}\n```'
+                            document_type = editor_name
+                            if "forms" == document_type:
+                                document_type = "pdf"
+                            doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{document_type}"}}\n{code_content}\n```'
                         
                     else:
                         # Record missing examples in missing_examples.txt

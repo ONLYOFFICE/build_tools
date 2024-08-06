@@ -426,12 +426,13 @@ def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
 
 def run_command(sCommand):
   popen = subprocess.Popen(sCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  result = {'stdout' : '', 'stderr' : ''}
+  result = {'stdout' : '', 'stderr' : '', 'returncode' : 0}
   try:
     stdout, stderr = popen.communicate()
     popen.wait()
     result['stdout'] = stdout.strip().decode('utf-8', errors='ignore')
     result['stderr'] = stderr.strip().decode('utf-8', errors='ignore')
+    result['returncode'] = popen.returncode
   finally:
     popen.stdout.close()
     popen.stderr.close()

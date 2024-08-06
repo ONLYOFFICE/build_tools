@@ -43,7 +43,7 @@ if utils.is_linux():
     },
     {
       "make": "rpm",
-      "src": "rpm/builddir/RPMS/*/*.rpm",
+      "src": "rpm/build/RPMS/*/*.rpm",
       "dst": "builder/linux/rhel/"
     }
   ]

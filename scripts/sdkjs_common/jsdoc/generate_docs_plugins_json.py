@@ -66,8 +66,7 @@ def generate(output_dir, md=False):
                             comment = ''
                             code_content = example_content
                         
-                        # Format content for doclet['example']
-                        doclet['example'] = remove_js_comments(comment) + "```js\n" + code_content + "\n```"
+                        doclet['examples'] = [remove_js_comments(comment) + code_content]
                         
                         if md == False:
                             document_type = editor_name

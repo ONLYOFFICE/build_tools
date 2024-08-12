@@ -76,9 +76,11 @@ def make():
       if (0 == platform.find("win")):
         base.copy_file(core_build_dir + "/lib/" + platform_postfix + "/doctrenderer.lib", root_dir + "/doctrenderer.lib")
     base.copy_v8_files(core_dir, root_dir, platform, isWindowsXP)
+    # python wrapper
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.c")
-
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir + "/docbuilder.py")
+    # java wrapper
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.jni")
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")

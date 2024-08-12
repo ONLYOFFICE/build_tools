@@ -31,8 +31,7 @@ def make_archive():
   dest_latest = "archive/%s/latest/%s" % (common.branch, dest)
   dest_version = "archive/%s/%s/%s" % (common.branch, common.build, dest)
   ret = utils.s3_upload(
-    "core.7z",
-    "s3://" + branding.s3_bucket + "/" + dest_version)
+    "core.7z", "s3://" + branding.s3_bucket + "/" + dest_version)
   utils.set_summary("core archive deploy", ret)
   if ret:
     utils.log("URL: " + branding.s3_base_url + "/" + dest_version)

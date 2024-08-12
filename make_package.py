@@ -10,15 +10,17 @@ import package_utils as utils
 # parse
 parser = argparse.ArgumentParser(description="Build packages.")
 parser.add_argument("-P", "--platform", dest="platform", type=str,
-                    action="store", help="Defines platform", required=True)
-parser.add_argument("-T", "--targets", dest="targets",   type=str, nargs="+",
-                    action="store", help="Defines targets",  required=True)
-parser.add_argument("-R", "--branding", dest="branding", type=str,
-                    action="store", help="Provides branding path")
+  action="store", help="Defines platform", required=True)
+parser.add_argument("-T", "--targets",  dest="targets",  type=str, nargs="+",
+  action="store", help="Defines targets",  required=True)
 parser.add_argument("-V", "--version",  dest="version",  type=str,
-                    action="store", help="Defines version")
+  action="store", help="Defines version")
 parser.add_argument("-B", "--build",    dest="build",    type=str,
-                    action="store", help="Defines build")
+  action="store", help="Defines build")
+parser.add_argument("-H", "--branch",   dest="branch",   type=str,
+  action="store", help="Defines branch")
+parser.add_argument("-R", "--branding", dest="branding", type=str,
+  action="store", help="Provides branding path")
 args = parser.parse_args()
 
 # vars
@@ -29,8 +31,16 @@ common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
-common.version = args.version if args.version else utils.get_env("BUILD_VERSION", "0.0.0")
-common.build = args.build if args.build else utils.get_env("BUILD_NUMBER", "0")
+if args.version: common.version = args.version
+else:            common.version = utils.get_env("PRODUCT_VERSION", "0.0.0")
+utils.set_env("PRODUCT_VERSION", common.version)
+utils.set_env("BUILD_VERSION", common.version)
+if args.build: common.build = args.build
+else:          common.build = utils.get_env("BUILD_NUMBER", "0")
+utils.set_env("BUILD_NUMBER", common.build)
+if args.branch: common.branch = args.branch
+else:           common.branch = utils.get_env("BRANCH_NAME", "null")
+utils.set_env("BRANCH_NAME", common.branch)
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")

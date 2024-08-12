@@ -64,10 +64,5 @@ def make():
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)
-
-    if base.is_file(archive_dir + ".7z"):
-      base.delete_file(archive_dir + ".7z")
-    base.archive_folder(archive_dir + "/*", archive_dir + ".7z")
-
   return
 

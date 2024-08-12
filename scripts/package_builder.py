@@ -7,14 +7,17 @@ import package_branding as branding
 
 def make():
   utils.log_h1("BUILDER")
+  if not (utils.is_windows() or utils.is_macos() or utils.is_linux()):
+    utils.log("Unsupported host OS")
+    return
+  if common.deploy:
+    make_archive()
   if utils.is_windows():
     make_windows()
   elif utils.is_macos():
     make_macos()
   elif utils.is_linux():
     make_linux()
-  else:
-    utils.log("Unsupported host OS")
   return
 
 def s3_upload(files, dst):
@@ -28,6 +31,37 @@ def s3_upload(files, dst):
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
+
+def make_archive():
+  utils.set_cwd(utils.get_path(
+    "build_tools/out/" + common.prefix + "/" + branding.company_name.lower()))
+
+  utils.log_h2("builder archive build")
+  utils.delete_file("builder.7z")
+  args = ["7z", "a", "-y", "builder.7z", "./documentbuilder/*"]
+  if utils.is_windows():
+    ret = utils.cmd(*args, verbose=True)
+  else:
+    ret = utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("builder archive build", ret)
+
+  utils.log_h2("builder archive deploy")
+  dest = "builder-" + common.prefix.replace("_","-") + ".7z"
+  dest_latest = "archive/%s/latest/%s" % (common.branch, dest)
+  dest_version = "archive/%s/%s/%s" % (common.branch, common.build, dest)
+  ret = utils.s3_upload(
+    "builder.7z", "s3://" + branding.s3_bucket + "/" + dest_version)
+  utils.set_summary("builder archive deploy", ret)
+  if ret:
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_version)
+    utils.add_deploy_data(dest_version)
+    utils.s3_copy(
+      "s3://" + branding.s3_bucket + "/" + dest_version,
+      "s3://" + branding.s3_bucket + "/" + dest_latest)
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_latest)
+
+  utils.set_cwd(common.workspace_dir)
+  return
 
 def make_windows():
   global inno_file, zip_file, suffix, key_prefix

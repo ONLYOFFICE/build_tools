@@ -55,13 +55,13 @@
 
     "[win,linux,mac,!linux_arm64]core/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro",
 
+    "spell",
+
     "[win,linux,mac,!no_tests]core/DesktopEditor/vboxtester/vboxtester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/StandardTester/standardtester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/x2tTester/x2ttester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/MetafileTester/MetafileTester.pro",
     "[win,linux,mac,!no_tests]core/Common/3dParty/hunspell/test/test.pro",
-
-    "spell"
 
   ],
 

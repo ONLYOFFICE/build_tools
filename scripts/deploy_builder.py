@@ -81,7 +81,6 @@ def make():
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir + "/docbuilder.py")
     # java wrapper
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.jni")
-    base.cmd_in_dir(core_dir + "/DesktopEditor/doctrenderer/docbuilder.java", "python", ["make.py"])
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.java/build/libs/docbuilder.jar", root_dir + "/docbuilder.jar")
 
     # app

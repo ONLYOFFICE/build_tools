@@ -61,7 +61,7 @@
     "[win,linux,mac,!no_tests]core/Test/Applications/StandardTester/standardtester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/x2tTester/x2ttester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/MetafileTester/MetafileTester.pro",
-    "[win,linux,mac,!no_tests]core/Common/3dParty/hunspell/test/test.pro",
+    "[win,linux,mac,!no_tests]core/Common/3dParty/hunspell/test/test.pro"
 
   ],
 

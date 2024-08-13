@@ -30,6 +30,59 @@ if utils.is_macos():
 builder_product_name = "Document Builder"
 
 if utils.is_linux():
-  desktop_make_targets = ["deb", "rpm", "suse-rpm", "tar"]
-  builder_make_targets = ["deb", "rpm"] # tar
-  server_make_targets = ["deb", "rpm", "tar"]
+  builder_make_targets = [
+    {
+      "make": "tar",
+      "src": "tar/*.tar*",
+      "dst": "builder/linux/generic/"
+    },
+    {
+      "make": "deb",
+      "src": "deb/*.deb",
+      "dst": "builder/linux/debian/"
+    },
+    {
+      "make": "rpm",
+      "src": "rpm/build/RPMS/*/*.rpm",
+      "dst": "builder/linux/rhel/"
+    }
+  ]
+  desktop_make_targets = [
+    {
+      "make": "tar",
+      "src": "tar/*.tar*",
+      "dst": "desktop/linux/generic/"
+    },
+    {
+      "make": "deb",
+      "src": "deb/*.deb",
+      "dst": "desktop/linux/debian/"
+    },
+    {
+      "make": "rpm",
+      "src": "rpm/build/RPMS/*/*.rpm",
+      "dst": "desktop/linux/rhel/"
+    },
+    {
+      "make": "rpm-suse",
+      "src": "rpm-suse/build/RPMS/*/*.rpm",
+      "dst": "desktop/linux/suse/"
+    }
+  ]
+  server_make_targets = [
+    {
+      "make": "deb",
+      "src": "deb/*.deb",
+      "dst": "server/linux/debian/"
+    },
+    {
+      "make": "rpm",
+      "src": "rpm/builddir/RPMS/*/*.rpm",
+      "dst": "server/linux/rhel/"
+    },
+    {
+      "make": "tar",
+      "src": "*.tar*",
+      "dst": "server/linux/snap/"
+    }
+  ]

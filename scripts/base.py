@@ -1226,7 +1226,12 @@ def mac_correct_rpath_docbuilder(dir):
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
   mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
   mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer"])
-  cmd("install_name_tool", ["-add_rpath", "@loader_path", "libdocbuilder.c.dylib"], True)
+
+  def add_loader_path_to_rpath(libs):
+    for lib in libs:
+      cmd("install_name_tool", ["-add_rpath", "@loader_path", "lib" + lib + ".dylib"], True)
+
+  add_loader_path_to_rpath(["icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "docbuilder.c"])
   os.chdir(cur_dir)
   return
 

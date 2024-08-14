@@ -52,9 +52,10 @@ def make(solution=""):
     for platform in platforms:
       if not platform in config.platforms:
         continue
+
       # build JNI library
-      qmake.make(platform, os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.java/src/jni/docbuilder_jni.pro", "", True)
+      qmake.make(platform, base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java/src/jni/docbuilder_jni.pro", "", True)
       # build Java code to JAR
-      base.cmd_in_dir(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.java", "python", ["make.py"])
+      base.cmd_in_dir(base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java", "python", ["make.py"])
 
   return

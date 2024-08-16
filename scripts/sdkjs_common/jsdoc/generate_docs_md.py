@@ -53,7 +53,7 @@ def correct_default_value(value, enumerations, classes):
     return generate_data_types_markdown([value], enumerations, classes)
 
 def remove_line_breaks(string):
-    return re.sub(r'[\r\n]', '', string)
+    return re.sub(r'[\r\n]', ' ', string)
 
 def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     param_types_md = ' &#124;'.join(types)

@@ -41,7 +41,7 @@ def make():
   base.create_dir(out_dir)
 
   # builder
-  base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["check.py", "--merge"])
+  base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
   build_interface(base_dir + "/../web-apps/build")
   build_sdk_builder(base_dir + "/../sdkjs/build")
   base.create_dir(out_dir + "/builder")
@@ -169,7 +169,7 @@ def build_js_develop(root_dir):
   _run_npm(root_dir + external_folder + "/web-apps/build")
   _run_npm_ci(root_dir + external_folder + "/web-apps/build/sprites")
   _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
-  base.cmd_in_dir(root_dir + external_folder + "/web-apps/translation", "python", ["check.py", "--merge"])
+  base.cmd_in_dir(root_dir + external_folder + "/web-apps/translation", "python", ["merge_and_check.py"])
 
   old_cur = os.getcwd()
   old_product_version = base.get_env("PRODUCT_VERSION")

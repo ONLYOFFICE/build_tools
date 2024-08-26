@@ -39,6 +39,9 @@ def is_os_arm():
     return False
   return True
 
+def get_platform():
+  return platform.machine().lower()
+
 def is_python_64bit():
   return (struct.calcsize("P") == 8)
 
@@ -1760,3 +1763,35 @@ def apply_patch(file, patch):
   #file_content_new = "\n#if 0" + file_content_old + "#else" + file_content_new + "#endif\n"
   replaceInFile(file, file_content_old, file_content_new)
   return
+
+def get_autobuild_version(product, platform="", branch="", build=""):
+  download_platform = platform
+  if ("" == download_platform):
+    osType = get_platform()
+    isArm = True if (-1 != osType.find("arm")) else False
+    is64 = True if (osType.endswith("64")) else False
+    
+    if ("windows" == host_platform()):
+      download_platform = "win-"
+    elif ("linux" == host_platform()):
+      download_platform = "linux-"
+    else:
+      download_platform = "mac-"
+
+    download_platform += ("arm" if isArm else "")
+    download_platform += ("64" if is64 else "32")
+  else:
+    download_platform = download_platform.replace("_", "-")
+
+  download_build = build
+  if ("" == download_build):
+    download_build = "latest"
+
+  download_branch = branch
+  if ("" == download_branch):
+    download_branch = "develop"
+
+  download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
+  return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
+
+

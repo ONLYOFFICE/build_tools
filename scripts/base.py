@@ -1743,3 +1743,14 @@ def check_tools():
         create_dir(directory + "/qt")
       cmd("python", [directory + "/arm/build_qt.py", "--arch", "arm64", directory + "/qt/arm64"])
   return
+
+def apply_patch(file, patch):
+  patch_content = readFile(patch)
+  index1 = patch_content.find("<<<<<<<")
+  index2 = patch_content.find("=======")
+  index3 = patch_content.find(">>>>>>>")
+  file_content_old = patch_content[index1 + 7:index2].strip()
+  file_content_new = patch_content[index2 + 7:index3].strip()
+  #file_content_new = "\n#if 0" + file_content_old + "#else" + file_content_new + "#endif\n"
+  replaceInFile(file, file_content_old, file_content_new)
+  return

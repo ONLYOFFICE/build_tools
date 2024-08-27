@@ -114,6 +114,7 @@ def make():
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps", js_dir + "/web-apps")
+    base.copy_file(js_dir + "/web-apps/apps/api/documents/api.js", js_dir + "/web-apps/apps/api/documents/api.js.tpl")
     for file in glob.glob(js_dir + "/web-apps/apps/*/*/*.js.map") \
               + glob.glob(js_dir + "/web-apps/apps/*/mobile/dist/js/*.js.map"):
       base.delete_file(file)

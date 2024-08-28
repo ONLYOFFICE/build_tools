@@ -247,7 +247,7 @@ def generate(output_dir):
         os.makedirs(output_dir + f'/{editor_name.title()}', exist_ok=True)
 
         data = load_json(input_file)
-        process_doclets(data, output_dir + f'/{editor_name}')
+        process_doclets(data, output_dir + f'/{editor_name.title()}')
     
     shutil.rmtree(output_dir + 'tmp_json')
     print('Done')

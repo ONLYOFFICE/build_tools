@@ -1798,7 +1798,7 @@ def create_x2t_js_cache(dir, product):
   if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
     return
 
-  if (product in ["builder", "server"])
+  if (product in ["builder", "server"]):
     cmd_in_dir(dir, "./x2t", ["-create-js-cache"])
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"])
   return

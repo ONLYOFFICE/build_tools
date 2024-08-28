@@ -15,19 +15,6 @@ def make():
 
   os.chdir(work_dir)
 
-  arch = "x64"
-  arch2 = "_64"
-  if base.is_windows() and not base.host_platform_is64():
-    arch = "x86"
-    arch2 = "_32"
-  if base.is_os_arm():
-    arch2 = "_arm64"
-  platform = ""
-  if base.is_windows():
-    platform = "win" + arch2
-  else:
-    platform = base.host_platform() + arch2
-
   url = base.get_autobuild_version("core", "", config.option("branch"))
   data_url = base.get_file_last_modified_url(url)
   if (data_url == "" and config.option("branch") != "develop"):

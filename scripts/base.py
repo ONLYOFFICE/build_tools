@@ -1794,4 +1794,11 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
+def create_x2t_js_cache(dir, product):
+  if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
+    return
 
+  if (product in ["builder", "server"])
+    cmd_in_dir(dir, "./x2t", ["-create-js-cache"])
+  cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"])
+  return

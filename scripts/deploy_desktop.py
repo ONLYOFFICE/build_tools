@@ -260,6 +260,8 @@ def make():
     if isUseJSC:
       base.delete_file(root_dir + "/converter/icudtl.dat")
 
+    base.create_x2t_js_cache(root_dir + "/converter", "desktop")
+
     if (0 == platform.find("win")):
       base.delete_file(root_dir + "/cef_sandbox.lib")
       base.delete_file(root_dir + "/libcef.lib")

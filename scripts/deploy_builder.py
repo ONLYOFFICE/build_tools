@@ -123,6 +123,8 @@ def make():
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
+
+    base.create_x2t_js_cache(root_dir, "builder")
   
   return
 

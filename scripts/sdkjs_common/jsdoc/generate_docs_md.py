@@ -72,7 +72,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
             return f"<[{element}]({root}Enumeration/{base_type}.md)>"
         elif base_type in classes:
             return f"<[{element}]({root}{base_type}/{base_type}.md)>"
-        return f"<{element}>"
+        return f"&lt;{element}&gt;"
     
     return re.sub(r'<([^<>]+)>', replace_with_links, param_types_md)
 

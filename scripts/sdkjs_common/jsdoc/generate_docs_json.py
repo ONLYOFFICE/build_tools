@@ -3,6 +3,7 @@ import subprocess
 import json
 import argparse
 import re
+import platform
 
 root = '../../../..'
 
@@ -35,7 +36,10 @@ def generate(output_dir, md=False):
     for config in configs:
         editor_name = config.split('/')[-1].replace('.json', '')
         output_file = os.path.join(output_dir, editor_name + ".json")
-        command = f"set EDITOR={editors_maps[editor_name]} && npx jsdoc -c {config} -X > {output_file}"
+        command_set_env = "export"
+        if (platform.system().lower() == "windows"):
+            command_set_env = "set"
+        command = f"{command_set_env} EDITOR={editors_maps[editor_name]} && npx jsdoc -c {config} -X > {output_file}"
         print(f"Generating {editor_name}.json: {command}")
         subprocess.run(command, shell=True)
 

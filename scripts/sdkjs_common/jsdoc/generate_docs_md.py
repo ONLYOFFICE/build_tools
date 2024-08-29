@@ -56,7 +56,7 @@ def remove_line_breaks(string):
     return re.sub(r'[\r\n]', ' ', string)
 
 def generate_data_types_markdown(types, enumerations, classes, root='../../'):
-    param_types_md = ' &#124;'.join(types)
+    param_types_md = ' &#124; '.join(types)
 
     for enum in enumerations:
         if enum['name'] in types:

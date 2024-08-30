@@ -96,25 +96,6 @@ def remove_js_comments(text):
     # Remove multi-line comments, leaving text after /*
     text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
     return text.strip()
-
-def get_current_branch(path):
-    try:
-        # Navigate to the specified directory and get the current branch name
-        result = subprocess.run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=path,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        if result.returncode == 0:
-            return result.stdout.strip()
-        else:
-            print(f"Error: {result.stderr}")
-            return None
-    except Exception as e:
-        print(f"Exception: {e}")
-        return None
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documentation")
@@ -126,12 +107,4 @@ if __name__ == "__main__":
         default=f"{root}/office-js-api-declarations/office-js-api-plugins"
     )
     args = parser.parse_args()
-    
-    branch_name = get_current_branch(f"{root}/sdkjs")
-    if branch_name:
-        index_last_name = branch_name.rfind("/")
-        if -1 != index_last_name:
-            branch_name = branch_name[index_last_name + 1:]
-        args.destination = f"{args.destination}/{branch_name}"
-    
     generate(args.destination)

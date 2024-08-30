@@ -48,7 +48,7 @@ This script generates Markdown documentation from the `apiBuilder.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the Markdown documentation will be saved. If not specified, the default path is `Onlyoffice/office-js-api`.
+  - `output_path` (optional): The directory where the Markdown documentation will be saved. If not specified, the default path is `../../../../office-js-api/`.
 
 ## Example
 

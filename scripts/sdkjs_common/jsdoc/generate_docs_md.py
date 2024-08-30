@@ -13,6 +13,8 @@ editors = [
     "forms"
 ]
 
+missing_examples = []
+
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -136,6 +138,8 @@ def generate_method_markdown(method, enumerations, classes):
         comment, code = example.split('```js', 1)
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+    else:
+        missing_examples.append(method)
 
     return content
 
@@ -193,6 +197,8 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
         comment, code = example.split('```js', 1)
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+    else:
+        missing_examples.append(enumeration)
 
     return content
 
@@ -262,5 +268,7 @@ if __name__ == "__main__":
         default="../../../../office-js-api/"  # Default value
     )
     args = parser.parse_args()
-    
     generate(args.destination)
+    print("START_MISSING_EXAMPLES")
+    print(",".join(missing_examples))
+    print("END_MISSING_EXAMPLES")

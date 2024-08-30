@@ -134,7 +134,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default=f"{root}/document-builder-declarations/document-builder"  # Default value
+        default=f"{root}/office-js-api-declarations/office-js-api"
     )
     args = parser.parse_args()
     

@@ -139,7 +139,7 @@ def generate_method_markdown(method, enumerations, classes):
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
     else:
-        missing_examples.append(method)
+        missing_examples.append(method_name)
 
     return content
 
@@ -198,7 +198,7 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
     else:
-        missing_examples.append(enumeration)
+        missing_examples.append(enum_name)
 
     return content
 

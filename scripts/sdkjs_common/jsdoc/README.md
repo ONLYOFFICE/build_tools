@@ -30,7 +30,7 @@ This script generates JSON documentation based on the `apiBuilder.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/document-builder-declarations/document-builder`.
+  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `../../../../office-js-api-declarations/office-js-api`.
 
 ### `generate_docs_plugins_json.py`
 

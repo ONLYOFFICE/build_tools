@@ -1799,6 +1799,6 @@ def create_x2t_js_cache(dir, product):
     return
 
   if (product in ["builder", "server"]):
-    cmd_in_dir(dir, "./x2t", ["-create-js-cache"])
-  cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"])
+    cmd_in_dir(dir, "./x2t", ["-create-js-cache"], True)
+  cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return

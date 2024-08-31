@@ -198,10 +198,11 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
 
     return content
 
-def process_doclets(data, output_dir):
+def process_doclets(data, output_dir, editor_name):
     classes = {}
     classes_props = {}
     enumerations = []
+    editor_dir =  os.path.join(output_dir, editor_name)
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -219,7 +220,7 @@ def process_doclets(data, output_dir):
 
     # Process classes
     for class_name, methods in classes.items():
-        class_dir = os.path.join(output_dir, class_name)
+        class_dir = os.path.join(editor_dir, class_name)
         methods_dir = os.path.join(class_dir, 'Methods')
         os.makedirs(methods_dir, exist_ok=True)
 
@@ -236,7 +237,7 @@ def process_doclets(data, output_dir):
                 missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
     # Process enumerations
-    enum_dir = os.path.join(output_dir, 'Enumeration')
+    enum_dir = os.path.join(editor_dir, 'Enumeration')
     os.makedirs(enum_dir, exist_ok=True)
 
     for enum in enumerations:
@@ -255,7 +256,7 @@ def generate(output_dir):
         os.makedirs(output_dir + f'/{editor_name.title()}', exist_ok=True)
 
         data = load_json(input_file)
-        process_doclets(data, output_dir + f'/{editor_name.title()}')
+        process_doclets(data, output_dir, editor_name.title())
     
     shutil.rmtree(output_dir + 'tmp_json')
     print('Done')

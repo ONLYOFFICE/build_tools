@@ -138,8 +138,6 @@ def generate_method_markdown(method, enumerations, classes):
         comment, code = example.split('```js', 1)
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
-    else:
-        missing_examples.append(f"{memberof}/{method_name}")
 
     return content
 
@@ -233,8 +231,11 @@ def process_doclets(data, output_dir):
 
         # Write method files
         for method in methods:
+            method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
             method_content = generate_method_markdown(method, enumerations, classes)
-            write_markdown_file(os.path.join(methods_dir, f"{method['name']}.md"), method_content)
+            write_markdown_file(method_file_path, method_content)
+            if not method.get('example', ''):
+                missing_examples.append(method_file_path)
 
     # Process enumerations
     enum_dir = os.path.join(output_dir, 'Enumeration')

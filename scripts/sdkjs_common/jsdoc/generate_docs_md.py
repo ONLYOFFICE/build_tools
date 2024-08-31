@@ -195,8 +195,6 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
         comment, code = example.split('```js', 1)
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
-    else:
-        missing_examples.append(enum_name)
 
     return content
 
@@ -242,8 +240,11 @@ def process_doclets(data, output_dir):
     os.makedirs(enum_dir, exist_ok=True)
 
     for enum in enumerations:
+        enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
         enum_content = generate_enumeration_markdown(enum, enumerations, classes)
-        write_markdown_file(os.path.join(enum_dir, f"{enum['name']}.md"), enum_content)
+        write_markdown_file(enum_file_path, enum_content)
+        if not enum.get('example', ''):
+            missing_examples.append(enum_file_path)
 
 def generate(output_dir):
     print('Generating Markdown documentation...')

@@ -23,14 +23,8 @@ editors_maps = {
 }
 
 def generate(output_dir, md=False):
-    missing_examples_file = f'{output_dir}/missing_examples.txt'
-
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
-    # Recreate missing_examples.txt file
-    with open(missing_examples_file, 'w', encoding='utf-8') as f:
-        f.write('')
 
     # Generate JSON documentation
     for config in configs:
@@ -84,11 +78,6 @@ def generate(output_dir, md=False):
                             if "forms" == document_type:
                                 document_type = "pdf"
                             doclet['description'] = doclet['description'] + f'\n\n## Try it\n\n ```js document-builder={{"documentType": "{document_type}"}}\n{code_content}\n```'
-                        
-                    else:
-                        # Record missing examples in missing_examples.txt
-                        with open(missing_examples_file, 'a', encoding='utf-8') as missing_file:
-                            missing_file.write(f"{file_path}\n")
         
         # Write the modified JSON file back
         with open(output_file, 'w', encoding='utf-8') as f:

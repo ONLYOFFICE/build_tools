@@ -233,7 +233,7 @@ def process_doclets(data, output_dir):
             method_content = generate_method_markdown(method, enumerations, classes)
             write_markdown_file(method_file_path, method_content)
             if not method.get('example', ''):
-                missing_examples.append(method_file_path)
+                missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
     # Process enumerations
     enum_dir = os.path.join(output_dir, 'Enumeration')
@@ -244,7 +244,7 @@ def process_doclets(data, output_dir):
         enum_content = generate_enumeration_markdown(enum, enumerations, classes)
         write_markdown_file(enum_file_path, enum_content)
         if not enum.get('example', ''):
-            missing_examples.append(enum_file_path)
+            missing_examples.append(os.path.relpath(enum_file_path, output_dir))
 
 def generate(output_dir):
     print('Generating Markdown documentation...')

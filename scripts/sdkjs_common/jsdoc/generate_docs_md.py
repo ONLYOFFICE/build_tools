@@ -139,7 +139,7 @@ def generate_method_markdown(method, enumerations, classes):
         comment = remove_js_comments(comment)
         content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
     else:
-        missing_examples.append(method_name)
+        missing_examples.append(f"{memberof}/{method_name}")
 
     return content
 

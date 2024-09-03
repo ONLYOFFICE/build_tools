@@ -500,12 +500,37 @@ def set_cwd(dir):
   return
 
 # git ---------------------------------------------------
+def git_get_origin():
+  cur_dir = os.getcwd()
+  os.chdir(get_script_dir() + "/../")
+  ret = run_command("git config --get remote.origin.url")["stdout"]
+  os.chdir(cur_dir)
+  return ret
+
+def git_is_ssh():
+  git_protocol = config.option("git-protocol")
+  if (git_protocol == "https"):
+    return False
+  if (git_protocol == "ssh"):
+    return True
+  origin = git_get_origin()
+  if (git_protocol == "auto") and (origin.find(":ONLYOFFICE/") != -1):
+    return True
+  return False
+
+def get_ssh_base_url():
+  cur_origin = git_get_origin()
+  ind = cur_origin.find(":ONLYOFFICE/")
+  if (ind == -1):
+    return "git@github.com:ONLYOFFICE/"
+  return cur_origin[:ind+12]
+
 def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
   owner = git_owner if git_owner else "ONLYOFFICE"
   url = "https://github.com/" + owner + "/" + repo + ".git"
-  if config.option("git-protocol") == "ssh":
-    url = "git@github.com:ONLYOFFICE/" + repo + ".git"
+  if git_is_ssh():
+    url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
   if is_current_dir:
     folder = repo
@@ -574,8 +599,8 @@ def get_branding_repositories(checker):
 def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
   print("[git] create pull request: " + repo)
   url = "https://github.com/ONLYOFFICE/" + repo + ".git"
-  if config.option("git-protocol") == "ssh":
-    url = "git@github.com:ONLYOFFICE/" + repo + ".git"
+  if git_is_ssh():
+    url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
   if is_current_dir:
     folder = repo
@@ -1336,7 +1361,7 @@ def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=Fal
   git_dir = __file__script__path__ + "/../.."
   if False:
     # old version
-    base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", dst_dir, "manager", is_name_as_guid, is_desktop_local)
+    copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", dst_dir, "manager", is_name_as_guid, is_desktop_local)
     return
   src_dir_path = git_dir + "/onlyoffice.github.io/store/plugin"
   name = "marketplace"

@@ -904,7 +904,16 @@ def install_gruntcli():
 
 def install_mysqlserver():
   if (host_platform == 'windows'):
-    return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + config.option("db-port") + 'enable_tcpip=true;port=' + config.option("db-port") + ';rootpasswd=' + config.option("db-pass") + ' -silent')
+    program_files = os.environ["ProgramFiles(x86)"]
+    mysql_installer_path = f"\"{program_files}\MySQL\MySQL Installer for Windows\MySQLInstallerConsole.exe\""
+    mysql_installer_params = " community install server;"
+    mysql_installer_params += "8.0.21" + ";"
+    mysql_installer_params += "x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid="
+    mysql_installer_params += "3306" + ';'
+    mysql_installer_params += "enable_tcpip=true;port=" + "3306" + ";"
+    mysql_installer_params += "rootpasswd=" + "onlyoffice"
+    mysql_installer_params += " -silent"
+    base.cmd2(mysql_installer_path, [mysql_installer_params])
   elif (host_platform == 'linux'):
     os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp ' + config.option("db-port"))['stdout'])
     code = os.system('sudo ufw enable && sudo ufw allow 22 && sudo ufw allow 3306')

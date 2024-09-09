@@ -1216,7 +1216,7 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("kernel", ["UnicodeConverter"])
   mac_correct_rpath_library("kernel_network", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
-  mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "kernel_network", "graphics"])
+  mac_correct_rpath_library("doctrenderer", ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "kernel_network", "graphics"])
   mac_correct_rpath_library("EpubFile", ["UnicodeConverter", "kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
@@ -1305,7 +1305,7 @@ def linux_set_origin_rpath_libraries(dir, libs):
   return
 
 def linux_correct_rpath_docbuilder(dir):
-  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so"])
+  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
   return
 
 def common_check_version(name, good_version, clean_func):

@@ -563,9 +563,11 @@ def get_repositories():
   result.update(get_sdkjs_addons())
   result["onlyoffice.github.io"] = [False, False]
   result["web-apps"] = [False, False]
-  result.update(get_web_apps_addons())
   result["dictionaries"] = [False, False]
   result["core-fonts"] = [False, False]
+
+  if config.check_option("module", "server"):
+    result.update(get_web_apps_addons())
 
   if config.check_option("module", "builder"):
     result["document-templates"] = [False, False]

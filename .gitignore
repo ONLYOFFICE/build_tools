@@ -12,3 +12,4 @@ tests/puppeteer/node_modules
 tests/puppeteer/work_directory
 tests/puppeteer/package.json
 tests/puppeteer/package-lock.json
+tools/linux/qt_build

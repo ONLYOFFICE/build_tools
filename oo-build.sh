@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+set -x
+
+BUILD_BINARIES="true"
 
 build_oo_binaries() {
 

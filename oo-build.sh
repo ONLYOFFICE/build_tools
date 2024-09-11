@@ -1,13 +1,14 @@
 #!/bin/bash
 
-BUILD_BINARIES="true"
-
 build_oo_binaries() {
 
   _OUT_FOLDER=out
   _PRODUCT_VERSION=8.1.3
   _BUILD_NUMBER=3
   _TAG_SUFFIX=-raven
+
+  _GIT_CLONE_BRANCH="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}${_TAG_SUFFIX}"
+  _GIT_CLONE_BRANCH_OO="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}"
 
   cd build_tools
   mkdir ${_OUT_FOLDER}

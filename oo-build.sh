@@ -6,7 +6,7 @@ BUILD_BINARIES="true"
 build_oo_binaries() {
 
   _OUT_FOLDER=out
-  _QT_FOLDER=out
+  _QT_FOLDER="tools/linux/qt_build"
   _PRODUCT_VERSION=8.1.3
   _BUILD_NUMBER=3
   _TAG_SUFFIX=-raven

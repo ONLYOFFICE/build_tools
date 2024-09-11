@@ -70,6 +70,7 @@ provided `Dockerfile` and run the corresponding Docker container.
 mkdir out
 docker build --tag onlyoffice-document-editors-builder .
 docker run -v $PWD/out:/build_tools/out onlyoffice-document-editors-builder
+docker run -e PRODUCT_VERSION=8.1.3 -e BUILD_NUMBER=3 -e NODE_ENV='production' -v $(pwd)/out:/build_tools/out onlyoffice-document-editors-builder /bin/bash -c 'cd tools/linux && python3 ./automate.py server'"
 ```
 
 The result will be available in the `./out` directory.

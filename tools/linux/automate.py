@@ -20,8 +20,8 @@ def get_branch_name(directory):
 def install_qt():
   # qt
   if not base.is_file("./qt_source_5.9.9.tar.xz"):
-    base.download("https://download.qt.io/new_archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
-
+    #base.download("https://download.qt.io/new_archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
+    base.download("http://localhost/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
   if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
     base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
 

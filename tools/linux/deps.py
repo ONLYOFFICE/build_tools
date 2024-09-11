@@ -39,7 +39,8 @@ def install_deps():
               "libxi-dev",
               "libxrender-dev",
               "libxss1",
-              "libncurses5"]
+              "libncurses5",
+              "ninja-build"]
 
   base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
 

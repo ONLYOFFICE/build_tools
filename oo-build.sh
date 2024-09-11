@@ -9,18 +9,6 @@ build_oo_binaries() {
   _BUILD_NUMBER=3
   _TAG_SUFFIX=-raven
 
-  _GIT_CLONE_BRANCH="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}${_TAG_SUFFIX}"
-  _GIT_CLONE_BRANCH_OO="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}"
-
-
-  git clone \
-    --depth=1 \
-    --recursive \
-    --branch ${_GIT_CLONE_BRANCH} \
-    https://github.com/jefriabdullah/build_tools.git \
-    build_tools
-  # Ignore detached head warning
-
   cd build_tools
   mkdir ${_OUT_FOLDER}
   docker build --tag onlyoffice-document-editors-builder .

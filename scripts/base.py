@@ -1237,7 +1237,7 @@ def mac_correct_rpath_x2t(dir):
   if is_file("./allthemesgen"):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
-    mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer"])
+    mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
   if is_file("./pluginsmanager"):
     cmd("chmod", ["-v", "+x", "./pluginsmanager"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
@@ -1255,13 +1255,13 @@ def mac_correct_rpath_docbuilder(dir):
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
   mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
-  mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer"])
+  mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
 
   def add_loader_path_to_rpath(libs):
     for lib in libs:
       cmd("install_name_tool", ["-add_rpath", "@loader_path", "lib" + lib + ".dylib"], True)
 
-  add_loader_path_to_rpath(["icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "docbuilder.c"])
+  add_loader_path_to_rpath(["icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer", "docbuilder.c"])
   os.chdir(cur_dir)
   return
 

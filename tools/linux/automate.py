@@ -21,7 +21,7 @@ def install_qt():
   # qt
   if not base.is_file("./qt_source_5.9.9.tar.xz"):
     #base.download("https://download.qt.io/new_archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
-    base.download("http://localhost/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
+    base.download("http://127.0.0.1/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
   if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
     base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
 
@@ -60,7 +60,7 @@ if not base.is_file("./node_js_setup_14.x"):
   print("install dependencies...")
   deps.install_deps()
 
-if not base.is_dir("./qt_build"):  
+if not base.is_dir("./qt_build/Qt-5.9.9"):  
   print("install qt...")
   install_qt()
 

@@ -40,8 +40,8 @@ RUN apt-get -y update && \
     libstdc++-10-dev
 
 RUN rm /usr/bin/python && ln -s /usr/bin/python2 /usr/bin/python
-ADD . /build_tools
-WORKDIR /build_tools
+# ADD . /build_tools
+# WORKDIR /build_tools
 
-CMD cd tools/linux && \
-    python3 ./automate.py
+# CMD cd tools/linux && \
+#     python3 ./automate.py

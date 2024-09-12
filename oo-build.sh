@@ -76,8 +76,6 @@ fi
 build_oo_binaries() {
 
   _OUT_FOLDER=$1
-  _QT_FOLDER="tools/linux/qt_build"
-  _QT_SRC="tools/linux/qt-everywhere-opensource-src-5.9.9"
   _TAG_SUFFIX=-raven
 
   _GIT_CLONE_BRANCH="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}${_TAG_SUFFIX}"
@@ -88,8 +86,6 @@ build_oo_binaries() {
   docker run -e PRODUCT_VERSION=${_PRODUCT_VERSION} \
   -e BUILD_NUMBER=${_BUILD_NUMBER} \
   -e NODE_ENV='production' \
-   -v $(pwd)/${_QT_FOLDER}:/build_tools/tools/linux/qt_build \
-   -v $(pwd)/${_QT_SRC}:/build_tools/tools/linux/qt-everywhere-opensource-src-5.9.9 \
    -v $(pwd)/${_OUT_FOLDER}:/build_tools/out \
    -v $(pwd):/build_tools \
   onlyoffice-document-editors-builder \

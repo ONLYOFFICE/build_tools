@@ -36,7 +36,8 @@ RUN apt-get -y update && \
     libxrender-dev \
     libxss1 \
     libncurses5 \
-    ninja-build
+    ninja-build \
+    libstdc++-10-dev
 
 RUN rm /usr/bin/python && ln -s /usr/bin/python2 /usr/bin/python
 ADD . /build_tools

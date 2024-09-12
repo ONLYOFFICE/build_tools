@@ -13,3 +13,9 @@ tests/puppeteer/work_directory
 tests/puppeteer/package.json
 tests/puppeteer/package-lock.json
 tools/linux/qt_build
+tools/linux/packages_complete
+tools/linux/python3/
+tools/linux/qt-everywhere-opensource-src-5.9.9/
+tools/linux/qt_build_bak/
+tools/linux/qt_source_5.9.9.tar.xz
+

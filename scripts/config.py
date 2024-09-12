@@ -25,7 +25,7 @@ def parse():
   # all platforms
   global platforms
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
-               "linux_64", "linux_32", "linux_arm64",
+               "linux_64", "linux_amd64", "linux_32", "linux_arm64",
                "mac_64", "mac_arm64",
                "ios", 
                "android_arm64_v8a", "android_armv7", "android_x86", "android_x86_64"]
@@ -38,7 +38,7 @@ def parse():
     if ("windows" == host_platform):
       options["platform"] += " win_64 win_32"
     elif ("linux" == host_platform):
-      options["platform"] += " linux_64 linux_32"
+      options["platform"] += " linux_64 linux_amd64 linux_32"
     else:
       options["platform"] += " mac_64"
 

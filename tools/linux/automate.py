@@ -24,7 +24,6 @@ def install_qt():
   if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
     base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
     base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/tools/qbytearraymatcher.h", "#define QBYTEARRAYMATCHER_H", "#define QBYTEARRAYMATCHER_H\n#include <limits>")
-    base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/global/qglobal.h", "#define QGLOBAL_H", "#define QGLOBAL_H\n#include <limits>")
 
   qt_params = ["-opensource",
                "-confirm-license",

@@ -23,6 +23,8 @@ def install_qt():
     base.download("https://download.qt.io/new_archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
   if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
     base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
+    base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/tools/qbytearraymatcher.h", "#define QBYTEARRAYMATCHER_H", "#define QBYTEARRAYMATCHER_H\n#include <limits.h>")
+    base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/global/qglobal.h", "#define QGLOBAL_H", "#define QGLOBAL_H\n#include <limits.h>")
 
   qt_params = ["-opensource",
                "-confirm-license",
@@ -50,8 +52,6 @@ def install_qt():
                "-skip", "qtwebview",
                "-skip", "qtwebengine"]
   
-  base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/tools/qbytearraymatcher.h", "#define QBYTEARRAYMATCHER_H", "#define QBYTEARRAYMATCHER_H\n#include <limits.h>")
-  base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/global/qglobal.h", "#define QGLOBAL_H", "#define QGLOBAL_H\n#include <limits.h>")
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "./configure", qt_params)
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["-j", "4"])
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["install"])

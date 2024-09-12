@@ -68,7 +68,8 @@ base.check_build_version(base_dir)
 if ("1" == config.option("update")):
   repositories = base.get_repositories()
   base.update_repositories(repositories)
-  base.replaceInFileRE(base.get_script_dir() + "/../../server/Common/sources/constants.js", "exports.LICENSE_CONNECTIONS = [0-9]*", "exports.LICENSE_CONNECTIONS = 99999")
+  base.replaceInFileRE(base.get_script_dir() + "/../../server/Common/sources/constants.js", "exports.LICENSE_CONNECTIONS = [0-9]*", "exports.LICENSE_CONNECTIONS = 9999")
+  base.replaceInFileRE(base.get_script_dir() + "/../../server/Common/sources/constants.js", "exports.LICENSE_USERS = [0-9]*", "exports.LICENSE_USERS = 9999")
 
 base.configure_common_apps()
 

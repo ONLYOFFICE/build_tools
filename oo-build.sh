@@ -89,9 +89,10 @@ build_oo_binaries() {
   -e BUILD_NUMBER=${_BUILD_NUMBER} \
   -e NODE_ENV='production' \
   -v $(pwd)/${_QT_FOLDER}:/build_tools/tools/linux/qt_build \
+  -v $(pwd)/${_QT_SRC}:/build_tools/tools/linux/qt-everywhere-opensource-src-5.9.9 \
   -v $(pwd)/${_OUT_FOLDER}:/build_tools/out \
   onlyoffice-document-editors-builder \
-  /bin/bash -c 'cd tools/linux && python3 ./automate.py server --branch=tags/'"${_GIT_CLONE_BRANCH}"
+  /bin/bash -c 'cd tools/linux && python3 ./automate.py server --branch=tags/'"${_GIT_CLONE_BRANCH_OO}"
   cd ..
 
 }

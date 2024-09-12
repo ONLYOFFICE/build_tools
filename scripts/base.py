@@ -500,15 +500,6 @@ def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
   owner = git_owner if git_owner else "ONLYOFFICE"
   
-  unlimited_organization = "jefriabdullah"
-  unlimited_tag_suffix = "-raven"
-  unlimited_modified_repos = ["server", "web-apps"]
-  if (repo in unlimited_modified_repos):
-    owner = unlimited_organization
-    branch_to_checkout = config.option("branch")
-  else:
-    branch_to_checkout = re.sub(unlimited_tag_suffix, '', config.option("branch"))
-
   url = "https://github.com/" + owner + "/" + repo + ".git"
   if config.option("git-protocol") == "ssh":
     url = "git@github.com:" + owner + "/" + repo + ".git"
@@ -525,7 +516,7 @@ def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   os.chdir(folder)
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
-    retCheckout = cmd("git", ["checkout", "-f", branch_to_checkout], True)
+    retCheckout = cmd("git", ["checkout", "-f", config.option("branch")], True)
     if (retCheckout != 0):
       print("branch does not exist...")
       print("switching to master...")

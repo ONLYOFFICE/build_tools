@@ -109,15 +109,14 @@ fi
 
 if [ "${BUILD_DEB}" == "true" ] ; then
   if [ ${build_oo_binaries_exit_value} -eq 0 ] ; then
-    cd deb_build
-    docker build --tag onlyoffice-deb-builder . -f Dockerfile-deb-builder
+    #cd deb_build
+    docker build --tag onlyoffice-deb-builder . -f ./deb_build/Dockerfile-deb-builder
     docker run \
       --env PRODUCT_VERSION=${_PRODUCT_VERSION} \
       --env BUILD_NUMBER=${_BUILD_NUMBER} \
-      -v $(pwd):/usr/local/unlimited-onlyoffice-package-builder:ro \
-      -v $(pwd):/root:rw \
+      -v $(pwd)/deb_build:/root:rw \
       -v $(pwd)/../build_tools:/root/build_tools:ro \
-      onlyoffice-deb-builder /bin/bash -c "/usr/local/unlimited-onlyoffice-package-builder/onlyoffice-deb-builder.sh --product-version ${_PRODUCT_VERSION} --build-number ${_BUILD_NUMBER}"
+      onlyoffice-deb-builder /bin/bash -c "/root/onlyoffice-deb-builder.sh --product-version ${_PRODUCT_VERSION} --build-number ${_BUILD_NUMBER}"
     cd ..
   else
     echo "Binaries build failed!"

@@ -26,7 +26,7 @@ def clean():
 def is_main_platform():
   if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
     return True
-  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_amd64") or config.check_option("platform", "linux_32") or config.check_option("platform", "linux_arm64")):
+  if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux-amd64") or config.check_option("platform", "linux_32") or config.check_option("platform", "linux_arm64")):
     return True
   if config.check_option("platform", "mac_64"):
     return True
@@ -172,9 +172,9 @@ def make():
     base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
-  if config.check_option("platform", "linux_amd64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_amd64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
-    base.cmd("ninja", ["-C", "out.gn/linux_amd64"])    
+  if config.check_option("platform", "linux-amd64"):
+    base.cmd2("gn", ["gen", "out.gn/linux-amd64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
+    base.cmd("ninja", ["-C", "out.gn/linux-amd64"])    
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])

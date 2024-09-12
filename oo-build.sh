@@ -116,7 +116,7 @@ if [ "${BUILD_DEB}" == "true" ] ; then
       -v $(pwd):/usr/local/unlimited-onlyoffice-package-builder:ro \
       -v $(pwd):/root:rw \
       -v $(pwd)/../build_tools:/root/build_tools:ro \
-      onlyoffice-deb-builder /bin/bash -c "/usr/local/unlimited-onlyoffice-package-builder/onlyoffice-deb-builder.sh --product-version ${PRODUCT_VERSION} --build-number ${BUILD_NUMBER}"
+      onlyoffice-deb-builder /bin/bash -c "/usr/local/unlimited-onlyoffice-package-builder/onlyoffice-deb-builder.sh --product-version ${_PRODUCT_VERSION} --build-number ${_BUILD_NUMBER}"
     cd ..
   else
     echo "Binaries build failed!"

@@ -70,13 +70,14 @@ if [ ${DEB_ONLY} == "true" ] ; then
   BUILD_DEB="true"
 fi
 
+  _PRODUCT_VERSION=8.1.3
+  _BUILD_NUMBER=3
+
 build_oo_binaries() {
 
   _OUT_FOLDER=$1
   _QT_FOLDER="tools/linux/qt_build"
   _QT_SRC="tools/linux/qt-everywhere-opensource-src-5.9.9"
-  _PRODUCT_VERSION=8.1.3
-  _BUILD_NUMBER=3
   _TAG_SUFFIX=-raven
 
   _GIT_CLONE_BRANCH="v${_PRODUCT_VERSION}.${_BUILD_NUMBER}${_TAG_SUFFIX}"

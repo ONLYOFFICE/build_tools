@@ -22,7 +22,7 @@ build_oo_binaries() {
   -v $(pwd)/${_QT_FOLDER}:/build_tools/tools/linux/qt_build \
   -v $(pwd)/${_OUT_FOLDER}:/build_tools/out \
   onlyoffice-document-editors-builder \
-  /bin/bash -c 'cd tools/linux && python3 ./built_qt.py && python ./automate.py --branch=tags/'"${_GIT_CLONE_BRANCH}"
+  /bin/bash -c 'cd tools/linux && python3 ./build_qt.py && python ./automate.py --branch=tags/'"${_GIT_CLONE_BRANCH}"
   cd ..
 
 }

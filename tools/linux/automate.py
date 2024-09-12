@@ -49,7 +49,8 @@ def install_qt():
                "-skip", "qt3d",
                "-skip", "qtwebview",
                "-skip", "qtwebengine"]
-
+  
+  base.replaceInFileRE("./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/tools/qbytearraymatcher.h", "#ifndef QBYTEARRAYMATCHER_H", "#include <limits.h>\n#ifndef QBYTEARRAYMATCHER_H")
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "./configure", qt_params)
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["-j", "4"])
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["install"])

@@ -111,8 +111,8 @@ if [ "${BUILD_DEB}" == "true" ] ; then
     cd deb_build
     docker build --tag onlyoffice-deb-builder . -f Dockerfile-deb-builder
     docker run \
-      --env PRODUCT_VERSION=${PRODUCT_VERSION} \
-      --env BUILD_NUMBER=${BUILD_NUMBER} \
+      --env PRODUCT_VERSION=${_PRODUCT_VERSION} \
+      --env BUILD_NUMBER=${_BUILD_NUMBER} \
       -v $(pwd):/usr/local/unlimited-onlyoffice-package-builder:ro \
       -v $(pwd):/root:rw \
       -v $(pwd)/../build_tools:/root/build_tools:ro \

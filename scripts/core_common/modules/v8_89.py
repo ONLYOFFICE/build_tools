@@ -154,6 +154,10 @@ def make():
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
+  if config.check_option("platform", "linux_amd64"):
+    base.cmd2("gn", ["gen", "out.gn/linux_amd64", make_args(gn_args, "linux")])
+    base.cmd("ninja", ["-C", "out.gn/linux_amd64"]) 
+
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])

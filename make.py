@@ -72,8 +72,8 @@ if ("1" == config.option("update")):
   base.replaceInFileRE(base.get_script_dir() + "/../../server/Common/sources/constants.js", "exports.LICENSE_CONNECTIONS = [0-9]*", "exports.LICENSE_CONNECTIONS = 9999")
   base.replaceInFileRE(base.get_script_dir() + "/../../server/Common/sources/constants.js", "exports.LICENSE_USERS = [0-9]*", "exports.LICENSE_USERS = 9999")
   base.replaceInFileRE(base.get_script_dir() + "/../../web-apps/apps/documenteditor/mobile/src/lib/patch.jsx", "return false", "return true")
-  base.replaceInFileRE(base.get_script_dir() + "/../../web-apps/apps/presentationeditor/mobile/src/lib/patch.jsx", "return false", "return true")
-  base.replaceInFileRE(base.get_script_dir() + "/../../web-apps/apps/spreadsheeteditor/mobile/src/lib/patch.jsx", "return false", "return true")
+  base.replaceInFileRE(base.get_script_dir() + "/../../web-apps/apps/presentationeditor/mobile/src/lib/patch.jsx", "EditorUIController.isSupportEditFeature = () => false;", "EditorUIController.isSupportEditFeature = () => true;")
+  base.replaceInFileRE(base.get_script_dir() + "/../../web-apps/apps/spreadsheeteditor/mobile/src/lib/patch.jsx", "EditorUIController.isSupportEditFeature = () => false;", "EditorUIController.isSupportEditFeature = () => true;")
   
 
 base.configure_common_apps()

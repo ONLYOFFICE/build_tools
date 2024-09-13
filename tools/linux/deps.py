@@ -7,7 +7,7 @@ import os
 import subprocess
 
 def install_deps():
-  if base.is_file("./packages_complete"):
+  if base.is_file("./_packages_complete"):
     return
 
   # dependencies

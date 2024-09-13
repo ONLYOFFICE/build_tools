@@ -1,4 +1,33 @@
-# build_tools
+# build_tools - onlyoffice-documentserver-8.1.3.3
+
+## Credit:
+1. https://github.com/btactic-oo
+2. https://github.com/thomisus
+
+## Usage
+
+The script will build onlyoffice-documentserver (server) binaries only and create .deb package. There is an option to build binaries only with `--binaries-only` or `--deb-only` option. Granted, to be able to build .deb, binaries must already been built.
+
+## Prerequisite
+
+May clone repo below for `document-server-package` for the permission patch. 
+1. `git clone https://github.com/jefriabdullah/document-server-package.git -b v8.1.3.3-raven` or apply patch https://github.com/btactic-oo/document-server-package/commit/58116a876090ba1d0c7e9b3618fb35a46d64de80
+2. Install docker-ce
+
+### Build binaries and .deb
+
+To build binaries and deb package
+```bash
+bash oo-build.sh
+```
+Build binaries only
+```bash
+bash oo-build.sh --binaries-only
+```
+Build deb only (need binaries compiled in advance or run binaries only first)
+```bash
+bash oo-build.sh --deb-only
+```
 
 ## Overview
 

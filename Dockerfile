@@ -40,7 +40,9 @@ RUN apt-get -y update && \
     ninja-build \
     libstdc++-10-dev
 
- RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+ && apt-get install -y nodejs \
+ && curl -L https://www.npmjs.com/install.sh | sh 
 
  RUN  ln -s /usr/bin/python2 /usr/bin/python
 # RUN rm /usr/bin/python && ln -s /usr/bin/python2 /usr/bin/python

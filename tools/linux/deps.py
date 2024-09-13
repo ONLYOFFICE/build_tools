@@ -58,7 +58,7 @@ def install_deps():
   if (nodejs_cur < 16000):
     print("Node.js version cannot be less 16")
     print("Reinstall")
-    base.run_as_bat(["curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&sudo apt-get install -y nodejs"])    
+    base.run_as_bat(["curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && sudo apt-get install -y nodejs"])    
   else:
     print("OK")
     base.cmd("sudo", ["apt-get", "-y", "install", "npm", "yarn"], True)

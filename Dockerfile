@@ -44,7 +44,9 @@ RUN apt-get -y update && \
  && apt-get install -y nodejs \
  && curl -L https://www.npmjs.com/install.sh | sh 
 
- RUN apt-get install grunt-cli yarn pkg
+ RUN apt-get install yarn 
+ RUN npm install -g grunt-cli 
+ RUN npm install -g pkg 
  RUN  ln -s /usr/bin/python2 /usr/bin/python
 # RUN rm /usr/bin/python && ln -s /usr/bin/python2 /usr/bin/python
 # ADD . /build_tools

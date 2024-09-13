@@ -40,9 +40,8 @@ RUN apt-get -y update && \
     ninja-build \
     libstdc++-10-dev
 
- RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
- && apt-get install -y nodejs \
- && curl -L https://www.npmjs.com/install.sh | sh 
+ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && apt-get install -y nodejs 
+ #&& curl -L https://www.npmjs.com/install.sh | sh 
 
  RUN apt-get install -y yarn 
  RUN npm install -g grunt-cli 

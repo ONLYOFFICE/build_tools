@@ -88,7 +88,6 @@ build_oo_binaries() {
    -v $(pwd)/../:/root \
   onlyoffice-document-editors-builder \
   /bin/bash -c 'cd /root/build_tools/tools/linux && python3 ./automate.py server --branch=tags/'"${_GIT_CLONE_BRANCH_OO}"
-  cd ..
 
 }
 
@@ -113,7 +112,7 @@ if [ "${BUILD_DEB}" == "true" ] ; then
       -v $(pwd)/deb_build:/root:rw \
       -v $(pwd)/../build_tools:/root/build_tools:ro \
       onlyoffice-deb-builder /bin/bash -c "/root/onlyoffice-deb-builder.sh --product-version ${_PRODUCT_VERSION} --build-number ${_BUILD_NUMBER}"
-    cd ..
+
   else
     echo "Binaries build failed!"
     echo "Aborting... !"

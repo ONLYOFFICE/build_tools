@@ -86,10 +86,11 @@ build_oo_binaries() {
   docker run -e PRODUCT_VERSION=${_PRODUCT_VERSION} \
   -e BUILD_NUMBER=${_BUILD_NUMBER} \
   -e NODE_ENV='production' \
-   -v $(pwd)/${_OUT_FOLDER}:/build_tools/out \
-   -v $(pwd):/build_tools \
+   -v $(pwd)/${_OUT_FOLDER}:/root/build_tools/out \
+   -v $(pwd):/root/build_tools \
+   -v $(pwd)/../:/root \
   onlyoffice-document-editors-builder \
-  /bin/bash -c 'cd /build_tools/tools/linux && python3 ./automate.py server --branch=tags/'"${_GIT_CLONE_BRANCH_OO}"
+  /bin/bash -c 'cd /root/build_tools/tools/linux && python3 ./automate.py server --branch=tags/'"${_GIT_CLONE_BRANCH_OO}"
   cd ..
 
 }

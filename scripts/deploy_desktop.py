@@ -102,6 +102,7 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
+    base.copy_dir(root_dir + "/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")

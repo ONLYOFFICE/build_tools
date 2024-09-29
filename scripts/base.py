@@ -608,7 +608,7 @@ def update_repositories(repositories):
       git_update(repo, value[0], False)
     else:
       if is_dir(current_dir + "/.git"):
-        delete_dir_with_access_error(current_dir);
+        delete_dir_with_access_error(current_dir)
         delete_dir(current_dir)
       if not is_dir(current_dir):
         create_dir(current_dir)
@@ -1567,7 +1567,7 @@ def restorePathForBuilder(new_path):
   old_path = new_path[:-4]
   delete_file(old_path)
   copy_file(new_path, old_path)
-  delete_file(new_path);
+  delete_file(new_path)
   return
 
 def generate_check_linux_system(build_tools_dir, out_dir):

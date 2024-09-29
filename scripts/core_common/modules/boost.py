@@ -22,10 +22,10 @@ def move_debug_libs_windows(dir):
 
 def clean():
   if base.is_dir("boost_1_58_0"):
-    base.delete_dir_with_access_error("boost_1_58_0");
+    base.delete_dir_with_access_error("boost_1_58_0")
     base.delete_dir("boost_1_58_0")
   if base.is_dir("boost_1_72_0"):
-    base.delete_dir_with_access_error("boost_1_72_0");
+    base.delete_dir_with_access_error("boost_1_72_0")
     base.delete_dir("boost_1_72_0")
   if base.is_dir("build"):
     base.delete_dir("build")

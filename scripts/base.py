@@ -1307,7 +1307,7 @@ def linux_set_origin_rpath_libraries(dir, libs):
   return
 
 def linux_correct_rpath_docbuilder(dir):
-  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
+  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so", "PdfFile.so", "XpsFile.so", "DjVuFile.so", "DocxRenderer.so"])
   return
 
 def common_check_version(name, good_version, clean_func):

@@ -137,6 +137,11 @@ def make():
   else:
     base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
 
+  if ("mac" == base.host_platform()):
+    if not base.is_file("v8/build/config/compiler/BUILD.gn.bak"):
+      base.copy_file("v8/build/config/compiler/BUILD.gn", "v8/build/config/compiler/BUILD.gn.bak")
+      base.replaceInFile("v8/build/config/compiler/BUILD.gn", "\"-Wloop-analysis\",", "\"-Wloop-analysis\", \"-D_Float16=short\",")
+
   if not base.is_file("v8/third_party/jinja2/tests.py.bak"):
     base.copy_file("v8/third_party/jinja2/tests.py", "v8/third_party/jinja2/tests.py.bak")
     base.replaceInFile("v8/third_party/jinja2/tests.py", "from collections import Mapping", "try:\n    from collections.abc import Mapping\nexcept ImportError:\n    from collections import Mapping")

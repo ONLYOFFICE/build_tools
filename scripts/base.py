@@ -1430,6 +1430,7 @@ def support_old_versions_plugins(out_dir):
 def generate_sdkjs_plugin_list(dst):
   plugins_list = config.option("sdkjs-plugin").rsplit(", ") \
                + config.option("sdkjs-plugin-server").rsplit(", ")
+  plugins_list = list(filter(None, plugins_list))
   with open(get_path(dst), 'w') as file:
     dump = json.dumps(sorted(plugins_list), indent=4)
     file.write(re.sub(r"^(\s{4})", '\t', dump, 0, re.MULTILINE))

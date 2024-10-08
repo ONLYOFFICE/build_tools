@@ -102,7 +102,11 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
-    base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
+    if (0 == platform.find("mac")):
+      # TODO: check macOS app launch issue when localized file name templates inside
+      base.copy_dir(git_dir + "/desktop-apps/common/templates/EN", root_dir + "/converter/templates/EN")
+    else:
+      base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")

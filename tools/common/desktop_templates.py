@@ -59,7 +59,9 @@ for file in src_files:
   elif ("xlsx" == name_ext) or ("xltx" == name_ext):
     dst_ext = "xltx"
 
-  dst_name = "[32]" + base64.b32encode(name_without_ext.encode("utf-8")).decode("utf-8")
+  dst_name = name_without_ext
+  if (len(dst_name) < 4) or (dst_name[0:4] != "[32]"):
+    dst_name = "[32]" + base64.b32encode(name_without_ext.encode("utf-8")).decode("utf-8")
 
   dst_file = directory_out_file + "/" + dst_name + "." + dst_ext
 

@@ -39,6 +39,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "EpubFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DocxRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "hunspell")
     base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", archive_dir + "/cmap.bin")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "x2t")
 
@@ -61,13 +62,14 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "ooxml_crypt")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "vboxtester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "metafiletester")
+    base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "dictionariestester")
+
+    # js cache
+    base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
+    base.create_x2t_js_cache(archive_dir, "core")
+    base.delete_file(archive_dir + "/DoctRenderer.config")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)
-
-    if base.is_file(archive_dir + ".7z"):
-      base.delete_file(archive_dir + ".7z")
-    base.archive_folder(archive_dir + "/*", archive_dir + ".7z")
-
   return
 

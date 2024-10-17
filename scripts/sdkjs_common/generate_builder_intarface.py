@@ -2,6 +2,8 @@
 import os
 import shutil
 import re
+import argparse
+
 def readFile(path):
   with open(path, "r", errors='replace') as file:
     filedata = file.read()
@@ -112,6 +114,8 @@ class EditorApi(object):
       line = line.replace("}", "")
       lineWithoutSpaces = line.replace(" ", "")
       if not is_found_function and 0 == line.find("function "):
+        if -1 == decoration.find("@constructor"):
+          return
         codeCorrect += (line + addon_for_func + "\n")
         is_found_function = True
       if not is_found_function and -1 != line.find(".prototype."):
@@ -177,7 +181,7 @@ class EditorApi(object):
 
   def generate(self):
     for file in self.files:
-      file_content = readFile(file)
+      file_content = readFile(f'{sdkjs_dir}/{file}')
       arrRecords = file_content.split("/**")
       arrRecords = arrRecords[1:-1]
       for record in arrRecords:
@@ -185,8 +189,8 @@ class EditorApi(object):
       self.numfile += 1
     correctContent = ''.join(self.records)
     correctContent += "\n"
-    os.mkdir('deploy/api_builder/' + self.folder)
-    writeFile("deploy/api_builder/" + self.folder + "/api.js", correctContent)
+    os.mkdir(args.destination + self.folder)
+    writeFile(args.destination + self.folder + "/api.js", correctContent)
     return
 
 def convert_to_interface(arrFiles, sEditorType):
@@ -195,12 +199,27 @@ def convert_to_interface(arrFiles, sEditorType):
   editor.generate()
   return
 
-old_cur = os.getcwd()
-os.chdir("../../../sdkjs")
-if True == os.path.isdir('deploy/api_builder'):
-  shutil.rmtree('deploy/api_builder', ignore_errors=True)
-os.mkdir('deploy/api_builder')
-convert_to_interface(["word/apiBuilder.js"], "word")
-convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js"], "slide")
-convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js", "cell/apiBuilder.js"], "cell")
-os.chdir(old_cur)
+sdkjs_dir = "../../../sdkjs"
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate documentation")
+    parser.add_argument(
+        "destination", 
+        type=str, 
+        help="Destination directory for the generated documentation",
+        nargs='?',  # Indicates the argument is optional
+        default="../../../onlyoffice.github.io\sdkjs-plugins\content\macros\libs/"  # Default value
+    )
+    args = parser.parse_args()
+    
+    old_cur = os.getcwd()
+    
+    if True == os.path.isdir(args.destination):
+      shutil.rmtree(args.destination, ignore_errors=True)
+    os.mkdir(args.destination)
+    convert_to_interface(["word/apiBuilder.js"], "word")
+    convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js"], "slide")
+    convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js", "cell/apiBuilder.js"], "cell")
+    os.chdir(old_cur)
+
+

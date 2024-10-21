@@ -5,10 +5,6 @@ import base
 import os
 import json
 
-def get_core_url(platform, branch):
-  return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" \
-    + branch + "/latest/core-" + platform.replace("_", "-") + ".7z"
-
 def make():
   git_dir = base.get_script_dir() + "/../.."
   old_cur = os.getcwd()
@@ -19,23 +15,10 @@ def make():
 
   os.chdir(work_dir)
 
-  arch = "x64"
-  arch2 = "_64"
-  if base.is_windows() and not base.host_platform_is64():
-    arch = "x86"
-    arch2 = "_32"
-  if base.is_os_arm():
-    arch2 = "_arm64"
-  platform = ""
-  if base.is_windows():
-    platform = "win" + arch2
-  else:
-    platform = base.host_platform() + arch2
-
-  url = get_core_url(platform, config.option("branch"))
+  url = base.get_autobuild_version("core", "", config.option("branch"))
   data_url = base.get_file_last_modified_url(url)
   if (data_url == "" and config.option("branch") != "develop"):
-    url = get_core_url(platform, "develop")
+    url = base.get_autobuild_version("core", "", "develop")
     data_url = base.get_file_last_modified_url(url)
   
   old_data_url = base.readFile("./core.7z.data")

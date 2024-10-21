@@ -64,6 +64,11 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "metafiletester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "dictionariestester")
 
+    # js cache
+    base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
+    base.create_x2t_js_cache(archive_dir, "core")
+    base.delete_file(archive_dir + "/DoctRenderer.config")
+
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)
   return

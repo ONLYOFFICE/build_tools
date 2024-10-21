@@ -114,12 +114,15 @@ def make():
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")
     base.copy_dir(base_dir + "/js/" + branding + "/builder/web-apps", js_dir + "/web-apps")
+    base.move_file(js_dir + "/web-apps/apps/api/documents/api.js", js_dir + "/web-apps/apps/api/documents/api.js.tpl")
     for file in glob.glob(js_dir + "/web-apps/apps/*/*/*.js.map") \
               + glob.glob(js_dir + "/web-apps/apps/*/mobile/dist/js/*.js.map"):
       base.delete_file(file)
 
+    base.create_x2t_js_cache(converter_dir, "server")
+
     # add embed worker code
-    base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
+    base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js.tpl"])
     
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")

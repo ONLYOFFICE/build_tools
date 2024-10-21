@@ -76,9 +76,12 @@ def make():
       if (0 == platform.find("win")):
         base.copy_file(core_build_dir + "/lib/" + platform_postfix + "/doctrenderer.lib", root_dir + "/doctrenderer.lib")
     base.copy_v8_files(core_dir, root_dir, platform, isWindowsXP)
+    # python wrapper
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.c")
-
     base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder.py", root_dir + "/docbuilder.py")
+    # java wrapper
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "docbuilder.jni")
+    base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.java/build/libs/docbuilder.jar", root_dir + "/docbuilder.jar")
 
     # app
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir, "docbuilder")
@@ -120,6 +123,8 @@ def make():
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
+
+    base.create_x2t_js_cache(root_dir, "builder")
   
   return
 

@@ -46,4 +46,16 @@ def make(solution=""):
     else:
       base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com.sln")
     base.restorePathForBuilder(new_replace_path)
+
+  # build Java docbuilder wrapper
+  if config.check_option("module", "builder") and "onlyoffice" == config.branding():
+    for platform in platforms:
+      if not platform in config.platforms:
+        continue
+
+      # build JNI library
+      qmake.make(platform, base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java/src/jni/docbuilder_jni.pro", "", True)
+      # build Java code to JAR
+      base.cmd_in_dir(base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java", "python", ["make.py"])
+
   return

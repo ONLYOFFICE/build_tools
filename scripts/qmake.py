@@ -29,7 +29,7 @@ def check_support_platform(platform):
     return False
   return True
 
-def make(platform, project, qmake_config_addon=""):
+def make(platform, project, qmake_config_addon="", is_no_errors=False):
   # check platform
   if not check_support_platform(platform):
     print("THIS PLATFORM IS NOT SUPPORTED")
@@ -100,7 +100,7 @@ def make(platform, project, qmake_config_addon=""):
       base.cmd_and_return_cwd("make", distclean_params, True)
       base.cmd(qmake_app, build_params)
       base.correct_makefile_after_qmake(platform, makefile)
-    base.cmd_and_return_cwd("make", ["-f", makefile] + get_j_num())
+    base.cmd_and_return_cwd("make", ["-f", makefile] + get_j_num(), is_no_errors)
   else:
     config_params_array = base.qt_config_as_param(config_param)
     config_params_string = ""
@@ -123,7 +123,7 @@ def make(platform, project, qmake_config_addon=""):
     if ("0" != config.option("multiprocess")):
       qmake_bat.append("set CL=/MP")
     qmake_bat.append("call nmake -f " + makefile)
-    base.run_as_bat(qmake_bat)
+    base.run_as_bat(qmake_bat, is_no_errors)
 
   if (base.is_file(stash_file)):
     base.delete_file(stash_file)

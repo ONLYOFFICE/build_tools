@@ -27,7 +27,7 @@ parser.add_option("--db-pass", action="store", type="string", dest="db-pass", de
 parser.add_option("--compiler", action="store", type="string", dest="compiler", default="", help="defines compiler name. It is not recommended to use it as it's defined automatically (msvc2015, msvc2015_64, gcc, gcc_64, clang, clang_64, etc)")
 parser.add_option("--no-apps", action="store", type="string", dest="no-apps", default="0", help="disables building desktop apps that use qt")
 parser.add_option("--themesparams", action="store", type="string", dest="themesparams", default="", help="provides settings for generating presentation themes thumbnails")
-parser.add_option("--git-protocol", action="store", type="string", dest="git-protocol", default="https", help="can be used only if update is set to true - 'https', 'ssh'")
+parser.add_option("--git-protocol", action="store", type="string", dest="git-protocol", default="auto", help="can be used only if update is set to true - 'https', 'ssh'")
 parser.add_option("--branding", action="store", type="string", dest="branding", default="", help="provides branding path")
 parser.add_option("--branding-name", action="store", type="string", dest="branding-name", default="", help="provides branding name")
 parser.add_option("--branding-url", action="store", type="string", dest="branding-url", default="", help="provides branding url")

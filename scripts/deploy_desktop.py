@@ -102,6 +102,7 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
+    base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
@@ -259,6 +260,8 @@ def make():
 
     if isUseJSC:
       base.delete_file(root_dir + "/converter/icudtl.dat")
+
+    base.create_x2t_js_cache(root_dir + "/converter", "desktop")
 
     if (0 == platform.find("win")):
       base.delete_file(root_dir + "/cef_sandbox.lib")

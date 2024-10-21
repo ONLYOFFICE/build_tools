@@ -3,14 +3,20 @@
 
 This guide explains how to generate documentation for Onlyoffice Builder/Plugins API using the provided Python scripts: `generate_docs_json.py`, `generate_docs_plugins_json.py`, `generate_docs_md.py`. These scripts are used to create JSON and Markdown documentation for the `apiBuilder.js` files from the word, cell, and slide editors.
 
-## Prerequisites
+## Requirements
 
-1. **Node.js and npm**: Ensure you have Node.js and npm installed on your machine. You can download them from [Node.js official website](https://nodejs.org/).
+```bash
+Node.js v20 and above
+Python v3.10 and above
+```
 
-2. **jsdoc**: The scripts use `jsdoc` to generate documentation. Install it using npm:
-   ```bash
-   npm install
-   ```
+## Installation
+
+```bash
+git clone https://github.com/ONLYOFFICE/build_tools.git
+cd build_tools/scripts/sdkjs_common/jsdoc
+npm install
+```
 
 ## Scripts Overview
 
@@ -24,7 +30,7 @@ This script generates JSON documentation based on the `apiBuilder.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/document-builder-declarations/document-builder`.
+  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `../../../../office-js-api-declarations/office-js-api`.
 
 ### `generate_docs_plugins_json.py`
 
@@ -36,7 +42,7 @@ This script generates JSON documentation based on the `api_plugins.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `Onlyoffice/document-builder-declarations/document-builder-plugin`.
+  - `output_path` (optional): The directory where the JSON documentation will be saved. If not specified, the default path is `../../../../office-js-api-declarations/office-js-api-plugins`.
 
 ### `generate_docs_md.py`
 
@@ -48,7 +54,7 @@ This script generates Markdown documentation from the `apiBuilder.js` files.
   ```
 
 - **Parameters**:
-  - `output_path` (optional): The directory where the Markdown documentation will be saved. If not specified, the default path is `Onlyoffice/office-js-api`.
+  - `output_path` (optional): The directory where the Markdown documentation will be saved. If not specified, the default path is `../../../../office-js-api/`.
 
 ## Example
 

@@ -13,6 +13,8 @@ editors = [
     "forms"
 ]
 
+missing_examples = []
+
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -53,10 +55,10 @@ def correct_default_value(value, enumerations, classes):
     return generate_data_types_markdown([value], enumerations, classes)
 
 def remove_line_breaks(string):
-    return re.sub(r'[\r\n]', '', string)
+    return re.sub(r'[\r\n]', ' ', string)
 
 def generate_data_types_markdown(types, enumerations, classes, root='../../'):
-    param_types_md = ' &#124;'.join(types)
+    param_types_md = ' &#124; '.join(types)
 
     for enum in enumerations:
         if enum['name'] in types:
@@ -69,10 +71,10 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
         element = match.group(1).strip()
         base_type = element.split('.')[0]  # Take only the first part before the dot, if any
         if any(enum['name'] == base_type for enum in enumerations):
-            return f"<[{element}](../../Enumeration/{base_type}.md)>"
+            return f"<[{element}]({root}Enumeration/{base_type}.md)>"
         elif base_type in classes:
-            return f"<[{element}](../../{base_type}/{base_type}.md)>"
-        return f"<{element}>"
+            return f"<[{element}]({root}{base_type}/{base_type}.md)>"
+        return f"&lt;{element}&gt;"
     
     return re.sub(r'<([^<>]+)>', replace_with_links, param_types_md)
 
@@ -196,10 +198,11 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
 
     return content
 
-def process_doclets(data, output_dir):
+def process_doclets(data, output_dir, editor_name):
     classes = {}
     classes_props = {}
     enumerations = []
+    editor_dir =  os.path.join(output_dir, editor_name)
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -217,7 +220,7 @@ def process_doclets(data, output_dir):
 
     # Process classes
     for class_name, methods in classes.items():
-        class_dir = os.path.join(output_dir, class_name)
+        class_dir = os.path.join(editor_dir, class_name)
         methods_dir = os.path.join(class_dir, 'Methods')
         os.makedirs(methods_dir, exist_ok=True)
 
@@ -227,16 +230,22 @@ def process_doclets(data, output_dir):
 
         # Write method files
         for method in methods:
+            method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
             method_content = generate_method_markdown(method, enumerations, classes)
-            write_markdown_file(os.path.join(methods_dir, f"{method['name']}.md"), method_content)
+            write_markdown_file(method_file_path, method_content)
+            if not method.get('example', ''):
+                missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
     # Process enumerations
-    enum_dir = os.path.join(output_dir, 'Enumeration')
+    enum_dir = os.path.join(editor_dir, 'Enumeration')
     os.makedirs(enum_dir, exist_ok=True)
 
     for enum in enumerations:
+        enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
         enum_content = generate_enumeration_markdown(enum, enumerations, classes)
-        write_markdown_file(os.path.join(enum_dir, f"{enum['name']}.md"), enum_content)
+        write_markdown_file(enum_file_path, enum_content)
+        if not enum.get('example', ''):
+            missing_examples.append(os.path.relpath(enum_file_path, output_dir))
 
 def generate(output_dir):
     print('Generating Markdown documentation...')
@@ -247,7 +256,7 @@ def generate(output_dir):
         os.makedirs(output_dir + f'/{editor_name.title()}', exist_ok=True)
 
         data = load_json(input_file)
-        process_doclets(data, output_dir + f'/{editor_name}')
+        process_doclets(data, output_dir, editor_name.title())
     
     shutil.rmtree(output_dir + 'tmp_json')
     print('Done')
@@ -262,5 +271,7 @@ if __name__ == "__main__":
         default="../../../../office-js-api/"  # Default value
     )
     args = parser.parse_args()
-    
     generate(args.destination)
+    print("START_MISSING_EXAMPLES")
+    print(",".join(missing_examples))
+    print("END_MISSING_EXAMPLES")

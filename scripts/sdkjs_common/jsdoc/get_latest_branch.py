@@ -23,10 +23,8 @@ def get_max_version_branch(branches):
 
     for branch in branches:
         parts = branch.split('/')
-        print(parts)
         if len(parts) >= 2 and (parts[1] == 'hotfix' or parts[1] == 'release'):
             version = parse_version(parts[2])
-            print(version)
             if version > max_version:
                 max_version = version
                 max_branch = parts

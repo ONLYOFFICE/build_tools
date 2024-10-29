@@ -196,10 +196,10 @@ def make_onlineinst():
   onlineinst_file = "%s-%s-%s.exe" % ("OnlineInstaller", package_version, suffix)
   ret = (base.move_file("online-installer.exe", onlineinst_file) != "");
 
-  if common.deploy and ret:
-      utils.log_h2("desktop onlineinst deploy")
-      ret = s3_upload([onlineinst_file], "desktop/win/onlineinst/")
-      utils.set_summary("desktop onlineinst deploy", ret)
+  # if common.deploy and ret:
+  #     utils.log_h2("desktop onlineinst deploy")
+  #     ret = s3_upload([onlineinst_file], "desktop/win/onlineinst/")
+  #     utils.set_summary("desktop onlineinst deploy", ret)
   return
 
 #

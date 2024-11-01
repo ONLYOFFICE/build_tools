@@ -294,7 +294,11 @@ def make_sparkle_updates():
   macos_zip = "build/" + zip_filename + ".zip"
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
-  utils.copy_dir_content(released_updates_dir, updates_dir, ".zip")
+  utils.sh(
+    "ls -1t " + released_updates_dir + "/*.zip" \
+      + " | head -n 3" \
+      + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
+    verbose=True)
 
   for file in utils.glob_path(changes_dir + "/" + common.version + "/*.html"):
     filename = utils.get_basename(file).replace("changes", zip_filename)

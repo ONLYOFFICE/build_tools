@@ -153,17 +153,6 @@ def make_inno():
     else:
       ret = False
     utils.set_summary("desktop inno update deploy", ret)
-
-  changes_dir = common.workspace_dir + "\\" \
-    + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
-  if common.platform == "windows_x64" and \
-     common.deploy and \
-     utils.glob_path(changes_dir + "\\*.html"):
-    utils.log_h2("desktop changelog deploy")
-    ret = s3_upload(
-      utils.glob_path(changes_dir + "\\*.html"),
-      "desktop/win/update/%s/%s/" % (common.version, common.build))
-    utils.set_summary("desktop changelog deploy", ret)
   return
 
 def make_advinst():

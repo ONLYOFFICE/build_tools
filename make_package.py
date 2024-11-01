@@ -45,7 +45,6 @@ common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.branding_dir = utils.get_abspath(common.workspace_dir + "/" + args.branding) if args.branding else common.workspace_dir
-common.deploy_data = utils.get_path(common.workspace_dir + "/deploy.txt")
 common.summary = []
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -74,7 +73,6 @@ import package_mobile
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
-utils.delete_file(common.deploy_data)
 if "core" in common.targets:
   package_core.make()
 if "closuremaps_opensource" in common.targets:

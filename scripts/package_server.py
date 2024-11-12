@@ -21,7 +21,6 @@ def s3_upload(files, dst):
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
     upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
-      utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret

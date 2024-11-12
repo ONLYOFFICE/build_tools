@@ -35,7 +35,6 @@ def make_archive():
   utils.set_summary("core archive deploy", ret)
   if ret:
     utils.log("URL: " + branding.s3_base_url + "/" + dest_version)
-    utils.add_deploy_data(dest_version)
     utils.s3_copy(
       "s3://" + branding.s3_bucket + "/" + dest_version,
       "s3://" + branding.s3_bucket + "/" + dest_latest)
@@ -65,7 +64,6 @@ def deploy_closuremaps_sdkjs(license):
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)
-      utils.add_deploy_data(key)
   utils.set_summary("sdkjs closure maps %s deploy" % license, ret)
   return
 
@@ -91,6 +89,5 @@ def deploy_closuremaps_webapps(license):
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)
-      utils.add_deploy_data(key)
   utils.set_summary("web-apps closure maps %s deploy" % license, ret)
   return

@@ -266,11 +266,6 @@ def set_summary(target, status):
   common.summary.append({target: status})
   return
 
-def add_deploy_data(key):
-  with open(common.deploy_data, 'a+') as f:
-    f.write(key + "\n")
-  return
-
 def cmd(*args, **kwargs):
   if kwargs.get("verbose"):
     log("- cmd:")

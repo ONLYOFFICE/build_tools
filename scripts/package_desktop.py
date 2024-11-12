@@ -26,7 +26,6 @@ def s3_upload(files, dst):
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
     upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
-      utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
@@ -154,17 +153,6 @@ def make_inno():
     else:
       ret = False
     utils.set_summary("desktop inno update deploy", ret)
-
-  changes_dir = common.workspace_dir + "\\" \
-    + utils.get_path(branding.desktop_changes_dir) + "\\" + common.version
-  if common.platform == "windows_x64" and \
-     common.deploy and \
-     utils.glob_path(changes_dir + "\\*.html"):
-    utils.log_h2("desktop changelog deploy")
-    ret = s3_upload(
-      utils.glob_path(changes_dir + "\\*.html"),
-      "desktop/win/update/%s/%s/" % (common.version, common.build))
-    utils.set_summary("desktop changelog deploy", ret)
   return
 
 def make_advinst():
@@ -294,7 +282,11 @@ def make_sparkle_updates():
   macos_zip = "build/" + zip_filename + ".zip"
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
-  utils.copy_dir_content(released_updates_dir, updates_dir, ".zip")
+  utils.sh(
+    "ls -1t " + released_updates_dir + "/*.zip" \
+      + " | head -n 3" \
+      + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
+    verbose=True)
 
   for file in utils.glob_path(changes_dir + "/" + common.version + "/*.html"):
     filename = utils.get_basename(file).replace("changes", zip_filename)

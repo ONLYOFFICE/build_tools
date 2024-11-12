@@ -105,6 +105,9 @@ def make():
   if not base.is_dir(base_dir):
     base.create_dir(base_dir)
 
+  if ("mac" == base.host_platform()):
+    base.cmd("git", ["config", "--global", "http.postBuffer", "157286400"], True)
+
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])

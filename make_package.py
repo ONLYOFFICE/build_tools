@@ -89,6 +89,7 @@ if "builder" in common.targets:
   package_builder.make()
 if "server_community" in common.targets:
   package_server.make("community")
+  package_server.make("prerequisites")
 if "server_enterprise" in common.targets:
   package_server.make("enterprise")
 if "server_developer" in common.targets:

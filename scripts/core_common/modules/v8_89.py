@@ -124,7 +124,7 @@ def make():
     base.copy_dir("./v8/third_party", "./v8/third_party_new")
     if ("windows" == base.host_platform()):
       os.chdir("v8")
-      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
       os.chdir("../")
     v8_branch_version = "remotes/branch-heads/8.9"
     if ("mac" == base.host_platform()):

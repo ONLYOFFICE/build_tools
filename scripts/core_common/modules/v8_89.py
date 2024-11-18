@@ -21,6 +21,9 @@ def change_bootstrap():
   content += "@Subdir git\n"
   content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"
 
+  base.replaceInFile("./depot_tools/bootstrap/bootstrap.py", 
+    "raise subprocess.CalledProcessError(proc.returncode, argv, None)", "return")
+  
   base.writeFile("./depot_tools/bootstrap/manifest.txt", content)
   return
 

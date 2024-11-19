@@ -1228,9 +1228,10 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DjVuFile", ["UnicodeConverter", "kernel", "graphics", "PdfFile"])
   mac_correct_rpath_library("XpsFile", ["UnicodeConverter", "kernel", "graphics", "PdfFile"])
   mac_correct_rpath_library("DocxRenderer", ["UnicodeConverter", "kernel", "graphics"])
+  mac_correct_rpath_library("IWorkFile", ["UnicodeConverter", "kernel"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])
+  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
@@ -1255,7 +1256,7 @@ def mac_correct_rpath_docbuilder(dir):
   os.chdir(dir)
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
-  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
+  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "IWorkFile", "doctrenderer", "DocxRenderer"])  
   mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
 
   def add_loader_path_to_rpath(libs):

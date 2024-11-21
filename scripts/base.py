@@ -1840,11 +1840,11 @@ def setup_local_qmake(dir):
     "QT_INSTALL_HEADERS":"/include",
     "QT_INSTALL_LIBS":"/lib",
     "QT_INSTALL_LIBEXECS":"/libexec",
-    "QT_INSTALL_BINS":"/bin"
-    "QT_INSTALL_TESTS":"/tests"
-    "QT_INSTALL_PLUGINS":"/plugins"
-    "QT_INSTALL_IMPORTS":"/imports"
-    "QT_INSTALL_QML":"/qml"
+    "QT_INSTALL_BINS":"/bin",
+    "QT_INSTALL_TESTS":"/tests",
+    "QT_INSTALL_PLUGINS":"/plugins",
+    "QT_INSTALL_IMPORTS":"/imports",
+    "QT_INSTALL_QML":"/qml",
     "QT_INSTALL_CONFIGURATION":"",
     "QT_HOST_PREFIX":"",
     "QT_HOST_DATA":"",

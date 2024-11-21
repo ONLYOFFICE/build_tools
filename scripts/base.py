@@ -1832,26 +1832,8 @@ def create_x2t_js_cache(dir, product):
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
 
-def setup_local_qmake(dir):
-  props = {
-    "QT_INSTALL_PREFIX":"",
-    "QT_INSTALL_ARCHDATA":"",
-    "QT_INSTALL_DATA":"",
-    "QT_INSTALL_HEADERS":"/include",
-    "QT_INSTALL_LIBS":"/lib",
-    "QT_INSTALL_LIBEXECS":"/libexec",
-    "QT_INSTALL_BINS":"/bin",
-    "QT_INSTALL_TESTS":"/tests",
-    "QT_INSTALL_PLUGINS":"/plugins",
-    "QT_INSTALL_IMPORTS":"/imports",
-    "QT_INSTALL_QML":"/qml",
-    "QT_INSTALL_CONFIGURATION":"",
-    "QT_HOST_PREFIX":"",
-    "QT_HOST_DATA":"",
-    "QT_HOST_BINS":"/bin",
-    "QT_HOST_LIBS":"/lib"
-  }
-  for i in props:
-    cmd(dir + "/bin/qmake", ["-set", i, dir + props[i]], True)
+def setup_local_qmake(dir_qmake):
+  dir_base = os.path.dirname(dir_qmake)
+  writeFile(dir_base + "/onlyoffice_qt.conf", "Prefix = " + dir_base)  
   return
   

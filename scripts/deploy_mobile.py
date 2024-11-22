@@ -62,6 +62,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "IWorkFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DocxRenderer")
     base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
 

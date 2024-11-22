@@ -72,8 +72,6 @@ def parse():
   # check vs-version
   if ("windows" == host_platform) and ("" == option("vs-version")):
     options["vs-version"] = "2019"
-    if check_option("platform", "win_64_xp") or check_option("platform", "win_32_xp"):
-      options["vs-version"] = "2015"
 
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
@@ -88,15 +86,15 @@ def parse():
     programFilesDir = base.get_env("ProgramFiles")
     if ("" != base.get_env("ProgramFiles(x86)")):
       programFilesDir = base.get_env("ProgramFiles(x86)")
-    if ("2015" == options["vs-version"]):
-      options["vs-path"] = programFilesDir + "/Microsoft Visual Studio 14.0/VC"
-    elif ("2019" == options["vs-version"]):
+    if ("2019" == options["vs-version"]):
       if base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"):
         options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build"
       elif base.is_dir(programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"):
         options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Professional/VC/Auxiliary/Build"
       else:
         options["vs-path"] = programFilesDir + "/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build"
+      # path ending with VS edition
+      options["vs-base-path"] = os.path.normpath(os.path.join(options["vs-path"], '../../..'))
 
   # check sdkjs-plugins
   if not "sdkjs-plugin" in options:
@@ -126,7 +124,7 @@ def parse():
 
   return
 
-def check_compiler(platform):
+def check_qt_compiler(platform):
   compiler = {}
   compiler["compiler"] = option("compiler")
   compiler["compiler_64"] = compiler["compiler"] + "_64"
@@ -137,8 +135,9 @@ def check_compiler(platform):
     return compiler
 
   if (0 == platform.find("win")):
-    compiler["compiler"] = "msvc" + options["vs-version"]
-    compiler["compiler_64"] = "msvc" + options["vs-version"] + "_64"
+    vs_version = options["vs-version"] if (-1 == platform.find("_xp")) else "2015"
+    compiler["compiler"] = "msvc" + vs_version
+    compiler["compiler_64"] = "msvc" + vs_version + "_64"
   elif (0 == platform.find("linux")):
     compiler["compiler"] = "gcc"
     compiler["compiler_64"] = "gcc_64"
@@ -240,7 +239,7 @@ def is_v8_60():
   if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
     return True
 
-  if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):
+  if ("windows" == base.host_platform() and options["platform"].find("_xp") != -1):
     return True
 
   #if check_option("config", "use_v8"):

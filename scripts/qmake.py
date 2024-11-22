@@ -29,6 +29,15 @@ def check_support_platform(platform):
     return False
   return True
 
+def add_spec_xp(qt_dir):
+  mkspecs_dir = os.path.join(qt_dir, "mkspecs")
+  xp_spec_dir = os.path.join(mkspecs_dir, "win32-msvc2019-xp")
+  if os.path.isdir(xp_spec_dir):
+    return
+  
+  xp_spec_dir_src = os.path.normpath(base.get_script_dir() + "/../tools/win/mkspecs/win32-msvc2019-xp")
+  base.copy_dir(xp_spec_dir_src, xp_spec_dir)
+
 def make(platform, project, qmake_config_addon="", is_no_errors=False):
   # check platform
   if not check_support_platform(platform):
@@ -110,16 +119,21 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if ("" != qmake_addon_string):
       qmake_addon_string = " " + qmake_addon_string
 
+    build_spec = ""
+    if platform.find("_xp") != -1:
+      if config.check_option("config", "add_mkspecs"):
+        add_spec_xp(qt_dir)
+      build_spec = " -spec win32-msvc2019-xp "
     qmake_bat = []
     qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
-    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
+    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + build_spec + file_pro + config_params_string + qmake_addon_string)
     if ("1" == config.option("clean")):
       qmake_bat.append("call nmake " + " ".join(clean_params))
       qmake_bat.append("call nmake " + " ".join(distclean_params))
-      qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
+      qmake_bat.append("call \"" + qmake_app + "\" -nocache " + build_spec + file_pro + config_params_string + qmake_addon_string)
     if ("0" != config.option("multiprocess")):
       qmake_bat.append("set CL=/MP")
     qmake_bat.append("call nmake -f " + makefile)

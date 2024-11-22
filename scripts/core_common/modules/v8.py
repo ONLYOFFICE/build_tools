@@ -232,12 +232,13 @@ def make_xp():
       if base.is_file("depot_tools/cipd.ps1"):
         base.replaceInFile("depot_tools/cipd.ps1", "windows-386", "windows-amd64")
   
+  dev_path = os.path.join(config.option("vs-base-path"), "Common7/IDE")
   # old variant
   #path_to_python2 = "/depot_tools/win_tools-2_7_13_chromium7_bin/python/bin"
   path_to_python2 = "/depot_tools/bootstrap-2@3_8_10_chromium_23_bin/python/bin"
   os.environ["PATH"] = os.pathsep.join([base_dir + "/depot_tools", 
     base_dir + path_to_python2, 
-    config.option("vs-path") + "/../Common7/IDE",
+    dev_path,
     os.environ["PATH"]])
 
   # --------------------------------------------------------------------------
@@ -270,13 +271,6 @@ def make_xp():
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>')",
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
     ]);
-
-  programFilesDir = base.get_env("ProgramFiles")
-  if ("" != base.get_env("ProgramFiles(x86)")):
-    programFilesDir = base.get_env("ProgramFiles(x86)")
-  dev_path = programFilesDir + "\\Microsoft Visual Studio 14.0\\Common7\\IDE"
-  if (base.is_dir(dev_path)):
-    os.environ["PATH"] = dev_path + os.pathsep + os.environ["PATH"]
 
   # add "SET CL=\"/D_ITERATOR_DEBUG_LEVEL=0\"" before devenv for disable _ITERATOR_DEBUG_LEVEL in debug
   if config.check_option("platform", "win_64_xp"):

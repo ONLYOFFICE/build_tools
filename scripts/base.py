@@ -676,7 +676,7 @@ def get_gcc_version():
 
 # qmake -------------------------------------------------
 def qt_setup(platform):
-  compiler = config.check_compiler(platform)
+  compiler = config.check_qt_compiler(platform)
   qt_dir = config.option("qt-dir") if (-1 == platform.find("_xp")) else config.option("qt-dir-xp")
 
   # qt bug

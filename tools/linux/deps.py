@@ -42,8 +42,8 @@ def install_deps():
               "libncurses5",
               "libncurses6",
               "curl",
-              "libxkbcommon0",
-              "libxkbcommon-x11-0"]
+              "libxkbcommon-dev",
+              "libxkbcommon-x11-dev"]
 
   for package in packages:
     base.cmd("sudo", ["apt-get", "install", "-y", package], True)

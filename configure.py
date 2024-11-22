@@ -38,7 +38,7 @@ parser.add_option("--web-apps-addon", action="append", type="string", dest="web-
 parser.add_option("--sdkjs-plugin", action="append", type="string", dest="sdkjs-plugin", default=["default"], help="provides plugins for server-based and desktop versions of the editors")
 parser.add_option("--sdkjs-plugin-server", action="append", type="string", dest="sdkjs-plugin-server", default=["default"], help="provides plugins for server-based version of the editors")
 parser.add_option("--features", action="store", type="string", dest="features", default="", help="native features (config addon)")
-parser.add_option("--vs-version", action="store", type="string", dest="vs-version", default="2015", help="version of visual studio")
+parser.add_option("--vs-version", action="store", type="string", dest="vs-version", default="2019", help="version of visual studio")
 parser.add_option("--vs-path", action="store", type="string", dest="vs-path", default="", help="path to vcvarsall")
 parser.add_option("--siteUrl", action="store", type="string", dest="siteUrl", default="127.0.0.1", help="site url")
 parser.add_option("--multiprocess", action="store", type="string", dest="multiprocess", default="1", help="provides ability to specify single process for make")

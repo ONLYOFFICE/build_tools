@@ -22,7 +22,7 @@ def make(use_gperf = True):
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/apple"
   
   os.chdir(base_dir)
-  base.check_module_version("1", clear_module)
+  base.check_module_version("2", clear_module)
   os.chdir(old_cur_dir)
 
   cmd_args = ["fetch.py"]

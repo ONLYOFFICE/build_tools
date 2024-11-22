@@ -55,14 +55,23 @@ def install_qt():
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["-j", "4"])
   base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make", ["install"])
   return
+  
+def install_qt_prebuild():
+  url_amd64 = "https://s3.eu-west-1.amazonaws.com/static-doc.teamlab.eu.com/qt/5.9.9/linux_amd64/qt_binary.7z"
+  base.download(url_amd64, "./qt_amd64.7z")
+  base.extract("./qt_amd64.7z", "./qt_build")
+  base.create_dir("./qt_build/Qt-5.9.9")
+  base.cmd("mv", ["./qt_build/qt_amd64", "./qt_build/Qt-5.9.9/gcc_64"])
+  base.setup_local_qmake("./qt_build/Qt-5.9.9/gcc_64/bin")
+  return
 
 if not base.is_file("./node_js_setup_14.x"):
   print("install dependencies...")
   deps.install_deps()
 
-if not base.is_dir("./qt_build"):  
+if not base.is_dir("./qt_build"):
   print("install qt...")
-  install_qt()
+  install_qt_prebuild()
 
 branch = get_branch_name("../..")
 
@@ -103,6 +112,3 @@ build_tools_params = ["--branch", branch,
 
 base.cmd_in_dir("../..", "./configure.py", build_tools_params)
 base.cmd_in_dir("../..", "./make.py")
-
-
-

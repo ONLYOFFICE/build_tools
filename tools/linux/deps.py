@@ -39,9 +39,14 @@ def install_deps():
               "libxi-dev",
               "libxrender-dev",
               "libxss1",
-              "libncurses5"]
+              "libncurses5",
+              "libncurses6",
+              "curl",
+              "libxkbcommon0",
+              "libxkbcommon-x11-0"]
 
-  base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
+  for package in packages:
+    base.cmd("sudo", ["apt-get", "install", "-y", package], True)
 
   # nodejs
   base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
@@ -79,4 +84,3 @@ def install_deps():
 
 if __name__ == "__main__":
   install_deps()
-

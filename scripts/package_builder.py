@@ -27,7 +27,6 @@ def s3_upload(files, dst):
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
     upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
-      utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
@@ -54,7 +53,6 @@ def make_archive():
   utils.set_summary("builder archive deploy", ret)
   if ret:
     utils.log("URL: " + branding.s3_base_url + "/" + dest_version)
-    utils.add_deploy_data(dest_version)
     utils.s3_copy(
       "s3://" + branding.s3_bucket + "/" + dest_version,
       "s3://" + branding.s3_bucket + "/" + dest_latest)

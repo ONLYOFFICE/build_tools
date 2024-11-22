@@ -1832,3 +1832,9 @@ def create_x2t_js_cache(dir, product):
     cmd_in_dir(dir, "./x2t", ["-create-js-cache"], True)
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
+
+def setup_local_qmake(dir_qmake):
+  dir_base = os.path.dirname(dir_qmake)
+  writeFile(dir_base + "/onlyoffice_qt.conf", "Prefix = " + dir_base)  
+  return
+  

@@ -119,7 +119,7 @@ def make():
     # windows hack (delete later) ----------------------
     if ("windows" == base.host_platform()):
       base.delete_dir_with_access_error("v8/buildtools/win")
-      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
       base.cmd("gclient", ["sync", "--force"], True)
     else:
       base.cmd("gclient", ["sync"], True) 
@@ -246,7 +246,7 @@ def make_xp():
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.cmd("./depot_tools/gclient", ["sync", "-r", "4.10.253"], True)
     base.delete_dir_with_access_error("v8/buildtools/win")
-    base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+    base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
     base.cmd("gclient", ["sync", "--force"], True)
 
   # save common py script

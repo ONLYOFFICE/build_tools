@@ -93,6 +93,9 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
   qmake_app = qt_dir + "/bin/qmake"
   # non windows platform
   if not base.is_windows():
+    if base.is_file(qt_dir + "/onlyoffice_qt.conf"):
+      build_params.append("-qtconf")
+      build_params.append(qt_dir + "/onlyoffice_qt.conf")
     base.cmd(qmake_app, build_params)
     base.correct_makefile_after_qmake(platform, makefile)
     if ("1" == config.option("clean")):

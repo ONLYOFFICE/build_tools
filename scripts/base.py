@@ -1122,16 +1122,16 @@ def _call_vcvarsall_and_return_env(arch):
 
   return result
 
-global _old_environment
-_old_environment = os.environ.copy()
+_old_environment = None
 
 def vcvarsall_start(arch):
+  global _old_environment
   _old_environment = os.environ.copy()
   vc_env = _call_vcvarsall_and_return_env(arch)
-  os.environ['PATH'] = vc_env['PATH']
-  os.environ['LIB'] = vc_env['LIB']
-  os.environ['LIBPATH'] = vc_env['LIBPATH']
-  os.environ['INCLUDE'] = vc_env['INCLUDE']
+  os.environ['PATH'] = vc_env['PATH'] + os.path.pathsep + get_env('PATH')
+  os.environ['LIB'] = vc_env['LIB'] + os.path.pathsep + get_env('LIB')
+  os.environ['LIBPATH'] = vc_env['LIBPATH'] + os.path.pathsep + get_env('LIBPATH')
+  os.environ['INCLUDE'] = vc_env['INCLUDE'] + os.path.pathsep + get_env('INCLUDE')
   return
 
 def vcvarsall_end():

@@ -84,7 +84,13 @@ def make():
 
   if ("windows" == base.host_platform()):
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
+    # V8 v6.0 builds with msvc v140 VS 2015 toolset only
     base.set_env("GYP_MSVS_VERSION", "2015")
+    programFilesDir = base.get_env("ProgramFiles")
+    if base.get_env("ProgramFiles(x86)") != "":
+      programFilesDir = base.get_env("ProgramFiles(x86)")
+    vs_path = os.path.join(programFilesDir, "Microsoft Visual Studio 14.0")
+    base.set_env("GYP_MSVS_OVERRIDE_PATH", vs_path)
 
   base.common_check_version("v8", "1", clean)
 
@@ -182,20 +188,24 @@ def make():
 
   # add enable_iterator_debugging=false for disable _ITERATOR_DEBUG_LEVEL
   if config.check_option("platform", "win_64"):
+    base.vcvarsall_start("x64")
     if (-1 != config.option("config").lower().find("debug")):
       base.cmd2("gn", ["gen", "out.gn/win_64/debug", "--args=\"is_debug=true " + base_args64 + " is_clang=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_64/debug"])      
 
     base.cmd2("gn", ["gen", "out.gn/win_64/release", "--args=\"is_debug=false " + base_args64 + " is_clang=false\""])
     base.cmd("ninja", ["-C", "out.gn/win_64/release"])
+    base.vcvarsall_end()
 
   if config.check_option("platform", "win_32"):
+    base.vcvarsall_start("x86")
     if (-1 != config.option("config").lower().find("debug")):
       base.cmd2("gn", ["gen", "out.gn/win_32/debug", "--args=\"is_debug=true " + base_args32 + " is_clang=false\""])
       base.cmd("ninja", ["-C", "out.gn/win_32/debug"])    
 
     base.cmd2("gn", ["gen", "out.gn/win_32/release", "--args=\"is_debug=false " + base_args32 + " is_clang=false\""])
     base.cmd("ninja", ["-C", "out.gn/win_32/release"])
+    base.vcvarsall_end()
 
   os.chdir(old_cur)
   os.environ.clear()

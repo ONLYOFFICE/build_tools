@@ -10,6 +10,47 @@ import base64
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
 
+base.configure_common_apps()
+
+def change_property(data_src, name, value):
+  data = data_src
+  creator_open = "<dc:" + name + ">"
+  creator_close = "</dc:" + name + ">"
+  open_tag_pos = data.find(creator_open)
+  if open_tag_pos == -1:
+    creator_close_to_find = "<dc:" + name + "/>"
+  else:
+    creator_close_to_find = "</dc:" + name + ">"
+  close_tag_pos = data.find(creator_close_to_find)
+  last_tag_pos = data.find("</cp:coreProperties>")
+
+  if open_tag_pos != -1 and close_tag_pos != - 1:
+    data = data[:open_tag_pos + len(creator_open)] + value + data[close_tag_pos:]
+  elif close_tag_pos != - 1:
+    data = data[:close_tag_pos] + creator_open + value + creator_close + data[close_tag_pos + len(creator_close_to_find):]
+  else:
+    data = data[:last_tag_pos] + creator_open + value + creator_close + data[last_tag_pos:]
+  return data
+
+def change_author_name(file_input):
+  temp_dir = os.getcwd().replace("\\", "/") + "/temp"
+  base.create_dir(temp_dir)
+
+  app = "7za" if ("mac" == base.host_platform()) else "7z"
+  base.cmd_exe(app, ["x", "-y", file_input, "-o" + temp_dir, "docProps/core.xml", "-r"])
+
+  with open(temp_dir + "/docProps/core.xml", 'r', encoding='utf-8') as file:
+    data = file.read()
+
+  data = change_property(data, "creator", "")
+  data = change_property(data, "lastModifiedBy", "")
+
+  with open(temp_dir + "/docProps/core.xml", 'w', encoding='utf-8') as file:
+    file.write(data)
+
+  base.cmd_exe(app, ["a", "-r", file_input, temp_dir + "/docProps"])
+  base.delete_dir(temp_dir)
+
 def get_files(dir):
   arr_files = []
   for file in glob.glob(dir + "/*"):
@@ -67,5 +108,7 @@ for file in src_files:
 
   os.makedirs(directory_out_file, exist_ok=True)
   base.cmd_in_dir(x2t_directory, "x2t", [file, dst_file])
+
+  change_author_name(dst_file)
 
   print(name_without_ext + " => " + dst_name)

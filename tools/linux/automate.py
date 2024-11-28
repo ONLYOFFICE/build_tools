@@ -62,6 +62,7 @@ def install_qt_prebuild():
   base.extract("./qt_amd64.7z", "./qt_build")
   base.create_dir("./qt_build/Qt-5.9.9")
   base.cmd("mv", ["./qt_build/qt_amd64", "./qt_build/Qt-5.9.9/gcc_64"])
+  base.setup_local_qmake("./qt_build/Qt-5.9.9/gcc_64/bin")
   return
 
 if not base.is_file("./node_js_setup_14.x"):

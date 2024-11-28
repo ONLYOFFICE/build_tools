@@ -21,6 +21,9 @@ def change_bootstrap():
   content += "@Subdir git\n"
   content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"
 
+  base.replaceInFile("./depot_tools/bootstrap/bootstrap.py", 
+    "raise subprocess.CalledProcessError(proc.returncode, argv, None)", "return")
+  
   base.writeFile("./depot_tools/bootstrap/manifest.txt", content)
   return
 
@@ -124,7 +127,7 @@ def make():
     base.copy_dir("./v8/third_party", "./v8/third_party_new")
     if ("windows" == base.host_platform()):
       os.chdir("v8")
-      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
       os.chdir("../")
     v8_branch_version = "remotes/branch-heads/8.9"
     if ("mac" == base.host_platform()):

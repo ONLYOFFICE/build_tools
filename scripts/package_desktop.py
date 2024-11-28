@@ -288,9 +288,11 @@ def make_sparkle_updates():
       + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
     verbose=True)
 
-  for file in utils.glob_path(changes_dir + "/" + common.version + "/*.html"):
-    filename = utils.get_basename(file).replace("changes", zip_filename)
-    utils.copy_file(file, updates_dir + "/" + filename)
+  for ext in [".html", ".ru.html"]:
+    changes_src = changes_dir + "/" + common.version + "/changes" + ext
+    changes_dst = updates_dir + "/" + zip_filename + ext
+    if not utils.copy_file(changes_src, changes_dst):
+      utils.write_file(changes_dst, "<!DOCTYPE html>placeholder")
 
   sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
   ret = utils.sh(

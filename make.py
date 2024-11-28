@@ -92,10 +92,8 @@ if config.check_option("module", "desktop"):
     config.extend_option("config", "updmodule")
     base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
     base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
-    base.set_env("DESKTOP_URL_INSTALL_CHANNEL_X64", "https://download.onlyoffice.com/install/desktop/editors/windows/distrib/onlyoffice/DesktopEditors_x64.exe")
-    base.set_env("DESKTOP_URL_INSTALL_CHANNEL_X86", "https://download.onlyoffice.com/install/desktop/editors/windows/distrib/onlyoffice/DesktopEditors_x86.exe")
-    base.set_env("DESKTOP_URL_INSTALL_CHANNEL_X64_MSI", "https://download.onlyoffice.com/install/desktop/editors/windows/distrib/onlyoffice/DesktopEditors_x64.msi")
-    base.set_env("DESKTOP_URL_INSTALL_CHANNEL_X86_MSI", "https://download.onlyoffice.com/install/desktop/editors/windows/distrib/onlyoffice/DesktopEditors_x86.msi")
+    base.set_env("DESKTOP_URL_INSTALL_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/distrib/onlyoffice/<file>")
+    base.set_env("DESKTOP_URL_INSTALL_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/onlineinstallerdev/<file>")
 
 # build
 build_sln.make()

@@ -9,7 +9,7 @@ RUN apt-get -y update && \
                        sudo
 RUN rm /usr/bin/python && ln -s /usr/bin/python2 /usr/bin/python
 ADD . /build_tools
-WORKDIR /build_tools
+WORKDIR /build_tools/tools/linux
 
-CMD cd tools/linux && \
-    python3 ./automate.py
+ENTRYPOINT ["python3"]
+CMD ["automate.py"]

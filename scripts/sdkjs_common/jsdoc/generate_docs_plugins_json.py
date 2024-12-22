@@ -27,10 +27,10 @@ def generate(output_dir, md=False):
         print(f"Generating {editor_name}.json: {command}")
         subprocess.run(command, shell=True)
 
-    output_file = os.path.join(output_dir, 'common.json')
-    with open(output_file, 'r', encoding='utf-8') as f:
-        common_doclets = json.load(f)
-    os.remove(output_file)
+    common_doclets_file = os.path.join(output_dir, 'common.json')
+    with open(common_doclets_file, 'r', encoding='utf-8') as f:
+        common_doclets_json = json.dumps(json.load(f))
+    os.remove(common_doclets_file)
     
     # Append examples to JSON documentation
     for config in configs:
@@ -45,7 +45,7 @@ def generate(output_dir, md=False):
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
             start_common_doclet_idx = len(data)
-            data += common_doclets
+            data += json.loads(common_doclets_json)
         
         # Modify JSON data
         for idx, doclet in enumerate(data):

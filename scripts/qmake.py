@@ -125,7 +125,10 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
         add_spec_xp(qt_dir)
       build_spec = " -spec win32-msvc2019-xp "
     qmake_bat = []
-    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
+    vcvars_ver = ""
+    if platform.find("_xp") != -1:
+      vcvars_ver = " -vcvars_ver=14.27"
+    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64") + vcvars_ver)
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])

@@ -25,7 +25,6 @@
 
     "core/Apple/IWork.pro",
 
-    "core/HtmlRenderer/htmlrenderer.pro",
     "core/DocxRenderer/DocxRenderer.pro",   
 
     "core/DesktopEditor/doctrenderer/doctrenderer.pro",

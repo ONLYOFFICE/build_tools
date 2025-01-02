@@ -30,7 +30,6 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "kernel_network")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "graphics")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "doctrenderer")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "PdfFile")

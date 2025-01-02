@@ -78,7 +78,6 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "XpsFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile2")
-    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlRenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "EpubFile")

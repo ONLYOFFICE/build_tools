@@ -370,7 +370,7 @@ def cmd(prog, args=[], is_no_errors=False):
   else:
     command = prog
     for arg in args:
-      command += (" \"" + arg + "\"")
+      command += (" \"" + arg.replace('\"', '\\\"') + "\"")
     ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
   if ret != 0 and True != is_no_errors:
     sys.exit("Error (" + prog + "): " + str(ret))
@@ -406,7 +406,7 @@ def cmd_exe(prog, args, is_no_errors=False):
   else:
     command = prog
     for arg in args:
-      command += (" \"" + arg + "\"")
+      command += (" \"" + arg.replace('\"', '\\\"') + "\"")
     process = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True, env=env_dir)
     ret = process.wait()
   if ret != 0 and True != is_no_errors:

@@ -22,6 +22,9 @@ def change_bootstrap():
   content += "@Subdir git\n"
   content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"
 
+  base.replaceInFile("./depot_tools/bootstrap/bootstrap.py", 
+    "raise subprocess.CalledProcessError(proc.returncode, argv, None)", "return")
+  
   base.writeFile("./depot_tools/bootstrap/manifest.txt", content)
   return
 
@@ -284,6 +287,9 @@ def make():
   if not base.is_dir(base_dir):
     base.create_dir(base_dir)
 
+  if ("mac" == base.host_platform()):
+    base.cmd("git", ["config", "--global", "http.postBuffer", "157286400"], True)
+
   os.chdir(base_dir)
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
@@ -300,7 +306,7 @@ def make():
     base.copy_dir("./v8/third_party", "./v8/third_party_new")
     if ("windows" == base.host_platform()):
       os.chdir("v8")
-      base.cmd("git", ["config", "--system", "core.longpaths", "true"])
+      base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
       os.chdir("../")
     v8_branch_version = "remotes/branch-heads/8.9"
     if ("mac" == base.host_platform()):
@@ -315,6 +321,11 @@ def make():
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
   else:
     base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
+
+  if ("mac" == base.host_platform()):
+    if not base.is_file("v8/build/config/compiler/BUILD.gn.bak"):
+      base.copy_file("v8/build/config/compiler/BUILD.gn", "v8/build/config/compiler/BUILD.gn.bak")
+      base.replaceInFile("v8/build/config/compiler/BUILD.gn", "\"-Wloop-analysis\",", "\"-Wloop-analysis\", \"-D_Float16=short\",")
 
   if not base.is_file("v8/third_party/jinja2/tests.py.bak"):
     base.copy_file("v8/third_party/jinja2/tests.py", "v8/third_party/jinja2/tests.py.bak")

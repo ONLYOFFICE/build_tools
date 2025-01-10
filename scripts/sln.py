@@ -14,6 +14,15 @@ def is_exist_in_array(projects, proj):
       return True
   return False
 
+def get_full_projects_list(json_data, list):
+  result = []
+  for rec in list:
+    if rec in json_data:
+      result += get_full_projects_list(json_data, json_data[rec])
+    else:
+      result.append(rec)
+  return result
+
 def adjust_project_params(params):
   ret_params = params
   
@@ -86,13 +95,9 @@ def get_projects(pro_json_path, platform):
     
     # check aliases to modules
     records_src = data[module]
-    records = []
+    records = get_full_projects_list(data, records_src)
 
-    for rec in records_src:
-      if rec in data:
-        records += data[rec]
-      else:
-        records.append(rec)
+    print(records)
 
     for rec in records:
       params = []

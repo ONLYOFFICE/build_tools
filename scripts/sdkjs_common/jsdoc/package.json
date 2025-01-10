@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "jsdoc-to-markdown": "7.1.1",
+    "dmd": "6.1.0",
+    "handlebars": "4.7.7"
+  }
+}

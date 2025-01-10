@@ -1,7 +1,6 @@
 {
 	"basePath": "../../../",
 	"reportFolder": "build_tools/scripts/license_checker/reports",
-	"licensePath": "build_tools/scripts/license_checker/header.license",
 	"printChecking": false,
 	"printReports": false,
 	"fix": ["OUTDATED"],
@@ -9,9 +8,7 @@
 		{
 			"dir": "core",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".cs", ".js", ".m", ".mm", ".license"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDir": [
 				"core/build",
 				"core/Common/cfcpp/test",
@@ -59,9 +56,7 @@
 		{
 			"dir": "core-ext",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDir": [
 				"core-ext/AutoTester",
 				"core-ext/cell_android",
@@ -83,9 +78,7 @@
 		{
 			"dir": "sdkjs",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDir": [
 				"sdkjs/deploy",
 				"sdkjs/develop",
@@ -106,9 +99,7 @@
 		{
 			"dir": "sdkjs-forms",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -117,9 +108,7 @@
 		{
 			"dir": "sdkjs-ooxml",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -128,9 +117,7 @@
 		{
 			"dir": "web-apps",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor",
@@ -138,6 +125,7 @@
 			],
 			"ignoreListDir": [
 				"web-apps/apps/common/mobile",
+				"web-apps/apps/common/main/lib/mods",
 				"web-apps/apps/documenteditor/mobile",
 				"web-apps/apps/spreadsheeteditor/mobile",
 				"web-apps/apps/presentationeditor/mobile",
@@ -145,7 +133,6 @@
 			],
 			"ignoreListFile": [
 				"web-apps/apps/api/documents/api.js",
-				"web-apps/apps/common/main/lib/mods/perfect-scrollbar.js",
 				"web-apps/apps/common/main/lib/core/application.js",
 				"web-apps/apps/common/main/lib/core/keymaster.js",
 				"web-apps/apps/presentationeditor/embed/resources/less/watch.js"
@@ -154,9 +141,7 @@
 		{
 			"dir": "web-apps-mobile",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules",
 				"vendor"
@@ -165,9 +150,7 @@
 		{
 			"dir": "server",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDir": [
 				"server/FileConverter/bin"
 			],
@@ -178,9 +161,7 @@
 		{
 			"dir": "server-lockstorage",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules"
 			]
@@ -188,9 +169,7 @@
 		{
 			"dir": "server-license",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules"
 			]
@@ -198,9 +177,7 @@
 		{
 			"dir": "server-license-key",
 			"fileExtensions": [".js"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"node_modules"
 			]
@@ -208,9 +185,7 @@
 		{
 			"dir": "editors-ios",
 			"fileExtensions": [".h", ".c", ".hpp", ".cpp", ".hxx", ".cxx", ".m", ".mm"],
-			"startMultiComm": "/*",
-			"endMultiComm": " */",
-			"prefix": " *",
+			"licensePath": "header.license",
 			"ignoreListDirName": [
 				"vendor",
 				"Vendor",

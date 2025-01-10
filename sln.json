@@ -1,6 +1,10 @@
 {
   "root" : "../",
 
+  "spell" : [
+    "[win,linux,mac]core/Common/3dParty/hunspell/qt/hunspell.pro"
+  ],
+
   "core" : [
 
     "core/Common/3dParty/cryptopp/project/cryptopp.pro",
@@ -23,7 +27,6 @@
     "core/DocxRenderer/DocxRenderer.pro",   
 
     "core/DesktopEditor/doctrenderer/doctrenderer.pro",
-    "core/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder_func_lib.pro",
 
     "[!no_x2t]core/OOXML/Projects/Linux/DocxFormatLib/DocxFormatLib.pro",
     "[!no_x2t]core/OOXML/Projects/Linux/PPTXFormatLib/PPTXFormatLib.pro",
@@ -51,15 +54,19 @@
 
     "[win,linux,mac,!linux_arm64]core/OfficeCryptReader/ooxml_crypt/ooxml_crypt.pro",
 
+    "spell",
+
     "[win,linux,mac,!no_tests]core/DesktopEditor/vboxtester/vboxtester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/StandardTester/standardtester.pro",
     "[win,linux,mac,!no_tests]core/Test/Applications/x2tTester/x2ttester.pro",
-    "[win,linux,mac,!no_tests]core/Test/Applications/MetafileTester/MetafileTester.pro"
+    "[win,linux,mac,!no_tests]core/Test/Applications/MetafileTester/MetafileTester.pro",
+    "[win,linux,mac,!no_tests]core/Common/3dParty/hunspell/test/test.pro"
 
   ],
 
   "builder" : [
-    "core"
+    "core",
+    "core/DesktopEditor/doctrenderer/docbuilder.python/src/docbuilder_func_lib.pro"
   ],
 
   "server" : [
@@ -70,13 +77,8 @@
     "[win,linux]desktop-sdk/ChromiumBasedEditors/videoplayerlib/videoplayerlib.pro"
   ],
   
-  "spell" : [
-    "[win,linux,mac]core/Common/3dParty/hunspell/qt/hunspell.pro"
-  ],
-
   "desktop" : [
     "core",
-    "spell",
     "multimedia",
     
     "core/DesktopEditor/xmlsec/src/ooxmlsignature.pro",

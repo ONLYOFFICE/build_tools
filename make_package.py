@@ -10,15 +10,17 @@ import package_utils as utils
 # parse
 parser = argparse.ArgumentParser(description="Build packages.")
 parser.add_argument("-P", "--platform", dest="platform", type=str,
-                    action="store", help="Defines platform", required=True)
-parser.add_argument("-T", "--targets", dest="targets",   type=str, nargs="+",
-                    action="store", help="Defines targets",  required=True)
-parser.add_argument("-R", "--branding", dest="branding", type=str,
-                    action="store", help="Provides branding path")
+  action="store", help="Defines platform", required=True)
+parser.add_argument("-T", "--targets",  dest="targets",  type=str, nargs="+",
+  action="store", help="Defines targets",  required=True)
 parser.add_argument("-V", "--version",  dest="version",  type=str,
-                    action="store", help="Defines version")
+  action="store", help="Defines version")
 parser.add_argument("-B", "--build",    dest="build",    type=str,
-                    action="store", help="Defines build")
+  action="store", help="Defines build")
+parser.add_argument("-H", "--branch",   dest="branch",   type=str,
+  action="store", help="Defines branch")
+parser.add_argument("-R", "--branding", dest="branding", type=str,
+  action="store", help="Provides branding path")
 args = parser.parse_args()
 
 # vars
@@ -29,13 +31,20 @@ common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
-common.version = args.version if args.version else utils.get_env("BUILD_VERSION", "0.0.0")
-common.build = args.build if args.build else utils.get_env("BUILD_NUMBER", "0")
+if args.version: common.version = args.version
+else:            common.version = utils.get_env("PRODUCT_VERSION", "0.0.0")
+utils.set_env("PRODUCT_VERSION", common.version)
+utils.set_env("BUILD_VERSION", common.version)
+if args.build: common.build = args.build
+else:          common.build = utils.get_env("BUILD_NUMBER", "0")
+utils.set_env("BUILD_NUMBER", common.build)
+if args.branch: common.branch = args.branch
+else:           common.branch = utils.get_env("BRANCH_NAME", "null")
+utils.set_env("BRANCH_NAME", common.branch)
 common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.branding_dir = utils.get_abspath(common.workspace_dir + "/" + args.branding) if args.branding else common.workspace_dir
-common.deploy_data = utils.get_path(common.workspace_dir + "/deploy.txt")
 common.summary = []
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -64,15 +73,14 @@ import package_mobile
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
-utils.delete_file(common.deploy_data)
 if "core" in common.targets:
   package_core.make()
-if "closuremaps_opensource" in common.targets:
+if "closuremaps_sdkjs_opensource" in common.targets:
   package_core.deploy_closuremaps_sdkjs("opensource")
-  package_core.deploy_closuremaps_webapps("opensource")
-if "closuremaps_commercial" in common.targets:
+if "closuremaps_sdkjs_commercial" in common.targets:
   package_core.deploy_closuremaps_sdkjs("commercial")
-  package_core.deploy_closuremaps_webapps("commercial")
+if "closuremaps_webapps" in common.targets:
+  package_core.deploy_closuremaps_webapps("opensource")
 if "desktop" in common.targets:
   package_desktop.make()
 if "builder" in common.targets:

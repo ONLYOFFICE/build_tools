@@ -483,8 +483,8 @@ def get_mysql_path_to_bin(mysqlPath = ''):
       mysqlPath = os.environ['PROGRAMW6432'] + '\\MySQL\\MySQL Server 8.0\\'
     mysqlPath += 'bin'
   return mysqlPath
-def get_mysqlLoginSrting():
-  return 'mysql -u ' + install_params['MySQLServer']['user'] + ' -p' +  install_params['MySQLServer']['pass']
+def get_mysqlLoginString():
+  return 'mysql -u ' + config.option("db-user") + ' -p' + config.option("db-pass")
 def get_mysqlServersInfo():
   arrInfo = []
 
@@ -511,14 +511,14 @@ def get_mysqlServersInfo():
 def check_mysqlServer():
   base.print_info('Check MySQL Server')
   dependence = CDependencies()
-  mysqlLoginSrt = get_mysqlLoginSrting()
+  mysqlLoginSrt = get_mysqlLoginString()
   connectionString = mysqlLoginSrt + ' -e "SHOW GLOBAL VARIABLES LIKE ' + r"'PORT';" + '"'
 
   if (host_platform != 'windows'):
     result = os.system(mysqlLoginSrt + ' -e "exit"')
     if (result == 0):
       connectionResult = base.run_command(connectionString)['stdout']
-      if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
+      if (connectionResult.find('port') != -1 and connectionResult.find(config.option("db-port")) != -1):
         print('MySQL configuration is valid')
         dependence.sqlPath = 'mysql'
         return dependence
@@ -535,7 +535,7 @@ def check_mysqlServer():
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
 
     connectionResult = base.run_command_in_dir(get_mysql_path_to_bin(info['Location']), connectionString)['stdout']
-    if (connectionResult.find('port') != -1 and connectionResult.find(install_params['MySQLServer']['port']) != -1):
+    if (connectionResult.find('port') != -1 and connectionResult.find(config.option("db-port")) != -1):
       print(mysql_full_name + 'configuration is valid')
       dependence.sqlPath = info['Location']
       return dependence
@@ -559,23 +559,43 @@ def check_mysqlServer():
   return dependence
 def check_MySQLConfig(mysqlPath = ''):
   result = True
-  mysqlLoginSrt = get_mysqlLoginSrting()
+  mysqlLoginSrt = get_mysqlLoginString()
   mysql_path_to_bin = get_mysql_path_to_bin(mysqlPath)
 
-  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].find('onlyoffice') == -1):
-    print('Database onlyoffice not found')
+  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SHOW DATABASES;"')['stdout'].lower().find(config.option("db-name").lower()) == -1):
+    print('Database "' + config.option("db-name") + '" not found')
+    result = create_MySQLDb(mysql_path_to_bin, config.option("db-name"), config.option("db-user"), config.option("db-pass"))
+    if (not result):
+        return False
+    print('Creating ' + config.option("db-name") + ' tables ...')
     creatdb_path = base.get_script_dir() + "/../../server/schema/mysql/createdb.sql"
-    result = execMySQLScript(mysql_path_to_bin, creatdb_path)
-  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + install_params['MySQLServer']['user'] + "';" + '"')['stdout'].find('mysql_native_password') == -1):
+    result = execMySQLScript(mysql_path_to_bin, config.option("db-name"), creatdb_path)
+  if (base.run_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "SELECT plugin from mysql.user where User=' + "'" + config.option("db-user") + "';" + '"')['stdout'].find('mysql_native_password') == -1):
     print('Password encryption is not valid')
     result = set_MySQLEncrypt(mysql_path_to_bin, 'mysql_native_password') and result
 
   return result
-def execMySQLScript(mysql_path_to_bin, scriptPath):
-  print('Execution ' + scriptPath)
-  mysqlLoginSrt = get_mysqlLoginSrting()
+def create_MySQLDb(mysql_path_to_bin, dbName, dbUser, dbPass):
+  mysqlLoginSrt = get_mysqlLoginString()
+  print('CREATE DATABASE ' + dbName + ';')
+  if (base.exec_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "CREATE DATABASE ' + dbName + ';"') != 0):
+    print('failed CREATE DATABASE ' + dbName + ';')
+    return False
+  # print('CREATE USER IF NOT EXISTS ' + dbUser + ' IDENTIFIED BY \'' + dbPass + '\';')
+  # if (base.exec_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "CREATE USER IF NOT EXISTS ' + dbUser + ' IDENTIFIED BY \'' + dbPass + '\';"') != 0):
+    # print('failed: CREATE USER IF NOT EXISTS ' + dbUser + ' IDENTIFIED BY \'' + dbPass + '\';')
+    # return False
+  # print('GRANT ALL PRIVILEGES ON ' + dbName + '.* TO ' + dbUser + ';')
+  # if (base.exec_command_in_dir(mysql_path_to_bin, mysqlLoginSrt + ' -e "GRANT ALL PRIVILEGES ON ' + dbName + '.* TO ' + dbUser + ';"') != 0):
+    # print('failed: GRANT ALL PRIVILEGES ON ' + dbName + '.* TO ' + dbUser + ';')
+    # return False
+  return True
   
-  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginSrting() + ' < "' + scriptPath + '"')
+def execMySQLScript(mysql_path_to_bin, dbName, scriptPath):
+  print('Execution ' + scriptPath)
+  mysqlLoginSrt = get_mysqlLoginString()
+  
+  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginString() + ' -D ' + dbName + ' < "' + scriptPath + '"')
   if (code != 0):
     print('Execution failed!')
     return False
@@ -584,7 +604,7 @@ def execMySQLScript(mysql_path_to_bin, scriptPath):
 def set_MySQLEncrypt(mysql_path_to_bin, sEncrypt):
   print('Setting MySQL password encrypting...')
 
-  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginSrting() + ' -e "' + "ALTER USER '" + install_params['MySQLServer']['user'] + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + install_params['MySQLServer']['pass'] + "';" + '"')
+  code = base.exec_command_in_dir(mysql_path_to_bin, get_mysqlLoginString() + ' -e "' + "ALTER USER '" + config.option("db-user") + "'@'localhost' IDENTIFIED WITH " + sEncrypt + " BY '" + config.option("db-pass") + "';" + '"')
   if (code != 0):
     print('Setting password encryption failed!')
     return False
@@ -611,7 +631,7 @@ def get_postrgre_path_to_bin(postgrePath = ''):
 def get_postgreLoginSrting(userName):
   if (host_platform == 'windows'):
     return 'psql -U' + userName + ' '
-  return 'PGPASSWORD="' + install_params['PostgreSQL']['dbPass'] + '" psql -U' + userName + ' -hlocalhost '
+  return 'PGPASSWORD="' + config.option("db-pass") + '" psql -U' + userName + ' -hlocalhost '
 def get_postgreSQLInfoByFlag(flag):
   arrInfo = []
 
@@ -647,7 +667,7 @@ def check_postgreSQL():
     result = os.system(postgreLoginSrt + ' -c "\q"')
     connectionResult = base.run_command(connectionString)['stdout']
 
-    if (result != 0 or connectionResult.find(install_params['PostgreSQL']['dbPort']) == -1):
+    if (result != 0 or connectionResult.find(config.option("db-port")) == -1):
       print('Valid PostgreSQL not found!')
       dependence.append_install('PostgreSQL')
       dependence.append_uninstall('PostgreSQL')
@@ -657,7 +677,7 @@ def check_postgreSQL():
     return dependence
 
   arrInfo = get_postgreSQLInfo()
-  base.set_env('PGPASSWORD', install_params['PostgreSQL']['dbPass'])
+  base.set_env('PGPASSWORD', config.option("db-pass"))
   for info in arrInfo:
     if (base.is_dir(info['Location']) == False):
       continue
@@ -665,7 +685,7 @@ def check_postgreSQL():
     postgre_full_name = 'PostgreSQL ' + info['Version'][:2] + ' '
     connectionResult = base.run_command_in_dir(get_postrgre_path_to_bin(info['Location']), connectionString)['stdout']
 
-    if (connectionResult.find(install_params['PostgreSQL']['dbPort']) != -1):
+    if (connectionResult.find(config.option("db-port")) != -1):
       print(postgre_full_name + 'configuration is valid')
       dependence.sqlPath = info['Location']
       return dependence
@@ -683,12 +703,12 @@ def check_postgreSQL():
 def check_postgreConfig(postgrePath = ''):
   result = True
   if (host_platform == 'windows'):
-    base.set_env('PGPASSWORD', install_params['PostgreSQL']['dbPass'])
+    base.set_env('PGPASSWORD', config.option("db-pass"))
 
   rootUser = install_params['PostgreSQL']['root']
-  dbUser = install_params['PostgreSQL']['dbUser']
-  dbName = install_params['PostgreSQL']['dbName']
-  dbPass = install_params['PostgreSQL']['dbPass']
+  dbUser = config.option("db-user")
+  dbName = config.option("db-name")
+  dbPass = config.option("db-pass")
   postgre_path_to_bin = get_postrgre_path_to_bin(postgrePath)
   postgreLoginRoot = get_postgreLoginSrting(rootUser)
   postgreLoginDbUser = get_postgreLoginSrting(dbUser)
@@ -705,7 +725,7 @@ def check_postgreConfig(postgrePath = ''):
     base.print_info('Creating ' + dbName + ' user...')
     result = create_postgreUser(dbUser, dbPass, postgre_path_to_bin) and result
 
-  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find('onlyoffice') == -1):
+  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find(config.option("db-name")) == -1):
     print('Database ' + dbName + ' not found')
     base.print_info('Creating ' + dbName + ' database...')
     result = create_postgreDb(dbName, postgre_path_to_bin) and configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
@@ -884,13 +904,13 @@ def install_gruntcli():
 
 def install_mysqlserver():
   if (host_platform == 'windows'):
-    return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + install_params['MySQLServer']['port'] + 'enable_tcpip=true;port=' + install_params['MySQLServer']['port'] + ';rootpasswd=' + install_params['MySQLServer']['pass'] + ' -silent')
+    return os.system('"' + os.environ['ProgramFiles(x86)'] + '\\MySQL\\MySQL Installer for Windows\\MySQLInstallerConsole" community install server;' + install_params['MySQLServer']['version'] + ';x64:*:type=config;openfirewall=true;generallog=true;binlog=true;serverid=' + config.option("db-port") + 'enable_tcpip=true;port=' + config.option("db-port") + ';rootpasswd=' + config.option("db-pass") + ' -silent')
   elif (host_platform == 'linux'):
-    os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp ' + install_params['MySQLServer']['port'])['stdout'])
+    os.system('sudo kill ' + base.run_command('sudo fuser -vn tcp ' + config.option("db-port"))['stdout'])
     code = os.system('sudo ufw enable && sudo ufw allow 22 && sudo ufw allow 3306')
     code = os.system('sudo apt-get -y install zsh htop') and code
-    code = os.system('echo "mysql-server mysql-server/root_password password ' + install_params['MySQLServer']['pass'] + '" | sudo debconf-set-selections') and code
-    code = os.system('echo "mysql-server mysql-server/root_password_again password ' + install_params['MySQLServer']['pass'] + '" | sudo debconf-set-selections') and code
+    code = os.system('echo "mysql-server mysql-server/root_password password ' + config.option("db-pass") + '" | sudo debconf-set-selections') and code
+    code = os.system('echo "mysql-server mysql-server/root_password_again password ' + config.option("db-pass") + '" | sudo debconf-set-selections') and code
     return os.system('yes | sudo apt install mysql-server') and code
   return 1
 
@@ -912,7 +932,7 @@ def install_postgresql():
     file_name = "install.exe"
     base.download(download_url, file_name)
     base.print_info("Install PostgreSQL...")
-    install_command = file_name + ' --mode unattended --unattendedmodeui none --superpassword ' + install_params['PostgreSQL']['dbPass'] + ' --serverport ' + install_params['PostgreSQL']['dbPort']
+    install_command = file_name + ' --mode unattended --unattendedmodeui none --superpassword ' + config.option("db-pass") + ' --serverport ' + config.option("db-port")
   else:
     base.print_info("Install PostgreSQL...")
     install_command = 'sudo apt install postgresql -y'
@@ -923,7 +943,7 @@ def install_postgresql():
   if (host_platform == 'windows'):
     base.delete_file(file_name)
   else:
-    code = os.system('sudo -i -u postgres psql -c "ALTER USER postgres PASSWORD ' + "'" + install_params['PostgreSQL']['dbPass'] + "'" + ';"') and code
+    code = os.system('sudo -i -u postgres psql -c "ALTER USER postgres PASSWORD ' + "'" + config.option("db-pass") + "'" + ';"') and code
 
   return code
 
@@ -974,18 +994,11 @@ install_params = {
   'BuildTools': '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --wait',
   'Git': '/VERYSILENT /NORESTART',
   'MySQLServer': {
-    'port': '3306',
-	'user': 'root',
-	'pass': 'onlyoffice',
 	'version': '8.0.21'
   },
   'Redis': 'PORT=6379 ADD_FIREWALL_RULE=1',
   'PostgreSQL': {
-    'root': 'postgres',
-    'dbPort': '5432',
-    'dbName': 'onlyoffice',
-    'dbUser': 'onlyoffice',
-    'dbPass': 'onlyoffice'
+    'root': 'postgres'
   }
 }
 uninstall_params = {

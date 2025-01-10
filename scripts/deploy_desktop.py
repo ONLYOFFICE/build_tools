@@ -102,6 +102,7 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
+    base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
@@ -213,6 +214,8 @@ def make():
 
     base.create_dir(root_dir + "/editors")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
+    if len(os.listdir(root_dir + "/editors/sdkjs")) == 0:
+      base.delete_dir(root_dir + "/editors/sdkjs") # delete empty folder. for bug 62528
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     for file in glob.glob(root_dir + "/editors/web-apps/apps/*/*/*.js.map"):
       base.delete_file(file)
@@ -257,6 +260,8 @@ def make():
 
     if isUseJSC:
       base.delete_file(root_dir + "/converter/icudtl.dat")
+
+    base.create_x2t_js_cache(root_dir + "/converter", "desktop")
 
     if (0 == platform.find("win")):
       base.delete_file(root_dir + "/cef_sandbox.lib")

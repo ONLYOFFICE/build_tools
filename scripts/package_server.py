@@ -21,7 +21,6 @@ def s3_upload(files, dst):
     key = dst + utils.get_basename(f) if dst.endswith("/") else dst
     upload = utils.s3_upload(f, "s3://" + branding.s3_bucket + "/" + key)
     if upload:
-      utils.add_deploy_data(key)
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
@@ -61,7 +60,8 @@ def make_linux(edition):
   utils.set_cwd("document-server-package")
 
   utils.log_h2("server " + edition + " build")
-  make_args = branding.server_make_targets + ["-e", "PRODUCT_NAME=" + product_name]
+  make_args = [t["make"] for t in branding.server_make_targets]
+  make_args += ["-e", "PRODUCT_NAME=" + product_name]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
@@ -70,40 +70,10 @@ def make_linux(edition):
   utils.set_summary("server " + edition + " build", ret)
 
   if common.deploy:
-    if ret:
-      if "deb" in branding.server_make_targets:
-        utils.log_h2("server " + edition + " deb deploy")
-        ret = s3_upload(
-          utils.glob_path("deb/*.deb"),
-          "server/linux/debian/")
-        utils.set_summary("server " + edition + " deb deploy", ret)
-      if "rpm" in branding.server_make_targets:
-        utils.log_h2("server " + edition + " rpm deploy")
-        ret = s3_upload(
-          utils.glob_path("rpm/builddir/RPMS/*/*.rpm"),
-          "server/linux/rhel/")
-        utils.set_summary("server " + edition + " rpm deploy", ret)
-      if "apt-rpm" in branding.server_make_targets:
-        utils.log_h2("server " + edition + " apt-rpm deploy")
-        ret = s3_upload(
-          utils.glob_path("apt-rpm/builddir/RPMS/*/*.rpm"),
-          "server/linux/altlinux/")
-        utils.set_summary("server " + edition + " apt-rpm deploy", ret)
-      if "tar" in branding.server_make_targets:
-        utils.log_h2("server " + edition + " snap deploy")
-        ret = s3_upload(
-          utils.glob_path("*.tar.gz"),
-          "server/linux/snap/")
-        utils.set_summary("server " + edition + " snap deploy", ret)
-    else:
-      if "deb" in branding.server_make_targets:
-        utils.set_summary("server " + edition + " deb deploy", False)
-      if "rpm" in branding.server_make_targets:
-        utils.set_summary("server " + edition + " rpm deploy", False)
-      if "apt-rpm" in branding.server_make_targets:
-        utils.set_summary("server " + edition + " apt-rpm deploy", False)
-      if "tar" in branding.server_make_targets:
-        utils.set_summary("server " + edition + " snap deploy", False)
+    for t in branding.server_make_targets:
+      utils.log_h2("server " + edition + " " + t["make"] + " deploy")
+      ret = s3_upload(utils.glob_path(t["src"]), t["dst"])
+      utils.set_summary("server " + edition + " " + t["make"] + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return

@@ -5,9 +5,6 @@ import base
 import os
 import json
 
-def get_core_url(arch, branch):
-  return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/" + base.host_platform() + "/core/" + branch + "/latest/" + arch + "/core.7z"
-
 def make():
   git_dir = base.get_script_dir() + "/../.."
   old_cur = os.getcwd()
@@ -18,16 +15,10 @@ def make():
 
   os.chdir(work_dir)
 
-  arch = "x64"
-  arch2 = "_64"
-  if ("windows" == base.host_platform()) and not base.host_platform_is64():
-    arch = "x86"
-    arch2 = "_32"
-
-  url = get_core_url(arch, config.option("branch"))
+  url = base.get_autobuild_version("core", "", config.option("branch"))
   data_url = base.get_file_last_modified_url(url)
   if (data_url == "" and config.option("branch") != "develop"):
-    url = get_core_url(arch, "develop")
+    url = base.get_autobuild_version("core", "", "develop")
     data_url = base.get_file_last_modified_url(url)
   
   old_data_url = base.readFile("./core.7z.data")
@@ -48,12 +39,6 @@ def make():
 
     base.extract("./core.7z", "./")
     base.writeFile("./core.7z.data", data_url)
-
-    platform = ""
-    if ("windows" == base.host_platform()):
-      platform = "win" + arch2
-    else:
-      platform = base.host_platform() + arch2
 
     base.copy_files("./core/*", "./")
   else:
@@ -107,7 +92,8 @@ def make():
   server_addons = []
   if (config.option("server-addons") != ""):
     server_addons = config.option("server-addons").rsplit(", ")
-  if ("server-lockstorage" in server_addons):
+  #server-lockstorage is private
+  if ("server-lockstorage" in server_addons and base.is_dir(git_dir + "/server-lockstorage")):
     server_config["editorDataStorage"] = "editorDataRedis"
   
   sdkjs_addons = []
@@ -131,6 +117,8 @@ def make():
     sql["type"] = config.option("sql-type")
   if (config.option("db-port") != ""):
     sql["dbPort"] = config.option("db-port")
+  if (config.option("db-name") != ""):
+    sql["dbName"] = config.option("db-name")
   if (config.option("db-user") != ""):
     sql["dbUser"] = config.option("db-user")
   if (config.option("db-pass") != ""):

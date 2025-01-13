@@ -69,6 +69,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "IWorkFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "HWPFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
     
     if ("ios" == platform):

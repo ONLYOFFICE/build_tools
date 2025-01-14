@@ -175,6 +175,13 @@ def find_file(path, pattern):
     for filename in fnmatch.filter(filenames, pattern):
       return os.path.join(root, filename)
 
+def find_files(path, pattern):
+  result = []
+  for root, dirnames, filenames in os.walk(path):
+    for filename in fnmatch.filter(filenames, pattern):
+      result.append(os.path.join(root, filename))
+  return result
+
 def create_dir(path):
   path2 = get_path(path)
   if not os.path.exists(path2):
@@ -1828,8 +1835,6 @@ def create_x2t_js_cache(dir, product):
   if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
     return
 
-  if (product in ["builder", "server"]):
-    cmd_in_dir(dir, "./x2t", ["-create-js-cache"], True)
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
 

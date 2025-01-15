@@ -127,5 +127,17 @@ def make():
 
     base.create_x2t_js_cache(root_dir, "builder")
   
+    # delete unnecessary builder files
+    def delete_files(files):
+      for file in files:
+        base.delete_file(file)
+    
+    delete_files(base.find_files(root_dir, "*.wasm"))
+    delete_files(base.find_files(root_dir, "*_ie.js"))
+    base.delete_file(root_dir + "/sdkjs/pdf/src/engine/cmap.bin")
+    if 0 != platform.find("mac"):
+      delete_files(base.find_files(root_dir, "sdk-all.js"))
+      delete_files(base.find_files(root_dir, "sdk-all-min.js"))
+
   return
 

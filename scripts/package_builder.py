@@ -139,31 +139,21 @@ def make_inno():
   return
 
 def make_macos():
-  company = branding.company_name.lower()
-  product = branding.builder_product_name.replace(" ","").lower()
-  source_dir = "build_tools/out/%s/%s/%s" % (common.prefix, company, product)
-  arch_list = {
-    "darwin_x86_64": "x86_64",
-    "darwin_arm64": "arm64"
-  }
-  suffix = arch_list[common.platform]
-  builder_tar = "../%s-%s-%s-%s-%s.tar.xz" % \
-    (company, product, common.version, common.build, suffix)
+  utils.set_cwd("document-builder-package")
 
-  utils.set_cwd(source_dir)
+  utils.log_h2("builder tar build")
+  make_args = ["tar"]
+  if common.platform == "darwin_arm64":
+    make_args += ["-e", "UNAME_M=arm64"]
+  if not branding.onlyoffice:
+    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
+  utils.set_summary("builder tar build", ret)
 
-  if common.clean:
-    utils.log_h2("builder clean")
-    utils.delete_files("../*.tar*")
-
-  utils.log_h2("builder build")
-  ret = utils.sh("tar --xz -cvf %s *" % builder_tar, creates=builder_tar, verbose=True)
-  utils.set_summary("builder build", ret)
-
-  if common.deploy and ret:
-    utils.log_h2("builder deploy")
-    ret = s3_upload([builder_tar], "builder/mac/generic/")
-    utils.set_summary("builder deploy", ret)
+  if common.deploy:
+    utils.log_h2("builder tar deploy")
+    ret = s3_upload(utils.glob_path("tar/*.tar.xz"), "builder/mac/generic/")
+    utils.set_summary("builder tar deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return

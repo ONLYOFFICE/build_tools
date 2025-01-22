@@ -24,22 +24,26 @@ def write_markdown_file(file_path, content):
         md_file.write(content)
 
 def remove_js_comments(text):
-    # Remove single-line comments, leaving text after //
-    text = re.sub(r'^\s*//\s?', '', text, flags=re.MULTILINE)
-    # Remove multi-line comments, leaving text after /*
-    text = re.sub(r'/\*\s*|\s*\*/', '', text, flags=re.DOTALL)
+    text = re.sub(r'^\s*//.*$', '', text, flags=re.MULTILINE)  # single-line
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)     # multi-line
     return text.strip()
 
 def correct_description(string):
+    """
+    Cleans up or transforms certain tags in a doclet description:
+      - <b> => **
+      - <note>...</note> => 💡 ...
+      - Provide a default if None.
+    """
     if string is None:
         return 'No description provided.'
     
-    # Replace opening <b> tag with **
+    # Replace <b> tags with markdown bold
     string = re.sub(r'<b>', '**', string)
-    # Replace closing </b> tag with **
     string = re.sub(r'</b>', '**', string)
-    # Note
-    return re.sub(r'<note>(.*?)</note>', r'💡 \1', string, flags=re.DOTALL)
+    # Convert <note>...</note> to a little icon + text
+    string = re.sub(r'<note>(.*?)</note>', r'💡 \1', string, flags=re.DOTALL)
+    return string
 
 def correct_default_value(value, enumerations, classes):
     if value is None:
@@ -55,39 +59,124 @@ def correct_default_value(value, enumerations, classes):
     return generate_data_types_markdown([value], enumerations, classes)
 
 def remove_line_breaks(string):
-    return re.sub(r'[\r\n]', ' ', string)
+    return re.sub(r'[\r\n]+', ' ', string)
+
+# Convert Array.<T> => T[] (including nested arrays).
+def convert_jsdoc_array_to_ts(type_str: str) -> str:
+    """
+    Recursively replaces 'Array.<T>' with 'T[]',
+    handling nested arrays like 'Array.<Array.<string>>' => 'string[][]'.
+    """
+    pattern = re.compile(r'Array\.<([^>]+)>')
+    
+    while True:
+        match = pattern.search(type_str)
+        if not match:
+            break
+        
+        inner_type = match.group(1).strip()
+        # Recursively convert inner parts
+        inner_type = convert_jsdoc_array_to_ts(inner_type)
+        
+        # Replace the outer Array.<...> with ...[]
+        type_str = (
+            type_str[:match.start()] 
+            + f"{inner_type}[]" 
+            + type_str[match.end():]
+        )
+    
+    return type_str
+
+def escape_text_outside_code_blocks(markdown: str) -> str:
+    """
+    Splits content by fenced code blocks, escapes MDX-unsafe characters
+    (<, >, {, }) only in the text outside those code blocks.
+    """
+    # A regex to capture fenced code blocks with ```
+    parts = re.split(r'(```.*?```)', markdown, flags=re.DOTALL)
+    
+    # Even indices (0, 2, 4, ...) are outside code blocks,
+    # odd indices (1, 3, 5, ...) are actual code blocks.
+    for i in range(0, len(parts), 2):
+        # Only escape in parts outside code blocks
+        parts[i] = (parts[i]
+                    .replace('<', '&lt;')
+                    .replace('>', '&gt;')
+                    .replace('{', '&#123;')
+                    .replace('}', '&#125;')
+                   )
+    return "".join(parts)
+
+def get_base_type(ts_type: str) -> str:
+    """
+    Given a TypeScript-like type (e.g. "Drawing[][]"), return the
+    'base' portion by stripping trailing "[]". For "Drawing[][]",
+    returns "Drawing". For "Array.<Drawing>", you'd convert it first
+    to "Drawing[]" then return "Drawing".
+    """
+    while ts_type.endswith('[]'):
+        ts_type = ts_type[:-2]
+    return ts_type
 
 def generate_data_types_markdown(types, enumerations, classes, root='../../'):
-    param_types_md = ' &#124; '.join(types)
+    """
+    1) Convert each raw JSDoc type from Array.<T> to T[].
+    2) Split union types if needed (usually they're provided as separate
+       elements in 'types' already, but let's be safe).
+    3) For each type, extract the base type (e.g. "Drawing" from "Drawing[]").
+    4) If the base type matches an enumeration or class, link the entire
+       T[]-based string.
+    5) Join with " | ".
+    """
 
-    for enum in enumerations:
-        if enum['name'] in types:
-            param_types_md = param_types_md.replace(enum['name'], f"[{enum['name']}]({root}Enumeration/{enum['name']}.md)")
-    for cls in classes:
-        if cls in types:
-            param_types_md = param_types_md.replace(cls, f"[{cls}]({root}{cls}/{cls}.md)")
+    # Convert each raw type from JSDoc to TS
+    converted = [convert_jsdoc_array_to_ts(t) for t in types]  # e.g. ["Drawing[]", "Foo[]", ...]
 
-    def replace_with_links(match):
+    # For each converted type (like "Drawing[]"), see if the base is in enumerations or classes
+    def link_if_known(ts_type):
+        base = get_base_type(ts_type)  # e.g. "Drawing" from "Drawing[]"
+
+        # Check enumerations first
+        for enum in enumerations:
+            if enum['name'] == base:
+                # Replace the entire token with a link
+                return f"[{ts_type}]({root}Enumeration/{base}.md)"
+
+        # Check classes
+        if base in classes:
+            return f"[{ts_type}]({root}{base}/{base}.md)"
+
+        # Otherwise just return as-is
+        return ts_type
+
+    # Build final list of possibly-linked types
+    linked = [link_if_known(ts_t) for ts_t in converted]
+
+    # Join them with " | "
+    param_types_md = ' | '.join(linked)
+
+    # If there's still leftover angle brackets for generics, gently escape or link them
+    # e.g. "Object.<string, number>" => "Object.&lt;string, number&gt;"
+    # or do more specialized linking if you want to handle them deeper.
+    def replace_leftover_generics(match):
         element = match.group(1).strip()
-        base_type = element.split('.')[0]  # Take only the first part before the dot, if any
-        if any(enum['name'] == base_type for enum in enumerations):
-            return f"\\<[{element}]({root}Enumeration/{base_type}.md)>"
-        elif base_type in classes:
-            return f"\\<[{element}]({root}{base_type}/{base_type}.md)>"
         return f"&lt;{element}&gt;"
     
-    return re.sub(r'<([^<>]+)>', replace_with_links, param_types_md)
+    param_types_md = re.sub(r'<([^<>]+)>', replace_leftover_generics, param_types_md)
+
+    return param_types_md
 
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
-    
     content += generate_properties_markdown(properties, enumerations, classes, '../')
 
     content += "## Methods\n\n"
     for method in methods:
         method_name = method['name']
         content += f"- [{method_name}](./Methods/{method_name}.md)\n"
-    return content
+
+    # Escape just before returning
+    return escape_text_outside_code_blocks(content)
 
 def generate_method_markdown(method, enumerations, classes):
     method_name = method['name']
@@ -100,14 +189,14 @@ def generate_method_markdown(method, enumerations, classes):
 
     content = f"# {method_name}\n\n{description}\n\n"
     
-    # Syntax section
+    # Syntax
     param_list = ', '.join([param['name'] for param in params]) if params else ''
     content += f"## Syntax\n\nexpression.{method_name}({param_list});\n\n"
     if memberof:
         content += f"`expression` - A variable that represents a [{memberof}](../{memberof}.md) class.\n\n"
 
+    # Parameters
     content += "## Parameters\n\n"
-
     if params:
         content += "| **Name** | **Required/Optional** | **Data type** | **Default** | **Description** |\n"
         content += "| ------------- | ------------- | ------------- | ------------- | ------------- |\n"
@@ -123,41 +212,47 @@ def generate_method_markdown(method, enumerations, classes):
     else:
         content += "This method doesn't have any parameters.\n"
 
+    # Returns
     content += "\n## Returns\n\n"
     if returns:
-        return_type = ', '.join(returns[0].get('type', {}).get('names', [])) if returns[0].get('type') else 'Unknown'
-        
-        # Check for enumerations and classes in return type and add links if they exist
-        return_type_md = generate_data_types_markdown([return_type], enumerations, classes)
+        return_type_list = returns[0].get('type', {}).get('names', [])
+        return_type_md = generate_data_types_markdown(return_type_list, enumerations, classes)
         content += return_type_md
     else:
         content += "This method doesn't return any data."
     
+    # Example
     if example:
-        # Separate comment and code, and remove comment symbols
-        comment, code = example.split('```js', 1)
-        comment = remove_js_comments(comment)
-        content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+        # Separate comment and code, remove JS comments
+        if '```js' in example:
+            comment, code = example.split('```js', 1)
+            comment = remove_js_comments(comment)
+            content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+        else:
+            # If there's no triple-backtick structure, just show it as code
+            cleaned_example = remove_js_comments(example)
+            content += f"\n\n## Example\n\n```javascript\n{cleaned_example}\n```\n"
 
-    return content
+    return escape_text_outside_code_blocks(content)
 
 def generate_properties_markdown(properties, enumerations, classes, root='../../'):
-    if (properties is None):
+    if properties is None:
         return ''
     
     content = "## Properties\n\n"
     content += "| Name | Type | Description |\n"
     content += "| ---- | ---- | ----------- |\n"
+
     for prop in properties:
         prop_name = prop['name']
         prop_description = prop.get('description', 'No description provided.')
         prop_description = remove_line_breaks(correct_description(prop_description))
-        param_types_md = generate_data_types_markdown(prop['type']['names'], enumerations, classes, root)
+        prop_types = prop['type']['names'] if prop.get('type') else []
+        param_types_md = generate_data_types_markdown(prop_types, enumerations, classes, root)
         content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
-    content += "\n"
 
-    return content
-        
+    # Escape outside code blocks
+    return escape_text_outside_code_blocks(content)
 
 def generate_enumeration_markdown(enumeration, enumerations, classes):
     enum_name = enumeration['name']
@@ -167,36 +262,51 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
 
     content = f"# {enum_name}\n\n{description}\n\n"
     
-    if 'TypeUnion' == enumeration['type']['parsedType']['type']:
+    ptype = enumeration['type']['parsedType']
+    if ptype['type'] == 'TypeUnion':
+        enum_empty = True # is empty enum
+
         content += "## Type\n\nEnumeration\n\n"
         content += "## Values\n\n"
-        elements = enumeration['type']['parsedType']['elements']
-        for element in elements:
-            element_name = element['name'] if element['type'] != 'NullLiteral' else 'null'
-            # Check if element is in enumerations or classes before adding link
-            if any(enum['name'] == element_name for enum in enumerations):
-                content += f"- [{element_name}](../../Enumeration/{element_name}.md)\n"
-            elif element_name in classes:
-                content += f"- [{element_name}](../../{element_name}/{element_name}.md)\n"
-            else:
-                content += f"- {element_name}\n"
+        # Each top-level name in the union
+        for raw_t in enumeration['type']['names']:
+            ts_t = convert_jsdoc_array_to_ts(raw_t)
+
+            # Attempt linking: we compare the raw type to enumerations/classes
+            if any(enum['name'] == raw_t for enum in enumerations):
+                content += f"- [{ts_t}](../Enumeration/{raw_t}.md)\n"
+                enum_empty = False
+            elif raw_t in classes:
+                content += f"- [{ts_t}](../{raw_t}/{raw_t}.md)\n"
+                enum_empty = False
+            elif ts_t.find('Api') == -1:
+                content += f"- {ts_t}\n"
+                enum_empty = False
+        
+        if enum_empty == True:
+            return None
     elif enumeration['properties'] is not None:
         content += "## Type\n\nObject\n\n"
         content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
     else:
         content += "## Type\n\n"
+        # If it's not a union and has no properties, simply print the type(s).
         types = enumeration['type']['names']
-        for t in types:
-            t = generate_data_types_markdown([t], enumerations, classes)
-            content += t + "\n\n"
+        t_md = generate_data_types_markdown(types, enumerations, classes)
+        content += t_md + "\n\n"
 
+    # Example
     if example:
-        # Separate comment and code, and remove comment symbols
-        comment, code = example.split('```js', 1)
-        comment = remove_js_comments(comment)
-        content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+        if '```js' in example:
+            comment, code = example.split('```js', 1)
+            comment = remove_js_comments(comment)
+            content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+        else:
+            # If there's no triple-backtick structure
+            cleaned_example = remove_js_comments(example)
+            content += f"\n\n## Example\n\n```javascript\n{cleaned_example}\n```\n"
 
-    return content
+    return escape_text_outside_code_blocks(content)
 
 def process_doclets(data, output_dir, editor_name):
     classes = {}
@@ -225,7 +335,13 @@ def process_doclets(data, output_dir, editor_name):
         os.makedirs(methods_dir, exist_ok=True)
 
         # Write class file
-        class_content = generate_class_markdown(class_name, methods, classes_props[class_name], enumerations, classes)
+        class_content = generate_class_markdown(
+            class_name, 
+            methods, 
+            classes_props[class_name], 
+            enumerations, 
+            classes
+        )
         write_markdown_file(os.path.join(class_dir, f"{class_name}.md"), class_content)
 
         # Write method files
@@ -233,6 +349,7 @@ def process_doclets(data, output_dir, editor_name):
             method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
             method_content = generate_method_markdown(method, enumerations, classes)
             write_markdown_file(method_file_path, method_content)
+
             if not method.get('example', ''):
                 missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
@@ -243,6 +360,9 @@ def process_doclets(data, output_dir, editor_name):
     for enum in enumerations:
         enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
         enum_content = generate_enumeration_markdown(enum, enumerations, classes)
+        if enum_content is None:
+            continue
+
         write_markdown_file(enum_file_path, enum_content)
         if not enum.get('example', ''):
             missing_examples.append(os.path.relpath(enum_file_path, output_dir))

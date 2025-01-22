@@ -221,8 +221,6 @@ def make():
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     for file in glob.glob(root_dir + "/editors/web-apps/apps/*/*/*.js.map"):
       base.delete_file(file)
-    # remove code for IE from editors
-    [base.delete_dir(root + "/" + d) for root, dirs, files in os.walk(root_dir + "/editors/web-apps/apps") for d in dirs if d == 'ie']
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")

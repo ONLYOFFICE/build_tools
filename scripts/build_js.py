@@ -56,12 +56,10 @@ def make():
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     correct_sdkjs_licence(out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/mobile")
+
+    deldirs = ['ie', 'mobile', 'embed']
+    [base.delete_dir(root + "/" + d) for root, dirs, f in os.walk(out_dir + "/desktop/web-apps/apps") for d in dirs if d in deldirs]
+
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")

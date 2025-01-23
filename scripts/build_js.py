@@ -62,7 +62,7 @@ def make():
 
     # for bug 62528. remove empty folders
     walklist = list(os.walk(out_dir + "/desktop/sdkjs"))
-    [base.delete_dir(p) for p, _, _ in walklist[::-1] if len(os.listdir(p)) == 0]
+    [os.remove(p) for p, _, _ in walklist[::-1] if len(os.listdir(p)) == 0]
 
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     

@@ -69,6 +69,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "IWorkFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "HWPFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
     
     if ("ios" == platform):
@@ -215,8 +216,6 @@ def make():
 
     base.create_dir(root_dir + "/editors")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
-    if len(os.listdir(root_dir + "/editors/sdkjs")) == 0:
-      base.delete_dir(root_dir + "/editors/sdkjs") # delete empty folder. for bug 62528
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     for file in glob.glob(root_dir + "/editors/web-apps/apps/*/*/*.js.map"):
       base.delete_file(file)

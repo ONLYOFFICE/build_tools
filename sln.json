@@ -22,6 +22,7 @@
     "core/HtmlFile2/HtmlFile2.pro",
     "core/Fb2File/Fb2File.pro",
     "core/EpubFile/CEpubFile.pro",
+    "core/HwpFile/HWPFile.pro",
 
     "core/Apple/IWork.pro",
 

@@ -29,6 +29,7 @@
 				"core/Fb2File",
 				"core/HtmlFile2",
 				"core/Apple",
+				"core/HwpFile",
 				"core/OdfFile/Common/utf8cpp",
 				"core/OfficeUtils/js/emsdk",
 				"core/OfficeUtils/src/zlib-1.2.11",

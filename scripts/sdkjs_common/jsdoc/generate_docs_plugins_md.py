@@ -425,17 +425,20 @@ def process_doclets(data, output_dir, editor_name):
 def generate(output_dir):
     print('Generating Markdown documentation...')
     
-    generate_docs_plugins_json.generate(output_dir + 'tmp_json', md=True)
+    if output_dir[-1] == '/':
+        output_dir = output_dir[:-1]
+    
+    generate_docs_plugins_json.generate(output_dir + '/tmp_json', md=True)
     for editor_name in editors:
-        input_file = os.path.join(output_dir + 'tmp_json', editor_name + ".json")
+        input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
-        shutil.rmtree(output_dir + f'/{editor_name.title()}')
+        shutil.rmtree(output_dir + f'/{editor_name.title()}', ignore_errors=True)
         os.makedirs(output_dir + f'/{editor_name.title()}')
 
         data = load_json(input_file)
         process_doclets(data, output_dir, editor_name.title())
     
-    shutil.rmtree(output_dir + 'tmp_json')
+    shutil.rmtree(output_dir + '/tmp_json')
     print('Done')
 
 if __name__ == "__main__":

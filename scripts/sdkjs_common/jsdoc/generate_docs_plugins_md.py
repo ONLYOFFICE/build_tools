@@ -168,7 +168,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
 
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
-    content += generate_properties_markdown(properties, enumerations, classes, '../')
+    content += generate_properties_markdown(properties, enumerations, classes)
 
     content += "## Methods\n\n"
     for method in methods:
@@ -256,7 +256,7 @@ def generate_method_markdown(method, enumerations, classes):
 
     return escape_text_outside_code_blocks(content)
 
-def generate_properties_markdown(properties, enumerations, classes, root='../../'):
+def generate_properties_markdown(properties, enumerations, classes, root='../'):
     if properties is None:
         return ''
     
@@ -309,9 +309,9 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
             for raw_t in enumeration['type']['names']:
                 # Attempt linking
                 if any(enum['name'] == raw_t for enum in enumerations):
-                    content += f"- [{raw_t}](../../Enumeration/{raw_t}.md)\n"
+                    content += f"- [{raw_t}](../Enumeration/{raw_t}.md)\n"
                 elif raw_t in classes:
-                    content += f"- [{raw_t}](../../{raw_t}/{raw_t}.md)\n"
+                    content += f"- [{raw_t}](../{raw_t}/{raw_t}.md)\n"
                 else:
                     content += f"- {raw_t}\n"
 

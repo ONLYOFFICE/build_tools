@@ -178,7 +178,7 @@ def make_advinst():
   return
 
 def make_online():
-  if not common.platform in ["windows_x64", "windows_x86"]:
+  if not common.platform in ["windows_x86_xp"]:
     return
   online_file = "%s-%s-%s.exe" % ("OnlineInstaller", package_version, suffix)
   ret = utils.is_file(online_file)

@@ -198,7 +198,7 @@ def generate_method_markdown(method, enumerations, classes):
     
     # Syntax
     param_list = ', '.join([param['name'] for param in params]) if params else ''
-    content += f"## Syntax\n\nexpression.{method_name}({param_list});\n\n"
+    content += f"## Syntax\n\n```javascript\nexpression.{method_name}({param_list});\n```\n\n"
     if memberof:
         content += f"`expression` - A variable that represents a [{memberof}](../{memberof}.md) class.\n\n"
 

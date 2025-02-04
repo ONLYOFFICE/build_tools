@@ -190,7 +190,7 @@ def check_nodejs():
   nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
   nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
   print('Installed Node.js version: ' + nodejs_version[1:])
-  nodejs_min_version = '18'
+  nodejs_min_version = '22'
   nodejs_min_version_minor  = 0
   major_minor_min_version = nodejs_min_version.split('.')
   nodejs_min_version_major = int(major_minor_min_version[0])
@@ -214,7 +214,7 @@ def check_nodejs():
       isNeedReinstall = True
 
   if (True == isNeedReinstall):
-    print('Installed Node.js version must be 18 or higher.')
+    print('Installed Node.js version must be 22 or higher.')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
       dependence.append_install('Node.js')
@@ -950,7 +950,7 @@ def install_postgresql():
   return code
 
 def install_nodejs():
-  os.system('curl -sSL https://deb.nodesource.com/setup_18.x | sudo -E bash -')
+  os.system('curl -sSL https://deb.nodesource.com/setup_22.x | sudo -E bash -')
   base.print_info("Install node.js...")
   install_command = 'yes | sudo apt install nodejs'
   print(install_command)
@@ -959,7 +959,7 @@ def install_nodejs():
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-    'Node.js': 'https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi',
+    'Node.js': 'https://nodejs.org/dist/v22.13.1/node-v22.13.1-x64.msi',
     'Java': 'https://aka.ms/download-jdk/microsoft-jdk-11.0.18-windows-x64.msi',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',

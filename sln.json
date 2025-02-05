@@ -22,8 +22,10 @@
     "core/HtmlFile2/HtmlFile2.pro",
     "core/Fb2File/Fb2File.pro",
     "core/EpubFile/CEpubFile.pro",
-    
-    "core/HtmlRenderer/htmlrenderer.pro",
+    "core/HwpFile/HWPFile.pro",
+
+    "core/Apple/IWork.pro",
+
     "core/DocxRenderer/DocxRenderer.pro",   
 
     "core/DesktopEditor/doctrenderer/doctrenderer.pro",
@@ -90,7 +92,8 @@
     "[win,linux]desktop-apps/win-linux/ASCDocumentEditor.pro",
     
     "[win]desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
-    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
+    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro",
+    "[win,!win_xp]desktop-apps/win-linux/extras/online-installer/OnlineInstaller.pro"
   ],
 
   "mobile" : [

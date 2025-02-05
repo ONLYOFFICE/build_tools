@@ -41,6 +41,7 @@ def make():
   base.create_dir(out_dir)
 
   # builder
+  base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
   build_interface(base_dir + "/../web-apps/build")
   build_sdk_builder(base_dir + "/../sdkjs/build")
   base.create_dir(out_dir + "/builder")
@@ -55,12 +56,14 @@ def make():
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     correct_sdkjs_licence(out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/mobile")
+
+    deldirs = ['ie', 'mobile', 'embed']
+    [base.delete_dir(root + "/" + d) for root, dirs, f in os.walk(out_dir + "/desktop/web-apps/apps") for d in dirs if d in deldirs]
+
+    # for bug 62528. remove empty folders
+    walklist = list(os.walk(out_dir + "/desktop/sdkjs"))
+    [os.remove(p) for p, _, _ in walklist[::-1] if len(os.listdir(p)) == 0]
+
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
@@ -168,6 +171,7 @@ def build_js_develop(root_dir):
   _run_npm(root_dir + external_folder + "/web-apps/build")
   _run_npm_ci(root_dir + external_folder + "/web-apps/build/sprites")
   _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
+  base.cmd_in_dir(root_dir + external_folder + "/web-apps/translation", "python", ["merge_and_check.py"])
 
   old_cur = os.getcwd()
   old_product_version = base.get_env("PRODUCT_VERSION")

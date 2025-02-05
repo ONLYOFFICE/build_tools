@@ -175,6 +175,13 @@ def find_file(path, pattern):
     for filename in fnmatch.filter(filenames, pattern):
       return os.path.join(root, filename)
 
+def find_files(path, pattern):
+  result = []
+  for root, dirnames, filenames in os.walk(path):
+    for filename in fnmatch.filter(filenames, pattern):
+      result.append(os.path.join(root, filename))
+  return result
+
 def create_dir(path):
   path2 = get_path(path)
   if not os.path.exists(path2):
@@ -370,7 +377,7 @@ def cmd(prog, args=[], is_no_errors=False):
   else:
     command = prog
     for arg in args:
-      command += (" \"" + arg + "\"")
+      command += (" \"" + arg.replace('\"', '\\\"') + "\"")
     ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True)
   if ret != 0 and True != is_no_errors:
     sys.exit("Error (" + prog + "): " + str(ret))
@@ -406,7 +413,7 @@ def cmd_exe(prog, args, is_no_errors=False):
   else:
     command = prog
     for arg in args:
-      command += (" \"" + arg + "\"")
+      command += (" \"" + arg.replace('\"', '\\\"') + "\"")
     process = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True, env=env_dir)
     ret = process.wait()
   if ret != 0 and True != is_no_errors:
@@ -1223,14 +1230,15 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("HtmlFile2", ["UnicodeConverter", "kernel", "kernel_network", "graphics"])
   mac_correct_rpath_library("EpubFile", ["UnicodeConverter", "kernel", "HtmlFile2", "graphics"])
   mac_correct_rpath_library("Fb2File", ["UnicodeConverter", "kernel", "graphics"])
-  mac_correct_rpath_library("HtmlRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("PdfFile", ["UnicodeConverter", "kernel", "graphics", "kernel_network"])
   mac_correct_rpath_library("DjVuFile", ["UnicodeConverter", "kernel", "graphics", "PdfFile"])
   mac_correct_rpath_library("XpsFile", ["UnicodeConverter", "kernel", "graphics", "PdfFile"])
   mac_correct_rpath_library("DocxRenderer", ["UnicodeConverter", "kernel", "graphics"])
+  mac_correct_rpath_library("IWorkFile", ["UnicodeConverter", "kernel"])
+  mac_correct_rpath_library("HWPFile", ["UnicodeConverter", "kernel", "graphics"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])
+  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
@@ -1255,7 +1263,7 @@ def mac_correct_rpath_docbuilder(dir):
   os.chdir(dir)
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
-  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer"])  
+  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "IWorkFile", "HWPFile", "doctrenderer", "DocxRenderer"])  
   mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "DjVuFile", "DocxRenderer"])
 
   def add_loader_path_to_rpath(libs):
@@ -1272,9 +1280,9 @@ def mac_correct_rpath_desktop(dir):
   os.chdir(dir)
   mac_correct_rpath_library("hunspell", [])
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
-  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
-  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "HtmlRenderer", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
@@ -1827,8 +1835,6 @@ def create_x2t_js_cache(dir, product):
   if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
     return
 
-  if (product in ["builder", "server"]):
-    cmd_in_dir(dir, "./x2t", ["-create-js-cache"], True)
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
 

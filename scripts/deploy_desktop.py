@@ -66,9 +66,10 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DjVuFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "XpsFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlFile2")
-    base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlRenderer")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "IWorkFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "HWPFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
     
     if ("ios" == platform):
@@ -183,6 +184,7 @@ def make():
         base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/" + apps_postfix + "/projicons.exe", root_dir + "/DesktopEditors.exe")
         if not isWindowsXP:
           base.copy_file(git_dir + "/desktop-apps/win-linux/extras/update-daemon/" + apps_postfix + "/updatesvc.exe", root_dir + "/updatesvc.exe")
+          base.copy_file(git_dir + "/desktop-apps/win-linux/extras/online-installer/" + apps_postfix + "/online-installer.exe", root_dir + "/online-installer.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors.exe", root_dir + "/editors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")
       elif (0 == platform.find("linux")):
@@ -214,8 +216,6 @@ def make():
 
     base.create_dir(root_dir + "/editors")
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/sdkjs", root_dir + "/editors/sdkjs")
-    if len(os.listdir(root_dir + "/editors/sdkjs")) == 0:
-      base.delete_dir(root_dir + "/editors/sdkjs") # delete empty folder. for bug 62528
     base.copy_dir(base_dir + "/js/" + branding + "/desktop/web-apps", root_dir + "/editors/web-apps")
     for file in glob.glob(root_dir + "/editors/web-apps/apps/*/*/*.js.map"):
       base.delete_file(file)

@@ -539,7 +539,9 @@ def check_mysqlServer():
       print(mysql_full_name + 'configuration is valid')
       dependence.sqlPath = info['Location']
       return dependence
-    print(mysql_full_name + 'configuration is not valid')
+    print(mysql_full_name + 'configuration is not valid:' + connectionResult)
+    # if path exists, then further removal and installation fails(according to startup statistics). it is better to fix issue manually.
+    return dependence
 
   print('Valid MySQL Server not found')
   dependence.append_uninstall('MySQL Server')

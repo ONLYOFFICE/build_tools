@@ -91,6 +91,8 @@ if "server_enterprise" in common.targets:
   package_server.make("enterprise")
 if "server_developer" in common.targets:
   package_server.make("developer")
+if "server_prerequisites" in common.targets:
+  package_server.make("prerequisites")
 if "mobile" in common.targets:
   package_mobile.make()
 

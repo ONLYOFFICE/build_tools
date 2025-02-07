@@ -36,10 +36,13 @@ def make_windows(edition):
 
   utils.log_h2("server " + edition + " build")
   ret = utils.cmd("make", "clean", verbose=True)
-  args = ["-e", "PRODUCT_NAME=" + product_name]
+  if edition == "prerequisites":
+    make_args = ["exe-pr"]
+  else:
+    make_args = ["exe", "-e", "PRODUCT_NAME=" + product_name]
   if not branding.onlyoffice:
-    args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-  ret &= utils.cmd("make", "packages", *args, verbose=True)
+    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
+  ret &= utils.cmd("make", *make_args, verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 
   if common.deploy and ret:

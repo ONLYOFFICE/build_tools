@@ -16,6 +16,7 @@ import curl
 import websocket_all
 import v8
 import html2
+import iwork
 import hunspell
 import glew
 import harfbuzz
@@ -42,6 +43,7 @@ def make():
   openssl.make()
   v8.make()
   html2.make()
+  iwork.make(False)
   hunspell.make(False)
   harfbuzz.make()
   glew.make()

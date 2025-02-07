@@ -3,7 +3,7 @@ import json
 import re
 import shutil
 import argparse
-import generate_docs_json
+import generate_docs_plugins_json
 
 # Configuration files
 editors = [
@@ -179,13 +179,20 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
     return escape_text_outside_code_blocks(content)
 
 def generate_method_markdown(method, enumerations, classes):
+    """
+    Generates Markdown for a method doclet, relying only on `method['examples']`
+    (array of strings). Ignores any single `method['example']` field.
+    """
+
     method_name = method['name']
     description = method.get('description', 'No description provided.')
     description = correct_description(description)
     params = method.get('params', [])
     returns = method.get('returns', [])
-    example = method.get('example', '')
     memberof = method.get('memberof', '')
+
+    # Use the 'examples' array only
+    examples = method.get('examples', [])
 
     content = f"# {method_name}\n\n{description}\n\n"
     
@@ -220,18 +227,32 @@ def generate_method_markdown(method, enumerations, classes):
         content += return_type_md
     else:
         content += "This method doesn't return any data."
-    
-    # Example
-    if example:
-        # Separate comment and code, remove JS comments
-        if '```js' in example:
-            comment, code = example.split('```js', 1)
-            comment = remove_js_comments(comment)
-            content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+
+    # Process examples array
+    if examples:
+        if len(examples) > 1:
+            content += "\n\n## Examples\n\n"
         else:
-            # If there's no triple-backtick structure, just show it as code
-            cleaned_example = remove_js_comments(example)
-            content += f"\n\n## Example\n\n```javascript\n{cleaned_example}\n```\n"
+            content += "\n\n## Example\n\n"
+
+        for i, ex_line in enumerate(examples, start=1):
+            # Remove JS comments
+            cleaned_example = remove_js_comments(ex_line).strip()
+
+            # Attempt splitting if the user used ```js
+            if '```js' in cleaned_example:
+                comment, code = cleaned_example.split('```js', 1)
+                comment = comment.strip()
+                code = code.strip()
+                if len(examples) > 1:
+                    content += f"**Example {i}:**\n\n{comment}\n\n"
+                
+                content += f"```javascript\n{code}\n```\n"
+            else:
+                if len(examples) > 1:
+                    content += f"**Example {i}:**\n\n{comment}\n\n"
+                # No special fences, just show as code
+                content += f"```javascript\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -255,56 +276,90 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
     return escape_text_outside_code_blocks(content)
 
 def generate_enumeration_markdown(enumeration, enumerations, classes):
+    """
+    Generates Markdown documentation for a 'typedef' doclet.
+    This version only works with `enumeration['examples']` (an array of strings),
+    ignoring any single `enumeration['examples']` field.
+    """
+
     enum_name = enumeration['name']
     description = enumeration.get('description', 'No description provided.')
     description = correct_description(description)
-    example = enumeration.get('example', '')
+
+    # Only use the 'examples' array
+    examples = enumeration.get('examples', [])
 
     content = f"# {enum_name}\n\n{description}\n\n"
-    
-    ptype = enumeration['type']['parsedType']
-    if ptype['type'] == 'TypeUnion':
-        enum_empty = True # is empty enum
 
-        content += "## Type\n\nEnumeration\n\n"
-        content += "## Values\n\n"
-        # Each top-level name in the union
-        for raw_t in enumeration['type']['names']:
-            ts_t = convert_jsdoc_array_to_ts(raw_t)
-
-            # Attempt linking: we compare the raw type to enumerations/classes
-            if any(enum['name'] == raw_t for enum in enumerations):
-                content += f"- [{ts_t}](../Enumeration/{raw_t}.md)\n"
-                enum_empty = False
-            elif raw_t in classes:
-                content += f"- [{ts_t}](../{raw_t}/{raw_t}.md)\n"
-                enum_empty = False
-            elif ts_t.find('Api') == -1:
-                content += f"- {ts_t}\n"
-                enum_empty = False
-        
-        if enum_empty == True:
-            return None
-    elif enumeration['properties'] is not None:
-        content += "## Type\n\nObject\n\n"
-        content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
+    parsed_type = enumeration['type'].get('parsedType')
+    if not parsed_type:
+        # If parsedType is missing, just list 'type.names' if available
+        type_names = enumeration['type'].get('names', [])
+        if type_names:
+            content += "## Type\n\n"
+            t_md = generate_data_types_markdown(type_names, enumerations, classes)
+            content += t_md + "\n\n"
     else:
-        content += "## Type\n\n"
-        # If it's not a union and has no properties, simply print the type(s).
-        types = enumeration['type']['names']
-        t_md = generate_data_types_markdown(types, enumerations, classes)
-        content += t_md + "\n\n"
+        ptype = parsed_type['type']
 
-    # Example
-    if example:
-        if '```js' in example:
-            comment, code = example.split('```js', 1)
-            comment = remove_js_comments(comment)
-            content += f"\n\n## Example\n\n{comment}\n\n```javascript\n{code.strip()}\n"
+        # 1) Handle TypeUnion
+        if ptype == 'TypeUnion':
+            content += "## Type\n\nEnumeration\n\n"
+            content += "## Values\n\n"
+            for raw_t in enumeration['type']['names']:
+                # Attempt linking
+                if any(enum['name'] == raw_t for enum in enumerations):
+                    content += f"- [{raw_t}](../Enumeration/{raw_t}.md)\n"
+                elif raw_t in classes:
+                    content += f"- [{raw_t}](../{raw_t}/{raw_t}.md)\n"
+                else:
+                    content += f"- {raw_t}\n"
+
+        # 2) Handle TypeApplication (e.g. Object.<string, string>)
+        elif ptype == 'TypeApplication':
+            content += "## Type\n\nObject\n\n"
+            type_names = enumeration['type'].get('names', [])
+            if type_names:
+                t_md = generate_data_types_markdown(type_names, enumerations, classes)
+                content += f"**Type:** {t_md}\n\n"
+
+        # 3) If properties are present, treat it like an object
+        if enumeration.get('properties') is not None:
+            content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
+
+        # 4) If it's neither TypeUnion nor TypeApplication, just output the type names
+        if ptype not in ('TypeUnion', 'TypeApplication'):
+            type_names = enumeration['type'].get('names', [])
+            if type_names:
+                content += "## Type\n\n"
+                t_md = generate_data_types_markdown(type_names, enumerations, classes)
+                content += t_md + "\n\n"
+
+    # Process examples array
+    if examples:
+        if len(examples) > 1:
+            content += "\n\n## Examples\n\n"
         else:
-            # If there's no triple-backtick structure
-            cleaned_example = remove_js_comments(example)
-            content += f"\n\n## Example\n\n```javascript\n{cleaned_example}\n```\n"
+            content += "\n\n## Example\n\n"
+
+        for i, ex_line in enumerate(examples, start=1):
+            # Remove JS comments
+            cleaned_example = remove_js_comments(ex_line).strip()
+
+            # Attempt splitting if the user used ```js
+            if '```js' in cleaned_example:
+                comment, code = cleaned_example.split('```js', 1)
+                comment = comment.strip()
+                code = code.strip()
+                if len(examples) > 1:
+                    content += f"**Example {i}:**\n\n{comment}\n\n"
+                
+                content += f"```javascript\n{code}\n```\n"
+            else:
+                if len(examples) > 1:
+                    content += f"**Example {i}:**\n\n{comment}\n\n"
+                # No special fences, just show as code
+                content += f"```javascript\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -350,7 +405,7 @@ def process_doclets(data, output_dir, editor_name):
             method_content = generate_method_markdown(method, enumerations, classes)
             write_markdown_file(method_file_path, method_content)
 
-            if not method.get('example', ''):
+            if not method.get('examples', ''):
                 missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
     # Process enumerations
@@ -364,23 +419,26 @@ def process_doclets(data, output_dir, editor_name):
             continue
 
         write_markdown_file(enum_file_path, enum_content)
-        if not enum.get('example', ''):
+        if not enum.get('examples', ''):
             missing_examples.append(os.path.relpath(enum_file_path, output_dir))
 
 def generate(output_dir):
     print('Generating Markdown documentation...')
     
-    generate_docs_json.generate(output_dir + 'tmp_json', md=True)
+    if output_dir[-1] == '/':
+        output_dir = output_dir[:-1]
+    
+    generate_docs_plugins_json.generate(output_dir + '/tmp_json', md=True)
     for editor_name in editors:
-        input_file = os.path.join(output_dir + 'tmp_json', editor_name + ".json")
+        input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
-        shutil.rmtree(output_dir + f'/{editor_name.title()}')
+        shutil.rmtree(output_dir + f'/{editor_name.title()}', ignore_errors=True)
         os.makedirs(output_dir + f'/{editor_name.title()}')
 
         data = load_json(input_file)
         process_doclets(data, output_dir, editor_name.title())
     
-    shutil.rmtree(output_dir + 'tmp_json')
+    shutil.rmtree(output_dir + '/tmp_json')
     print('Done')
 
 if __name__ == "__main__":
@@ -390,7 +448,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../office-js-api/"  # Default value
+        default="../../../../office-js-api/Plugins/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

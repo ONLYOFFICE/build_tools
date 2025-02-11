@@ -23,6 +23,9 @@ def change_bootstrap():
 
   base.replaceInFile("./depot_tools/bootstrap/bootstrap.py", 
     "raise subprocess.CalledProcessError(proc.returncode, argv, None)", "return")
+
+  base.replaceInFile("./depot_tools/bootstrap/bootstrap.py", 
+    "    _win_git_bootstrap_config()", "    #_win_git_bootstrap_config()")
   
   base.writeFile("./depot_tools/bootstrap/manifest.txt", content)
   return

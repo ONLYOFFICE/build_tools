@@ -153,7 +153,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     linked = [link_if_known(ts_t) for ts_t in converted]
 
     # Join them with " | "
-    param_types_md = ' | '.join(linked)
+    param_types_md = ' \| '.join(linked)
 
     # If there's still leftover angle brackets for generics, gently escape or link them
     # e.g. "Object.<string, number>" => "Object.&lt;string, number&gt;"

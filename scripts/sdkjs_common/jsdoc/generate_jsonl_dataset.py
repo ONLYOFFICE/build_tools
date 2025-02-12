@@ -126,9 +126,8 @@ def extract_examples_blocks_temp(content: str):
     return [{"comments": comment_blocks, "code": code_part}]
 
 def create_entry(system_message, user_message, assistant_message, model):
-    return {
+    entry = {
         "created_at": datetime.now().isoformat(" "),
-        "model": model,
         "messages": [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
@@ -137,6 +136,11 @@ def create_entry(system_message, user_message, assistant_message, model):
         "recommended": False,
         "upvoted": True
     }
+
+    if model is not "":
+        entry["model"] = model
+
+    return entry 
 
 def process_doclets(doclets, output_entries, editor_name, model):
     for doclet in doclets:

@@ -153,7 +153,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     linked = [link_if_known(ts_t) for ts_t in converted]
 
     # Join them with " | "
-    param_types_md = ' | '.join(linked)
+    param_types_md = r' \| '.join(linked)
 
     # If there's still leftover angle brackets for generics, gently escape or link them
     # e.g. "Object.<string, number>" => "Object.&lt;string, number&gt;"
@@ -168,7 +168,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
 
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
-    content += generate_properties_markdown(properties, enumerations, classes, '../')
+    content += generate_properties_markdown(properties, enumerations, classes)
 
     content += "## Methods\n\n"
     for method in methods:
@@ -178,7 +178,7 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
     # Escape just before returning
     return escape_text_outside_code_blocks(content)
 
-def generate_method_markdown(method, enumerations, classes):
+def generate_method_markdown(method, enumerations, classes, example_editor_name):
     """
     Generates Markdown for a method doclet, relying only on `method['examples']`
     (array of strings). Ignores any single `method['example']` field.
@@ -198,7 +198,7 @@ def generate_method_markdown(method, enumerations, classes):
     
     # Syntax
     param_list = ', '.join([param['name'] for param in params]) if params else ''
-    content += f"## Syntax\n\nexpression.{method_name}({param_list});\n\n"
+    content += f"## Syntax\n\n```javascript\nexpression.{method_name}({param_list});\n```\n\n"
     if memberof:
         content += f"`expression` - A variable that represents a [{memberof}](../{memberof}.md) class.\n\n"
 
@@ -247,16 +247,16 @@ def generate_method_markdown(method, enumerations, classes):
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 
-                content += f"```javascript\n{code}\n```\n"
+                content += f"```javascript {example_editor_name}\n{code}\n```\n"
             else:
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+                content += f"```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
-def generate_properties_markdown(properties, enumerations, classes, root='../../'):
+def generate_properties_markdown(properties, enumerations, classes, root='../'):
     if properties is None:
         return ''
     
@@ -275,7 +275,7 @@ def generate_properties_markdown(properties, enumerations, classes, root='../../
     # Escape outside code blocks
     return escape_text_outside_code_blocks(content)
 
-def generate_enumeration_markdown(enumeration, enumerations, classes):
+def generate_enumeration_markdown(enumeration, enumerations, classes, example_editor_name):
     """
     Generates Markdown documentation for a 'typedef' doclet.
     This version only works with `enumeration['examples']` (an array of strings),
@@ -309,9 +309,9 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
             for raw_t in enumeration['type']['names']:
                 # Attempt linking
                 if any(enum['name'] == raw_t for enum in enumerations):
-                    content += f"- [{raw_t}](../../Enumeration/{raw_t}.md)\n"
+                    content += f"- [{raw_t}](../Enumeration/{raw_t}.md)\n"
                 elif raw_t in classes:
-                    content += f"- [{raw_t}](../../{raw_t}/{raw_t}.md)\n"
+                    content += f"- [{raw_t}](../{raw_t}/{raw_t}.md)\n"
                 else:
                     content += f"- {raw_t}\n"
 
@@ -354,12 +354,12 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 
-                content += f"```javascript\n{code}\n```\n"
+                content += f"```javascript {example_editor_name}\n{code}\n```\n"
             else:
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+                content += f"```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -368,6 +368,16 @@ def process_doclets(data, output_dir, editor_name):
     classes_props = {}
     enumerations = []
     editor_dir =  os.path.join(output_dir, editor_name)
+    example_editor_name = 'editor-'
+    
+    if editor_name == 'Word':
+        example_editor_name += 'docx'
+    elif editor_name == 'Forms':
+        example_editor_name += 'pdf'
+    elif editor_name == 'Slide':
+        example_editor_name += 'pptx'
+    elif editor_name == 'Cell':
+        example_editor_name += 'xlsx'
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -402,7 +412,7 @@ def process_doclets(data, output_dir, editor_name):
         # Write method files
         for method in methods:
             method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
-            method_content = generate_method_markdown(method, enumerations, classes)
+            method_content = generate_method_markdown(method, enumerations, classes, example_editor_name)
             write_markdown_file(method_file_path, method_content)
 
             if not method.get('examples', ''):
@@ -414,7 +424,7 @@ def process_doclets(data, output_dir, editor_name):
 
     for enum in enumerations:
         enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
-        enum_content = generate_enumeration_markdown(enum, enumerations, classes)
+        enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
         if enum_content is None:
             continue
 
@@ -425,15 +435,20 @@ def process_doclets(data, output_dir, editor_name):
 def generate(output_dir):
     print('Generating Markdown documentation...')
     
-    generate_docs_plugins_json.generate(output_dir + 'tmp_json', md=True)
+    if output_dir[-1] == '/':
+        output_dir = output_dir[:-1]
+    
+    generate_docs_plugins_json.generate(output_dir + '/tmp_json', md=True)
     for editor_name in editors:
-        input_file = os.path.join(output_dir + 'tmp_json', editor_name + ".json")
-        os.makedirs(output_dir + f'/{editor_name.title()}', exist_ok=True)
+        input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
+
+        shutil.rmtree(output_dir + f'/{editor_name.title()}', ignore_errors=True)
+        os.makedirs(output_dir + f'/{editor_name.title()}')
 
         data = load_json(input_file)
         process_doclets(data, output_dir, editor_name.title())
     
-    shutil.rmtree(output_dir + 'tmp_json')
+    shutil.rmtree(output_dir + '/tmp_json')
     print('Done')
 
 if __name__ == "__main__":

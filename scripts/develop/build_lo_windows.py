@@ -44,9 +44,9 @@ CYGWIN_SETUP_PARAMS = [
 CYGWIN_BAT_PATH = 'C:/cygwin64/Cygwin.bat'
 LO_BUILD_PATH = os.path.normpath(os.path.join(os.getcwd(), '../../../LO'))
 
-CONFIGURE_PARAMS = ["--with-external-tar=c:/games/lo/sources/lo-externalsrc",
-                    "--with-junit=c:/games/lo/sources/junit-4.10.jar",
-                    "--with-ant-home=c:/games/lo/sources/apache-ant-1.9.5",
+CONFIGURE_PARAMS = [f"--with-external-tar={LO_BUILD_PATH}/sources/lo-externalsrc",
+                    f"--with-junit={LO_BUILD_PATH}/sources/junit-4.10.jar",
+                    f"--with-ant-home={LO_BUILD_PATH}/sources/apache-ant-1.9.5",
                     "--enable-pch",
                     "--disable-ccache",
                     "--with-visual-studio=2022",

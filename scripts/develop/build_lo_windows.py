@@ -1,10 +1,22 @@
+# Before starting, make sure that:
+# 1. MVS 2022 is installed and the necessary individual components are in its installer
+# ·	Windows Universal C Runtime
+# ·	.NET Framework 4.x SDK (.NET Framework 5.x SDK and later are currently not supported. These don't register their information to registry, don't have csc.exe and they use dotnet command with csc.dll instead for compiling.)
+# ·	C++ 20xx Redistributable MSMs (only required to build MSI installer)
+# ·	C++ Clang Compiler for Windows (x.x.x)
+# 2. Java JDK >= 17
+# 3. Antivirus is turned off
+# 4. There is enough free space on the disk
+
 import sys
+sys.path.append('../../scripts')
 import threading
 
-import requests
 import os
 import subprocess
 import shutil
+import argparse
+import base
 
 CYGWIN_DOWNLOAD_URL = 'https://cygwin.com/setup-x86_64.exe'
 CYGWIN_TEMP_PATH = './tmp'
@@ -39,14 +51,16 @@ CYGWIN_SETUP_PARAMS = [
     "-P", "zip",
     "-P", "perl-Archive-Zip",
     "-P", "perl-Font-TTF",
-    "-P", "perl-IO-String"
+    "-P", "perl-IO-String",
+    "--no-admin",
+    "--quiet-mode"
 ]
 CYGWIN_BAT_PATH = 'C:/cygwin64/Cygwin.bat'
 LO_BUILD_PATH = os.path.normpath(os.path.join(os.getcwd(), '../../../LO'))
 
-CONFIGURE_PARAMS = [f"--with-external-tar={LO_BUILD_PATH}/sources/lo-externalsrc",
-                    f"--with-junit={LO_BUILD_PATH}/sources/junit-4.10.jar",
-                    f"--with-ant-home={LO_BUILD_PATH}/sources/apache-ant-1.9.5",
+CONFIGURE_PARAMS = [f'--with-external-tar="{LO_BUILD_PATH}/sources/lo-externalsrc"',
+                    f'--with-junit="{LO_BUILD_PATH}/sources/junit-4.10.jar"',
+                    f'--with-ant-home="{LO_BUILD_PATH}/sources/apache-ant-1.9.5"',
                     "--enable-pch",
                     "--disable-ccache",
                     "--with-visual-studio=2022",
@@ -63,20 +77,6 @@ def create_folder_safe(folder_path):
             print(f"Error creating folder: {e}")
     else:
         print(f"Folder '{folder_path}' already exists.")
-
-
-def download_file(url, save_path):
-    try:
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-
-        with open(save_path, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-        print(f"File successfully downloaded and saved as {save_path}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error downloading the file: {e}")
 
 
 class CygwinRunner:
@@ -116,6 +116,7 @@ class CygwinRunner:
 
     @staticmethod
     def install_gnu_make():
+        base.print_info("install_gnu_make")
         commands = ['mkdir -p /opt/lo/bin',
                     'cd /opt/lo/bin',
                     'wget https://dev-www.libreoffice.org/bin/cygwin/make-4.2.1-msvc.exe',
@@ -126,6 +127,7 @@ class CygwinRunner:
 
     @staticmethod
     def install_ant_and_junit():
+        base.print_info("install_ant_and_junit")
         commands = [f'mkdir -p {LO_BUILD_PATH}/sources',
                     f'cd {LO_BUILD_PATH}/sources',
                     'wget https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.5-bin.tar.bz2',
@@ -136,6 +138,7 @@ class CygwinRunner:
 
     @staticmethod
     def clone_lo():
+        base.print_info("clone_lo")
         commands = [f'cd {LO_BUILD_PATH}/sources',
                     'git clone https://gerrit.libreoffice.org/core libo-core',
                     'exit']
@@ -143,6 +146,7 @@ class CygwinRunner:
 
     @staticmethod
     def build_autogen():
+        base.print_info("build_autogen")
         commands = [f'cd {LO_BUILD_PATH}/sources/libo-core',
                     f"./autogen.sh {' '.join(map(str, CONFIGURE_PARAMS))}",
                     'exit']
@@ -150,6 +154,7 @@ class CygwinRunner:
 
     @staticmethod
     def run_make():
+        base.print_info("run_make")
         commands = [f'cd {LO_BUILD_PATH}/sources/libo-core'
                     ,f'/opt/lo/bin/make gb_COLOR=1',
                     "exit"]
@@ -157,9 +162,15 @@ class CygwinRunner:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="options")
+    parser.add_argument("--lo_build_path", dest="build_path", default=f'../../../LO')
+    args = parser.parse_args()
+
+    LO_BUILD_PATH = args.build_path
+    create_folder_safe(f'{LO_BUILD_PATH}/sources/lo-externalsrc')
     create_folder_safe(CYGWIN_TEMP_PATH)
     os.chdir(CYGWIN_TEMP_PATH)
-    download_file(CYGWIN_DOWNLOAD_URL, CYGWIN_SETUP_FILENAME)
+    base.download(CYGWIN_DOWNLOAD_URL, CYGWIN_SETUP_FILENAME)
     subprocess.run([CYGWIN_SETUP_FILENAME] + CYGWIN_SETUP_PARAMS)
     os.chdir('..')
     shutil.rmtree(CYGWIN_TEMP_PATH)
@@ -168,8 +179,3 @@ if __name__ == '__main__':
     CygwinRunner.clone_lo()
     CygwinRunner.build_autogen()
     CygwinRunner.run_make()
-
-# Before starting, make sure that:
-# 1. MVS 2022 is installed and the necessary packages are in its installer
-# 2. Antivirus is turned off
-# 3. There is enough free space on the disk

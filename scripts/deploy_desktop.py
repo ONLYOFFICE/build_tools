@@ -40,7 +40,7 @@ def make():
     isWindowsXP = False if (-1 == native_platform.find("_xp")) else True
     platform = native_platform[0:-3] if isWindowsXP else native_platform
 
-    apps_postfix = "build" + base.qt_dst_postfix();
+    apps_postfix = "build" + base.qt_dst_postfix()
     if ("" != config.option("branding")):
       apps_postfix += ("/" + config.option("branding"))
     apps_postfix += "/"

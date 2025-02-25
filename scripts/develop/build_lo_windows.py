@@ -6,7 +6,15 @@
 # ·	C++ Clang Compiler for Windows (x.x.x)
 # 2. Java JDK >= 17
 # 3. Antivirus is turned off
-# 4. There is enough free space on the disk
+# 4. There is enough free space on the disk (50GB Libre Office, 50Gb cygwin64)
+
+# after completion, the files will appear:
+# {LO_BUILD_PATH}/sources/libo-core/instdir/program/soffice.exe
+# {LO_BUILD_PATH}/sources/libo-core/LibreOffice.sln
+# debugging can be done via MVS 2022
+# https://wiki.documentfoundation.org/Development/IDE#Microsoft_Visual_Studio
+# or via attatch to the soffice.bin process
+# https://wiki.documentfoundation.org/Development/How_to_debug#Debugging_with_gdb
 
 import sys
 sys.path.append('../../scripts')
@@ -156,7 +164,7 @@ class CygwinRunner:
     def run_make():
         base.print_info("run_make")
         commands = [f'cd {LO_BUILD_PATH}/sources/libo-core'
-                    ,f'/opt/lo/bin/make gb_COLOR=1',
+                    ,f'/opt/lo/bin/make gb_COLOR=1 vs-ide-integration',
                     "exit"]
         CygwinRunner.process_commands(commands)
 

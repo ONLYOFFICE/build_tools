@@ -181,9 +181,11 @@ class CygwinRunner:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="options")
     parser.add_argument("--lo_build_path", dest="build_path", default=f'../../../LO')
+    parser.add_argument("--disable_sln", dest="disable_sln", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     LO_BUILD_PATH = args.build_path
+    DISABLE_SLN = args.disable_sln
     create_folder_safe(f'{LO_BUILD_PATH}/sources/lo-externalsrc')
     create_folder_safe(CYGWIN_TEMP_PATH)
     os.chdir(CYGWIN_TEMP_PATH)
@@ -196,4 +198,5 @@ if __name__ == '__main__':
     CygwinRunner.clone_lo()
     CygwinRunner.build_autogen()
     CygwinRunner.run_make_build()
-    CygwinRunner.build_vs_integration()
+    if not DISABLE_SLN:
+        CygwinRunner.build_vs_integration()

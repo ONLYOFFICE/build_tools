@@ -1,9 +1,9 @@
 # Before starting, make sure that:
 # 1. MVS 2022 is installed and the necessary individual components are in its installer
-# ·	Windows Universal C Runtime
-# ·	.NET Framework 4.x SDK (.NET Framework 5.x SDK and later are currently not supported. These don't register their information to registry, don't have csc.exe and they use dotnet command with csc.dll instead for compiling.)
-# ·	C++ 20xx Redistributable MSMs (only required to build MSI installer)
-# ·	C++ Clang Compiler for Windows (x.x.x)
+# ï¿½	Windows Universal C Runtime
+# ï¿½	.NET Framework 4.x SDK (.NET Framework 5.x SDK and later are currently not supported. These don't register their information to registry, don't have csc.exe and they use dotnet command with csc.dll instead for compiling.)
+# ï¿½	C++ 20xx Redistributable MSMs (only required to build MSI installer)
+# ï¿½	C++ Clang Compiler for Windows (x.x.x)
 # 2. Java JDK >= 17
 # 3. Antivirus is turned off
 # 4. There is enough free space on the disk (50GB Libre Office, 50Gb cygwin64)
@@ -17,6 +17,7 @@
 # https://wiki.documentfoundation.org/Development/How_to_debug#Debugging_with_gdb
 
 import sys
+
 sys.path.append('../../scripts')
 import threading
 
@@ -161,10 +162,18 @@ class CygwinRunner:
         CygwinRunner.process_commands(commands)
 
     @staticmethod
-    def run_make():
+    def run_make_build():
         base.print_info("run_make")
-        commands = [f'cd {LO_BUILD_PATH}/sources/libo-core'
-                    ,f'/opt/lo/bin/make gb_COLOR=1 vs-ide-integration',
+        commands = [f'cd {LO_BUILD_PATH}/sources/libo-core',
+                    f'/opt/lo/bin/make gb_COLOR=1',
+                    "exit"]
+        CygwinRunner.process_commands(commands)
+
+    @staticmethod
+    def build_vs_integration():
+        base.print_info("run_make")
+        commands = [f'cd {LO_BUILD_PATH}/sources/libo-core',
+                    f'/opt/lo/bin/make gb_COLOR=1 vs-ide-integration',
                     "exit"]
         CygwinRunner.process_commands(commands)
 
@@ -186,4 +195,5 @@ if __name__ == '__main__':
     CygwinRunner.install_ant_and_junit()
     CygwinRunner.clone_lo()
     CygwinRunner.build_autogen()
-    CygwinRunner.run_make()
+    CygwinRunner.run_make_build()
+    CygwinRunner.build_vs_integration()

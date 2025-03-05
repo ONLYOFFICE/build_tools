@@ -48,7 +48,7 @@ def correct_description(string):
     return string
 
 def correct_default_value(value, enumerations, classes):
-    if value is None:
+    if value is None or value == '':
         return ''
     
     # Проверяем, является ли значение именно булевым
@@ -133,15 +133,53 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     # Set of primitive types
     primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "{}"}
 
+    def is_primitive(type):
+        if (type.lower() in primitive_types or
+            (type.startswith('"') and type.endswith('"')) or
+            (type.startswith("'") and type.endswith("'")) or
+            type.replace('.', '', 1).isdigit() or
+            (type.startswith('-') and type[1:].replace('.', '', 1).isdigit())):
+            return True
+        return False
+
     def link_if_known(ts_type):
         ts_type = ts_type.strip()
-        # Count the number of array dimensions, e.g., [][] => 2 levels
+        # Count the number of array dimensions, e.g., "[][]" has 2 dimensions
         array_dims = 0
         while ts_type.endswith("[]"):
             array_dims += 1
             ts_type = ts_type[:-2].strip()
 
-        # ts_type now contains the base type without "[]"
+        # Process generic types, e.g., Object.<string, editorType>
+        if ".<" in ts_type and ts_type.endswith(">"):
+            import re
+            m = re.match(r'^(.*?)\.<(.*)>$', ts_type)
+            if m:
+                base_part = m.group(1).strip()
+                generic_args_str = m.group(2).strip()
+                # Process the base part of the type
+                found = False
+                for enum in enumerations:
+                    if enum['name'] == base_part:
+                        base_result = f"[{base_part}]({root}Enumeration/{base_part}.md)"
+                        found = True
+                        break
+                if not found:
+                    if base_part in classes:
+                        base_result = f"[{base_part}]({root}{base_part}/{base_part}.md)"
+                    elif is_primitive(base_part):
+                        base_result = base_part
+                    elif cur_editor_name == "Forms":
+                        base_result = f"[{base_part}]({root}../Word/{base_part}/{base_part}.md)"
+                    else:
+                        print(f"Unknown type encountered: {base_part}")
+                        base_result = base_part
+                # Split the generic parameters by commas and process each recursively
+                generic_args = [link_if_known(x) for x in generic_args_str.split(",")]
+                result = base_result + ".&lt;" + ", ".join(generic_args) + "&gt;"
+                result += "[]" * array_dims
+                return result
+
         # Process union types: if the type is enclosed in parentheses
         if ts_type.startswith("(") and ts_type.endswith(")"):
             inner = ts_type[1:-1].strip()
@@ -151,36 +189,30 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
             else:
                 processed = [link_if_known(subtype) for subtype in subtypes]
                 result = "(" + " | ".join(processed) + ")"
+            result += "[]" * array_dims
+            return result
+
+        # If not a generic or union type – process the base type
         else:
             base = ts_type
             found = False
-            # Check among enumerations
             for enum in enumerations:
                 if enum['name'] == base:
                     result = f"[{base}]({root}Enumeration/{base}.md)"
                     found = True
                     break
             if not found:
-                # If the type is a class
                 if base in classes:
                     result = f"[{base}]({root}{base}/{base}.md)"
-                # If the editor is Forms and the type is not primitive, generate a link
-                elif cur_editor_name == "Forms" and base.lower() not in primitive_types:
+                elif is_primitive(base):
+                    result = base
+                elif cur_editor_name == "Forms":
                     result = f"[{base}]({root}../Word/{base}/{base}.md)"
                 else:
-                    # If the type is primitive or a numeric literal, return it as is
-                    if (base.lower() in primitive_types or
-                        (base.startswith('"') and base.endswith('"')) or
-                        (base.startswith("'") and base.endswith("'")) or
-                        base.replace('.', '', 1).isdigit() or
-                        (base.startswith('-') and base[1:].replace('.', '', 1).isdigit())):
-                        result = base
-                    else:
-                        print(f"Unknown type encountered: {base}")
-                        result = base
-        # Append all array levels back
-        result += "[]" * array_dims
-        return result
+                    print(f"Unknown type encountered: {base}")
+                    result = base
+            result += "[]" * array_dims
+            return result
 
     # Apply link_if_known to each converted type
     linked = [link_if_known(ts_t) for ts_t in converted]
@@ -392,6 +424,9 @@ def process_doclets(data, output_dir, editor_name):
 
     # Process classes
     for class_name, methods in classes.items():
+        if (len(methods) == 0):
+            continue
+
         class_dir = os.path.join(editor_dir, class_name)
         methods_dir = os.path.join(class_dir, 'Methods')
         os.makedirs(methods_dir, exist_ok=True)

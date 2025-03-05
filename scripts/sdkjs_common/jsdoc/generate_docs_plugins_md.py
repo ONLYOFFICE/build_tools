@@ -15,6 +15,8 @@ editors = [
 
 missing_examples = []
 
+cur_editor_name = None
+
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -46,7 +48,7 @@ def correct_description(string):
     return string
 
 def correct_default_value(value, enumerations, classes):
-    if value is None:
+    if value is None or value == '':
         return ''
     
     if value == True:
@@ -120,62 +122,141 @@ def get_base_type(ts_type: str) -> str:
 
 def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     """
-    1) Convert each raw JSDoc type from Array.<T> to T[].
-    2) Split union types if needed (usually they're provided as separate
-       elements in 'types' already, but let's be safe).
-    3) For each type, extract the base type (e.g. "Drawing" from "Drawing[]").
-    4) If the base type matches an enumeration or class, link the entire
-       T[]-based string.
-    5) Join with " | ".
+    1) Converts each type from JSDoc (e.g., Array.<T>) to T[].
+    2) Processes union types by splitting them using '|'.
+    3) Supports multidimensional arrays, e.g., (string|ApiRange|number)[].
+    4) If the base type matches the name of an enumeration or class, generates a link.
+    5) The final types are joined using " | ".
     """
+    # Convert each type from JSDoc format to TypeScript format (e.g., T[])
+    converted = [convert_jsdoc_array_to_ts(t) for t in types]
 
-    # Convert each raw type from JSDoc to TS
-    converted = [convert_jsdoc_array_to_ts(t) for t in types]  # e.g. ["Drawing[]", "Foo[]", ...]
+    # Set of primitive types
+    primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "{}"}
 
-    # For each converted type (like "Drawing[]"), see if the base is in enumerations or classes
+    def is_primitive(type):
+        if (type.lower() in primitive_types or
+            (type.startswith('"') and type.endswith('"')) or
+            (type.startswith("'") and type.endswith("'")) or
+            type.replace('.', '', 1).isdigit() or
+            (type.startswith('-') and type[1:].replace('.', '', 1).isdigit())):
+            return True
+        return False
+
     def link_if_known(ts_type):
-        base = get_base_type(ts_type)  # e.g. "Drawing" from "Drawing[]"
+        ts_type = ts_type.strip()
+        # Count the number of array dimensions, e.g., "[][]" has 2 dimensions
+        array_dims = 0
+        while ts_type.endswith("[]"):
+            array_dims += 1
+            ts_type = ts_type[:-2].strip()
 
-        # Check enumerations first
-        for enum in enumerations:
-            if enum['name'] == base:
-                # Replace the entire token with a link
-                return f"[{ts_type}]({root}Enumeration/{base}.md)"
+        # Process generic types, e.g., Object.<string, editorType>
+        if ".<" in ts_type and ts_type.endswith(">"):
+            import re
+            m = re.match(r'^(.*?)\.<(.*)>$', ts_type)
+            if m:
+                base_part = m.group(1).strip()
+                generic_args_str = m.group(2).strip()
+                # Process the base part of the type
+                found = False
+                for enum in enumerations:
+                    if enum['name'] == base_part:
+                        base_result = f"[{base_part}]({root}Enumeration/{base_part}.md)"
+                        found = True
+                        break
+                if not found:
+                    if base_part in classes:
+                        base_result = f"[{base_part}]({root}{base_part}/{base_part}.md)"
+                    elif is_primitive(base_part):
+                        base_result = base_part
+                    elif cur_editor_name == "Forms":
+                        base_result = f"[{base_part}]({root}../Word/{base_part}/{base_part}.md)"
+                    else:
+                        print(f"Unknown type encountered: {base_part}")
+                        base_result = base_part
+                # Split the generic parameters by commas and process each recursively
+                generic_args = [link_if_known(x) for x in generic_args_str.split(",")]
+                result = base_result + ".&lt;" + ", ".join(generic_args) + "&gt;"
+                result += "[]" * array_dims
+                return result
 
-        # Check classes
-        if base in classes:
-            return f"[{ts_type}]({root}{base}/{base}.md)"
+        # Process union types: if the type is enclosed in parentheses
+        if ts_type.startswith("(") and ts_type.endswith(")"):
+            inner = ts_type[1:-1].strip()
+            subtypes = [sub.strip() for sub in inner.split("|")]
+            if len(subtypes) == 1:
+                result = link_if_known(subtypes[0])
+            else:
+                processed = [link_if_known(subtype) for subtype in subtypes]
+                result = "(" + " | ".join(processed) + ")"
+            result += "[]" * array_dims
+            return result
 
-        # Otherwise just return as-is
-        return ts_type
+        # If not a generic or union type – process the base type
+        else:
+            base = ts_type
+            found = False
+            for enum in enumerations:
+                if enum['name'] == base:
+                    result = f"[{base}]({root}Enumeration/{base}.md)"
+                    found = True
+                    break
+            if not found:
+                if base in classes:
+                    result = f"[{base}]({root}{base}/{base}.md)"
+                elif is_primitive(base):
+                    result = base
+                elif cur_editor_name == "Forms":
+                    result = f"[{base}]({root}../Word/{base}/{base}.md)"
+                else:
+                    print(f"Unknown type encountered: {base}")
+                    result = base
+            result += "[]" * array_dims
+            return result
 
-    # Build final list of possibly-linked types
+    # Apply link_if_known to each converted type
     linked = [link_if_known(ts_t) for ts_t in converted]
 
-    # Join them with " | "
-    param_types_md = r' \| '.join(linked)
+    # Join results using " | "
+    param_types_md = r' | '.join(linked)
+    param_types_md = param_types_md.replace("|", r"\|")
 
-    # If there's still leftover angle brackets for generics, gently escape or link them
-    # e.g. "Object.<string, number>" => "Object.&lt;string, number&gt;"
-    # or do more specialized linking if you want to handle them deeper.
+    # Escape remaining angle brackets for generics
     def replace_leftover_generics(match):
         element = match.group(1).strip()
         return f"&lt;{element}&gt;"
-    
+
     param_types_md = re.sub(r'<([^<>]+)>', replace_leftover_generics, param_types_md)
 
     return param_types_md
 
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
-    content += generate_properties_markdown(properties, enumerations, classes)
-
-    content += "## Methods\n\n"
+    
+    content += "\n## Methods\n\n"
+    content += "| Method | Returns | Description |\n"
+    content += "| ------ | ------- | ----------- |\n"
+    
     for method in methods:
         method_name = method['name']
-        content += f"- [{method_name}](./Methods/{method_name}.md)\n"
-
-    # Escape just before returning
+        
+        # Get the type of return values
+        returns = method.get('returns', [])
+        if returns:
+            return_type_list = returns[0].get('type', {}).get('names', [])
+            returns_markdown = generate_data_types_markdown(return_type_list, enumerations, classes, '../')
+        else:
+            returns_markdown = "None"
+        
+        # Processing the method description
+        description = remove_line_breaks(correct_description(method.get('description', 'No description provided.')))
+        
+        # Form a link to the method document
+        method_link = f"[{method_name}](./Methods/{method_name}.md)"
+        
+        content += f"| {method_link} | {returns_markdown} | {description} |\n"
+    
     return escape_text_outside_code_blocks(content)
 
 def generate_method_markdown(method, enumerations, classes, example_editor_name):
@@ -364,6 +445,9 @@ def generate_enumeration_markdown(enumeration, enumerations, classes, example_ed
     return escape_text_outside_code_blocks(content)
 
 def process_doclets(data, output_dir, editor_name):
+    global cur_editor_name
+    cur_editor_name = editor_name
+
     classes = {}
     classes_props = {}
     enumerations = []
@@ -395,6 +479,9 @@ def process_doclets(data, output_dir, editor_name):
 
     # Process classes
     for class_name, methods in classes.items():
+        if (len(methods) == 0):
+            continue
+
         class_dir = os.path.join(editor_dir, class_name)
         methods_dir = os.path.join(class_dir, 'Methods')
         os.makedirs(methods_dir, exist_ok=True)

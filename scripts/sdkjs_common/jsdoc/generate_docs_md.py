@@ -38,7 +38,7 @@ def process_link_tags(text, root=''):
     For a method, if an alias is not specified, the name is left in the format 'Class#Method'.
     """
     reserved_links = {
-        '/docbuilder/global#ShapeType': 'Word/Enumeration/ShapeType.md',
+        '/docbuilder/global#ShapeType': f"{'../../../' if root == '' else '../../' if root == '../' else root}Word/Enumeration/ShapeType.md",
         '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
         '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
     }
@@ -87,7 +87,7 @@ def correct_description(string, root=''):
         return 'No description provided.'
 
     # Line breaks
-    string = string.replace('\r', '\\n')
+    string = string.replace('\r', '\\\n')
     
     # Replace <b> tags with Markdown bold formatting
     string = re.sub(r'<b>', '-**', string)

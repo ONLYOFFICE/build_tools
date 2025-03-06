@@ -30,28 +30,81 @@ def remove_js_comments(text):
     text = re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)     # multi-line
     return text.strip()
 
-def correct_description(string):
+def process_link_tags(text, root=''):
     """
-    Cleans up or transforms certain tags in a doclet description:
-      - <b> => **
+    Finds patterns like {@link ...} and replaces them with Markdown links.
+    If the prefix 'global#' is found, a link to a typedef is generated,
+    otherwise, a link to a class method is created.
+    For a method, if an alias is not specified, the name is left in the format 'Class#Method'.
+    """
+    reserved_links = {
+        '/docbuilder/global#ShapeType': 'Word/Enumeration/ShapeType.md',
+        '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
+        '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
+    }
+
+    def replace_link(match):
+        content = match.group(1).strip()  # Example: "/docbuilder/global#ShapeType shape type" or "global#ErrorValue ErrorValue"
+        parts = content.split()
+        ref = parts[0]
+        label = parts[1] if len(parts) > 1 else None
+
+        if ref.startswith('/'):
+            # Handle reserved links using mapping
+            if ref in reserved_links:
+                url = reserved_links[ref]
+                display_text = label if label else ref
+                return f"[{display_text}]({url})"
+            else:
+                # If the link is not in the mapping, return the original construction
+                return match.group(0)
+        elif ref.startswith("global#"):
+            # Handle links to typedef (similar logic as before)
+            typedef_name = ref.split("#")[1]
+            display_text = label if label else typedef_name
+            return f"[{display_text}]({root}Enumeration/{typedef_name}.md)"
+        else:
+            # Handle links to class methods like ClassName#MethodName
+            try:
+                class_name, method_name = ref.split("#")
+            except ValueError:
+                return match.group(0)
+            display_text = label if label else ref  # Keep the full notation, e.g., "Api#CreateSlide"
+            return f"[{display_text}]({root}{class_name}/Methods/{method_name}.md)"
+
+    return re.sub(r'{@link\s+([^}]+)}', replace_link, text)
+
+def correct_description(string, root=''):
+    """
+    Cleans or transforms specific tags in the doclet description:
+      - <b> => ** (bold text)
       - <note>...</note> => 💡 ...
-      - Provide a default if None.
+      - {@link ...} is replaced with a Markdown link
+      - If the description is missing, returns a default value.
+      - All '\r' characters are replaced with '\n'.
     """
     if string is None:
         return 'No description provided.'
+
+    # Line breaks
+    string = string.replace('\r', '\\n')
     
-    # Replace <b> tags with markdown bold
-    string = re.sub(r'<b>', '**', string)
+    # Replace <b> tags with Markdown bold formatting
+    string = re.sub(r'<b>', '-**', string)
     string = re.sub(r'</b>', '**', string)
-    # Convert <note>...</note> to a little icon + text
+    
+    # Replace <note> tags with an icon and text
     string = re.sub(r'<note>(.*?)</note>', r'💡 \1', string, flags=re.DOTALL)
+    
+    # Process {@link ...} constructions
+    string = process_link_tags(string, root)
+    
     return string
 
 def correct_default_value(value, enumerations, classes):
     if value is None or value == '':
         return ''
     
-    # Проверяем, является ли значение именно булевым
     if isinstance(value, bool):
         value = "true" if value else "false"
     else:
@@ -234,11 +287,13 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
     
+    content += generate_properties_markdown(properties, enumerations, classes)
+
     content += "\n## Methods\n\n"
     content += "| Method | Returns | Description |\n"
     content += "| ------ | ------- | ----------- |\n"
     
-    for method in methods:
+    for method in sorted(methods, key=lambda m: m['name']):
         method_name = method['name']
         
         # Get the type of return values
@@ -250,7 +305,7 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
             returns_markdown = "None"
         
         # Processing the method description
-        description = remove_line_breaks(correct_description(method.get('description', 'No description provided.')))
+        description = remove_line_breaks(correct_description(method.get('description', 'No description provided.'), '../'))
         
         # Form a link to the method document
         method_link = f"[{method_name}](./Methods/{method_name}.md)"
@@ -262,7 +317,7 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
 def generate_method_markdown(method, enumerations, classes, example_editor_name):
     method_name = method['name']
     description = method.get('description', 'No description provided.')
-    description = correct_description(description)
+    description = correct_description(description, '../../')
     params = method.get('params', [])
     returns = method.get('returns', [])
     example = method.get('example', '')
@@ -285,7 +340,7 @@ def generate_method_markdown(method, enumerations, classes, example_editor_name)
             param_name = param.get('name', 'Unnamed')
             param_types = param.get('type', {}).get('names', []) if param.get('type') else []
             param_types_md = generate_data_types_markdown(param_types, enumerations, classes)
-            param_desc = remove_line_breaks(correct_description(param.get('description', 'No description provided.')))
+            param_desc = remove_line_breaks(correct_description(param.get('description', 'No description provided.'), '../../'))
             param_required = "Required" if not param.get('optional') else "Optional"
             param_default = correct_default_value(param.get('defaultvalue', ''), enumerations, classes)
 
@@ -324,10 +379,10 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
     content += "| Name | Type | Description |\n"
     content += "| ---- | ---- | ----------- |\n"
 
-    for prop in properties:
+    for prop in sorted(properties, key=lambda m: m['name']):
         prop_name = prop['name']
         prop_description = prop.get('description', 'No description provided.')
-        prop_description = remove_line_breaks(correct_description(prop_description))
+        prop_description = remove_line_breaks(correct_description(prop_description, root))
         prop_types = prop['type']['names'] if prop.get('type') else []
         param_types_md = generate_data_types_markdown(prop_types, enumerations, classes, root)
         content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
@@ -338,7 +393,7 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
 def generate_enumeration_markdown(enumeration, enumerations, classes, example_editor_name):
     enum_name = enumeration['name']
     description = enumeration.get('description', 'No description provided.')
-    description = correct_description(description)
+    description = correct_description(description, '../')
     example = enumeration.get('example', '')
 
     content = f"# {enum_name}\n\n{description}\n\n"
@@ -411,8 +466,10 @@ def process_doclets(data, output_dir, editor_name):
     for doclet in data:
         if doclet['kind'] == 'class':
             class_name = doclet['name']
-            classes[class_name] = []
-            classes_props[class_name] = doclet.get('properties', None)
+            if class_name:
+                if class_name not in classes:
+                    classes[class_name] = []
+                classes_props[class_name] = doclet.get('properties', None)
         elif doclet['kind'] == 'function':
             class_name = doclet.get('memberof')
             if class_name:

@@ -139,6 +139,10 @@ def make():
       delete_files(base.find_files(root_dir, "sdk-all.js"))
       delete_files(base.find_files(root_dir, "sdk-all-min.js"))
     base.delete_dir(root_dir + "/sdkjs/slide/themes")
+    base.delete_dir(root_dir + "/sdkjs/cell/css")
+    base.delete_file(root_dir + "/sdkjs/pdf/src/engine/viewer.js")
+    base.delete_file(root_dir + "/sdkjs/common/spell/spell/spell.js.mem")
+    base.delete_dir(root_dir + "/sdkjs/common/Images")   
 
   return
 

@@ -430,10 +430,10 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
 
 def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
   if (platform == "linux_arm64"):
-    cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
+    return cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
   if (platform == "linux_arm32"):
-    cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
-  return ret
+    return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
+  return 0
 
 def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
   cur_dir = os.getcwd()

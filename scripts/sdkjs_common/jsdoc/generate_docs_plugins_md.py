@@ -227,7 +227,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                         base_result = f"[{base_part}]({root}{base_part}/{base_part}.md)"
                     elif is_primitive(base_part):
                         base_result = base_part
-                    elif cur_editor_name == "Forms":
+                    elif cur_editor_name == "forms":
                         base_result = f"[{base_part}]({root}../text-document-api/{base_part}/{base_part}.md)"
                     else:
                         print(f"Unknown type encountered: {base_part}")
@@ -265,7 +265,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                     result = f"[{base}]({root}{base}/{base}.md)"
                 elif is_primitive(base):
                     result = base
-                elif cur_editor_name == "Forms":
+                elif cur_editor_name == "forms":
                     result = f"[{base}]({root}../text-document-api/{base}/{base}.md)"
                 else:
                     print(f"Unknown type encountered: {base}")
@@ -515,7 +515,7 @@ def process_doclets(data, output_dir, editor_name):
     classes = {}
     classes_props = {}
     enumerations = []
-    editor_dir =  os.path.join(output_dir, editor_name)
+    editor_dir = os.path.join(output_dir, editors[editor_name])
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -597,7 +597,7 @@ def generate(output_dir):
 
         data = load_json(input_file)
         used_enumerations.clear()
-        process_doclets(data, output_dir, folder_name)
+        process_doclets(data, output_dir, editor_name)
     
     shutil.rmtree(output_dir + '/tmp_json')
     print('Done')

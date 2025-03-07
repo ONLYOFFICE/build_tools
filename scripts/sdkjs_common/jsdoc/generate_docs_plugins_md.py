@@ -6,12 +6,12 @@ import argparse
 import generate_docs_plugins_json
 
 # Configuration files
-editors = [
-    "word",
-    "cell",
-    "slide",
-    "forms"
-]
+editors = {
+    "word": "text-document-api",
+    "cell": "spreadsheet-api",
+    "slide": "presentation-api",
+    "forms": "form-api"
+}
 
 missing_examples = []
 used_enumerations = set()
@@ -39,7 +39,7 @@ def process_link_tags(text, root=''):
     For a method, if an alias is not specified, the name is left in the format 'Class#Method'.
     """
     reserved_links = {
-        '/docbuilder/global#ShapeType': f"{'../../../' if root == '' else '../../' if root == '../' else root}Word/Enumeration/ShapeType.md",
+        '/docbuilder/global#ShapeType': f"{'../../../' if root == '' else '../../' if root == '../' else root}text-document-api/Enumeration/ShapeType.md",
         '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
         '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
     }
@@ -228,7 +228,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                     elif is_primitive(base_part):
                         base_result = base_part
                     elif cur_editor_name == "Forms":
-                        base_result = f"[{base_part}]({root}../Word/{base_part}/{base_part}.md)"
+                        base_result = f"[{base_part}]({root}../text-document-api/{base_part}/{base_part}.md)"
                     else:
                         print(f"Unknown type encountered: {base_part}")
                         base_result = base_part
@@ -266,7 +266,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                 elif is_primitive(base):
                     result = base
                 elif cur_editor_name == "Forms":
-                    result = f"[{base}]({root}../Word/{base}/{base}.md)"
+                    result = f"[{base}]({root}../text-document-api/{base}/{base}.md)"
                 else:
                     print(f"Unknown type encountered: {base}")
                     result = base
@@ -589,15 +589,15 @@ def generate(output_dir):
         output_dir = output_dir[:-1]
     
     generate_docs_plugins_json.generate(output_dir + '/tmp_json', md=True)
-    for editor_name in editors:
+    for editor_name, folder_name in editors.items():
         input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
-        shutil.rmtree(output_dir + f'/{editor_name.title()}', ignore_errors=True)
-        os.makedirs(output_dir + f'/{editor_name.title()}')
+        shutil.rmtree(output_dir + f'/{folder_name}', ignore_errors=True)
+        os.makedirs(output_dir + f'/{folder_name}')
 
         data = load_json(input_file)
         used_enumerations.clear()
-        process_doclets(data, output_dir, editor_name.title())
+        process_doclets(data, output_dir, folder_name)
     
     shutil.rmtree(output_dir + '/tmp_json')
     print('Done')
@@ -609,7 +609,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../office-js-api/Plugins/"  # Default value
+        default="../../../../office-js-api/plugins/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

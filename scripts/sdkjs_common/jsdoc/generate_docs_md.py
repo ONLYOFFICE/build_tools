@@ -14,6 +14,7 @@ editors = [
 ]
 
 missing_examples = []
+used_enumerations = set()
 
 cur_editor_name = None
 
@@ -61,6 +62,7 @@ def process_link_tags(text, root=''):
         elif ref.startswith("global#"):
             # Handle links to typedef (similar logic as before)
             typedef_name = ref.split("#")[1]
+            used_enumerations.add(typedef_name)
             display_text = label if label else typedef_name
             return f"[{display_text}]({root}Enumeration/{typedef_name}.md)"
         else:
@@ -214,6 +216,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                 found = False
                 for enum in enumerations:
                     if enum['name'] == base_part:
+                        used_enumerations.add(base_part)
                         base_result = f"[{base_part}]({root}Enumeration/{base_part}.md)"
                         found = True
                         break
@@ -251,6 +254,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
             found = False
             for enum in enumerations:
                 if enum['name'] == base:
+                    used_enumerations.add(base)
                     result = f"[{base}]({root}Enumeration/{base}.md)"
                     found = True
                     break
@@ -392,6 +396,10 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
 
 def generate_enumeration_markdown(enumeration, enumerations, classes, example_editor_name):
     enum_name = enumeration['name']
+    
+    if enum_name not in used_enumerations:
+            return None
+    
     description = enumeration.get('description', 'No description provided.')
     description = correct_description(description, '../')
     example = enumeration.get('example', '')
@@ -410,6 +418,7 @@ def generate_enumeration_markdown(enumeration, enumerations, classes, example_ed
 
             # Attempt linking: we compare the raw type to enumerations/classes
             if any(enum['name'] == raw_t for enum in enumerations):
+                used_enumerations.add(raw_t)
                 content += f"- [{ts_t}](../Enumeration/{raw_t}.md)\n"
                 enum_empty = False
             elif raw_t in classes:
@@ -511,6 +520,13 @@ def process_doclets(data, output_dir, editor_name):
     enum_dir = os.path.join(editor_dir, 'Enumeration')
     os.makedirs(enum_dir, exist_ok=True)
 
+    # idle run
+    prev_used_count = -1
+    while len(used_enumerations) != prev_used_count:
+        prev_used_count = len(used_enumerations)
+        for enum in [e for e in enumerations if e['name'] in used_enumerations]:
+            enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
+
     for enum in enumerations:
         enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
         enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
@@ -532,6 +548,7 @@ def generate(output_dir):
         os.makedirs(output_dir + f'/{editor_name.title()}')
 
         data = load_json(input_file)
+        used_enumerations.clear()
         process_doclets(data, output_dir, editor_name.title())
     
     shutil.rmtree(output_dir + 'tmp_json')

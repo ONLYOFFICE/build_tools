@@ -225,7 +225,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                         base_result = f"[{base_part}]({root}{base_part}/{base_part}.md)"
                     elif is_primitive(base_part):
                         base_result = base_part
-                    elif cur_editor_name == "Forms":
+                    elif cur_editor_name == "forms":
                         base_result = f"[{base_part}]({root}../text-document-api/{base_part}/{base_part}.md)"
                     else:
                         print(f"Unknown type encountered: {base_part}")
@@ -263,7 +263,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
                     result = f"[{base}]({root}{base}/{base}.md)"
                 elif is_primitive(base):
                     result = base
-                elif cur_editor_name == "Forms":
+                elif cur_editor_name == "forms":
                     result = f"[{base}]({root}../text-document-api/{base}/{base}.md)"
                 else:
                     print(f"Unknown type encountered: {base}")
@@ -460,16 +460,16 @@ def process_doclets(data, output_dir, editor_name):
     classes = {}
     classes_props = {}
     enumerations = []
-    editor_dir =  os.path.join(output_dir, editor_name)
+    editor_dir = os.path.join(output_dir, editors[editor_name])
     example_editor_name = 'editor-'
     
-    if editor_name == 'Word':
+    if editor_name == 'word':
         example_editor_name += 'docx'
-    elif editor_name == 'Forms':
+    elif editor_name == 'forms':
         example_editor_name += 'pdf'
-    elif editor_name == 'Slide':
+    elif editor_name == 'slide':
         example_editor_name += 'pptx'
-    elif editor_name == 'Cell':
+    elif editor_name == 'cell':
         example_editor_name += 'xlsx'
 
     for doclet in data:
@@ -549,7 +549,7 @@ def generate(output_dir):
 
         data = load_json(input_file)
         used_enumerations.clear()
-        process_doclets(data, output_dir, folder_name)
+        process_doclets(data, output_dir, editor_name)
     
     shutil.rmtree(output_dir + 'tmp_json')
     print('Done')

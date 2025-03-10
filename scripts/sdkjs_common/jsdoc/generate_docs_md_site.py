@@ -39,7 +39,7 @@ def process_link_tags(text, root=''):
     For a method, if an alias is not specified, the name is left in the format 'Class#Method'.
     """
     reserved_links = {
-        '/docbuilder/global#ShapeType': f"{'../../../' if root == '' else '../../' if root == '../' else root}text-document-api/Enumeration/ShapeType.md",
+        '/docbuilder/global#ShapeType': f"{'../../../../../../' if root == '' else '../../../../../' if root == '../' else root}docs/office-api/usage-api/text-document-api/Enumeration/ShapeType.md",
         '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
         '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
     }

@@ -153,7 +153,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     linked = [link_if_known(ts_t) for ts_t in converted]
 
     # Join them with " | "
-    param_types_md = ' | '.join(linked)
+    param_types_md = r' \| '.join(linked)
 
     # If there's still leftover angle brackets for generics, gently escape or link them
     # e.g. "Object.<string, number>" => "Object.&lt;string, number&gt;"
@@ -178,7 +178,7 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
     # Escape just before returning
     return escape_text_outside_code_blocks(content)
 
-def generate_method_markdown(method, enumerations, classes):
+def generate_method_markdown(method, enumerations, classes, example_editor_name):
     """
     Generates Markdown for a method doclet, relying only on `method['examples']`
     (array of strings). Ignores any single `method['example']` field.
@@ -247,12 +247,12 @@ def generate_method_markdown(method, enumerations, classes):
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 
-                content += f"```javascript\n{code}\n```\n"
+                content += f"```javascript {example_editor_name}\n{code}\n```\n"
             else:
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+                content += f"```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -275,7 +275,7 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
     # Escape outside code blocks
     return escape_text_outside_code_blocks(content)
 
-def generate_enumeration_markdown(enumeration, enumerations, classes):
+def generate_enumeration_markdown(enumeration, enumerations, classes, example_editor_name):
     """
     Generates Markdown documentation for a 'typedef' doclet.
     This version only works with `enumeration['examples']` (an array of strings),
@@ -354,12 +354,12 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 
-                content += f"```javascript\n{code}\n```\n"
+                content += f"```javascript {example_editor_name}\n{code}\n```\n"
             else:
                 if len(examples) > 1:
                     content += f"**Example {i}:**\n\n{comment}\n\n"
                 # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+                content += f"```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -368,6 +368,16 @@ def process_doclets(data, output_dir, editor_name):
     classes_props = {}
     enumerations = []
     editor_dir =  os.path.join(output_dir, editor_name)
+    example_editor_name = 'editor-'
+    
+    if editor_name == 'Word':
+        example_editor_name += 'docx'
+    elif editor_name == 'Forms':
+        example_editor_name += 'pdf'
+    elif editor_name == 'Slide':
+        example_editor_name += 'pptx'
+    elif editor_name == 'Cell':
+        example_editor_name += 'xlsx'
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -402,7 +412,7 @@ def process_doclets(data, output_dir, editor_name):
         # Write method files
         for method in methods:
             method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
-            method_content = generate_method_markdown(method, enumerations, classes)
+            method_content = generate_method_markdown(method, enumerations, classes, example_editor_name)
             write_markdown_file(method_file_path, method_content)
 
             if not method.get('examples', ''):
@@ -414,7 +424,7 @@ def process_doclets(data, output_dir, editor_name):
 
     for enum in enumerations:
         enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
-        enum_content = generate_enumeration_markdown(enum, enumerations, classes)
+        enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
         if enum_content is None:
             continue
 

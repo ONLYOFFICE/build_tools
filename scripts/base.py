@@ -428,6 +428,13 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   os.chdir(cur_dir)
   return ret
 
+def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
+  if (platform == "linux_arm64"):
+    return cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
+  if (platform == "linux_arm32"):
+    return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
+  return 0
+
 def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
   cur_dir = os.getcwd()
   ret = cmd(prog, args, is_no_errors)
@@ -1831,8 +1838,12 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
-def create_x2t_js_cache(dir, product):
+def create_x2t_js_cache(dir, product, platform):
   if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
+    return
+
+  if ((platform == "linux_arm64") and not is_os_arm()):
+    cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
     return
 
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)

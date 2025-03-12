@@ -67,7 +67,7 @@ def make():
 
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
-    base.create_x2t_js_cache(archive_dir, "core")
+    base.create_x2t_js_cache(archive_dir, "core", platform)
     base.delete_file(archive_dir + "/DoctRenderer.config")
 
     # dictionaries

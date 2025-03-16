@@ -68,6 +68,4 @@ def build_server_with_addons():
       base.cmd_in_dir(addon_dir, "npm", ["run", "build"])
 
 def build_server_develop():
-  server_dir = base.get_script_dir() + "/../../server"
-  base.cmd_in_dir(server_dir, "npm", ["ci"])
-  base.cmd_in_dir(server_dir, "grunt", ["develop", "-v"] + base.server_addons_param())
+  build_server_with_addons()

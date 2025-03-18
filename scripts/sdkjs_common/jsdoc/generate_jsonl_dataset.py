@@ -14,6 +14,13 @@ editors = [
     "forms"
 ]
 
+editors_names = {
+    "word": "Word",
+    "cell": "Spreadsheet",
+    "slide": "Presentation",
+    "forms": "Forms"
+}
+
 root = '../../../..'
 missing_examples = []
 
@@ -143,6 +150,8 @@ def create_entry(system_message, user_message, assistant_message, model):
     return entry 
 
 def process_doclets(doclets, output_entries, editor_name, model):
+    system_message = f'You are an expert in API for library from OnlyOffice. The library provides functions for editing {editors_names[editor_name]} documents. Your functional capabilities: 1) Explanation of Onlyoffice JavaScript API classes and their methods and parameters. 2) Assistance in writing Onlyoffice JavaScript API examples upon user request. 3) Reviewing user examples, assisting in finding and fixing their mistakes.'
+    
     for doclet in doclets:
         kind = doclet.get("kind", "").lower()
         see = doclet.get("see", [])
@@ -158,26 +167,14 @@ def process_doclets(doclets, output_entries, editor_name, model):
             # Functions must have both "name" (method_name) and "memberof" fields filled
             if not (method_name and memberof):
                 continue
-            system_message = (
-                f"You act as an API expert for Onlyoffice {editor_name.title()} editor. "
-                f"This task is an example for the function {method_name} in the class {memberof}."
-            )
             default_user_message = f"How do I use the method {method_name} of {memberof} class?"
             
         elif kind == "class":
             class_name = doclet.get("name", "")
-            system_message = (
-                f"You act as an API expert for Onlyoffice {editor_name.title()} editor. "
-                f"This task is an example for the class {class_name}."
-            )
             default_user_message = f"How do I instantiate or work with the class {class_name}?"
             
         elif kind == "typedef":
             typedef_name = doclet.get("name", "")
-            system_message = (
-                f"You act as an API expert for Onlyoffice {editor_name.title()} editor. "
-                f"This task is an example for the typedef {typedef_name}"
-            )
             default_user_message = f"How do I use the typedef {typedef_name}?"
             
         else:

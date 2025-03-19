@@ -125,7 +125,7 @@ def make():
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 
-    base.create_x2t_js_cache(root_dir, "builder")
+    base.create_x2t_js_cache(root_dir, "builder", platform)
   
     # delete unnecessary builder files
     def delete_files(files):
@@ -138,6 +138,11 @@ def make():
     if 0 != platform.find("mac"):
       delete_files(base.find_files(root_dir, "sdk-all.js"))
       delete_files(base.find_files(root_dir, "sdk-all-min.js"))
+    base.delete_dir(root_dir + "/sdkjs/slide/themes")
+    base.delete_dir(root_dir + "/sdkjs/cell/css")
+    base.delete_file(root_dir + "/sdkjs/pdf/src/engine/viewer.js")
+    base.delete_file(root_dir + "/sdkjs/common/spell/spell/spell.js.mem")
+    base.delete_dir(root_dir + "/sdkjs/common/Images")   
 
   return
 

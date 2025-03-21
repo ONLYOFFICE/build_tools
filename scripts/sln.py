@@ -97,7 +97,7 @@ def get_projects(pro_json_path, platform):
     records_src = data[module]
     records = get_full_projects_list(data, records_src)
 
-    print(records)
+    #print(records)
 
     for rec in records:
       params = []
@@ -163,6 +163,18 @@ def get_projects(pro_json_path, platform):
           break
       if is_append:
         result.append(root_dir + record)
+
+  # delete duplicates
+  old_results = result
+  result = []
+
+  map_results = set()
+  for item in old_results:
+    proj = item.replace("\\", "/")
+    if proj in map_results:
+      continue
+    map_results.add(proj)
+    result.append(proj)
 
   if is_log:
     print(result)

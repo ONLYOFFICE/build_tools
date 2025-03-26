@@ -36,7 +36,7 @@ def make(solution=""):
 
   if config.check_option("module", "builder") and base.is_windows() and "onlyoffice" == config.branding():
     # check branding libs
-    if (option("branding-name") == "onlyoffice"):
+    if (config.option("branding-name") == "onlyoffice"):
       for platform in platforms:
         if not platform in config.platforms:
           continue

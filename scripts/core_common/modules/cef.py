@@ -19,7 +19,7 @@ def make():
     if not config.check_option("platform", platform):
       continue
 
-    url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
+    url = "https://d2ettrnqo7v976.cloudfront.net/cef/"
     archive_name = "./cef_binary.7z"
 
     if (-1 != platform.find("_xp")):

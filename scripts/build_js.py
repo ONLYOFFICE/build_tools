@@ -33,7 +33,7 @@ def make():
   base.set_env('NODE_ENV', 'production')
 
   base_dir = base.get_script_dir() + "/.."
-  out_dir = base_dir + "/out/js/";
+  out_dir = base_dir + "/out/js/"
   branding = config.option("branding-name")
   if ("" == branding):
     branding = "onlyoffice"

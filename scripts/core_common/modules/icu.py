@@ -10,6 +10,8 @@ import glob
 import icu_android
 
 def fetch_icu(major, minor):
+  if (base.is_dir("./icu2")):
+    base.delete_dir_with_access_error("icu2")  
   base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + major, "https://github.com/unicode-org/icu.git", "./icu2"])
   base.copy_dir("./icu2/icu4c", "./icu")
   base.delete_dir_with_access_error("icu2")

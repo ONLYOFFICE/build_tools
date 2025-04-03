@@ -90,7 +90,10 @@ def make():
       base.create_dir(base_dir + "/icu/cross_build")
       os.chdir("icu/cross_build")
       base.cmd("./../source/runConfigureICU", ["Linux", "--prefix=" + base_dir + "/icu/cross_build_install"])
-      base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) -static-libstdc++ -static-libgcc")
+      if "1" == config.option("use-clang"):
+        base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) -stdlib=libc++")
+      else:
+        base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) -static-libstdc++ -static-libgcc")
       base.cmd("make", ["-j4"])
       base.cmd("make", ["install"], True)
       base.create_dir(base_dir + "/linux_64")

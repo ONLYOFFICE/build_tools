@@ -89,16 +89,15 @@ def make():
     correct_install_includes_win(base_dir, "win_32")    
 
   if config.check_option("platform", "linux_64") and not base.is_dir("../build/linux_64"):
+    addon_config = []
+    addon_compile = []
     if "1" == config.option("use-clang"):
-      base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex", "--with-toolset=clang"])
-    else:
-      base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
+      addon_config = ["--with-toolset=clang"]
+      addon_compile = ["cxxflags=-stdlib=libc++", "linkflags=-stdlib=libc++", "define=_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION"]
+    base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"] + addon_config)
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    if "1" == config.option("use-clang"):
-      base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "cxxflags=-stdlib=libc++", "linkflags=-stdlib=libc++","define=_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION", "install"])    
-    else:
-      base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
+    base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC"] + addon_compile + ["install"])
     # TODO: support x86
 
   if config.check_option("platform", "linux_arm64") and not base.is_dir("../build/linux_arm64"):

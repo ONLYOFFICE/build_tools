@@ -52,10 +52,19 @@ def make_args(args, platform, is_64=True, is_debug=False):
   else:
     args_copy.append("is_debug=false")
   
+  linux_clang = False
   if (platform == "linux"):
     args_copy.append("is_clang=true")
+    if "1" == config.option("use-clang"):
+      gn_args.append("use_sysroot=true")
+      linux_clang = True
+    else:
+      gn_args.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")
+
+  if linux_clang != True:
+    gn_args.append("use_custom_libcxx=false")
 
   return "--args=\"" + " ".join(args_copy) + "\""
 
@@ -162,12 +171,6 @@ def make():
              "v8_use_external_startup_data=false",
              "treat_warnings_as_errors=false"]
          
-  if "1" == config.option("use-clang"):    
-    gn_args.append("use_sysroot=true")
-  else:
-    gn_args.append("use_custom_libcxx=false")
-    gn_args.append("use_sysroot=false")
-
   if config.check_option("platform", "linux_64"):
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])

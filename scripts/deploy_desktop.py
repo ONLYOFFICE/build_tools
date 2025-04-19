@@ -65,6 +65,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "PdfFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DjVuFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "XpsFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "OFDFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlFile2")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")

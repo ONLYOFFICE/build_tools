@@ -35,8 +35,12 @@ config.parse_defaults()
 repositories = base.get_repositories()
 
 # Add other repositories
+if (config.check_option("module", "desktop")):
+  repositories['appimage-desktopeditors'] = [False, False]
+
 if config.check_option("module", "builder"):
   repositories['document-builder-package'] = [False, False]
+  repositories['appimage-documentbuilder'] = [False, False]
 
 if (config.check_option("module", "server")):
   repositories['document-server-package'] = [False, False]

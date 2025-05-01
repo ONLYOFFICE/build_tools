@@ -133,7 +133,7 @@ def get_projects(pro_json_path, platform):
       is_needed_platform_exist = False
       for pl in platform_records:
         if is_exist_in_array(params, pl):
-          is_needed_platform_exist = True;
+          is_needed_platform_exist = True
           break
 
       # if one config exists => all needed must exists
@@ -144,7 +144,7 @@ def get_projects(pro_json_path, platform):
         if is_exist_in_array(platform_records, item):
           continue
         is_needed_config_exist = True
-        break;
+        break
 
       if is_needed_platform_exist:
         if not is_exist_in_array(params, platform):

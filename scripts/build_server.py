@@ -38,15 +38,15 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_dir + '/Common/sources')
 
-  pkg_target = "node22"
+  pkg_target = "node16"
 
   if ("linux" == base.host_platform()):
-    pkg_target += "-linux"
+    pkg_target = "node22-linux"
     if (-1 != config.option("platform").find("linux_arm64")):
       pkg_target += "-arm64"
 
   if ("windows" == base.host_platform()):
-    pkg_target += "-win"
+    pkg_target = "node16-win"
 
   base.cmd_in_dir(server_dir + "/DocService", "pkg", [".", "-t", pkg_target, "--options", "max_old_space_size=4096", "-o", "docservice"])
   base.cmd_in_dir(server_dir + "/FileConverter", "pkg", [".", "-t", pkg_target, "-o", "converter"])

@@ -18,6 +18,10 @@ used_enumerations = set()
 
 cur_editor_name = None
 
+_CODE_BLOCK_RE = re.compile(r'(```.*?```)', re.DOTALL)
+_QSTRING_RE    = re.compile(r'(["\'])(.*?)(?<!\\)\1', re.DOTALL)
+_BRACKET_TABLE = {ord('['): '&#91;', ord(']'): '&#93;'}
+
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -156,14 +160,23 @@ def escape_text_outside_code_blocks(markdown: str) -> str:
     # Even indices (0, 2, 4, ...) are outside code blocks,
     # odd indices (1, 3, 5, ...) are actual code blocks.
     for i in range(0, len(parts), 2):
-        # Only escape in parts outside code blocks
-        parts[i] = (parts[i]
-                    .replace('<', '&lt;')
-                    .replace('>', '&gt;')
-                    .replace('{', '&#123;')
-                    .replace('}', '&#125;')
-                   )
+        text = (parts[i]
+                .replace('<', '&lt;')
+                .replace('>', '&gt;')
+                .replace('{', '&#123;')
+                .replace('}', '&#125;'))
+        parts[i] = escape_brackets_in_quotes(text)
+    
     return "".join(parts)
+
+def escape_brackets_in_quotes(text: str) -> str:
+    return re.sub(
+        r"(['\"])(.*?)(?<!\\)\1",
+        lambda m: m.group(1)
+                  + m.group(2).replace('[', r'\[').replace(']', r'\]')
+                  + m.group(1),
+        text
+    )
 
 def get_base_type(ts_type: str) -> str:
     """

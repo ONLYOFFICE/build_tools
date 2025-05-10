@@ -41,7 +41,8 @@ def make():
   pkg_target = "node16"
 
   if ("linux" == base.host_platform()):
-    pkg_target = "node22-linux"
+    #node22 packaging has issue https://github.com/yao-pkg/pkg/issues/87
+    pkg_target = "node20-linux"
     if (-1 != config.option("platform").find("linux_arm64")):
       pkg_target += "-arm64"
 

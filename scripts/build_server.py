@@ -38,16 +38,16 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_dir + '/Common/sources')
 
-  pkg_target = "node16"
+  #node22 packaging has issue https://github.com/yao-pkg/pkg/issues/87
+  pkg_target = "node20"
 
   if ("linux" == base.host_platform()):
-    #node22 packaging has issue https://github.com/yao-pkg/pkg/issues/87
-    pkg_target = "node20-linux"
+    pkg_target += "-linux"
     if (-1 != config.option("platform").find("linux_arm64")):
       pkg_target += "-arm64"
 
   if ("windows" == base.host_platform()):
-    pkg_target = "node16-win"
+    pkg_target += "-win"
 
   base.cmd_in_dir(server_dir + "/DocService", "pkg", [".", "-t", pkg_target, "--options", "max_old_space_size=4096", "-o", "docservice"])
   base.cmd_in_dir(server_dir + "/FileConverter", "pkg", [".", "-t", pkg_target, "-o", "converter"])

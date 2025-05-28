@@ -74,15 +74,12 @@ def make_windows():
   if common.clean:
     utils.log_h2("builder clean")
     utils.delete_dir("build")
-    utils.delete_files("exe\\*.exe")
-    utils.delete_files("zip\\*.msi")
+    utils.delete_files("zip\\*.zip")
 
   if make_prepare():
     make_zip()
-    make_inno()
   else:
     utils.set_summary("builder zip build", False)
-    utils.set_summary("builder inno build", False)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -118,26 +115,6 @@ def make_zip():
     utils.set_summary("builder zip deploy", ret)
   return
 
-def make_inno():
-  args = [
-    "-Version", package_version,
-    "-Arch", arch
-  ]
-  if not branding.onlyoffice:
-    args += ["-Branding", common.branding]
-  if common.sign:
-    args += ["-Sign"]
-
-  utils.log_h2("builder inno build")
-  ret = utils.ps1("make_inno.ps1", args, verbose=True)
-  utils.set_summary("builder inno build", ret)
-
-  if common.deploy and ret:
-    utils.log_h2("builder inno deploy")
-    ret = s3_upload(utils.glob_path("exe/*.exe"), "builder/win/inno/")
-    utils.set_summary("builder inno deploy", ret)
-  return
-
 def make_macos():
   utils.set_cwd("document-builder-package")
 
@@ -161,20 +138,19 @@ def make_macos():
 def make_linux():
   utils.set_cwd("document-builder-package")
 
-  utils.log_h2("builder build")
-  make_args = [t["make"] for t in branding.builder_make_targets]
+  utils.log_h2("builder tar build")
+  make_args = ["tar"]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
   ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
-  utils.set_summary("builder build", ret)
+  utils.set_summary("builder tar build", ret)
 
   if common.deploy:
-    for t in branding.builder_make_targets:
-      utils.log_h2("builder " + t["make"] + " deploy")
-      ret = s3_upload(utils.glob_path(t["src"]), t["dst"])
-      utils.set_summary("builder " + t["make"] + " deploy", ret)
+    utils.log_h2("builder tar deploy")
+    ret = s3_upload(utils.glob_path("tar/*.tar.xz"), "builder/linux/generic/")
+    utils.set_summary("builder tar deploy", ret)
 
   utils.set_cwd(common.workspace_dir)
   return

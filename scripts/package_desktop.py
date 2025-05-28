@@ -128,12 +128,9 @@ def make_inno():
     ret = utils.ps1("make_inno.ps1", args + ["-Target", "standalone"], verbose=True)
     utils.set_summary("desktop inno standalone build", ret)
 
-  if update_wrapper:
+  if update_wrapper and not xp:
     utils.log_h2("desktop inno update build")
-    if xp:
-      ret = utils.ps1("make_inno.ps1", args + ["-Target", "xp_update"], verbose=True)
-    else:
-      ret = utils.ps1("make_inno.ps1", args + ["-Target", "update"], verbose=True)
+    ret = utils.ps1("make_inno.ps1", args + ["-Target", "update"], verbose=True)
     utils.set_summary("desktop inno update build", ret)
 
   if common.deploy:

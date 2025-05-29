@@ -67,7 +67,7 @@ def install_deps():
     print("OK")
     base.cmd("sudo", ["apt-get", "-y", "install", "npm", "yarn"], True)
   base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
-  base.cmd("sudo", ["npm", "install", "-g", "pkg"])
+  base.cmd("sudo", ["npm", "install", "-g", "@yao-pkg/pkg"])
 
   # java
   java_error = base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-11-jdk"], True)

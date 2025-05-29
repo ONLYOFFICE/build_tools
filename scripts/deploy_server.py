@@ -185,6 +185,7 @@ def make():
     base.copy_file(license_file1, build_server_dir)
     base.copy_file(license_file2, build_server_dir)
     base.copy_dir(license_dir, license)
+    base.copy_dir(server_dir + '/dictionaries', build_server_dir + '/dictionaries')
 
     #branding
     welcome_files = branding_dir + '/welcome'

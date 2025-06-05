@@ -215,7 +215,13 @@ def make_wheel():
 
   if common.deploy and ret:
     utils.log_h2("builder python wheel deploy")
-    ret = s3_upload(utils.glob_path("dist/*.whl"), "builder/win/python/")
+    if utils.is_windows():
+      s3_dest = "builder/win/python/"
+    elif utils.is_macos():
+      s3_dest = "builder/mac/python/"
+    elif utils.is_linux():
+      s3_dest = "builder/linux/python/"
+    ret = s3_upload(utils.glob_path("dist/*.whl"), s3_dest)
     utils.set_summary("builder python wheel deploy", ret)
 
   utils.set_cwd(old_cwd)

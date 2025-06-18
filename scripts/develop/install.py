@@ -6,6 +6,7 @@ import base
 import shutil
 import optparse
 import dependence
+import config
 
 arguments = sys.argv[1:]
 
@@ -16,6 +17,10 @@ parser.add_option("--remove-path", action="append", type="string", dest="remove-
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)
+
+# parse configuration
+config.parse()
+config.parse_defaults()
 
 for item in configOptions["uninstall"]:
   dependence.uninstallProgram(item)

@@ -52,11 +52,19 @@ def make_args(args, platform, is_64=True, is_debug=False):
   else:
     args_copy.append("is_debug=false")
   
+  linux_clang = False
   if (platform == "linux"):
     args_copy.append("is_clang=true")
-    args_copy.append("use_sysroot=false")
+    if "1" == config.option("use-clang"):
+      args_copy.append("use_sysroot=true")
+      linux_clang = True
+    else:
+      args_copy.append("use_sysroot=false")
   if (platform == "windows"):
     args_copy.append("is_clang=false")
+
+  if linux_clang != True:
+    args_copy.append("use_custom_libcxx=false")
 
   return "--args=\"" + " ".join(args_copy) + "\""
 
@@ -161,7 +169,6 @@ def make():
              "is_component_build=false",
              "v8_monolithic=true",
              "v8_use_external_startup_data=false",
-             "use_custom_libcxx=false",
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):

@@ -43,7 +43,7 @@ def process_link_tags(text, root=''):
     For a method, if an alias is not specified, the name is left in the format 'Class#Method'.
     """
     reserved_links = {
-        '/docbuilder/global#ShapeType': f"{'../../../' if root == '' else '../../' if root == '../' else root}text-document-api/Enumeration/ShapeType.md",
+        '/docbuilder/global#ShapeType': f"{'../../../../../../' if root == '' else '../../../../../' if root == '../' else root}docs/office-api/usage-api/text-document-api/Enumeration/ShapeType.md",
         '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
         '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
     }
@@ -605,8 +605,11 @@ def generate(output_dir):
     for editor_name, folder_name in editors.items():
         input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
-        shutil.rmtree(output_dir + f'/{folder_name}', ignore_errors=True)
-        os.makedirs(output_dir + f'/{folder_name}')
+        editor_folder_path = os.path.join(output_dir, folder_name)
+        for folder_name in os.listdir(editor_folder_path):
+            folder_path_to_del = os.path.join(editor_folder_path, folder_name)
+            if os.path.isdir(folder_path_to_del):
+                shutil.rmtree(folder_path_to_del, ignore_errors=True)
 
         data = load_json(input_file)
         used_enumerations.clear()
@@ -622,7 +625,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../office-js-api/plugins/"  # Default value
+        default="../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/methods/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

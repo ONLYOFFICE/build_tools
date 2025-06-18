@@ -33,24 +33,29 @@ def make():
   base.set_env('NODE_ENV', 'production')
 
   base_dir = base.get_script_dir() + "/.."
-  out_dir = base_dir + "/out/js/";
+  out_dir = base_dir + "/out/js/"
   branding = config.option("branding-name")
   if ("" == branding):
     branding = "onlyoffice"
   out_dir += branding
   base.create_dir(out_dir)
 
+  isOnlyMobile = False
+  if (config.option("module") == "mobile"):
+    isOnlyMobile = True
+
   # builder
-  base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
-  build_interface(base_dir + "/../web-apps/build")
-  build_sdk_builder(base_dir + "/../sdkjs/build")
-  base.create_dir(out_dir + "/builder")
-  base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
-  base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
-  correct_sdkjs_licence(out_dir + "/builder/sdkjs")
+  if not isOnlyMobile:
+    base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
+    build_interface(base_dir + "/../web-apps/build")
+    build_sdk_builder(base_dir + "/../sdkjs/build")
+    base.create_dir(out_dir + "/builder")
+    base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
+    base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
+    correct_sdkjs_licence(out_dir + "/builder/sdkjs")
 
   # desktop
-  if config.check_option("module", "desktop"):
+  if config.check_option("module", "desktop") and not isOnlyMobile:
     build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
@@ -72,7 +77,7 @@ def make():
 
   # mobile
   if config.check_option("module", "mobile"):
-    build_sdk_native(base_dir + "/../sdkjs/build", False)
+    build_sdk_native(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/mobile")
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"

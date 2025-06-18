@@ -19,6 +19,7 @@
     "core/PdfFile/PdfFile.pro",
     "core/DjVuFile/DjVuFile.pro",
     "core/XpsFile/XpsFile.pro",
+    "core/OFDFile/OFDFile.pro",
     "core/HtmlFile2/HtmlFile2.pro",
     "core/Fb2File/Fb2File.pro",
     "core/EpubFile/CEpubFile.pro",
@@ -93,7 +94,7 @@
     
     "[win]desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
     "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro",
-    "[win,!win_xp]desktop-apps/win-linux/extras/online-installer/OnlineInstaller.pro"
+    "[win_xp]desktop-apps/win-linux/extras/online-installer/OnlineInstaller.pro"
   ],
 
   "mobile" : [

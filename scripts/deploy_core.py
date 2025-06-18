@@ -32,6 +32,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "OFDFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "UnicodeConverter")

@@ -40,7 +40,7 @@ def make():
     isWindowsXP = False if (-1 == native_platform.find("_xp")) else True
     platform = native_platform[0:-3] if isWindowsXP else native_platform
 
-    apps_postfix = "build" + base.qt_dst_postfix();
+    apps_postfix = "build" + base.qt_dst_postfix()
     if ("" != config.option("branding")):
       apps_postfix += ("/" + config.option("branding"))
     apps_postfix += "/"
@@ -65,6 +65,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "PdfFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DjVuFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "XpsFile")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "OFDFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "HtmlFile2")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "Fb2File")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "EpubFile")
@@ -184,6 +185,7 @@ def make():
         base.copy_file(git_dir + "/desktop-apps/win-linux/extras/projicons/" + apps_postfix + "/projicons.exe", root_dir + "/DesktopEditors.exe")
         if not isWindowsXP:
           base.copy_file(git_dir + "/desktop-apps/win-linux/extras/update-daemon/" + apps_postfix + "/updatesvc.exe", root_dir + "/updatesvc.exe")
+        else:
           base.copy_file(git_dir + "/desktop-apps/win-linux/extras/online-installer/" + apps_postfix + "/online-installer.exe", root_dir + "/online-installer.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/" + apps_postfix + "/DesktopEditors.exe", root_dir + "/editors.exe")
         base.copy_file(git_dir + "/desktop-apps/win-linux/res/icons/desktopeditors.ico", root_dir + "/app.ico")

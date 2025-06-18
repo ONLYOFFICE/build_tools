@@ -128,12 +128,9 @@ def make_inno():
     ret = utils.ps1("make_inno.ps1", args + ["-Target", "standalone"], verbose=True)
     utils.set_summary("desktop inno standalone build", ret)
 
-  if update_wrapper:
+  if update_wrapper and not xp:
     utils.log_h2("desktop inno update build")
-    if xp:
-      ret = utils.ps1("make_inno.ps1", args + ["-Target", "xp_update"], verbose=True)
-    else:
-      ret = utils.ps1("make_inno.ps1", args + ["-Target", "update"], verbose=True)
+    ret = utils.ps1("make_inno.ps1", args + ["-Target", "update"], verbose=True)
     utils.set_summary("desktop inno update build", ret)
 
   if common.deploy:
@@ -178,7 +175,7 @@ def make_advinst():
   return
 
 def make_online():
-  if not common.platform in ["windows_x64", "windows_x86"]:
+  if not common.platform in ["windows_x86_xp"]:
     return
   online_file = "%s-%s-%s.exe" % ("OnlineInstaller", package_version, suffix)
   ret = utils.is_file(online_file)

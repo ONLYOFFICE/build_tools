@@ -8,7 +8,7 @@ import os
 
 def clean():
   if base.is_dir("glew-2.1.0"):
-    base.delete_dir("glew-2.1.0");
+    base.delete_dir("glew-2.1.0")
   return
 
 def make():
@@ -16,7 +16,7 @@ def make():
     return
 
   if not config.check_option("module", "mobile"):
-    return;
+    return
 
   print("[fetch & build]: glew")
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/glew"

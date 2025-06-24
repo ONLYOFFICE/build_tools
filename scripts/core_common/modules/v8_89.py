@@ -55,11 +55,13 @@ def make_args(args, platform, is_64=True, is_debug=False):
   linux_clang = False
   if (platform == "linux"):
     args_copy.append("is_clang=true")
-    if "1" == config.option("use-clang"):
+    if "1" == config.option("use-clang") or "" != config.option("custom-sysroot"):
       args_copy.append("use_sysroot=true")
       linux_clang = True
     else:
       args_copy.append("use_sysroot=false")
+
+
   if (platform == "windows"):
     args_copy.append("is_clang=false")
 

@@ -199,6 +199,14 @@ def is_mobile_platform():
     return True
   return False
 
+def get_custom_sysroot_bin():
+  return option("custom-sysroot") + "/usr/bin"
+
+# todo 32bit support?
+def get_custom_sysroot_lib():
+  if base.is_os_64bit():
+    return option("custom-sysroot") + "/usr/lib/x86_64-linux-gnu"
+
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"
   if ("" != option("branding")):

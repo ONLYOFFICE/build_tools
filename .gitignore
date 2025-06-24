@@ -7,6 +7,7 @@ config
 *.*~
 **~
 *.DS_Store
+.idea
 scripts/license_checker/reports
 tests/puppeteer/node_modules
 tests/puppeteer/work_directory

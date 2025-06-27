@@ -6,11 +6,10 @@ import re
 
 # Configuration files
 configs = [
-    "./config/plugins/methods/common.json",
-    "./config/plugins/methods/word.json",
-    "./config/plugins/methods/cell.json",
-    "./config/plugins/methods/slide.json",
-    "./config/plugins/methods/forms.json"
+    "./config/plugins/events/common.json",
+    "./config/plugins/events/word.json",
+    "./config/plugins/events/cell.json",
+    "./config/plugins/events/slide.json"
 ]
 
 root = '../../../..'
@@ -105,7 +104,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default=f"{root}/office-js-api-declarations/office-js-api-plugins/methods"
+        default=f"{root}/office-js-api-declarations/office-js-api-plugins/events"
     )
     args = parser.parse_args()
     generate(args.destination)

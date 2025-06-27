@@ -53,13 +53,16 @@ def make_args(args, platform, is_64=True, is_debug=False):
     args_copy.append("is_debug=false")
   
   linux_clang = False
-  if (platform == "linux"):
-    args_copy.append("is_clang=true")
-    if "1" == config.option("use-clang") or "" != config.option("custom-sysroot"):
-      args_copy.append("use_sysroot=true")
-      linux_clang = True
-    else:
+  if platform == "linux":
+    if "" != config.option("custom-sysroot"):
       args_copy.append("use_sysroot=false")
+      args_copy.append("is_clang=false")
+    else:
+      args_copy.append("is_clang=true")
+      if "1" == config.option("use-clang"):
+        linux_clang = True
+      else:
+        args_copy.append("use_sysroot=false")
 
 
   if (platform == "windows"):
@@ -175,6 +178,10 @@ def make():
 
   if config.check_option("platform", "linux_64"):
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
+    if config.option("custom-sysroot") != "":
+      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+      #os.environ['CXX'] = config.get_custom_sysroot_bin() + "/bin/g++"
+      #os.environ['LINK'] = config.get_custom_sysroot_lib() + "/bin/g++"
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):

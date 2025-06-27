@@ -22,10 +22,10 @@ def move_debug_libs_windows(dir):
 
 def clean():
   if base.is_dir("boost_1_58_0"):
-    base.delete_dir_with_access_error("boost_1_58_0");
+    base.delete_dir_with_access_error("boost_1_58_0")
     base.delete_dir("boost_1_58_0")
   if base.is_dir("boost_1_72_0"):
-    base.delete_dir_with_access_error("boost_1_72_0");
+    base.delete_dir_with_access_error("boost_1_72_0")
     base.delete_dir("boost_1_72_0")
   if base.is_dir("build"):
     base.delete_dir("build")
@@ -89,10 +89,15 @@ def make():
     correct_install_includes_win(base_dir, "win_32")    
 
   if config.check_option("platform", "linux_64") and not base.is_dir("../build/linux_64"):
-    base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"])
+    addon_config = []
+    addon_compile = []
+    if "1" == config.option("use-clang"):
+      addon_config = ["--with-toolset=clang"]
+      addon_compile = ["cxxflags=-stdlib=libc++", "linkflags=-stdlib=libc++", "define=_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION"]
+    base.cmd("./bootstrap.sh", ["--with-libraries=filesystem,system,date_time,regex"] + addon_config)
     base.cmd("./b2", ["headers"])
     base.cmd("./b2", ["--clean"])
-    base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC", "install"])    
+    base.cmd("./b2", ["--prefix=./../build/linux_64", "link=static", "cxxflags=-fPIC"] + addon_compile + ["install"])
     # TODO: support x86
 
   if config.check_option("platform", "linux_arm64") and not base.is_dir("../build/linux_arm64"):

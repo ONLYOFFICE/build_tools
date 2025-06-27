@@ -10,10 +10,10 @@ import v8_89
 
 def clean():
   if base.is_dir("depot_tools"):
-    base.delete_dir_with_access_error("depot_tools");
+    base.delete_dir_with_access_error("depot_tools")
     base.delete_dir("depot_tools")
   if base.is_dir("v8"):
-    base.delete_dir_with_access_error("v8");
+    base.delete_dir_with_access_error("v8")
     base.delete_dir("v8")
   if base.is_exist("./.gclient"):
     base.delete_file("./.gclient")
@@ -45,7 +45,7 @@ def is_use_clang():
   gcc_version = base.get_gcc_version()  
     
   is_clang = "false"
-  if (gcc_version >= 6000):
+  if (gcc_version >= 6000 or "1" == config.option("use-clang")):
     is_clang = "true"
 
   print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)
@@ -269,7 +269,7 @@ def make_xp():
     "for file in projects:",
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>')",
     "  replaceInFile(file, '<RuntimeLibrary>MultiThreaded</RuntimeLibrary>', '<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>')",
-    ]);
+    ])
 
   programFilesDir = base.get_env("ProgramFiles")
   if ("" != base.get_env("ProgramFiles(x86)")):

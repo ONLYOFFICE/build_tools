@@ -199,7 +199,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     converted = [convert_jsdoc_array_to_ts(t) for t in types]
 
     # Set of primitive types
-    primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "{}"}
+    primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "{}", "date"}
 
     def is_primitive(type):
         if (type.lower() in primitive_types or

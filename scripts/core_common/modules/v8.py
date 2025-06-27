@@ -51,12 +51,6 @@ def is_use_clang():
   print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)
   return is_clang
 
-def is_use_sysroot():
-  is_sysroot = "false"
-  if config.option("custom-sysroot") != "":
-    is_sysroot = "true"
-  return is_sysroot
-
 def make():
   if not is_main_platform():
     make_xp()
@@ -175,11 +169,11 @@ def make():
   base_args32 = "target_cpu=\\\"x86\\\" v8_target_cpu=\\\"x86\\\" v8_static_library=true is_component_build=false v8_use_snapshot=false"
 
   if config.check_option("platform", "linux_64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=" + is_use_sysroot() + "treat_warnings_as_errors=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_64", "--args=\"is_debug=false " + base_args64 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_64"])
 
   if config.check_option("platform", "linux_32"):
-    base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=" + is_use_clang() + " use_sysroot=" + is_use_sysroot() + "treat_warnings_as_errors=false\""])
+    base.cmd2("gn", ["gen", "out.gn/linux_32", "--args=\"is_debug=false " + base_args32 + " is_clang=" + is_use_clang() + " use_sysroot=false treat_warnings_as_errors=false\""])
     base.cmd("ninja", ["-C", "out.gn/linux_32"])
 
   if config.check_option("platform", "mac_64"):

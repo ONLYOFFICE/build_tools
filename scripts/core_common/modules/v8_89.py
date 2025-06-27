@@ -177,12 +177,19 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
     if config.option("custom-sysroot") != "":
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-      #os.environ['CXX'] = config.get_custom_sysroot_bin() + "/bin/g++"
-      #os.environ['LINK'] = config.get_custom_sysroot_lib() + "/bin/g++"
-    base.cmd("ninja", ["-C", "out.gn/linux_64"])
+
+      src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
+      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("custom-sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("custom-sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("custom-sysroot") + "\"]"
+      base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
+
+      src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
+      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
+      base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
+
+    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+    base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])

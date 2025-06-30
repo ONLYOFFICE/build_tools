@@ -13,7 +13,7 @@ def writeFile(path, content):
   if (os.path.isfile(path)):
     os.remove(path)
 
-  with open(path, "w") as file:
+  with open(path, "w", encoding='utf-8') as file:
     file.write(content)
   return
 
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../onlyoffice.github.io\sdkjs-plugins\content\macros\libs/"  # Default value
+        default="../../../web-apps/vendor/monaco/libs/"  # Default value
     )
     args = parser.parse_args()
     
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     if True == os.path.isdir(args.destination):
       shutil.rmtree(args.destination, ignore_errors=True)
     os.mkdir(args.destination)
-    convert_to_interface(["word/apiBuilder.js"], "word")
+    convert_to_interface(["word/apiBuilder.js", "../sdkjs-forms/apiBuilder.js"], "word")
     convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js"], "slide")
     convert_to_interface(["word/apiBuilder.js", "slide/apiBuilder.js", "cell/apiBuilder.js"], "cell")
     os.chdir(old_cur)

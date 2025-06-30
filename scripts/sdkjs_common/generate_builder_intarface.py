@@ -160,6 +160,12 @@ class EditorApi(object):
         editors_support = decoration[index_type_editors:index_type_editors_end]
         if -1 == editors_support.find(self.type):
           return
+        
+    decoration = "\n".join(
+        line for line in decoration.splitlines()
+        if "@typeofeditors" not in line and "@see" not in line
+    )
+    
     # optimizations for first file
     if 0 == self.numfile:
       self.records.append(decoration + "\n" + code + "\n")

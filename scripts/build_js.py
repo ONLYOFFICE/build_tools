@@ -46,21 +46,13 @@ def make():
 
   # builder
   if not isOnlyMobile:
-    print("LOG: start merge web-apps langs");
     base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
-    print("LOG: start build_interface");
     build_interface(base_dir + "/../web-apps/build")
-    print("LOG: start build_sdk_builder");
     build_sdk_builder(base_dir + "/../sdkjs/build")
-    print("LOG: create_dir builder");
     base.create_dir(out_dir + "/builder")
-    print("LOG: copy_dir web-apps");
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
-    print("LOG: copy_dir sdkjs");
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
-    print("LOG: correct_sdkjs_licence");
     correct_sdkjs_licence(out_dir + "/builder/sdkjs")
-    print("LOG: correct_sdkjs_licence finished");
 
   # desktop
   if config.check_option("module", "desktop") and not isOnlyMobile:
@@ -116,8 +108,11 @@ def make():
   return
 
 # JS build
-def _run_npm(directory, params=[]):
-  return base.cmd_in_dir(directory, "npm", ["install"] + params)
+def _run_npm(directory):
+  retValue = base.cmd_in_dir(directory, "npm", ["install"], True)
+  if (0 != retValue):
+    retValue = base.cmd_in_dir(directory, "npm", ["install", "--verbose"])
+  return retValue
 
 def _run_npm_ci(directory):
   return base.cmd_in_dir(directory, "npm", ["ci"])
@@ -129,11 +124,8 @@ def _run_grunt(directory, params=[]):
   return base.cmd_in_dir(directory, "grunt", params)
 
 def build_interface(directory):
-  print("LOG: interface 1 step");
-  _run_npm(directory, ["--verbose"])
-  print("LOG: interface 2 step");
+  _run_npm(directory)
   _run_grunt(directory, ["--force", "--verbose"] + base.web_apps_addons_param())
-  print("LOG: interface 3 step");
   return
 
 def get_build_param(minimize=True):

@@ -129,8 +129,11 @@ def _run_grunt(directory, params=[]):
   return base.cmd_in_dir(directory, "grunt", params)
 
 def build_interface(directory):
+  print("LOG: interface 1 step");
   _run_npm(directory)
+  print("LOG: interface 2 step");
   _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
+  print("LOG: interface 3 step");
   return
 
 def get_build_param(minimize=True):

@@ -521,6 +521,17 @@ def generate_enumeration_markdown(enumeration, enumerations, classes):
 
     return escape_text_outside_code_blocks(content)
 
+def clean_editor_dir(editor_dir):
+    for root, dirs, files in os.walk(editor_dir, topdown=False):
+        for file in files:
+            if not file.endswith(('.json')):
+                os.remove(os.path.join(root, file))
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            # remove empty folder
+            if not os.listdir(dir_path):
+                os.rmdir(dir_path)
+
 def process_doclets(data, output_dir, editor_name):
     global cur_editor_name
     cur_editor_name = editor_name
@@ -528,7 +539,10 @@ def process_doclets(data, output_dir, editor_name):
     classes = {}
     classes_props = {}
     enumerations = []
-    editor_dir = os.path.join(output_dir, editors[editor_name])
+    editor_dir = os.path.join(output_dir, editors[editor_name], 'methods')
+
+    clean_editor_dir(editor_dir)
+    os.makedirs(editor_dir, exist_ok=True)
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -605,12 +619,6 @@ def generate(output_dir):
     for editor_name, folder_name in editors.items():
         input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
-        editor_folder_path = os.path.join(output_dir, folder_name)
-        for folder_name in os.listdir(editor_folder_path):
-            folder_path_to_del = os.path.join(editor_folder_path, folder_name)
-            if os.path.isdir(folder_path_to_del):
-                shutil.rmtree(folder_path_to_del, ignore_errors=True)
-
         data = load_json(input_file)
         used_enumerations.clear()
         process_doclets(data, output_dir, editor_name)
@@ -625,7 +633,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/methods/"  # Default value
+        default="../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

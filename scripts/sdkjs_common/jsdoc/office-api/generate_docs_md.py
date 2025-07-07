@@ -3,7 +3,7 @@ import json
 import re
 import shutil
 import argparse
-import generate_docs_plugins_json
+import generate_docs_json
 
 # Configuration files
 editors = {
@@ -17,10 +17,6 @@ missing_examples = []
 used_enumerations = set()
 
 cur_editor_name = None
-
-_CODE_BLOCK_RE = re.compile(r'(```.*?```)', re.DOTALL)
-_QSTRING_RE    = re.compile(r'(["\'])(.*?)(?<!\\)\1', re.DOTALL)
-_BRACKET_TABLE = {ord('['): '&#91;', ord(']'): '&#93;'}
 
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -44,7 +40,7 @@ def process_link_tags(text, root=''):
     """
     reserved_links = {
         '/docbuilder/global#ShapeType': f"{'../../../../../../' if root == '' else '../../../../../' if root == '../' else root}docs/office-api/usage-api/text-document-api/Enumeration/ShapeType.md",
-        '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/manifest/',
+        '/plugin/config': 'https://api.onlyoffice.com/docs/plugin-and-macros/structure/configuration/',
         '/docbuilder/basic': 'https://api.onlyoffice.com/docs/office-api/usage-api/text-document-api/'
     }
 
@@ -80,7 +76,7 @@ def process_link_tags(text, root=''):
 
     return re.sub(r'{@link\s+([^}]+)}', replace_link, text)
 
-def correct_description(string, root=''):
+def correct_description(string, root='', isInTable=False):
     """
     Cleans or transforms specific tags in the doclet description:
       - <b> => ** (bold text)
@@ -92,8 +88,9 @@ def correct_description(string, root=''):
     if string is None:
         return 'No description provided.'
 
-    # Line breaks
-    string = string.replace('\r', '\\\n')
+    if False == isInTable:
+        # Line breaks
+        string = string.replace('\r', '\\\n')
     
     # Replace <b> tags with Markdown bold formatting
     string = re.sub(r'<b>', '-**', string)
@@ -111,10 +108,8 @@ def correct_default_value(value, enumerations, classes):
     if value is None or value == '':
         return ''
     
-    if value == True:
-        value = "true"
-    elif value == False:
-        value = "false"
+    if isinstance(value, bool):
+        value = "true" if value else "false"
     else:
         value = str(value)
     
@@ -201,7 +196,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
     converted = [convert_jsdoc_array_to_ts(t) for t in types]
 
     # Set of primitive types
-    primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "{}"}
+    primitive_types = {"string", "number", "boolean", "null", "undefined", "any", "object", "false", "true", "json", "function", "date", "{}"}
 
     def is_primitive(type):
         if (type.lower() in primitive_types or
@@ -302,6 +297,7 @@ def generate_data_types_markdown(types, enumerations, classes, root='../../'):
 
     return param_types_md
 
+
 def generate_class_markdown(class_name, methods, properties, enumerations, classes):
     content = f"# {class_name}\n\nRepresents the {class_name} class.\n\n"
     
@@ -323,7 +319,7 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
             returns_markdown = "None"
         
         # Processing the method description
-        description = remove_line_breaks(correct_description(method.get('description', 'No description provided.'), '../'))
+        description = remove_line_breaks(correct_description(method.get('description', 'No description provided.'), '../', True))
         
         # Form a link to the method document
         method_link = f"[{method_name}](./Methods/{method_name}.md)"
@@ -332,21 +328,14 @@ def generate_class_markdown(class_name, methods, properties, enumerations, class
     
     return escape_text_outside_code_blocks(content)
 
-def generate_method_markdown(method, enumerations, classes):
-    """
-    Generates Markdown for a method doclet, relying only on `method['examples']`
-    (array of strings). Ignores any single `method['example']` field.
-    """
-
+def generate_method_markdown(method, enumerations, classes, example_editor_name):
     method_name = method['name']
     description = method.get('description', 'No description provided.')
     description = correct_description(description, '../../')
     params = method.get('params', [])
     returns = method.get('returns', [])
+    example = method.get('example', '')
     memberof = method.get('memberof', '')
-
-    # Use the 'examples' array only
-    examples = method.get('examples', [])
 
     content = f"# {method_name}\n\n{description}\n\n"
     
@@ -365,7 +354,7 @@ def generate_method_markdown(method, enumerations, classes):
             param_name = param.get('name', 'Unnamed')
             param_types = param.get('type', {}).get('names', []) if param.get('type') else []
             param_types_md = generate_data_types_markdown(param_types, enumerations, classes)
-            param_desc = remove_line_breaks(correct_description(param.get('description', 'No description provided.'), '../../'))
+            param_desc = remove_line_breaks(correct_description(param.get('description', 'No description provided.'), '../../', True))
             param_required = "Required" if not param.get('optional') else "Optional"
             param_default = correct_default_value(param.get('defaultvalue', ''), enumerations, classes)
 
@@ -381,32 +370,18 @@ def generate_method_markdown(method, enumerations, classes):
         content += return_type_md
     else:
         content += "This method doesn't return any data."
-
-    # Process examples array
-    if examples:
-        if len(examples) > 1:
-            content += "\n\n## Examples\n\n"
+    
+    # Example
+    if example:
+        # Separate comment and code, remove JS comments
+        if '```js' in example:
+            comment, code = example.split('```js', 1)
+            comment = remove_js_comments(comment)
+            content += f"\n\n## Example\n\n{comment}\n\n```javascript {example_editor_name}\n{code.strip()}\n"
         else:
-            content += "\n\n## Example\n\n"
-
-        for i, ex_line in enumerate(examples, start=1):
-            # Remove JS comments
-            cleaned_example = remove_js_comments(ex_line).strip()
-
-            # Attempt splitting if the user used ```js
-            if '```js' in cleaned_example:
-                comment, code = cleaned_example.split('```js', 1)
-                comment = comment.strip()
-                code = code.strip()
-                if len(examples) > 1:
-                    content += f"**Example {i}:**\n\n{comment}\n\n"
-                
-                content += f"```javascript\n{code}\n```\n"
-            else:
-                if len(examples) > 1:
-                    content += f"**Example {i}:**\n\n{comment}\n\n"
-                # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+            # If there's no triple-backtick structure, just show it as code
+            cleaned_example = remove_js_comments(example)
+            content += f"\n\n## Example\n\n```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -421,7 +396,7 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
     for prop in sorted(properties, key=lambda m: m['name']):
         prop_name = prop['name']
         prop_description = prop.get('description', 'No description provided.')
-        prop_description = remove_line_breaks(correct_description(prop_description))
+        prop_description = remove_line_breaks(correct_description(prop_description, root, True))
         prop_types = prop['type']['names'] if prop.get('type') else []
         param_types_md = generate_data_types_markdown(prop_types, enumerations, classes, root)
         content += f"| {prop_name} | {param_types_md} | {prop_description} |\n"
@@ -429,95 +404,62 @@ def generate_properties_markdown(properties, enumerations, classes, root='../'):
     # Escape outside code blocks
     return escape_text_outside_code_blocks(content)
 
-def generate_enumeration_markdown(enumeration, enumerations, classes):
-    """
-    Generates Markdown documentation for a 'typedef' doclet.
-    This version only works with `enumeration['examples']` (an array of strings),
-    ignoring any single `enumeration['examples']` field.
-    """
+def generate_enumeration_markdown(enumeration, enumerations, classes, example_editor_name):
     enum_name = enumeration['name']
-
+    
     if enum_name not in used_enumerations:
-        return None
+            return None
     
     description = enumeration.get('description', 'No description provided.')
     description = correct_description(description, '../')
-
-    # Only use the 'examples' array
-    examples = enumeration.get('examples', [])
+    example = enumeration.get('example', '')
 
     content = f"# {enum_name}\n\n{description}\n\n"
+    
+    ptype = enumeration['type']['parsedType']
+    if ptype['type'] == 'TypeUnion':
+        enum_empty = True # is empty enum
 
-    parsed_type = enumeration['type'].get('parsedType')
-    if not parsed_type:
-        # If parsedType is missing, just list 'type.names' if available
-        type_names = enumeration['type'].get('names', [])
-        if type_names:
-            content += "## Type\n\n"
-            t_md = generate_data_types_markdown(type_names, enumerations, classes)
-            content += t_md + "\n\n"
+        content += "## Type\n\nEnumeration\n\n"
+        content += "## Values\n\n"
+        # Each top-level name in the union
+        for raw_t in enumeration['type']['names']:
+            ts_t = convert_jsdoc_array_to_ts(raw_t)
+
+            # Attempt linking: we compare the raw type to enumerations/classes
+            if any(enum['name'] == raw_t for enum in enumerations):
+                used_enumerations.add(raw_t)
+                content += f"- [{ts_t}](../Enumeration/{raw_t}.md)\n"
+                enum_empty = False
+            elif raw_t in classes:
+                content += f"- [{ts_t}](../{raw_t}/{raw_t}.md)\n"
+                enum_empty = False
+            elif ts_t.find('Api') == -1:
+                content += f"- {ts_t}\n"
+                enum_empty = False
+        
+        if enum_empty == True:
+            return None
+    elif enumeration['properties'] is not None:
+        content += "## Type\n\nObject\n\n"
+        content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
     else:
-        ptype = parsed_type['type']
+        content += "## Type\n\n"
+        # If it's not a union and has no properties, simply print the type(s).
+        types = enumeration['type']['names']
+        t_md = generate_data_types_markdown(types, enumerations, classes)
+        content += t_md + "\n\n"
 
-        # 1) Handle TypeUnion
-        if ptype == 'TypeUnion':
-            content += "## Type\n\nEnumeration\n\n"
-            content += "## Values\n\n"
-            for raw_t in enumeration['type']['names']:
-                # Attempt linking
-                if any(enum['name'] == raw_t for enum in enumerations):
-                    used_enumerations.add(raw_t)
-                    content += f"- [{raw_t}](../Enumeration/{raw_t}.md)\n"
-                elif raw_t in classes:
-                    content += f"- [{raw_t}](../{raw_t}/{raw_t}.md)\n"
-                else:
-                    content += f"- {raw_t}\n"
-
-        # 2) Handle TypeApplication (e.g. Object.<string, string>)
-        elif ptype == 'TypeApplication':
-            content += "## Type\n\nObject\n\n"
-            type_names = enumeration['type'].get('names', [])
-            if type_names:
-                t_md = generate_data_types_markdown(type_names, enumerations, classes)
-                content += f"**Type:** {t_md}\n\n"
-
-        # 3) If properties are present, treat it like an object
-        if enumeration.get('properties') is not None:
-            content += generate_properties_markdown(enumeration['properties'], enumerations, classes)
-
-        # 4) If it's neither TypeUnion nor TypeApplication, just output the type names
-        if ptype not in ('TypeUnion', 'TypeApplication'):
-            type_names = enumeration['type'].get('names', [])
-            if type_names:
-                content += "## Type\n\n"
-                t_md = generate_data_types_markdown(type_names, enumerations, classes)
-                content += t_md + "\n\n"
-
-    # Process examples array
-    if examples:
-        if len(examples) > 1:
-            content += "\n\n## Examples\n\n"
+    # Example
+    if example:
+        if '```js' in example:
+            comment, code = example.split('```js', 1)
+            comment = remove_js_comments(comment)
+            content += f"\n\n## Example\n\n{comment}\n\n```javascript {example_editor_name}\n{code.strip()}\n"
         else:
-            content += "\n\n## Example\n\n"
-
-        for i, ex_line in enumerate(examples, start=1):
-            # Remove JS comments
-            cleaned_example = remove_js_comments(ex_line).strip()
-
-            # Attempt splitting if the user used ```js
-            if '```js' in cleaned_example:
-                comment, code = cleaned_example.split('```js', 1)
-                comment = comment.strip()
-                code = code.strip()
-                if len(examples) > 1:
-                    content += f"**Example {i}:**\n\n{comment}\n\n"
-                
-                content += f"```javascript\n{code}\n```\n"
-            else:
-                if len(examples) > 1:
-                    content += f"**Example {i}:**\n\n{comment}\n\n"
-                # No special fences, just show as code
-                content += f"```javascript\n{cleaned_example}\n```\n"
+            # If there's no triple-backtick structure
+            cleaned_example = remove_js_comments(example)
+            content += f"\n\n## Example\n\n```javascript {example_editor_name}\n{cleaned_example}\n```\n"
 
     return escape_text_outside_code_blocks(content)
 
@@ -529,6 +471,16 @@ def process_doclets(data, output_dir, editor_name):
     classes_props = {}
     enumerations = []
     editor_dir = os.path.join(output_dir, editors[editor_name])
+    example_editor_name = 'editor-'
+    
+    if editor_name == 'word':
+        example_editor_name += 'docx'
+    elif editor_name == 'forms':
+        example_editor_name += 'pdf'
+    elif editor_name == 'slide':
+        example_editor_name += 'pptx'
+    elif editor_name == 'cell':
+        example_editor_name += 'xlsx'
 
     for doclet in data:
         if doclet['kind'] == 'class':
@@ -541,7 +493,7 @@ def process_doclets(data, output_dir, editor_name):
             class_name = doclet.get('memberof')
             if class_name:
                 if class_name not in classes:
-                        classes[class_name] = []
+                    classes[class_name] = []
                 classes[class_name].append(doclet)
         elif doclet['kind'] == 'typedef':
             enumerations.append(doclet)
@@ -568,10 +520,10 @@ def process_doclets(data, output_dir, editor_name):
         # Write method files
         for method in methods:
             method_file_path = os.path.join(methods_dir, f"{method['name']}.md")
-            method_content = generate_method_markdown(method, enumerations, classes)
+            method_content = generate_method_markdown(method, enumerations, classes, example_editor_name)
             write_markdown_file(method_file_path, method_content)
 
-            if not method.get('examples', ''):
+            if not method.get('example', ''):
                 missing_examples.append(os.path.relpath(method_file_path, output_dir))
 
     # Process enumerations
@@ -583,25 +535,22 @@ def process_doclets(data, output_dir, editor_name):
     while len(used_enumerations) != prev_used_count:
         prev_used_count = len(used_enumerations)
         for enum in [e for e in enumerations if e['name'] in used_enumerations]:
-            enum_content = generate_enumeration_markdown(enum, enumerations, classes)
+            enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
 
     for enum in enumerations:
         enum_file_path = os.path.join(enum_dir, f"{enum['name']}.md")
-        enum_content = generate_enumeration_markdown(enum, enumerations, classes)
+        enum_content = generate_enumeration_markdown(enum, enumerations, classes, example_editor_name)
         if enum_content is None:
             continue
 
         write_markdown_file(enum_file_path, enum_content)
-        if not enum.get('examples', ''):
+        if not enum.get('example', ''):
             missing_examples.append(os.path.relpath(enum_file_path, output_dir))
 
 def generate(output_dir):
     print('Generating Markdown documentation...')
     
-    if output_dir[-1] == '/':
-        output_dir = output_dir[:-1]
-    
-    generate_docs_plugins_json.generate(output_dir + '/tmp_json', md=True)
+    generate_docs_json.generate(output_dir + 'tmp_json', md=True)
     for editor_name, folder_name in editors.items():
         input_file = os.path.join(output_dir + '/tmp_json', editor_name + ".json")
 
@@ -615,7 +564,7 @@ def generate(output_dir):
         used_enumerations.clear()
         process_doclets(data, output_dir, editor_name)
     
-    shutil.rmtree(output_dir + '/tmp_json')
+    shutil.rmtree(output_dir + 'tmp_json')
     print('Done')
 
 if __name__ == "__main__":
@@ -625,7 +574,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/methods/"  # Default value
+        default="../../../../../api.onlyoffice.com/site/docs/office-api/usage-api/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

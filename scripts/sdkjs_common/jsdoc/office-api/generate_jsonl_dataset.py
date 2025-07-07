@@ -21,7 +21,7 @@ editors_names = {
     "forms": "Forms"
 }
 
-root = '../../../..'
+root = '../../../../..'
 missing_examples = []
 
 def load_json(file_path):
@@ -228,7 +228,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../office-js-api/dataset"  # Default value
+        default="../../../../../office-js-api/dataset"  # Default value
     )
     parser.add_argument(
         "model", 

@@ -87,6 +87,3 @@ def make():
 
     os.chdir(old_dir)
     return
-
-if __name__ == '__main__':
-    make()

@@ -50,9 +50,11 @@ def correct_description(string, root='', isInTable=False):
     if False == isInTable:
         # Line breaks
         string = string.replace('\r', '\\\n')
+        # Replace <b> tags with Markdown bold formatting
+        string = re.sub(r'<b>', '-**', string)
+    else:
+        string = re.sub(r'<b>', '**', string)
     
-    # Replace <b> tags with Markdown bold formatting
-    string = re.sub(r'<b>', '-**', string)
     string = re.sub(r'</b>', '**', string)
     
     # Replace <note> tags with an icon and text

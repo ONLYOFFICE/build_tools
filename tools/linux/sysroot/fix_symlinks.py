@@ -4,6 +4,7 @@ import uuid
 
 # change symbolic link to relative paths
 def fix_symlinks(top_dir='./sysroot_ubuntu_1604'):
+    top_dir += '/usr/lib/x86_64-linux-gnu'
     for root, dirs, files in os.walk(top_dir):
         for name in files:
             path = os.path.join(root, name)

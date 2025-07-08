@@ -177,6 +177,7 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
+    ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
     if config.option("custom-sysroot") != "":
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
 
@@ -190,6 +191,7 @@ def make():
 
     base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
     base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
+    os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])

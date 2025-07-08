@@ -43,7 +43,7 @@ def download_sysroot():
     os.remove(arm_toolchain_tar_filename)
 
     base.cmd2('sudo -S mv', [tmp_sysroot_ubuntu_dir + '/', dst_sysroot_ubuntu_dir + '/'])
-    base.cmd2('sudo -S chmod', ['-R', 'u+rwx', dst_sysroot_ubuntu_dir])
+    base.cmd2('sudo -S chmod', ['-R', 'o+rwx', dst_sysroot_ubuntu_dir])
 
     # fix symlinks
     fix_symlinks.fix_symlinks(dst_sysroot_ubuntu_dir)

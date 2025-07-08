@@ -96,10 +96,12 @@ def make():
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"),)
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
 
+    ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
     if config.option("custom-sysroot") == "":
       base.cmd("make", [])
       base.cmd("make", ["install"])
       base.cmd("make", ["clean"], True)
+      os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
     else:
       base.cmd_exe("make", [])
       base.cmd_exe("make", ["install"])

@@ -93,6 +93,7 @@ def make():
       os.chdir("icu/cross_build")
       command_configure = "./../source/runConfigureICU"
       command_compile_addon = "-static-libstdc++ -static-libgcc"
+      ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
       if "1" == config.option("use-clang"):
         command_configure = "CXXFLAGS=-stdlib=libc++ " + command_configure
         command_compile_addon = "-stdlib=libc++"
@@ -114,6 +115,7 @@ def make():
       else:
         base.cmd_exe("make", ["-j4"])
         base.cmd_exe("make", ["install"], True)
+        os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
 
       base.create_dir(base_dir + "/linux_64")
       base.create_dir(base_dir + "/linux_64/build")

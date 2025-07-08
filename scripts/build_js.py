@@ -109,7 +109,10 @@ def make():
 
 # JS build
 def _run_npm(directory):
-  return base.cmd_in_dir(directory, "npm", ["install"])
+  retValue = base.cmd_in_dir(directory, "npm", ["install"], True)
+  if (0 != retValue):
+    retValue = base.cmd_in_dir(directory, "npm", ["install", "--verbose"])
+  return retValue
 
 def _run_npm_ci(directory):
   return base.cmd_in_dir(directory, "npm", ["ci"])
@@ -122,7 +125,7 @@ def _run_grunt(directory, params=[]):
 
 def build_interface(directory):
   _run_npm(directory)
-  _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
+  _run_grunt(directory, ["--force", "--verbose"] + base.web_apps_addons_param())
   return
 
 def get_build_param(minimize=True):

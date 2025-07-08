@@ -6,14 +6,14 @@ import re
 
 # Configuration files
 configs = [
-    "./config/plugins/methods/common.json",
-    "./config/plugins/methods/word.json",
-    "./config/plugins/methods/cell.json",
-    "./config/plugins/methods/slide.json",
-    "./config/plugins/methods/forms.json"
+    "./config/methods/common.json",
+    "./config/methods/word.json",
+    "./config/methods/cell.json",
+    "./config/methods/slide.json",
+    "./config/methods/forms.json"
 ]
 
-root = '../../../..'
+root = '../../../../..'
 
 def generate(output_dir, md=False):
     if not os.path.exists(output_dir):
@@ -49,7 +49,7 @@ def generate(output_dir, md=False):
         
         # Modify JSON data
         for idx, doclet in enumerate(data):
-            if idx == start_common_doclet_idx:
+            if idx >= start_common_doclet_idx:
                 example_folder_name = 'common'
             elif editor_name == 'forms':
                 example_folder_name = 'word'
@@ -84,7 +84,7 @@ def generate(output_dir, md=False):
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("Documentation generation for builder completed.")
+    print("Documentation generation for plugin methods completed.")
 
 def remove_builder_lines(text):
     lines = text.splitlines()  # Split text into lines
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default=f"{root}/office-js-api-declarations/office-js-api-plugins/methods"
+        default=f"{root}/office-js-api-declarations/office-js-api-plugins"
     )
     args = parser.parse_args()
     generate(args.destination)

@@ -5,6 +5,7 @@ sys.path.append('../../../scripts')
 import base
 import os
 import shutil
+import fix_symlinks
 
 def bash_chroot(command, sysroot):
     base.cmd2('sudo -S chroot', [sysroot, '/bin/bash -c', '\"' + command + ' \"'])
@@ -31,10 +32,6 @@ def download_sysroot():
     bash_chroot('apt upgrade -y', tmp_sysroot_ubuntu_dir)
     bash_chroot('apt install -y build-essential curl libpthread-stubs0-dev zlib1g-dev', tmp_sysroot_ubuntu_dir)
 
-    # fix link to a libdl
-    bash_chroot('rm /usr/lib/x86_64-linux-gnu/libdl.so', tmp_sysroot_ubuntu_dir)
-    bash_chroot('ln -s /lib/x86_64-linux-gnu/libdl.so.2 /usr/lib/x86_64-linux-gnu/libdl.so', tmp_sysroot_ubuntu_dir)
-
     # # downloading arm toolchain
     arm_toolchain_url = 'https://releases.linaro.org/components/toolchain/binaries/5.3-2016.05/aarch64-linux-gnu/'
     arm_toolchain_tar_filename = 'gcc-linaro-5.3.1-2016.05-x86_64_aarch64-linux-gnu.tar.xz'
@@ -47,6 +44,9 @@ def download_sysroot():
 
     base.cmd2('sudo -S mv', [tmp_sysroot_ubuntu_dir + '/', dst_sysroot_ubuntu_dir + '/'])
     base.cmd2('sudo -S chmod', ['-R', 'u+rwx', dst_sysroot_ubuntu_dir])
+
+    # fix symlinks
+    fix_symlinks.fix_symlinks(dst_sysroot_ubuntu_dir)
 
     return
 

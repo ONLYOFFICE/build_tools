@@ -104,8 +104,24 @@ def parse():
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"
 
+  # custom-sysroot setup
+  if "custom-sysroot" in options:
+    if options["custom-sysroot"] == "0":
+      options["custom-sysroot"] = ""
+    elif options["custom-sysroot"] == "1":
+      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../..')
+      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
+      options["custom-sysroot"] = custom_sysroot
+      if not os.path.isdir(custom_sysroot):
+        print("Custom sysroot is not found, unpacking...")
+        os.mkdir(custom_sysroot)
+        base.cmd2('tar', ['-xf', base.get_script_dir(__file__) + '/../tools/linux/sysroot/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
+
   if not "arm64-toolchain-bin" in options:
-    options["arm64-toolchain-bin"] = "/usr/bin"
+    if not "custom-sysroot" in options:
+      options["arm64-toolchain-bin"] = "/usr/bin"
+    else:
+      options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
 
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):

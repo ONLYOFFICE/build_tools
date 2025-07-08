@@ -124,7 +124,7 @@ def make():
     if config.check_option("platform", "linux_arm64") and not base.is_dir(base_dir + "/linux_arm64") and not base.is_os_arm():
       base.create_dir(base_dir + "/icu/linux_arm64")
       os.chdir(base_dir + "/icu/linux_arm64")
-      base_arm_tool_dir = base.get_prefix_cross_compiler_arm64()
+      base_arm_tool_dir = config.option('arm64-toolchain-bin') + '/' + base.get_prefix_cross_compiler_arm64()
       base.cmd("./../source/configure", ["--host=arm-linux", "--prefix=" + base_dir + "/icu/linux_arm64_install", "--with-cross-build=" + base_dir + "/icu/cross_build",
         "CC=" + base_arm_tool_dir + "gcc", "CXX=" + base_arm_tool_dir + "g++", "AR=" + base_arm_tool_dir + "ar", "RANLIB=" + base_arm_tool_dir + "ranlib"])
       base.cmd("make", ["-j4"])

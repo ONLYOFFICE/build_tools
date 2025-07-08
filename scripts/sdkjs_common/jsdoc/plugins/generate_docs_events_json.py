@@ -6,14 +6,14 @@ import re
 
 # Configuration files
 configs = [
-    "./config/plugins/common.json",
-    "./config/plugins/word.json",
-    "./config/plugins/cell.json",
-    "./config/plugins/slide.json",
-    "./config/plugins/forms.json"
+    "./config/events/common.json",
+    "./config/events/word.json",
+    "./config/events/cell.json",
+    "./config/events/slide.json",
+    "./config/events/forms.json"
 ]
 
-root = '../../../..'
+root = '../../../../..'
 
 def generate(output_dir, md=False):
     if not os.path.exists(output_dir):
@@ -49,7 +49,7 @@ def generate(output_dir, md=False):
         
         # Modify JSON data
         for idx, doclet in enumerate(data):
-            if idx == start_common_doclet_idx:
+            if idx >= start_common_doclet_idx:
                 example_folder_name = 'common'
             elif editor_name == 'forms':
                 example_folder_name = 'word'
@@ -84,7 +84,7 @@ def generate(output_dir, md=False):
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("Documentation generation for builder completed.")
+    print("Documentation generation for plugin events completed.")
 
 def remove_builder_lines(text):
     lines = text.splitlines()  # Split text into lines

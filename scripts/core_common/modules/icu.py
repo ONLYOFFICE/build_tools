@@ -93,7 +93,7 @@ def make():
       os.chdir("icu/cross_build")
       command_configure = "./../source/runConfigureICU"
       command_compile_addon = "-static-libstdc++ -static-libgcc"
-      ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
+      ld_library_path_copy = ''
       if "1" == config.option("use-clang"):
         command_configure = "CXXFLAGS=-stdlib=libc++ " + command_configure
         command_compile_addon = "-stdlib=libc++"
@@ -101,6 +101,8 @@ def make():
         base.cmd(command_configure, ["Linux", "--prefix=" + base_dir + "/icu/cross_build_install"])
         base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) " + command_compile_addon)
       else:
+        if 'LD_LIBRARY_PATH' in os.environ:
+          ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
         os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
         base.cmd_exe("./../source/configure", ["--prefix=" + base_dir + "/icu/cross_build_install",
                                            "CC=" + config.get_custom_sysroot_bin() + "/gcc", "CXX=" + config.get_custom_sysroot_bin() + "/g++",

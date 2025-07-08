@@ -177,8 +177,10 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
-    ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
+    ld_library_path_copy = ''
     if config.option("custom-sysroot") != "":
+      if 'LD_LIBRARY_PATH' in os.environ:
+        ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
 
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"

@@ -537,7 +537,7 @@ def git_get_base_url():
       colon_pos = origin.find(":", at_pos)
       if at_pos != -1 and colon_pos != -1:
         host = origin[at_pos+1:colon_pos]
-        return f"https://{host}/"
+        return "https://{host}/"
   
   # Fallback to GitHub
   return "https://github.com/"

@@ -42,9 +42,13 @@ jobs:
     steps:
       - name: Clone Gitea repo
         run: |
-          echo ${{ GITEA_SERVER_URL }}/${{ REPO_OWNER }}/${{ REPO_NAME }}.git
-          echo ${{ secrets.TOKEN }}
-          git clone https://:${{ secrets.TOKEN }}@${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
+          echo ${{ github.server_url }}
+          echo ${{ github.repository }}
+          
+          echo ${{ context.serverUrl }}
+          echo ${{ context.repo.owner }}
+          echo ${{ context.repo.repo }}
+          
       
       - name: Set up Python
         uses: actions/setup-python@v4

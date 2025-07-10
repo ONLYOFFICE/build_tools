@@ -40,6 +40,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Clone Gitea repo
+        run: |
+          git clone https://${{ secrets.GITEA_USERNAME }}:${{ secrets.GITEA_TOKEN }}@${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -65,7 +69,7 @@ jobs:
       
       - name: Run Git Operations
         run: |
-          cd build_tools/scripts/develop
+          cd ${REPO_NAME}/scripts/develop
           python git_operations.py ${{ inputs.operation }} "${{ inputs.branch_name }}" \
             --base-branch="${{ inputs.base_branch }}" \
             --branding="${{ inputs.branding }}" \

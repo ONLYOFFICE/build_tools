@@ -42,14 +42,7 @@ jobs:
     steps:
       - name: Clone Gitea repo
         run: |
-          git clone https://${{ secrets.GITEA_USERNAME }}:${{ secrets.GITEA_TOKEN }}@${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          path: build_tools
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+          git clone https://${{ secrets.USERNAME }}:${{ secrets.TOKEN }}@${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
       
       - name: Set up Python
         uses: actions/setup-python@v4

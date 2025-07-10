@@ -43,7 +43,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          path: ONLYOFFICE
+          path: ONLYOFFICE/build_tools
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       

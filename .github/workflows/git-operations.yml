@@ -42,12 +42,10 @@ jobs:
     steps:
       - name: Clone Gitea repo
         run: |
-          echo ${{ github.server_url }}
-          echo ${{ github.repository }}
-          
-          echo ${{ context.serverUrl }}
-          echo ${{ context.repo.owner }}
-          echo ${{ context.repo.repo }}
+          echo "GitHub Server URL: $GITHUB_SERVER_URL"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Owner: ${GITHUB_REPOSITORY%/*}"
+          echo "Repo: ${GITHUB_REPOSITORY#*/}"
           
       
       - name: Set up Python

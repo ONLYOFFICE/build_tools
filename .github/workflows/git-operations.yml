@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Clone Gitea repo
         run: |
-          echo ${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
+          echo ${{ GITEA_SERVER_URL }}/${{ REPO_OWNER }}/${{ REPO_NAME }}.git
           echo ${{ secrets.TOKEN }}
           git clone https://:${{ secrets.TOKEN }}@${GITEA_SERVER_URL}/${REPO_OWNER}/${REPO_NAME}.git
       

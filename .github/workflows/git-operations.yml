@@ -43,7 +43,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          path: ONLYOFFICE/build_tools
+          path: build_tools
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       
@@ -65,7 +65,7 @@ jobs:
       
       - name: Run Git Operations
         run: |
-          cd ONLYOFFICE/build_tools/scripts/develop
+          cd build_tools/scripts/develop
           python git_operations.py ${{ inputs.operation }} "${{ inputs.branch_name }}" \
             --base-branch="${{ inputs.base_branch }}" \
             --branding="${{ inputs.branding }}" \

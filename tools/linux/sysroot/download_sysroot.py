@@ -33,9 +33,9 @@ def download_sysroot():
     bash_chroot('apt install -y build-essential curl libpthread-stubs0-dev zlib1g-dev', tmp_sysroot_ubuntu_dir)
 
     # # downloading arm toolchain
-    arm_toolchain_url = 'https://releases.linaro.org/components/toolchain/binaries/5.3-2016.05/aarch64-linux-gnu/'
-    arm_toolchain_tar_filename = 'gcc-linaro-5.3.1-2016.05-x86_64_aarch64-linux-gnu.tar.xz'
-    arm_toolchain_output_dir = 'gcc-linaro-5.3.1-2016.05-x86_64_aarch64-linux-gnu'
+    arm_toolchain_url = 'https://releases.linaro.org/components/toolchain/binaries/5.4-2017.05/aarch64-linux-gnu/'
+    arm_toolchain_tar_filename = 'gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz'
+    arm_toolchain_output_dir = 'gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu'
     base.cmd2('wget', [arm_toolchain_url + arm_toolchain_tar_filename])
     base.cmd2('tar', ['-xf', arm_toolchain_tar_filename])
     base.cmd2('sudo -S rsync', ['-avh', '--progress', curr_dir + '/' + arm_toolchain_output_dir + '/', tmp_sysroot_ubuntu_dir + '/usr/'])

@@ -42,7 +42,7 @@ parser.add_option("--vs-version", action="store", type="string", dest="vs-versio
 parser.add_option("--vs-path", action="store", type="string", dest="vs-path", default="", help="path to vcvarsall")
 parser.add_option("--siteUrl", action="store", type="string", dest="siteUrl", default="127.0.0.1", help="site url")
 parser.add_option("--multiprocess", action="store", type="string", dest="multiprocess", default="1", help="provides ability to specify single process for make")
-parser.add_option("--custom-sysroot", action="store", type="string", dest="custom-sysroot", default="0", help="provides ability to use custom sysroot (ubuntu 16.04) to build c++ core. If value is \"1\", then the sysroot from tools/linux/sysroot will be used, and if it is not there, it will download it and unpack it. You can also set value as the path to the your own sysroot (rarely used)")
+parser.add_option("--custom-sysroot", action="store", type="string", dest="custom-sysroot", default="0", help="provides ability to use custom sysroot (ubuntu 16.04) to build c++ core. If value is \"1\", then the sysroot from tools/linux/sysroot will be used, and if it is not there, it will download it and unpack it. You can also set value as the path to the your own sysroot (rarely used). Only for linux")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

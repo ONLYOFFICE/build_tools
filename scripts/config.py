@@ -105,7 +105,10 @@ def parse():
     options["sdkjs-plugin-server"] = "default"
 
   # custom-sysroot setup
-  if "custom-sysroot" in options:
+  if "linux" != host_platform and "custom-sysroot" in options:
+    options["custom-sysroot"] = ""
+
+  if "linux" == host_platform and "custom-sysroot" in options:
     if options["custom-sysroot"] == "0":
       options["custom-sysroot"] = ""
     elif options["custom-sysroot"] == "1":

@@ -119,6 +119,8 @@ def parse():
         os.mkdir(custom_sysroot)
         print("Unpacking...")
         base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
+        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
+          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
 
   if not "arm64-toolchain-bin" in options:
     if not "custom-sysroot" in options:

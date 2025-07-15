@@ -109,13 +109,16 @@ def parse():
     if options["custom-sysroot"] == "0":
       options["custom-sysroot"] = ""
     elif options["custom-sysroot"] == "1":
-      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../..')
+      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
       custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
       options["custom-sysroot"] = custom_sysroot
       if not os.path.isdir(custom_sysroot):
-        print("Custom sysroot is not found, unpacking...")
+        print("Custom sysroot is not found, downloading...")
+        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
+        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
         os.mkdir(custom_sysroot)
-        base.cmd2('tar', ['-xf', base.get_script_dir(__file__) + '/../tools/linux/sysroot/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
+        print("Unpacking...")
+        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
 
   if not "arm64-toolchain-bin" in options:
     if not "custom-sysroot" in options:

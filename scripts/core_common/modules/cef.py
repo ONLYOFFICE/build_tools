@@ -19,7 +19,8 @@ def make():
     if not config.check_option("platform", platform):
       continue
 
-    url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
+    # url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
+    url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/cef/"
     archive_name = "./cef_binary.7z"
 
     if (-1 != platform.find("_xp")):

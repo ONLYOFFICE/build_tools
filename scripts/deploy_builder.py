@@ -65,7 +65,7 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/libicudata.so.58")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/libicuuc.so.58")
 
-    if (0 == platform.find("mac")):
+    if (0 == platform.find("mac") and not config.check_option("config", "bundle_dylibs")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
 
@@ -106,11 +106,11 @@ def make():
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder_midl.h", root_dir + "/include/docbuilder_midl.h")
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
-    
+
     if ("win_64" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_64/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_64/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
-      
+
     elif ("win_32" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_32/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_32/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
@@ -127,12 +127,12 @@ def make():
       base.mac_correct_rpath_docbuilder(root_dir)
 
     base.create_x2t_js_cache(root_dir, "builder", platform)
-  
+
     # delete unnecessary builder files
     def delete_files(files):
       for file in files:
         base.delete_file(file)
-    
+
     delete_files(base.find_files(root_dir, "*.wasm"))
     delete_files(base.find_files(root_dir, "*_ie.js"))
     base.delete_file(root_dir + "/sdkjs/pdf/src/engine/cmap.bin")
@@ -143,7 +143,6 @@ def make():
     base.delete_dir(root_dir + "/sdkjs/cell/css")
     base.delete_file(root_dir + "/sdkjs/pdf/src/engine/viewer.js")
     base.delete_file(root_dir + "/sdkjs/common/spell/spell/spell.js.mem")
-    base.delete_dir(root_dir + "/sdkjs/common/Images")   
+    base.delete_dir(root_dir + "/sdkjs/common/Images")
 
   return
-

@@ -1,10 +1,6 @@
 {
   "source": {
-<<<<<<<< HEAD:scripts/sdkjs_common/jsdoc/config/plugins/methods/common.json
-    "include": ["../../../../sdkjs/common/plugins/plugin_base_api.js", "../../../../sdkjs/common/apiBase_plugins.js"]
-========
     "include": ["../../../../../sdkjs/word/apiBuilder.js", "../../../../../sdkjs/slide/apiBuilder.js", "../../../../../sdkjs/cell/apiBuilder.js"]
->>>>>>>> hotfix/v9.0.3:scripts/sdkjs_common/jsdoc/office-api/config/cell.json
   },
   "plugins": ["./correct_doclets.js"],
   "opts": {

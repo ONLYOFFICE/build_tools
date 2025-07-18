@@ -12,7 +12,7 @@ def copy_lib_with_links(src_dir, dst_dir, lib, version):
   lib_major_name = lib + "." + major_version
 
   base.copy_file(src_dir + "/" + lib_full_name, dst_dir + "/" + lib_full_name)
-  
+
   base.cmd_in_dir(dst_dir, "ln", ["-s", "./" + lib_full_name, "./" + lib_major_name])
   base.cmd_in_dir(dst_dir, "ln", ["-s", "./" + lib_major_name, "./" + lib])
 
@@ -72,7 +72,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "IWorkFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "HWPFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
-    
+
     if ("ios" == platform):
       base.copy_lib(build_libraries_path, root_dir + "/converter", "x2t")
     else:
@@ -91,7 +91,7 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/converter/libicudata.so.58")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/converter/libicuuc.so.58")
 
-    if (0 == platform.find("mac")):
+    if (0 == platform.find("mac") and not config.check_option("config", "bundle_dylibs")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/converter/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/converter/libicuuc.58.dylib")
 
@@ -99,7 +99,7 @@ def make():
     if isWindowsXP:
       base.copy_lib(build_libraries_path + "/xp", root_dir + "/converter", "doctrenderer")
     else:
-      base.copy_lib(build_libraries_path, root_dir + "/converter", "doctrenderer")      
+      base.copy_lib(build_libraries_path, root_dir + "/converter", "doctrenderer")
     base.copy_v8_files(core_dir, root_dir + "/converter", platform, isWindowsXP)
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
@@ -117,7 +117,7 @@ def make():
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
 
     base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
-  
+
     # cef
     build_dir_name = "build"
     if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):
@@ -140,18 +140,18 @@ def make():
     base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "ascdocumentscore")
     if (0 != platform.find("mac")):
       base.copy_lib(build_libraries_path + ("/xp" if isWindowsXP else ""), root_dir, "qtascdocumentscore")
-    
+
     if (0 == platform.find("mac")):
       base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "editors_helper")
-    
+
     if isUseQt:
       base.qt_copy_lib("Qt5Core", root_dir)
       base.qt_copy_lib("Qt5Gui", root_dir)
       base.qt_copy_lib("Qt5PrintSupport", root_dir)
       base.qt_copy_lib("Qt5Svg", root_dir)
-      base.qt_copy_lib("Qt5Widgets", root_dir)      
+      base.qt_copy_lib("Qt5Widgets", root_dir)
       base.qt_copy_lib("Qt5Network", root_dir)
       base.qt_copy_lib("Qt5OpenGL", root_dir)
 
@@ -160,7 +160,7 @@ def make():
       base.qt_copy_plugin("imageformats", root_dir)
       base.qt_copy_plugin("platforms", root_dir)
       base.qt_copy_plugin("platforminputcontexts", root_dir)
-      base.qt_copy_plugin("printsupport", root_dir)      
+      base.qt_copy_plugin("printsupport", root_dir)
 
       base.qt_copy_plugin("platformthemes", root_dir)
       base.qt_copy_plugin("xcbglintegrations", root_dir)
@@ -194,9 +194,9 @@ def make():
 
       if base.check_congig_option_with_platfom(platform, "libvlc"):
         vlc_dir = git_dir + "/core/Common/3dParty/libvlc/build/" + platform + "/lib"
-        
+
         if (0 == platform.find("win")):
-          base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")          
+          base.copy_dir(vlc_dir + "/plugins", root_dir + "/plugins")
           base.copy_files(vlc_dir + "/*.dll", root_dir)
           base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
@@ -242,7 +242,7 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/common/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}", root_dir + "/editors/sdkjs-plugins/{14A8FC87-8E26-4216-B34E-F27F053B2EC4}")
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
-  
+
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
     base.create_dir(root_dir + "/editors/webext")
     base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
@@ -255,7 +255,10 @@ def make():
 
     isUseJSC = False
     if (0 == platform.find("mac")):
-      file_size_doctrenderer = os.path.getsize(root_dir + "/converter/libdoctrenderer.dylib")
+      doctrenderer_lib = "libdoctrenderer.dylib"
+      if config.check_option("config", "bundle_dylibs"):
+        doctrenderer_lib = "doctrenderer.framework/doctrenderer"
+      file_size_doctrenderer = os.path.getsize(root_dir + "/converter/" + doctrenderer_lib)
       print("file_size_doctrenderer: " + str(file_size_doctrenderer))
       if (file_size_doctrenderer < 5*1024*1024):
         isUseJSC = True
@@ -303,4 +306,3 @@ def make():
       base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
 
   return
-

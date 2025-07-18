@@ -538,7 +538,7 @@ def git_get_base_url():
       if at_pos != -1 and colon_pos != -1:
         host = origin[at_pos+1:colon_pos]
         return f"https://{host}/"
-  
+
   # Fallback to GitHub
   return "https://github.com/"
 
@@ -1237,13 +1237,26 @@ def get_file_last_modified_url(url):
 
   return retvalue
 
+def mac_change_rpath_binary(bin, old, new):
+  cmd("install_name_tool", ["-change", old, new, bin], True)
+
+def mac_change_rpath_library(lib_name, old, new):
+  # converts library name to actual library file name (dylib or binary file in framework)
+  def lib_name_to_file_name(lib_name):
+    if config.check_option("config", "bundle_dylibs"):
+      lib = lib_name + ".framework/" + lib_name
+    else:
+      lib = "lib" + lib_name + ".dylib"
+    return lib
+  mac_change_rpath_binary(lib_name_to_file_name(lib_name), old, new)
+
 def mac_correct_rpath_binary(path, libs):
-  # if framework are built, do not change lib paths but add `@loader_path` to rpaths instead with `mac_add_loader_path_to_rpath()`
+  # if framework are built, instead of correcting lib paths add `@loader_path` to rpaths with `mac_add_loader_path_to_rpath()`
   if config.check_option("config", "bundle_dylibs"):
     return
 
   for lib in libs:
-    cmd("install_name_tool", ["-change", "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib", path], True)
+    mac_change_rpath_binary(path, "lib" + lib + ".dylib", "@rpath/lib" + lib + ".dylib")
   return
 
 def mac_correct_rpath_library(name, libs):
@@ -1320,7 +1333,7 @@ def mac_correct_rpath_desktop(dir):
   mac_correct_rpath_library("hunspell", [])
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
   mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
-  cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
+  mac_change_rpath_library("ascdocumentscore", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework")
   mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
@@ -1873,8 +1886,11 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
 def create_x2t_js_cache(dir, product, platform):
-  if is_file(dir + "/libdoctrenderer.dylib") and (os.path.getsize(dir + "/libdoctrenderer.dylib") < 5*1024*1024):
-    return
+  # mac
+  if is_file(dir + "/libdoctrenderer.dylib") or is_dir(dir + "/doctrenderer.framework"):
+    doctrenderer_lib = "libdoctrenderer.dylib" if is_file(dir + "/libdoctrenderer.dylib") else "doctrenderer.framework/doctrenderer"
+    if os.path.getsize(dir + "/" + doctrenderer_lib) < 5*1024*1024:
+      return
 
   if ((platform == "linux_arm64") and not is_os_arm()):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)

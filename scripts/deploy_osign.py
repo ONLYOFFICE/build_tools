@@ -18,7 +18,7 @@ def make():
 
     if base.get_env("DESTDIR_BUILD_OVERRIDE") != "":
       return
-      
+
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -37,7 +37,7 @@ def make():
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir)
+      base.generate_plist(root_dir, "ios")
 
   for native_platform in platforms:
     if native_platform == "android":

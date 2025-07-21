@@ -281,6 +281,8 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allthemesgen")
 
     if (0 == platform.find("mac")):
+      # gen plists with max_depth 2 because frameworks are only located in root_dir and converter subdirectory
+      base.generate_plist(root_dir, "mac", max_depth=2)
       base.mac_correct_rpath_desktop(root_dir)
 
     if isMacArmPlaformOnIntel:

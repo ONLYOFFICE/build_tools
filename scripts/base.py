@@ -977,7 +977,7 @@ def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries 
   file.close()
   return
 
-def generate_plist_framework_folder(file):
+def generate_plist_framework_folder(file, platform):
   bundle_id_url = "com.onlyoffice."
   if ("" != get_env("PUBLISHER_BUNDLE_ID")):
     bundle_id_url = get_env("PUBLISHER_BUNDLE_ID")
@@ -1011,11 +1011,14 @@ def generate_plist_framework_folder(file):
   content += "\t<string>????</string>\n"
   content += "\t<key>CFBundleVersion</key>\n"
   content += "\t<string>" + bundle_version[0] + "." + bundle_version[1] + "." + bundle_version[2] + "</string>\n"
-  content += "\t<key>MinimumOSVersion</key>\n"
-  content += "\t<string>13.0</string>\n"
+  if platform.find("ios") == 0:
+    content += "\t<key>MinimumOSVersion</key>\n"
+    content += "\t<string>13.0</string>\n"
   content += "</dict>\n"
   content += "</plist>"
 
+  if platform.find("mac") == 0:
+    file += "/Resources"
   fileDst = file + "/Info.plist"
   if is_file(fileDst):
     delete_file(fileDst)
@@ -1025,7 +1028,11 @@ def generate_plist_framework_folder(file):
   fileInfo.close()
   return
 
-def generate_plist(path):
+def generate_plist(path, platform, max_depth=512):
+  if not config.check_option("config", "bundle_dylibs"):
+    return
+  if max_depth == 0:
+    return
   src_folder = path
   if ("/" != path[-1:]):
     src_folder += "/"
@@ -1033,9 +1040,9 @@ def generate_plist(path):
   for file in glob.glob(src_folder):
     if (is_dir(file)):
       if file.endswith(".framework"):
-        generate_plist_framework_folder(file)
+        generate_plist_framework_folder(file, platform)
       else:
-        generate_plist(file)
+        generate_plist(file, platform, max_depth - 1)
   return
 
 def correct_bundle_identifier(bundle_identifier):

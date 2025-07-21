@@ -112,6 +112,10 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
     base.copy_dir(git_dir + "/document-templates/new/en-US", converter_dir + "/empty")
 
+    # correct mac frameworks
+    if (0 == platform.find("mac")):
+      base.generate_plist(converter_dir, "mac", max_depth=1)
+
     # js
     js_dir = root_dir
     base.copy_dir(base_dir + "/js/" + branding + "/builder/sdkjs", js_dir + "/sdkjs")

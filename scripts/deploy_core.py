@@ -67,6 +67,10 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "metafiletester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "dictionariestester")
 
+    # correct mac frameworks
+    if (0 == platform.find("mac")):
+      base.generate_plist(archive_dir, "mac", max_depth=1)
+
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
     base.create_x2t_js_cache(archive_dir, "core", platform)

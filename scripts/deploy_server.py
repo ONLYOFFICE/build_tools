@@ -102,10 +102,10 @@ def make():
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", converter_dir + "/libicudata.so.58")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", converter_dir + "/libicuuc.so.58")
 
-    if (0 == platform.find("mac")):
+    if (0 == platform.find("mac") and not config.check_option("config", "bundle_dylibs")):
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", converter_dir + "/libicudata.58.dylib")
       base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", converter_dir + "/libicuuc.58.dylib")
-    
+
     base.copy_v8_files(core_dir, converter_dir, platform)
 
     # builder
@@ -124,7 +124,7 @@ def make():
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
-    
+
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
     base.copy_marketplace_plugin(js_dir + "/sdkjs-plugins", False, True)
@@ -146,7 +146,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
     if ("1" != config.option("preinstalled-plugins")):
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "pluginsmanager")
-    
+
     branding_dir = server_dir + "/branding"
     if("" != config.option("branding") and "onlyoffice" != config.option("branding")):
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
@@ -228,4 +228,3 @@ def make():
       base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return
-

@@ -35,7 +35,7 @@ def s3_upload(files, dst):
 #
 
 def make_windows():
-  global package_name, package_version, arch, xp, suffix
+  global package_name, package_version, arch, xp
   utils.set_cwd("desktop-apps\\win-linux\\package\\windows")
 
   package_name = branding.desktop_package_name
@@ -47,7 +47,6 @@ def make_windows():
     "windows_x86_xp": "x86"
   }[common.platform]
   xp = common.platform.endswith("_xp")
-  suffix = arch + ("-xp" if xp else "")
 
   if common.clean:
     utils.log_h2("desktop clean")
@@ -95,7 +94,10 @@ def make_prepare():
   return
 
 def make_zip(edition = "opensource"):
-  zip_file = "%s-%s-%s.zip" % (package_name, package_version, suffix)
+  if   edition == "commercial": zip_file = "%s-Commercial-%s-%s.zip"
+  elif edition == "xp":         zip_file = "%s-XP-%s-%s.zip"
+  else:                         zip_file = "%s-%s-%s.zip"
+  zip_file = zip_file % (package_name, package_version, arch)
   args = [
     "-Version", package_version,
     "-Arch", arch,
@@ -115,12 +117,12 @@ def make_zip(edition = "opensource"):
   return
 
 def make_inno(edition = "opensource"):
-  inno_file = "%s-%s-%s.exe"
   if   edition == "commercial": inno_file = "%s-Commercial-%s-%s.exe"
   elif edition == "standalone": inno_file = "%s-Standalone-%s-%s.exe"
   elif edition == "update":     inno_file = "%s-Update-%s-%s.exe"
   elif edition == "xp":         inno_file = "%s-XP-%s-%s.exe"
-  inno_file = inno_file % (package_name, package_version, suffix)
+  else:                         inno_file = "%s-%s-%s.exe"
+  inno_file = inno_file % (package_name, package_version, arch)
   args = [
     "-Version", package_version,
     "-Arch", arch,
@@ -140,9 +142,9 @@ def make_inno(edition = "opensource"):
   return
 
 def make_advinst(edition = "opensource"):
-  if not common.platform in ["windows_x64", "windows_x86"]:
-    return
-  advinst_file = "%s-%s-%s.msi" % (package_name, package_version, suffix)
+  if edition == "commercial": advinst_file = "%s-Commercial-%s-%s.msi"
+  else:                       advinst_file = "%s-%s-%s.msi"
+  advinst_file = advinst_file % (package_name, package_version, arch)
   args = [
     "-Version", package_version,
     "-Arch", arch,
@@ -162,7 +164,8 @@ def make_advinst(edition = "opensource"):
   return
 
 def make_online():
-  online_file = "%s-%s-%s.exe" % ("OnlineInstaller", package_version, suffix)
+  online_file = utils.glob_file("OnlineInstaller-" + package_version + "*.exe")
+  utils.log_h2("desktop online installer build")
   ret = utils.is_file(online_file)
   utils.set_summary("desktop online installer build", ret)
 

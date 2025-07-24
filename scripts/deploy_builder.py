@@ -127,6 +127,13 @@ def make():
       base.mac_correct_rpath_docbuilder(root_dir)
 
     base.create_x2t_js_cache(root_dir, "builder", platform)
+
+    base.create_dir(root_dir + "/fonts")
+    base.copy_dir(git_dir  + "/core-fonts/asana",      root_dir + "/fonts/asana")
+    base.copy_dir(git_dir  + "/core-fonts/caladea",    root_dir + "/fonts/caladea")
+    base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
+    base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+    base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
   
     # delete unnecessary builder files
     def delete_files(files):
@@ -143,7 +150,7 @@ def make():
     base.delete_dir(root_dir + "/sdkjs/cell/css")
     base.delete_file(root_dir + "/sdkjs/pdf/src/engine/viewer.js")
     base.delete_file(root_dir + "/sdkjs/common/spell/spell/spell.js.mem")
-    base.delete_dir(root_dir + "/sdkjs/common/Images")   
+    base.delete_dir(root_dir + "/sdkjs/common/Images")
 
   return
 

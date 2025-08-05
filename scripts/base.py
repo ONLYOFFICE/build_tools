@@ -1309,9 +1309,9 @@ def mac_correct_rpath_desktop(dir):
   os.chdir(dir)
   mac_correct_rpath_library("hunspell", [])
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
-  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
-  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
@@ -1428,7 +1428,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, i
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if isXp:
-    plugins_list_config="photoeditor, macros, highlightcode, doc2md"
+    plugins_list_config="photoeditor, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")

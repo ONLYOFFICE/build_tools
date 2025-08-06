@@ -1,0 +1,88 @@
+name: Git Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Operation to perform'
+        required: true
+        type: choice
+        options:
+          - create
+          - remove
+        default: 'create'
+      
+      branch_name:
+        description: 'Branch name to create or remove'
+        required: true
+        type: string
+      
+      base_branch:
+        description: 'Base branch to work from (for create operation)'
+        required: false
+        type: string
+        default: 'develop'
+      
+      branding:
+        description: 'Branding name'
+        required: false
+        type: string
+        default: 'onlyoffice'
+      
+      branding_url:
+        description: 'Branding repository URL (relative to git host)'
+        required: false
+        type: string
+        default: 'ONLYOFFICE/onlyoffice.git'
+
+jobs:
+  git-operations:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ONLYOFFICE/build_tools
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install any Python dependencies if requirements.txt exists
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+      
+      - name: Run Git Operations
+        run: |
+          cd ONLYOFFICE/build_tools/scripts/develop
+          python git_operations.py ${{ inputs.operation }} "${{ inputs.branch_name }}" \
+            --base-branch="${{ inputs.base_branch }}" \
+            --branding="${{ inputs.branding }}" \
+            --branding-url="${{ inputs.branding_url }}" \
+            --modules="${{ inputs.modules }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Operation Summary
+        run: |
+          echo "## Git Operations Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Operation**: ${{ inputs.operation }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch Name**: ${{ inputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base Branch**: ${{ inputs.base_branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branding**: ${{ inputs.branding }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branding URL**: ${{ inputs.branding_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Modules**: ${{ inputs.modules }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.operation }}" = "remove" ] && [ "${{ inputs.force_remove }}" = "true" ]; then
+            echo "- **Force Remove**: Yes" >> $GITHUB_STEP_SUMMARY
+          fi

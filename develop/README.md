@@ -6,6 +6,10 @@ but don't want to compile pretty compilcated core product to make those changes.
 
 ## System requirements
 
+**Note**: ARM-based architectures are currently **NOT** supported;
+attempting to run the images on ARM devices may result in startup failures 
+or other runtime issues.
+
 ### Windows
 
 You need the latest

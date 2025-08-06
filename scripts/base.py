@@ -521,6 +521,27 @@ def git_get_origin():
   os.chdir(cur_dir)
   return ret
 
+def git_get_base_url():
+  """Get the base URL for git operations, with fallback to GitHub"""
+  origin = git_get_origin()
+  if origin:
+    # Extract base URL from origin
+    if origin.startswith("https://"):
+      # For HTTPS URLs like https://git.example.com/owner/repo.git
+      parts = origin.split("/")
+      if len(parts) >= 4:
+        return "/".join(parts[:3]) + "/"
+    elif ":" in origin and "@" in origin:
+      # For SSH URLs like git@git.example.com:owner/repo.git
+      at_pos = origin.find("@")
+      colon_pos = origin.find(":", at_pos)
+      if at_pos != -1 and colon_pos != -1:
+        host = origin[at_pos+1:colon_pos]
+        return f"https://{host}/"
+  
+  # Fallback to GitHub
+  return "https://github.com/"
+
 def git_is_ssh():
   git_protocol = config.option("git-protocol")
   if (git_protocol == "https"):
@@ -542,7 +563,7 @@ def get_ssh_base_url():
 def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
   owner = git_owner if git_owner else "ONLYOFFICE"
-  url = "https://github.com/" + owner + "/" + repo + ".git"
+  url = git_get_base_url() + owner + "/" + repo + ".git"
   if git_is_ssh():
     url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -614,7 +635,7 @@ def get_branding_repositories(checker):
 
 def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
   print("[git] create pull request: " + repo)
-  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  url = git_get_base_url() + "ONLYOFFICE/" + repo + ".git"
   if git_is_ssh():
     url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -1288,9 +1309,9 @@ def mac_correct_rpath_desktop(dir):
   os.chdir(dir)
   mac_correct_rpath_library("hunspell", [])
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
-  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
-  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
@@ -1407,7 +1428,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, i
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if isXp:
-    plugins_list_config="photoeditor, macros, highlightcode, doc2md"
+    plugins_list_config="photoeditor, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")
@@ -1856,4 +1877,3 @@ def setup_local_qmake(dir_qmake):
   dir_base = os.path.dirname(dir_qmake)
   writeFile(dir_base + "/onlyoffice_qt.conf", "Prefix = " + dir_base)  
   return
-  

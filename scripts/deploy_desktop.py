@@ -116,8 +116,6 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
 
-    base.copy_file(git_dir + "/desktop-apps/common/package/license/3dparty/3DPARTYLICENSE", root_dir + "/3DPARTYLICENSE")
-  
     # cef
     build_dir_name = "build"
     if (0 == platform.find("linux")) and (config.check_option("config", "cef_version_107")):

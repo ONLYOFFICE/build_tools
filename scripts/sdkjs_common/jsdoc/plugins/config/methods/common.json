@@ -1,0 +1,16 @@
+{
+  "source": {
+    "include": ["../../../../../sdkjs/common/plugins/plugin_base_api.js" ,"../../../../../sdkjs/common/apiBase_plugins.js"]
+  },
+  "plugins": ["../correct_doclets.js"],
+  "opts": {
+    "destination": "./out",
+    "recurse": true,
+    "encoding": "utf8"
+  },
+  "templates": {
+    "json": {
+      "pretty": true
+    }
+  }
+}

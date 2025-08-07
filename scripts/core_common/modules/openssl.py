@@ -81,8 +81,16 @@ def make():
 
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
     base.cmd("./config", ["enable-md2", "no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
-    base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
-    base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
+    if "1" == config.option("use-clang"):
+      base.replaceInFile("./Makefile", "CC=$(CROSS_COMPILE)gcc", "CC=$(CROSS_COMPILE)clang")
+      base.replaceInFile("./Makefile", "CXX=$(CROSS_COMPILE)g++", "CXX=$(CROSS_COMPILE)clang++")
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
+      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden -stdlib=libc++")
+      base.replaceInFile("./Makefile", "LDFLAGS", "LDFLAGS=-stdlib=libc++")
+    else:
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
+      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
+      
     base.cmd("make")
     base.cmd("make", ["install"])
     base.cmd("make", ["clean"], True)

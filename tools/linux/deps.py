@@ -39,9 +39,14 @@ def install_deps():
               "libxi-dev",
               "libxrender-dev",
               "libxss1",
-              "libncurses5"]
+              "libncurses5",
+              "libncurses6",
+              "curl",
+              "libxkbcommon-dev",
+              "libxkbcommon-x11-dev"]
 
-  base.cmd("sudo", ["apt-get", "install", "-y"] + packages)
+  for package in packages:
+    base.cmd("sudo", ["apt-get", "install", "-y", package], True)
 
   # nodejs
   base.cmd("sudo", ["apt-get", "install", "-y", "nodejs"])
@@ -62,7 +67,7 @@ def install_deps():
     print("OK")
     base.cmd("sudo", ["apt-get", "-y", "install", "npm", "yarn"], True)
   base.cmd("sudo", ["npm", "install", "-g", "grunt-cli"])
-  base.cmd("sudo", ["npm", "install", "-g", "pkg"])
+  base.cmd("sudo", ["npm", "install", "-g", "@yao-pkg/pkg"])
 
   # java
   java_error = base.cmd("sudo", ["apt-get", "-y", "install", "openjdk-11-jdk"], True)
@@ -79,4 +84,3 @@ def install_deps():
 
 if __name__ == "__main__":
   install_deps()
-

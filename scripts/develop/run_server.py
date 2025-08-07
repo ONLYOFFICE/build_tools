@@ -49,7 +49,18 @@ def run_integration_example():
 
 def start_linux_services():
   base.print_info('Restart MySQL Server')
-  
+
+
+def update_config(args):
+  platform = base.host_platform()
+  branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
+
+  if ("linux" == platform):
+  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
+  else:
+  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-name', 'onlyoffice', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
+  	
+
 def make_start():
   base.configure_common_apps()
   
@@ -64,15 +75,8 @@ def make_start():
     start_linux_services()
 
 def make_configure(args):
-  platform = base.host_platform()
-  branch = base.run_command('git rev-parse --abbrev-ref HEAD')['stdout']
-  
   base.print_info('Build modules')
-  if ("linux" == platform):
-  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0'] + args)
-  else:
-  	base.cmd_in_dir(base_dir + '/../../', 'python', ['configure.py', '--branch', branch or 'develop', '--develop', '1', '--module', 'server', '--update', '1', '--update-light', '1', '--clean', '0', '--sql-type', 'mysql', '--db-port', '3306', '--db-user', 'root', '--db-pass', 'onlyoffice'] + args)
-  	
+  update_config(args)
   base.cmd_in_dir(base_dir + '/../../', 'python', ['make.py'])
 def make_install():
   platform = base.host_platform()

@@ -266,11 +266,6 @@ def set_summary(target, status):
   common.summary.append({target: status})
   return
 
-def add_deploy_data(key):
-  with open(common.deploy_data, 'a+') as f:
-    f.write(key + "\n")
-  return
-
 def cmd(*args, **kwargs):
   if kwargs.get("verbose"):
     log("- cmd:")
@@ -385,15 +380,13 @@ def s3_upload(src, dst, **kwargs):
     ret = sh(" ".join(args), verbose=True)
   return ret
 
-def s3_sync(src, dst, **kwargs):
+def s3_copy(src, dst, **kwargs):
   args = ["aws"]
   if kwargs.get("endpoint_url"):
     args += ["--endpoint-url", kwargs["endpoint_url"]]
-  args += ["s3", "sync", "--no-progress"]
+  args += ["s3", "cp", "--no-progress"]
   if kwargs.get("acl"):
     args += ["--acl", kwargs["acl"]]
-  if kwargs.get("delete") and kwargs["delete"]:
-    args += ["--delete"]
   args += [src, dst]
   if is_windows():
     ret = cmd(*args, verbose=True)

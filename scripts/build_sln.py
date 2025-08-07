@@ -35,15 +35,41 @@ def make(solution=""):
         qmake.make(platform, pro, "xcframework_platform_ios_simulator")
 
   if config.check_option("module", "builder") and base.is_windows() and "onlyoffice" == config.branding():
+    # check branding libs
+    if (config.option("branding-name") == "onlyoffice"):
+      for platform in platforms:
+        if not platform in config.platforms:
+          continue
+        core_lib_unbranding_dir = os.getcwd() + "/../core/build/lib/" + platform + base.qt_dst_postfix()
+        if not base.is_dir(core_lib_unbranding_dir):
+          base.create_dir(core_lib_unbranding_dir)
+        core_lib_branding_dir = os.getcwd() + "/../core/build/onlyoffice/lib/" + platform + base.qt_dst_postfix()
+        base.copy_file(core_lib_branding_dir + "/doctrenderer.dll", core_lib_unbranding_dir + "/doctrenderer.dll")
+        base.copy_file(core_lib_branding_dir + "/doctrenderer.lib", core_lib_unbranding_dir + "/doctrenderer.lib")
+
     # check replace
-    new_replace_path = base.correctPathForBuilder(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder.h")
-    if ("2019" == config.option("vs-version")):
-      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com_2019.sln")
-      if (True):
-        new_path_net = base.correctPathForBuilder(os.getcwd() + "/../core/DesktopEditor/doctrenderer/docbuilder.net/src/docbuilder.net.cpp")
-        base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.net/src", "docbuilder.net.sln")
-        base.restorePathForBuilder(new_path_net)
-    else:
-      base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com.sln")
-    base.restorePathForBuilder(new_replace_path)
+    directory_builder_branding = os.getcwd() + "/../core/DesktopEditor/doctrenderer"
+    if base.is_dir(directory_builder_branding):
+      new_replace_path = base.correctPathForBuilder(directory_builder_branding + "/docbuilder.com/src/docbuilder.h")
+      if ("2019" == config.option("vs-version")):
+        base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com_2019.sln")
+        if (True):
+          new_path_net = base.correctPathForBuilder(directory_builder_branding + "/docbuilder.net/src/docbuilder.net.cpp")
+          base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.net/src", "docbuilder.net.sln")
+          base.restorePathForBuilder(new_path_net)
+      else:
+        base.make_sln_project("../core/DesktopEditor/doctrenderer/docbuilder.com/src", "docbuilder.com.sln")
+      base.restorePathForBuilder(new_replace_path)
+
+  # build Java docbuilder wrapper
+  if config.check_option("module", "builder") and "onlyoffice" == config.branding():
+    for platform in platforms:
+      if not platform in config.platforms:
+        continue
+
+      # build JNI library
+      qmake.make(platform, base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java/src/jni/docbuilder_jni.pro", "", True)
+      # build Java code to JAR
+      base.cmd_in_dir(base.get_script_dir() + "/../../core/DesktopEditor/doctrenderer/docbuilder.java", "python", ["make.py"])
+
   return

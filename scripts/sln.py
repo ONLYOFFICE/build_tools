@@ -14,6 +14,15 @@ def is_exist_in_array(projects, proj):
       return True
   return False
 
+def get_full_projects_list(json_data, list):
+  result = []
+  for rec in list:
+    if rec in json_data:
+      result += get_full_projects_list(json_data, json_data[rec])
+    else:
+      result.append(rec)
+  return result
+
 def adjust_project_params(params):
   ret_params = params
   
@@ -86,13 +95,9 @@ def get_projects(pro_json_path, platform):
     
     # check aliases to modules
     records_src = data[module]
-    records = []
+    records = get_full_projects_list(data, records_src)
 
-    for rec in records_src:
-      if rec in data:
-        records += data[rec]
-      else:
-        records.append(rec)
+    #print(records)
 
     for rec in records:
       params = []
@@ -128,7 +133,7 @@ def get_projects(pro_json_path, platform):
       is_needed_platform_exist = False
       for pl in platform_records:
         if is_exist_in_array(params, pl):
-          is_needed_platform_exist = True;
+          is_needed_platform_exist = True
           break
 
       # if one config exists => all needed must exists
@@ -139,7 +144,7 @@ def get_projects(pro_json_path, platform):
         if is_exist_in_array(platform_records, item):
           continue
         is_needed_config_exist = True
-        break;
+        break
 
       if is_needed_platform_exist:
         if not is_exist_in_array(params, platform):
@@ -158,6 +163,18 @@ def get_projects(pro_json_path, platform):
           break
       if is_append:
         result.append(root_dir + record)
+
+  # delete duplicates
+  old_results = result
+  result = []
+
+  map_results = set()
+  for item in old_results:
+    proj = item.replace("\\", "/")
+    if proj in map_results:
+      continue
+    map_results.add(proj)
+    result.append(proj)
 
   if is_log:
     print(result)

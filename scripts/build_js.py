@@ -33,34 +33,42 @@ def make():
   base.set_env('NODE_ENV', 'production')
 
   base_dir = base.get_script_dir() + "/.."
-  out_dir = base_dir + "/out/js/";
+  out_dir = base_dir + "/out/js/"
   branding = config.option("branding-name")
   if ("" == branding):
     branding = "onlyoffice"
   out_dir += branding
   base.create_dir(out_dir)
 
+  isOnlyMobile = False
+  if (config.option("module") == "mobile"):
+    isOnlyMobile = True
+
   # builder
-  build_interface(base_dir + "/../web-apps/build")
-  build_sdk_builder(base_dir + "/../sdkjs/build")
-  base.create_dir(out_dir + "/builder")
-  base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
-  base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
-  correct_sdkjs_licence(out_dir + "/builder/sdkjs")
+  if not isOnlyMobile:
+    base.cmd_in_dir(base_dir + "/../web-apps/translation", "python", ["merge_and_check.py"])
+    build_interface(base_dir + "/../web-apps/build")
+    build_sdk_builder(base_dir + "/../sdkjs/build")
+    base.create_dir(out_dir + "/builder")
+    base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/builder/web-apps")
+    base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/builder/sdkjs")
+    correct_sdkjs_licence(out_dir + "/builder/sdkjs")
 
   # desktop
-  if config.check_option("module", "desktop"):
+  if config.check_option("module", "desktop") and not isOnlyMobile:
     build_sdk_desktop(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/desktop")
     base.copy_dir(base_dir + "/../sdkjs/deploy/sdkjs", out_dir + "/desktop/sdkjs")
     correct_sdkjs_licence(out_dir + "/desktop/sdkjs")
     base.copy_dir(base_dir + "/../web-apps/deploy/web-apps", out_dir + "/desktop/web-apps")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/documenteditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/presentationeditor/mobile")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/embed")
-    base.delete_dir(out_dir + "/desktop/web-apps/apps/spreadsheeteditor/mobile")
+
+    deldirs = ['ie', 'mobile', 'embed']
+    [base.delete_dir(root + "/" + d) for root, dirs, f in os.walk(out_dir + "/desktop/web-apps/apps") for d in dirs if d in deldirs]
+
+    # for bug 62528. remove empty folders
+    walklist = list(os.walk(out_dir + "/desktop/sdkjs"))
+    [os.remove(p) for p, _, _ in walklist[::-1] if len(os.listdir(p)) == 0]
+
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
@@ -69,7 +77,7 @@ def make():
 
   # mobile
   if config.check_option("module", "mobile"):
-    build_sdk_native(base_dir + "/../sdkjs/build", False)
+    build_sdk_native(base_dir + "/../sdkjs/build")
     base.create_dir(out_dir + "/mobile")
     base.create_dir(out_dir + "/mobile/sdkjs")
     vendor_dir_src = base_dir + "/../web-apps/vendor/"
@@ -101,7 +109,10 @@ def make():
 
 # JS build
 def _run_npm(directory):
-  return base.cmd_in_dir(directory, "npm", ["install"])
+  retValue = base.cmd_in_dir(directory, "npm", ["install"], True)
+  if (0 != retValue):
+    retValue = base.cmd_in_dir(directory, "npm", ["install", "--verbose"])
+  return retValue
 
 def _run_npm_ci(directory):
   return base.cmd_in_dir(directory, "npm", ["ci"])
@@ -114,7 +125,7 @@ def _run_grunt(directory, params=[]):
 
 def build_interface(directory):
   _run_npm(directory)
-  _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
+  _run_grunt(directory, ["--force", "--verbose"] + base.web_apps_addons_param())
   return
 
 def get_build_param(minimize=True):
@@ -146,18 +157,29 @@ def build_sdk_native(directory, minimize=True):
   _run_grunt(directory, get_build_param(minimize) + ["--mobile=true"] + addons)
   return
 
+
+def build_sdkjs_develop(root_dir):
+  external_folder = config.option("--external-folder")
+  if (external_folder != ""):
+    external_folder = "/" + external_folder
+
+  _run_npm_ci(root_dir + external_folder + "/sdkjs/build")
+  _run_grunt(root_dir + external_folder + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
+  _run_grunt(root_dir + external_folder + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
+
+
 def build_js_develop(root_dir):
   #_run_npm_cli(root_dir + "/sdkjs/build")
   external_folder = config.option("--external-folder")
   if (external_folder != ""):
     external_folder = "/" + external_folder
     
-  _run_npm_ci(root_dir + external_folder + "/sdkjs/build")
-  _run_grunt(root_dir + external_folder + "/sdkjs/build", get_build_param(False) + base.sdkjs_addons_param())
-  _run_grunt(root_dir + external_folder + "/sdkjs/build", ["develop"] + base.sdkjs_addons_param())
+  build_sdkjs_develop(root_dir)
+
   _run_npm(root_dir + external_folder + "/web-apps/build")
   _run_npm_ci(root_dir + external_folder + "/web-apps/build/sprites")
   _run_grunt(root_dir + external_folder + "/web-apps/build/sprites", [])
+  base.cmd_in_dir(root_dir + external_folder + "/web-apps/translation", "python", ["merge_and_check.py"])
 
   old_cur = os.getcwd()
   old_product_version = base.get_env("PRODUCT_VERSION")

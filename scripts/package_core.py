@@ -10,47 +10,37 @@ def make():
     utils.log("Unsupported host OS")
     return
   if common.deploy:
-    make_core()
+    make_archive()
   return
 
-def make_core():
-  prefix = common.platformPrefixes[common.platform]
-  company = branding.company_name.lower()
-  repos = {
-    "windows_x64":   { "repo": "windows", "arch": "x64", "version": common.version + "." + common.build },
-    "windows_x86":   { "repo": "windows", "arch": "x86", "version": common.version + "." + common.build },
-    "darwin_x86_64": { "repo": "mac",     "arch": "x64", "version": common.version + "-" + common.build },
-    "darwin_arm64":  { "repo": "mac",     "arch": "arm", "version": common.version + "-" + common.build },
-    "linux_x86_64":  { "repo": "linux",   "arch": "x64", "version": common.version + "-" + common.build },
-  }
-  repo = repos[common.platform]
-  branch = utils.get_env("BRANCH_NAME")
-  core_7z = utils.get_path("build_tools/out/%s/%s/core.7z" % (prefix, company))
-  dest_version = "%s/core/%s/%s/%s" % (repo["repo"], branch, repo["version"], repo["arch"])
-  dest_latest = "%s/core/%s/%s/%s" % (repo["repo"], branch, "latest", repo["arch"])
+def make_archive():
+  utils.set_cwd(utils.get_path(
+    "build_tools/out/" + common.prefix + "/" + branding.company_name.lower()))
 
-  if branch is None:
-    utils.log_err("BRANCH_NAME variable is undefined")
-    utils.set_summary("core deploy", False)
-    return
-  if not utils.is_file(core_7z):
-    utils.log_err("file not exist: " + core_7z)
-    utils.set_summary("core deploy", False)
-    return
+  utils.log_h2("core archive build")
+  utils.delete_file("core.7z")
+  args = ["7z", "a", "-y", "core.7z", "./core/*"]
+  if utils.is_windows():
+    ret = utils.cmd(*args, verbose=True)
+  else:
+    ret = utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("core archive build", ret)
 
-  utils.log_h2("core deploy")
+  utils.log_h2("core archive deploy")
+  dest = "core-" + common.prefix.replace("_","-") + ".7z"
+  dest_latest = "archive/%s/latest/%s" % (common.branch, dest)
+  dest_version = "archive/%s/%s/%s" % (common.branch, common.build, dest)
   ret = utils.s3_upload(
-    core_7z,
-    "s3://" + branding.s3_bucket + "/" + dest_version + "/core.7z")
+    "core.7z", "s3://" + branding.s3_bucket + "/" + dest_version)
+  utils.set_summary("core archive deploy", ret)
   if ret:
-    utils.log("URL: " + branding.s3_base_url + "/" + dest_version + "/core.7z")
-    utils.add_deploy_data(dest_version + "/core.7z")
-    ret = utils.s3_sync(
-      "s3://" + branding.s3_bucket + "/" + dest_version + "/",
-      "s3://" + branding.s3_bucket + "/" + dest_latest + "/",
-      delete=True)
-    utils.log("URL: " + branding.s3_base_url + "/" + dest_latest + "/core.7z")
-  utils.set_summary("core deploy", ret)
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_version)
+    utils.s3_copy(
+      "s3://" + branding.s3_bucket + "/" + dest_version,
+      "s3://" + branding.s3_bucket + "/" + dest_latest)
+    utils.log("URL: " + branding.s3_base_url + "/" + dest_latest)
+
+  utils.set_cwd(common.workspace_dir)
   return
 
 def deploy_closuremaps_sdkjs(license):
@@ -74,7 +64,6 @@ def deploy_closuremaps_sdkjs(license):
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)
-      utils.add_deploy_data(key)
   utils.set_summary("sdkjs closure maps %s deploy" % license, ret)
   return
 
@@ -100,6 +89,5 @@ def deploy_closuremaps_webapps(license):
     ret &= upload
     if upload:
       utils.log("URL: " + branding.s3_base_url + "/" + key)
-      utils.add_deploy_data(key)
   utils.set_summary("web-apps closure maps %s deploy" % license, ret)
   return

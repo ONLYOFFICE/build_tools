@@ -72,8 +72,6 @@ def make_windows():
   else:
     make_zip("xp")
     make_inno("xp")
-  if common.platform == "windows_x86_xp":
-    make_online()
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -161,18 +159,6 @@ def make_advinst(edition = "opensource"):
     utils.log_h2("desktop advinst " + edition + " deploy")
     ret = s3_upload([advinst_file], "desktop/win/advinst/")
     utils.set_summary("desktop advinst " + edition + " deploy", ret)
-  return
-
-def make_online():
-  online_file = utils.glob_file("OnlineInstaller-" + package_version + "*.exe")
-  utils.log_h2("desktop online installer build")
-  ret = utils.is_file(online_file)
-  utils.set_summary("desktop online installer build", ret)
-
-  if common.deploy and ret:
-    utils.log_h2("desktop online installer deploy")
-    ret = s3_upload([online_file], "desktop/win/online/")
-    utils.set_summary("desktop online installer deploy", ret)
   return
 
 #

@@ -94,7 +94,7 @@ def make_prepare():
   return
 
 def make_zip(edition = "opensource"):
-  if   edition == "commercial": zip_file = "%s-Commercial-%s-%s.zip"
+  if   edition == "commercial": zip_file = "%s-Enterprise-%s-%s.zip"
   elif edition == "xp":         zip_file = "%s-XP-%s-%s.zip"
   else:                         zip_file = "%s-%s-%s.zip"
   zip_file = zip_file % (package_name, package_version, arch)
@@ -117,7 +117,7 @@ def make_zip(edition = "opensource"):
   return
 
 def make_inno(edition = "opensource"):
-  if   edition == "commercial": inno_file = "%s-Commercial-%s-%s.exe"
+  if   edition == "commercial": inno_file = "%s-Enterprise-%s-%s.exe"
   elif edition == "standalone": inno_file = "%s-Standalone-%s-%s.exe"
   elif edition == "update":     inno_file = "%s-Update-%s-%s.exe"
   elif edition == "xp":         inno_file = "%s-XP-%s-%s.exe"
@@ -142,7 +142,7 @@ def make_inno(edition = "opensource"):
   return
 
 def make_advinst(edition = "opensource"):
-  if edition == "commercial": advinst_file = "%s-Commercial-%s-%s.msi"
+  if edition == "commercial": advinst_file = "%s-Enterprise-%s-%s.msi"
   else:                       advinst_file = "%s-%s-%s.msi"
   advinst_file = advinst_file % (package_name, package_version, arch)
   args = [

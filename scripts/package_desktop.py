@@ -58,18 +58,21 @@ def make_windows():
     utils.delete_files("*.zip")
     utils.delete_files("data\\*.exe")
 
-  make_prepare()
   if not xp:
+    make_prepare()
     make_zip()
-    make_zip("commercial")
     make_inno()
-    make_inno("commercial")
     if branding.onlyoffice:
       make_inno("standalone")
       make_inno("update")
     make_advinst()
+
+    make_prepare("commercial")
+    make_zip("commercial")
+    make_inno("commercial")
     make_advinst("commercial")
   else:
+    make_prepare("xp")
     make_zip("xp")
     make_inno("xp")
   if common.platform == "windows_x86_xp":
@@ -78,19 +81,18 @@ def make_windows():
   utils.set_cwd(common.workspace_dir)
   return
 
-def make_prepare():
+def make_prepare(edition = "opensource"):
   args = [
     "-Version", package_version,
-    "-Arch", arch
+    "-Arch", arch,
+    "-Target", edition
   ]
-  if xp:
-    args += ["-Target", "xp"]
   if common.sign:
     args += ["-Sign"]
 
-  utils.log_h2("desktop prepare")
+  utils.log_h2("desktop prepare " + edition)
   ret = utils.ps1("make.ps1", args, verbose=True)
-  utils.set_summary("desktop prepare", ret)
+  utils.set_summary("desktop prepare " + edition, ret)
   return
 
 def make_zip(edition = "opensource"):

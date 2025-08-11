@@ -69,22 +69,23 @@ def make_x265(base_dir, build_type):
   if "mac" == base.host_platform():
     cmake_args += [
       "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
+      "-DENABLE_ASSEMBLY=OFF"                   # disable assembly optimizations
     ]
 
     # mac_64
     if config.check_option("platform", "mac_64"):
-      cmake_args_ext = []
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
       if base.is_os_arm():
-        cmake_args_ext = [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64",
-          "-DENABLE_ASSEMBLY=OFF"               # disable assembly optimizations for cross-arch build
+        cmake_args_ext += [
+          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
         ]
       build_unix("mac_64", cmake_args + cmake_args_ext)
 
     # mac_arm64
     if config.check_option("platform", "mac_arm64"):
-      build_unix("mac_arm64", cmake_args)
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+      build_unix("mac_arm64", cmake_args + cmake_args_ext)
 
   os.chdir(base_dir)
   return
@@ -160,16 +161,17 @@ def make_de265(base_dir, build_type):
 
     # mac_64
     if config.check_option("platform", "mac_64"):
-      cmake_args_ext = []
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
       if base.is_os_arm():
-        cmake_args_ext = [
+        cmake_args_ext += [
           "-DCMAKE_OSX_ARCHITECTURES=x86_64"
         ]
       build_unix("mac_64", cmake_args + cmake_args_ext)
 
     # mac_arm64
     if config.check_option("platform", "mac_arm64"):
-      build_unix("mac_arm64", cmake_args)
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+      build_unix("mac_arm64", cmake_args + cmake_args_ext)
 
   os.chdir(base_dir)
   return
@@ -265,16 +267,17 @@ def make_heif(base_dir, build_type):
 
     # mac_64
     if config.check_option("platform", "mac_64"):
-      cmake_args_ext = []
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
       if base.is_os_arm():
-        cmake_args_ext = [
+        cmake_args_ext += [
           "-DCMAKE_OSX_ARCHITECTURES=x86_64"
         ]
       build_unix("mac_64", cmake_args + cmake_args_ext)
 
     # mac_arm64
     if config.check_option("platform", "mac_arm64"):
-      build_unix("mac_arm64", cmake_args)
+      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+      build_unix("mac_arm64", cmake_args + cmake_args_ext)
 
   os.chdir(base_dir)
   return

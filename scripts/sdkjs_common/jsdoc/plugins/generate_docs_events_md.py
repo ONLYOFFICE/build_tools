@@ -91,7 +91,7 @@ def process_link_tags(text, root=''):
                 display_text = label if label else ref
                 return f"[{display_text}]({url})"
             elif ref.startswith('/docs/plugins/'):
-                url = f'../../{ref.split('/docs/plugins/')[1]}.md'
+                url = f"../../{ref.split('/docs/plugins/')[1]}.md"
                 display_text = label if label else ref
                 return f"[{display_text}]({url})"
             else:

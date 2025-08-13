@@ -116,8 +116,11 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if ("" != qmake_addon_string):
       qmake_addon_string = " " + qmake_addon_string
 
+    vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
+    if platform == "win_arm64":
+      vcvarsall_arch += "_arm64"
     qmake_bat = []
-    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
+    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + vcvarsall_arch)
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])

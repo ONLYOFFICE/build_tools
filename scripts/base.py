@@ -829,6 +829,9 @@ def qt_config(platform):
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
+    
+  if ("win_arm64" == platform):
+    config_param += " win_arm64"
 
   config_param += qt_config_platform_addon(platform)
   return config_param

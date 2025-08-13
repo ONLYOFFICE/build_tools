@@ -42,6 +42,8 @@ parser.add_option("--vs-version", action="store", type="string", dest="vs-versio
 parser.add_option("--vs-path", action="store", type="string", dest="vs-path", default="", help="path to vcvarsall")
 parser.add_option("--siteUrl", action="store", type="string", dest="siteUrl", default="127.0.0.1", help="site url")
 parser.add_option("--multiprocess", action="store", type="string", dest="multiprocess", default="1", help="provides ability to specify single process for make")
+parser.add_option("--repo-overrides", action="store", type="string", dest="repo-overrides", default="", help="Comma-separated list of repo=url overrides, e.g. server=https://github.com/me/custom-server.git")
+parser.add_option("--repo-branch-overrides", action="store", type="string", dest="repo-branch-overrides", default="", help="Comma-separated list of repo=branch overrides, e.g. server=feature/new-api")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

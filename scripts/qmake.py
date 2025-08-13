@@ -117,7 +117,7 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       qmake_addon_string = " " + qmake_addon_string
 
     vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
-    qmake_spec = "-spec win32-arm64-msvc "
+    qmake_spec = "-spec win32-arm64-msvc2017 "
     if platform == "win_arm64":
       vcvarsall_arch += "_arm64"
     qmake_bat = []

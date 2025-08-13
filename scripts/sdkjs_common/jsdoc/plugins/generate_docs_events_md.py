@@ -91,7 +91,7 @@ def process_link_tags(text, root=''):
                 display_text = label if label else ref
                 return f"[{display_text}]({url})"
             elif ref.startswith('/docs/plugins/'):
-                url = f'../../{ref.split('/docs/plugins/')[1]}.md'
+                url = f"../../{ref.split('/docs/plugins/')[1]}.md"
                 display_text = label if label else ref
                 return f"[{display_text}]({url})"
             else:
@@ -275,6 +275,22 @@ def generate_enumeration_markdown(enumeration, enumerations):
 
     return escape_text_outside_code_blocks(content)
 
+def generate_events_summary(events):
+    """
+    Create Events.md summary listing all events with their description.
+    """
+    header = [
+        "# Events\n\n",
+        "| Event | Description |\n",
+        "| ----- | ----------- |\n"
+    ]
+    lines = [
+        f"| [{ev['name']}](./{ev['name']}.md) | "
+        f"{remove_line_breaks(correct_description(ev.get('description', ''), isInTable=True))} |\n"
+        for ev in sorted(events, key=lambda e: e['name'])
+    ]
+    return "".join(header + lines)
+
 def generate_properties_markdown(properties, enumerations):
     if properties is None:
         return ''
@@ -352,6 +368,8 @@ def process_events(data, editor_dir):
             if not e.get('examples'):
                 missing_examples.append(os.path.relpath(path, editor_dir))
 
+    # events summary
+    write_markdown_file(os.path.join(events_dir, "Events.md"), generate_events_summary(events))
 
 def generate_events(output_dir):
     if output_dir.endswith('/'):

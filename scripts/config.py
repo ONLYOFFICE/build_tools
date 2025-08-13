@@ -24,7 +24,7 @@ def parse():
 
   # all platforms
   global platforms
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "win_arm64", 
                "linux_64", "linux_32", "linux_arm64",
                "mac_64", "mac_arm64",
                "ios", 

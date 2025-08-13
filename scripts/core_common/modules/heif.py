@@ -5,7 +5,7 @@ import os
 import config
 
 # NOTE:
-#  - requires CMake < 4.0.0
+#  - requires CMake >= 3.21, < 4.0.0
 
 def get_vs_version():
   vs_version = "14 2015"
@@ -296,7 +296,8 @@ def make_heif(base_dir, build_type):
     return
 
   # set version here
-  heif_version = "1.20.2"
+  # NOTE: 1.18.2 - the latest version of libheif supporting C++11 build (as for now)
+  heif_version = "1.18.2"
   if not base.is_dir("libheif"):
     fetch(heif_version)
     # do not build heifio module
@@ -382,7 +383,7 @@ def make():
   old_dir = os.getcwd()
   os.chdir(base_dir)
 
-  # TODO: do we really need debug build for libheif ???
+  # TODO: do we really need debug builds for libheif ???
   build_type = "Release"
   if (-1 != config.option("config").lower().find("debug")):
     build_type = "Debug"

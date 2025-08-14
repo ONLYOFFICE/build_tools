@@ -169,6 +169,9 @@ def make():
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
+  
+    if config.check_option("platform", "win_arm64"):
+      base.replaceInFile("v8/build/toolchain/win/setup_toolchain.py", "SDK_VERSION = \'10.0.26100.0\'", "SDK_VERSION = \'10.0.22621.0\'")
   else:
     base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
 

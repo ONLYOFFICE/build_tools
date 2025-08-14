@@ -253,6 +253,7 @@ def make():
 
     # license
     if (0 == platform.find("mac")):
+      base.create_dir(root_dir + "/license")
       base.copy_file(git_dir + "/desktop-apps/common/package/license/opensource/EULA.html", root_dir + "/license/EULA.html")
 
     isUseJSC = False

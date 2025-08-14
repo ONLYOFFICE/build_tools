@@ -10,13 +10,11 @@ import glob
 import icu_android
 
 def fetch_icu(major, minor):
-  if (base.is_dir("./icu2")):
-    base.delete_dir_with_access_error("icu2")  
-  base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + major, "https://github.com/unicode-org/icu.git", "./icu2"])
-  base.copy_dir("./icu2/icu4c", "./icu")
-  base.delete_dir_with_access_error("icu2")
+  base.download("https://github.com/unicode-org/icu/releases/download/release-" + major + "-" + minor + "/icu4c-" + major + "_" + minor + "-src.zip", "./icu.zip")
+  base.extract("./icu.zip", "./")
   #base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
   return
+
 
 def clear_module():
   if base.is_dir("icu"):
@@ -43,8 +41,8 @@ def make():
 
   os.chdir(base_dir)
 
-  icu_major = "58"
-  icu_minor = "3"
+  icu_major = "74"
+  icu_minor = "2"
   
   if not base.is_dir("icu"):
     fetch_icu(icu_major, icu_minor)  
@@ -58,24 +56,52 @@ def make():
       need_platforms.append("win_64")
     if (-1 != config.option("platform").find("win_32")):
       need_platforms.append("win_32")
+    if (-1 != config.option("platform").find("win_arm64")): 
+      need_platforms.append("win_64") # for exe files
+      need_platforms.append("win_arm64")
+      
     for platform in need_platforms:
-      if not config.check_option("platform", platform) and not config.check_option("platform", platform + "_xp"):
+      if not config.check_option("platform", platform) and not config.check_option("platform", platform + "_xp") and not config.check_option("platform", "win_arm64"):
         continue
+      
       if not base.is_dir(platform + "/build"):
         base.create_dir(platform)
         compile_bat = []
         compile_bat.append("setlocal")
-        compile_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
-        compile_bat.append("call MSBuild.exe icu/source/allinone/allinone.sln /p:Configuration=Release /p:PlatformToolset=" + platformToolset + " /p:Platform=" + ("Win32" if base.platform_is_32(platform) else "X64"))
+        
+        args = {
+          "win_32" : {
+            "msbuild_platfrom" : "Win32",
+            "vcvarsall_arch" : "x86",
+            "out_bin_dir" : "icu/bin/",
+            "out_lib_dir" : "icu/lib/"
+          },
+          "win_64" : {
+            "msbuild_platfrom" : "X64",
+            "vcvarsall_arch" : "x64",
+            "out_bin_dir" : "icu/bin64/",
+            "out_lib_dir" : "icu/lib64/"
+          },
+          "win_arm64" : {
+            "msbuild_platfrom" : "ARM64",
+            "vcvarsall_arch" : "x64_arm64",
+            "out_bin_dir" : "icu/binARM64/",
+            "out_lib_dir" : "icu/libARM64/"
+          }
+        }
+        
+        platform_args = args[platform]
+                  
+        compile_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + platform_args['vcvarsall_arch'])
+        compile_bat.append("call MSBuild.exe icu/source/allinone/allinone.sln /p:Configuration=Release /p:PlatformToolset=" + platformToolset + " /p:Platform=" + platform_args['msbuild_platfrom'])
         compile_bat.append("endlocal")
         base.run_as_bat(compile_bat)
-        bin_dir = "icu/bin64/" if ("win_64" == platform) else "icu/bin/"
-        lib_dir = "icu/lib64/" if ("win_64" == platform) else "icu/lib/"
+        
         base.create_dir(platform + "/build")
-        base.copy_file(bin_dir + "icudt" + icu_major + ".dll", platform + "/build/")
-        base.copy_file(bin_dir + "icuuc" + icu_major + ".dll", platform + "/build/")
-        base.copy_file(lib_dir + "icudt.lib", platform + "/build/")
-        base.copy_file(lib_dir + "icuuc.lib", platform + "/build/")
+        base.copy_file(platform_args['out_bin_dir'] + "icudt" + icu_major + ".dll", platform + "/build/")
+        base.copy_file(platform_args['out_bin_dir'] + "icuuc" + icu_major + ".dll", platform + "/build/")
+        base.copy_file(platform_args['out_lib_dir'] + "icudt.lib", platform + "/build/")
+        base.copy_file(platform_args['out_lib_dir'] + "icuuc.lib", platform + "/build/")
     os.chdir(old_cur)
     return
 

@@ -15,6 +15,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DocumentBuilder" if base.is_windows() else "/documentbuilder"))
+    root_dir_win64 = base_dir + "/win_64/" + branding + "/DocumentBuilder"
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -134,6 +135,10 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
+    
+    if native_platform == "win_arm64":
+      base.delete_dir(root_dir + "/sdkjs")
+      base.copy_dir(root_dir_win64 + "/sdkjs", root_dir + "/sdkjs")
   
     # delete unnecessary builder files
     def delete_files(files):

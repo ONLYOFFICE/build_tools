@@ -61,7 +61,7 @@ def make():
       need_platforms.append("win_arm64")
       
     for platform in need_platforms:
-      if not config.check_option("platform", platform) and not config.check_option("platform", platform + "_xp") and not config.check_option("platform", "win_arm64"):
+      if not config.check_option("platform", platform) and not config.check_option("platform", platform + "_xp"):
         continue
       
       if not base.is_dir(platform + "/build"):

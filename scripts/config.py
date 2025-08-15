@@ -56,6 +56,10 @@ def parse():
   if ("mac" == host_platform) and check_option("platform", "mac_arm64") and not base.is_os_arm():
     if not check_option("platform", "mac_64"):
       options["platform"] = "mac_64 " + options["platform"]
+      
+  if ("windows" == host_platform) and check_option("platform", "win_arm64") and not base.is_os_arm():
+    if not check_option("platform", "win_64"):
+      options["platform"] = "win_64 " + options["platform"]
 
   if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
     if not check_option("platform", "linux_64"):

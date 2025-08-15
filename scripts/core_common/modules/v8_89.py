@@ -167,6 +167,14 @@ def make():
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
+    
+    # fix for new depot_tools and vs2019, as VC folder contains a folder with a symbol in the name
+    # sorting is done by increasing version, so 0 is a dummy value
+    replace_src = "  def to_int_if_int(x):\n    try:\n      return int(x)\n    except ValueError:\n      return x"
+    replace_dst = "  def to_int_if_int(x):\n    try:\n      return int(x)\n    except ValueError:\n      return 0"
+    base.replaceInFile("v8/build/vs_toolchain.py", replace_src, replace_dst)
+    
+    
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
   

@@ -260,11 +260,6 @@ def make_dmg(target = "opensource"):
   args = ["bundler", "exec", "fastlane", lane, "skip_git_bump:true"]
   if target == "commercial":
     args += ["edition:Enterprise"]
-    utils.delete_file(
-      source_dir + "/desktopeditors/license/EULA.html")
-    utils.copy_file(
-      "../../common/package/license/commercial/LICENSE.html",
-      source_dir + "/desktopeditors/license/LICENSE.html")
   dmg = utils.sh(" ".join(args), verbose=True)
   utils.set_summary("desktop dmg " + target + " build", dmg)
 

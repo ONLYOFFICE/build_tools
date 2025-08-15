@@ -209,7 +209,7 @@ def make():
     base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
     
-  if config.check_option("platform", "win_arm64") and not base.is_file("out.gn/win_64/release/obj/v8_monolith.lib"):
+  if config.check_option("platform", "win_arm64") and not base.is_file("out.gn/win_arm64/release/obj/v8_monolith.lib"):
     ninja_windows_make(gn_args, True, False, True)
 
   if config.check_option("platform", "win_64"):

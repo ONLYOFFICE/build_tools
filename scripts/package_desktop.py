@@ -248,7 +248,7 @@ def make_macos():
   dmg = make_dmg()
   if dmg and sparkle_updates:
     make_sparkle_updates()
-  if common.platform != "darwin_x86_64_v8"
+  if common.platform != "darwin_x86_64_v8":
     make_dmg("commercial")
 
   utils.set_cwd(common.workspace_dir)

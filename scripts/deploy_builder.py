@@ -15,6 +15,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DocumentBuilder" if base.is_windows() else "/documentbuilder"))
+    root_dir_win64 = base_dir + "/win_64/" + branding + "/DocumentBuilder"
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -57,17 +58,18 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
+    icu_ver = "74"
     if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/icudt58.dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/icuuc58.dll")
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt" + icu_ver + ".dll", root_dir + "/icudt" + icu_ver + ".dll")
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc" + icu_ver + ".dll", root_dir + "/icuuc" + icu_ver + ".dll")
 
     if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/libicuuc.so.58")
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so." + icu_ver, root_dir + "/libicudata.so." + icu_ver)
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so." + icu_ver, root_dir + "/libicuuc.so." + icu_ver)
 
     if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata." + icu_ver + ".dylib", root_dir + "/libicudata." + icu_ver + ".dylib")
+      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc." + icu_ver + ".dylib", root_dir + "/libicuuc." + icu_ver + ".dylib")
 
     # doctrenderer
     if isWindowsXP:
@@ -134,6 +136,11 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
+    
+    if native_platform == "win_arm64":
+      base.delete_dir(root_dir + "/sdkjs")
+      base.copy_dir(root_dir_win64 + "/sdkjs", root_dir + "/sdkjs")
+      return
   
     # delete unnecessary builder files
     def delete_files(files):

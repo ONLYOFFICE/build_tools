@@ -116,12 +116,17 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if ("" != qmake_addon_string):
       qmake_addon_string = " " + qmake_addon_string
 
+    vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
+    qmake_spec = ""
+    if platform == "win_arm64":
+      vcvarsall_arch += "_arm64"
+      qmake_spec = "-spec win32-arm64-msvc2017 "
     qmake_bat = []
-    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ("x86" if base.platform_is_32(platform) else "x64"))
+    qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + vcvarsall_arch)
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
-    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
+    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + qmake_spec + file_pro + config_params_string + qmake_addon_string)
     if ("1" == config.option("clean")):
       qmake_bat.append("call nmake " + " ".join(clean_params))
       qmake_bat.append("call nmake " + " ".join(distclean_params))

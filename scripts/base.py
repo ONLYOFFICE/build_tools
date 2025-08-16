@@ -829,6 +829,9 @@ def qt_config(platform):
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
+    
+  if ("win_arm64" == platform):
+    config_param += " win_arm64"
 
   config_param += qt_config_platform_addon(platform)
   return config_param
@@ -1868,6 +1871,9 @@ def create_x2t_js_cache(dir, product, platform):
 
   if ((platform == "linux_arm64") and not is_os_arm()):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
+    return
+  
+  if platform == "win_arm64": # copying sdkjs later
     return
 
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)

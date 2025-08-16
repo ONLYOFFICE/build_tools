@@ -54,6 +54,14 @@ def make():
       qmake_bat.append("call nmake clean")
       qmake_bat.append("call nmake build_libs install")
       base.run_as_bat(qmake_bat, True)
+    if (-1 != config.option("platform").find("win_arm64")) and not base.is_dir("../build/win_arm64"):
+      base.create_dir("./../build/win_arm64")
+      qmake_bat = []
+      qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" x64_arm64")
+      qmake_bat.append("perl Configure VC-WIN64-ARM --prefix=" + old_cur_dir + "\\build\\win_arm64 --openssldir=" + old_cur_dir + "\\build\\win_arm64 no-shared no-asm enable-md2")
+      qmake_bat.append("call nmake clean")
+      qmake_bat.append("call nmake build_libs install")
+      base.run_as_bat(qmake_bat, True)
     os.chdir(old_cur)
     # xp ----------------------------------------------------------------------------------------------------
     os.chdir(base_dir + "/openssl")

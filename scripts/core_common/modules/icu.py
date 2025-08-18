@@ -10,11 +10,12 @@ import glob
 import icu_android
 
 def fetch_icu(major, minor):
-  base.download("https://github.com/unicode-org/icu/releases/download/release-" + major + "-" + minor + "/icu4c-" + major + "_" + minor + "-src.zip", "./icu.zip")
-  base.extract("./icu.zip", "./")
-  #base.cmd("svn", ["export", "https://github.com/unicode-org/icu/tags/release-" + icu_major + "-" + icu_minor + "/icu4c", "./icu", "--non-interactive", "--trust-server-cert"])
+  if (base.is_dir("./icu2")):
+    base.delete_dir_with_access_error("icu2")  
+  base.cmd("git", ["clone", "--depth", "1", "--branch", "release-" + major + "-" + minor, "https://github.com/unicode-org/icu.git", "./icu2"])
+  base.copy_dir("./icu2/icu4c", "./icu")
+  base.delete_dir_with_access_error("icu2")
   return
-
 
 def clear_module():
   if base.is_dir("icu"):
@@ -106,14 +107,6 @@ def make():
     return
 
   if ("linux" == base.host_platform()):
-    if not base.is_file("./icu/source/i18n/digitlst.cpp.bak"):
-      base.copy_file("./icu/source/i18n/digitlst.cpp", "./icu/source/i18n/digitlst.cpp.bak")
-      base.replaceInFile("./icu/source/i18n/digitlst.cpp", "xlocale", "locale")
-      if base.is_dir(base_dir + "/linux_64"):
-        base.delete_dir(base_dir + "/linux_64")
-      if base.is_dir(base_dir + "/linux_arm64"):
-        base.delete_dir(base_dir + "/linux_arm64")
-
     if not base.is_dir(base_dir + "/linux_64"):
       base.create_dir(base_dir + "/icu/cross_build")
       os.chdir("icu/cross_build")

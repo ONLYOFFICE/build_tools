@@ -562,10 +562,42 @@ def get_ssh_base_url():
 
 def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
+
+  # Repo URL override ---
   owner = git_owner if git_owner else "ONLYOFFICE"
-  url = git_get_base_url() + owner + "/" + repo + ".git"
-  if git_is_ssh():
-    url = get_ssh_base_url() + repo + ".git"
+  repo_overrides = config.option("repo-overrides")  # full URL overrides
+  if repo_overrides:
+      url = None
+      for entry in repo_overrides.split(","):
+          entry = entry.strip()
+          if "=" in entry:
+              name, url_override = entry.split("=", 1)
+              if name.strip() == repo:
+                  print("[git] '" + repo +"' repo URL override: '" + url_override.strip() + "'")
+                  url = url_override.strip()
+                  break
+      if not url:
+          url = git_get_base_url() + owner + "/" + repo + ".git"
+          if git_is_ssh():
+              url = get_ssh_base_url() + repo + ".git"
+  else:
+      url = git_get_base_url() + owner + "/" + repo + ".git"
+      if git_is_ssh():
+          url = get_ssh_base_url() + repo + ".git"
+
+  # Branch override
+  branch_name = config.option("branch")  # default global branch
+  repo_branch_overrides = config.option("repo-branch-overrides")
+  if repo_branch_overrides:
+      for entry in repo_branch_overrides.split(","):
+          entry = entry.strip()
+          if "=" in entry:
+              name, branch_override = entry.split("=", 1)
+              if name.strip() == repo:
+                  print("[git] '" + repo +"' repo BRANCH override: '" + branch_override.strip() + "'")
+                  branch_name = branch_override.strip()
+                  break
+
   folder = get_script_dir() + "/../../" + repo
   if is_current_dir:
     folder = repo
@@ -579,13 +611,13 @@ def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   os.chdir(folder)
   cmd("git", ["fetch"], False if ("1" != config.option("update-light")) else True)
   if is_not_exit or ("1" != config.option("update-light")):
-    retCheckout = cmd("git", ["checkout", "-f", config.option("branch")], True)
+    retCheckout = cmd("git", ["checkout", "-f", branch_name], True)
     if (retCheckout != 0):
       print("branch does not exist...")
       print("switching to master...")
       cmd("git", ["checkout", "-f", "master"])
     cmd("git", ["submodule", "update", "--init", "--recursive"], True)
-  if (0 != config.option("branch").find("tags/")):
+  if (0 != branch_name.find("tags/")):
     cmd("git", ["pull"], False if ("1" != config.option("update-light")) else True)
     cmd("git", ["submodule", "update", "--recursive", "--remote"], True)
   os.chdir(old_cur)

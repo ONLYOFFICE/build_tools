@@ -21,14 +21,17 @@ def get_vs_path(version = "2019"):
       
   return vs_path
 
-def make(host_qt_bin_path):
+def make():
+  qt_build_path = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.15.2/win_arm64"
+  qt_build_tools = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.15.2/tools"
   qt_params = ["-opensource",
     "-confirm-license",
     "-release",
     "-shared",
     "-accessibility",
-    "-prefix", "\"./../../qt_build/Qt-5.15.2/win_arm64\"",
-    "-external-hostbindir", "\"" + host_qt_bin_path + "\"",
+    "-prefix", "\"" + qt_build_path + "\"",
+    "-extprefix", "\"" + qt_build_path + "\"",
+    "-hostprefix", "\"" + qt_build_tools + "\"",
     "-c++std", "c++11",
     "-qt-zlib",
     "-qt-libpng",
@@ -46,7 +49,8 @@ def make(host_qt_bin_path):
     "-skip", "qtwebview",
     "-skip", "qtwebengine",
     "-xplatform", "win32-arm64-msvc2017",
-    "-mp"]
+    "-mp",
+    "-no-pch"]
 
   qt_params_str = ""
   for param in qt_params:
@@ -67,11 +71,9 @@ def make(host_qt_bin_path):
   qt_build_bat.append("call \"" + vs_path + "/vcvarsall.bat\" " + vcvarsall_host_arch)
   qt_build_bat.append("cd qt-everywhere-src-5.15.2")
   qt_build_bat.append("call configure " + qt_params_str)
-  
-  qt_build_bat.append("call \"" + vs_path + "/vcvarsall.bat\" " + vcvarsall_arch)
   qt_build_bat.append("call nmake")
   qt_build_bat.append("call nmake install")
   base.run_as_bat(qt_build_bat)
   
 if __name__ == "__main__":
-  make(sys.argv[1]) # pass qt_binaries host machine path (for moc.exe etc...)
+  make()

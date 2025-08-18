@@ -13,7 +13,7 @@ from the `master` branch.
 
 ## How to use - Linux
 
-**Note**: The solution has been tested on **Ubuntu 16.04**.
+**Note**: The solution has been tested on **Ubuntu 20.04**.
 
 ### Installing dependencies
 

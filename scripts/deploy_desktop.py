@@ -82,19 +82,8 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
-    if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/converter/icudt58.dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/converter/icuuc58.dll")
-      #base.copy_file(git_dir + "/desktop-apps/common/converter/package.config", root_dir + "/converter/package.config")
-
-    if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/converter/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/converter/libicuuc.so.58")
-
-    if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/converter/libicudata.58.dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/converter/libicuuc.58.dylib")
-
+    base.deploy_icu(core_dir, root_dir + "/converter")
+    
     # doctrenderer
     if isWindowsXP:
       base.copy_lib(build_libraries_path + "/xp", root_dir + "/converter", "doctrenderer")

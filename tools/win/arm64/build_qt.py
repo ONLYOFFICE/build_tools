@@ -23,7 +23,6 @@ def get_vs_path(version = "2019"):
 
 def make():
   qt_build_path = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.15.2/win_arm64"
-  qt_build_tools = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.15.2/tools"
   qt_params = ["-opensource",
     "-confirm-license",
     "-release",
@@ -31,7 +30,7 @@ def make():
     "-accessibility",
     "-prefix", "\"" + qt_build_path + "\"",
     "-extprefix", "\"" + qt_build_path + "\"",
-    "-hostprefix", "\"" + qt_build_tools + "\"",
+    "-hostprefix", "\"" + qt_build_path + "\"",
     "-c++std", "c++11",
     "-qt-zlib",
     "-qt-libpng",

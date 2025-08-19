@@ -73,7 +73,7 @@ def make():
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu
-    base.deploy_icu(core_dir, root_dir)
+    base.deploy_icu(core_dir, root_dir, platform)
     
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")

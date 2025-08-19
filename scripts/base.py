@@ -1886,7 +1886,7 @@ def setup_local_qmake(dir_qmake):
   writeFile(dir_base + "/onlyoffice_qt.conf", "Prefix = " + dir_base)  
   return
 
-def deploy_icu(core_dir, dst_dir):
+def deploy_icu(core_dir, dst_dir, platform):
   if (0 == platform.find("android")):
     src_dir = core_dir + "/Common/3dParty/icu/android/build/" + platform[8:]
     base.copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")

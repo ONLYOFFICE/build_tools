@@ -94,7 +94,7 @@ def make():
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server", "", "../../../dictionaries")
 
     # icu
-    base.deploy_icu(core_dir, converter_dir)
+    base.deploy_icu(core_dir, converter_dir, platform)
         
     base.copy_v8_files(core_dir, converter_dir, platform)
 

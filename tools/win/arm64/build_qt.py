@@ -64,11 +64,10 @@ def make():
     base.cmd("tar", ["-xf", "./qt_source_5.15.2.tar.xz"])
     
   vs_path = get_vs_path()
-  vcvarsall_arch = "x64_arm64"
   vcvarsall_host_arch = "x64"
   
   qt_build_bat = []
-  qt_build_bat.append("call \"" + vs_path + "/vcvarsall.bat\" " + vcvarsall_host_arch)
+  qt_build_bat.append("call \"" + vs_path + "/vcvarsall.bat\" " + vcvarsall_host_arch) # for nmake
   qt_build_bat.append("cd qt-everywhere-src-5.15.2")
   qt_build_bat.append("call configure " + qt_params_str)
   qt_build_bat.append("call nmake")

@@ -11,9 +11,8 @@ def change_icu_defs(arch):
   param = "-arch x86_64"
   if arch == "arm64":
     param = "-arch arm64"
-    param += " -isysroot " + base.find_mac_sdk()
   
-  #param += " -isysroot " + base.find_mac_sdk()
+  param += " -isysroot " + base.find_mac_sdk()
   param += " -mmacosx-version-min=10.12"
 
   os.environ["CFLAGS"] = param

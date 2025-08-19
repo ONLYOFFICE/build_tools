@@ -1889,21 +1889,21 @@ def setup_local_qmake(dir_qmake):
 def deploy_icu(core_dir, dst_dir, platform):
   if (0 == platform.find("android")):
     src_dir = core_dir + "/Common/3dParty/icu/android/build/" + platform[8:]
-    base.copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")
+    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")
     return
 
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
 
   if (0 == platform.find("win")):
-    base.copy_file(src_dir + "/icudt" + icu_ver + ".dll", dst_dir + "/icudt" + icu_ver + ".dll")
-    base.copy_file(src_dir + "/icuuc" + icu_ver + ".dll", dst_dir + "/icuuc" + icu_ver + ".dll")
+    copy_file(src_dir + "/icudt" + icu_ver + ".dll", dst_dir + "/icudt" + icu_ver + ".dll")
+    copy_file(src_dir + "/icuuc" + icu_ver + ".dll", dst_dir + "/icuuc" + icu_ver + ".dll")
 
   if (0 == platform.find("linux")):
-    base.copy_file(src_dir + "/libicudata.so." + icu_ver, dst_dir + "/libicudata.so." + icu_ver)
-    base.copy_file(src_dir + "/libicuuc.so." + icu_ver, dst_dir + "/libicuuc.so." + icu_ver)
+    copy_file(src_dir + "/libicudata.so." + icu_ver, dst_dir + "/libicudata.so." + icu_ver)
+    copy_file(src_dir + "/libicuuc.so." + icu_ver, dst_dir + "/libicuuc.so." + icu_ver)
 
   if (0 == platform.find("mac")):
-    base.copy_file(src_dir + "/libicudata." + icu_ver + ".dylib", dst_dir + "/libicudata." + icu_ver + ".dylib")
-    base.copy_file(src_dir + "/libicuuc." + icu_ver + ".dylib", dst_dir + "/libicuuc." + icu_ver + ".dylib")
+    copy_file(src_dir + "/libicudata." + icu_ver + ".dylib", dst_dir + "/libicudata." + icu_ver + ".dylib")
+    copy_file(src_dir + "/libicuuc." + icu_ver + ".dylib", dst_dir + "/libicuuc." + icu_ver + ".dylib")
 
   return

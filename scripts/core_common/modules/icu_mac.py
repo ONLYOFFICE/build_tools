@@ -44,7 +44,7 @@ if not base.is_dir(current_dir + "/mac_cross_64"):
     "--prefix=" + current_dir + "/mac_cross_64"])
 
   base.cmd("make", ["-j4"])
-  #base.cmd("make", ["install"], True)
+  base.cmd("make", ["install"], True)
 
   restore_icu_defs(old_env)
 

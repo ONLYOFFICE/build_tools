@@ -15,7 +15,7 @@ import stat
 import json
 
 __file__script__path__ = os.path.dirname( os.path.realpath(__file__))
-icu_ver = 74
+icu_ver = "74"
 
 # common functions --------------------------------------
 def get_script_dir(file=""):

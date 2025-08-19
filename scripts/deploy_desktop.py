@@ -82,7 +82,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
-    base.deploy_icu(core_dir, root_dir + "/converter")
+    base.deploy_icu(core_dir, root_dir + "/converter", platform)
     
     # doctrenderer
     if isWindowsXP:

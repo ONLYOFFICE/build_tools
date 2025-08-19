@@ -58,19 +58,8 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
-    icu_ver = "74"
-    if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt" + icu_ver + ".dll", root_dir + "/icudt" + icu_ver + ".dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc" + icu_ver + ".dll", root_dir + "/icuuc" + icu_ver + ".dll")
-
-    if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so." + icu_ver, root_dir + "/libicudata.so." + icu_ver)
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so." + icu_ver, root_dir + "/libicuuc.so." + icu_ver)
-
-    if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata." + icu_ver + ".dylib", root_dir + "/libicudata." + icu_ver + ".dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc." + icu_ver + ".dylib", root_dir + "/libicuuc." + icu_ver + ".dylib")
-
+    base.deploy_icu(core_dir, root_dir, platform)
+    
     # doctrenderer
     if isWindowsXP:
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix + "/xp", root_dir, "doctrenderer")

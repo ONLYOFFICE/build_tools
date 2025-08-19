@@ -93,8 +93,7 @@
     "[win,linux]desktop-apps/win-linux/ASCDocumentEditor.pro",
     
     "[win]desktop-apps/win-linux/extras/projicons/ProjIcons.pro",
-    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro",
-    "[win_xp]desktop-apps/win-linux/extras/online-installer/OnlineInstaller.pro"
+    "[win,!win_xp]desktop-apps/win-linux/extras/update-daemon/UpdateDaemon.pro"
   ],
 
   "mobile" : [

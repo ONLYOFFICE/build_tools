@@ -91,6 +91,11 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
   build_params = ["-nocache", file_pro] + base.qt_config_as_param(config_param) + qmake_addon
 
   qmake_app = qt_dir + "/bin/qmake"
+  
+  qt_win_arm64_dir = os.path.abspath(os.path.dirname(__file__) + "/../tools/win/arm64/qt_build/Qt-5.15.2/win_arm64")
+  if platform == "win_arm64" and base.is_dir(qt_win_arm64_dir):
+    qmake_app = os.path.abspath(qt_win_arm64_dir + "/bin/qmake.exe")
+  
   # non windows platform
   if not base.is_windows():
     if base.is_file(qt_dir + "/onlyoffice_qt.conf"):

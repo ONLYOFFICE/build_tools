@@ -54,8 +54,12 @@ os.chdir(current_dir + "/icu/source")
 
 old_env = change_icu_defs("arm64")
 
+addon = []
+if not base.is_os_arm():
+  addon = ["--host=aarch64-apple-darwin"]
+
 base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64", 
-  "--with-cross-build=" + current_dir + "/mac_cross_64", "VERBOSE=1"])
+  "--with-cross-build=" + current_dir + "/mac_cross_64", "VERBOSE=1"] + addon)
 
 base.cmd("make", ["-j4"])
 base.cmd("make", ["install"])

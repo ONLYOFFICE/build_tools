@@ -34,8 +34,8 @@ def restore_icu_defs(current_dir):
   base.delete_file(icudef_file_old)
   return
 
-icu_major = "58"
-icu_minor = "3"
+icu_major = "74"
+icu_minor = "2"
 
 current_dir_old = os.getcwd()
 current_dir = base.get_script_dir() + "/../../core/Common/3dParty/icu"

@@ -7,7 +7,16 @@ import config
 # NOTE:
 #  - requires CMake >= 3.21, < 4.0.0
 
-# TODO: refactor build functions
+# libs versions
+X265_VERSION = "4.1"
+DE265_VERSION = "1.0.16"
+# 1.18.2 - the latest version of libheif supporting C++11 builds (as for now)
+HEIF_VERSION = "1.18.2"
+
+# ios cmake toolchain
+IOS_CMAKE_VERSION = "4.5.0"
+CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
+
 
 def get_vs_version():
   vs_version = "14 2015"
@@ -15,91 +24,108 @@ def get_vs_version():
     vs_version = "16 2019"
   return vs_version
 
-def fetch_ios_cmake():
-  # set version here
-  version = "4.5.0"
-  branch_name = version
-  base.cmd("git", ["clone", "--depth", "1", "--branch", branch_name, "https://github.com/leetal/ios-cmake.git"])
+def get_xcode_sdk(platform):
+  xcode_sdk = "iphoneos"
+  if "simulator" in platform:
+    xcode_sdk = "iphonesimulator"
+  return xcode_sdk
+
+def fetch_repo(repo_url, branch_or_tag):
+  base.cmd("git", ["clone", "--depth", "1", "--branch", branch_or_tag, repo_url])
+  return
+
+def get_build_dir(base_dir, repo_dir, platform, build_type):
+  return os.path.join(base_dir, repo_dir, "build", platform, build_type.lower())
+
+# general build function (supposing we are located in the build directory)
+def build_with_cmake(platform, cmake_args, build_type):
+  # extend cmake arguments
+  cmake_args_ext = []
+  # WINDOWS
+  if "win" in platform:
+    cmake_args_ext = [
+      "-G", f"Visual Studio {get_vs_version()}"
+    ]
+    if platform == "win_64":
+      cmake_args_ext += ["-A", "x64"]
+    elif platform == "win_32":
+      cmake_args_ext += ["-A", "Win32"]
+  # LINUX, MAC
+  elif "linux" in platform or "mac" in platform:
+    cmake_args_ext = [
+      "-G", "Unix Makefiles",
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"  # on UNIX we need to compile with fPIC
+    ]
+    if platform == "mac_64":
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
+      if base.is_os_arm():
+        cmake_args_ext += [
+          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
+        ]
+    elif platform == "mac_arm64":
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+  # IOS
+  elif "ios" in platform:
+    cmake_args_ext = [
+      "-G", "Xcode",
+      "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE,
+      "-DDEPLOYMENT_TARGET=11.0"
+    ]
+    if platform == "ios":
+      cmake_args_ext += ["-DPLATFORM=OS64"]
+    elif platform == "ios_simulator":
+      cmake_args_ext += ["-DPLATFORM=SIMULATOR64COMBINED"]
+
+  # run cmake
+  base.cmd("cmake", cmake_args + cmake_args_ext)
+  # build
+  if "Unix Makefiles" in cmake_args_ext:
+    base.cmd("make", ["-j4"])
+  else:
+    base.cmd("cmake", ["--build", ".", "--config", build_type])
+  return
+
+# general make function that calls `build_func` callback for needed platform(s) with specified cmake arguments
+def make_common(build_func, cmake_args):
+  # WINDOWS
+  if "windows" == base.host_platform():
+    # win_64
+    if config.check_option("platform", "win_64"):
+      build_func("win_64", cmake_args)
+    # win_32
+    if config.check_option("platform", "win_32"):
+      build_func("win_32", cmake_args)
+
+  # LINUX
+  elif "linux" == base.host_platform():
+    # linux_64
+    if config.check_option("platform", "linux_64"):
+      build_func("linux_64", cmake_args)
+    # linux_arm64
+    if config.check_option("platform", "linux_arm64"):
+      build_func("linux_arm64", cmake_args)
+
+  # MAC
+  elif "mac" == base.host_platform():
+    # mac_64
+    if config.check_option("platform", "mac_64"):
+      build_func("mac_64", cmake_args)
+    # mac_arm64
+    if config.check_option("platform", "mac_arm64"):
+      build_func("mac_arm64", cmake_args)
+
+    # IOS
+    if -1 != config.option("platform").find("ios"):
+      # ios (arm64)
+      build_func("ios", cmake_args)
+      # ios simulator (x86_64 and arm64 FAT lib)
+      build_func("ios_simulator", cmake_args)
   return
 
 def make_x265(base_dir, build_type):
-  # clones repo
-  def fetch(version):
-    branch_name = f"Release_{version}"
-    base.cmd("git", ["clone", "--depth", "1", "--branch", branch_name, "https://bitbucket.org/multicoreware/x265_git.git"])
-    return
-
-  # builds library (Unix specific)
-  def build_unix(platform, cmake_args):
-    # check build dir
-    build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libx265.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("make", ["-j4"])
-    # copy files
-    base.copy_file(base_dir + "/x265_git/source/x265.h", build_dir)
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (Windows specific)
-  def build_win(platform, cmake_args):
-    # check build dir
-    build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    if base.is_file(os.path.join(build_dir, build_type, "x265-static.lib")):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # copy files
-    base.copy_file(base_dir + "/x265_git/source/x265.h", build_dir)
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (iOS specific)
-  def build_ios(platform, cmake_args):
-    # check build dir
-    build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libx265.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # make library
-    platform_xcode = "iphoneos"
-    if platform.find("simulator") != -1:
-      platform_xcode = "iphonesimulator"
-    base.cmd("libtool", [
-      "-static",
-      "-o", "libx265.a",
-      f"build/common.build/{build_type}-{platform_xcode}/libcommon.a",
-      f"build/encoder.build/{build_type}-{platform_xcode}/libencoder.a"
-    ])
-    # copy files
-    base.copy_file(base_dir + "/x265_git/source/x265.h", build_dir)
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # set version here
-  x265_version = "4.1"
+  # fetch lib repo
   if not base.is_dir("x265_git"):
-    fetch(x265_version)
+    fetch_repo("https://bitbucket.org/multicoreware/x265_git.git", f"Release_{X265_VERSION}")
     # fix x265 version detection so it reads version from x265Version.txt instead of parsing it from .git
     base.replaceInFile(
       base_dir + "/x265_git/source/cmake/Version.cmake",
@@ -107,156 +133,57 @@ def make_x265(base_dir, build_type):
       "endif()\n    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../x265Version.txt)"
     )
 
+  # prepare cmake args
   cmake_dir = base_dir + "/x265_git/source"
-  cmake_args_base = [
+  cmake_args = [
     cmake_dir,
     "-DCMAKE_BUILD_TYPE=" + build_type,
     "-DENABLE_CLI=OFF",                 # do not build standalone CLI app
-    "-DENABLE_SHARED=OFF"               # do not build shared libs
+    "-DENABLE_SHARED=OFF",              # do not build shared libs
+    "-DENABLE_ASSEMBLY=OFF",            # disable assembly optimizations
   ]
 
-  # WINDOWS
-  if "windows" == base.host_platform():
-    cmake_args_platform = [
-      "-G", f"Visual Studio {get_vs_version()}"
-    ]
-    # win_64
-    if config.check_option("platform", "win_64"):
-      cmake_args_ext = ["-A", "x64"]
-      build_win("win_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # win_32
-    if config.check_option("platform", "win_32"):
-      cmake_args_ext = ["-A", "Win32"]
-      build_win("win_32", cmake_args_base + cmake_args_platform + cmake_args_ext)
+  # lib build function
+  def build_x265(platform, cmake_args):
+    # check if target lib has already been built
+    build_dir = get_build_dir(base_dir, "x265_git", platform, build_type)
+    if platform.find("win") != -1:
+      target_lib = os.path.join(build_dir, build_type, "x265-static.lib")
+    else:
+      target_lib = os.path.join(build_dir, "libx265.a")
+    if base.is_file(target_lib):
+      return
+    # go to the build directory
+    base.create_dir(build_dir)
+    os.chdir(build_dir)
+    # run build
+    build_with_cmake(platform, cmake_args, build_type)
+    # for iOS there is no target for building libx265.a, so we need to form it ourselves from libcommon.a and libencoder.a
+    if platform.find("ios") != -1:
+      xcode_sdk = get_xcode_sdk(platform)
+      base.cmd("libtool", [
+        "-static",
+        "-o", "libx265.a",
+        f"build/common.build/{build_type}-{xcode_sdk}/libcommon.a",
+        f"build/encoder.build/{build_type}-{xcode_sdk}/libencoder.a"
+      ])
+    # copy header
+    base.copy_file(base_dir + "/x265_git/source/x265.h", build_dir)
+    # reset directory
+    os.chdir(base_dir)
+    return
 
-  # LINUX
-  elif "linux" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    ]
-    # linux_64
-    if config.check_option("platform", "linux_64"):
-      build_unix("linux_64", cmake_args_base + cmake_args_platform)
-    # linux_arm64
-    if config.check_option("platform", "linux_arm64"):
-      build_unix("linux_arm64", cmake_args_base + cmake_args_platform)
-
-  # MAC
-  elif "mac" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
-      "-DENABLE_ASSEMBLY=OFF"                   # disable assembly optimizations
-    ]
-    # mac_64
-    if config.check_option("platform", "mac_64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
-      if base.is_os_arm():
-        cmake_args_ext += [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
-        ]
-      build_unix("mac_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # mac_arm64
-    if config.check_option("platform", "mac_arm64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
-      build_unix("mac_arm64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-    # IOS
-    if -1 != config.option("platform").find("ios"):
-      cmake_toolchain_file = base_dir + "/ios-cmake/ios.toolchain.cmake"
-      cmake_args_platform = [
-        "-G", "Xcode",
-        "-DENABLE_ASSEMBLY=OFF",                          # disable assembly optimizations
-        "-DCMAKE_TOOLCHAIN_FILE=" + cmake_toolchain_file,
-        "-DDEPLOYMENT_TARGET=11.0"
-      ]
-      # ios (arm64)
-      cmake_args_ext = ["-DPLATFORM=OS64"]
-      build_ios("ios", cmake_args_base + cmake_args_platform + cmake_args_ext)
-      # ios simulator (x86_64 and arm64 FAT lib)
-      cmake_args_ext = ["-DPLATFORM=SIMULATOR64COMBINED"]
-      build_ios("ios_simulator", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-  os.chdir(base_dir)
+  make_common(build_x265, cmake_args)
   return
 
 def make_de265(base_dir, build_type):
-  # clones repo
-  def fetch(version):
-    tag_name = f"v{version}"
-    base.cmd("git", ["clone", "--depth", "1", "--branch", tag_name, "https://github.com/strukturag/libde265.git"])
-    return
-
-  # builds library (Unix specific)
-  def build_unix(platform, cmake_args):
-    # prepare build dir
-    build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libde265/libde265.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("make", ["-j4"])
-    # copy files
-    base.copy_file(base_dir + "/libde265/libde265/de265.h", build_dir + "/libde265")
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (Windows specific)
-  def build_win(platform, cmake_args):
-    # check build dir
-    build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    if base.is_file(os.path.join(build_dir, "libde265", build_type, "libde265.lib")):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # copy files
-    base.copy_file(base_dir + "/libde265/libde265/de265.h", build_dir + "/libde265")
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (iOS specific)
-  def build_ios(platform, cmake_args):
-    # prepare build dir
-    build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libde265/libde265.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # build
-    base.cmd("cmake", cmake_args)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # copy lib
-    platform_xcode = "iphoneos"
-    if platform.find("simulator") != -1:
-      platform_xcode = "iphonesimulator"
-    base.copy_file(build_dir + f"/libde265/{build_type}-{platform_xcode}/libde265.a", build_dir + "/libde265")
-    # copy headers
-    base.copy_file(base_dir + "/libde265/libde265/de265.h", build_dir + "/libde265")
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # set version here
-  de265_version = "1.0.16"
+  # fetch lib repo
   if not base.is_dir("libde265"):
-    fetch(de265_version)
+    fetch_repo("https://github.com/strukturag/libde265.git", f"v{DE265_VERSION}")
 
+  # prepare cmake args
   cmake_dir = base_dir + "/libde265"
-  cmake_args_base = [
+  cmake_args = [
     cmake_dir,
     "-DCMAKE_BUILD_TYPE=" + build_type,
     "-DBUILD_SHARED_LIBS=OFF",            # do not build shared libs
@@ -265,165 +192,38 @@ def make_de265(base_dir, build_type):
     "-DENABLE_ENCODER=OFF",               # do not build encoder CLI executable
   ]
 
-  # WINDOWS
-  if "windows" == base.host_platform():
-    cmake_args_platform = [
-      "-G", f"Visual Studio {get_vs_version()}"
-    ]
-    # win_64
-    if config.check_option("platform", "win_64"):
-      cmake_args_ext = ["-A", "x64"]
-      build_win("win_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # win_32
-    if config.check_option("platform", "win_32"):
-      cmake_args_ext = ["-A", "Win32"]
-      build_win("win_32", cmake_args_base + cmake_args_platform + cmake_args_ext)
+  # lib build function
+  def build_de265(platform, cmake_args):
+    # check if target lib has already been built
+    build_dir = get_build_dir(base_dir, "libde265", platform, build_type)
+    if platform.find("win") != -1:
+      target_lib = os.path.join(build_dir, "libde265", build_type, "libde265.lib")
+    else:
+      target_lib = os.path.join(build_dir, "libde265/libde265.a")
+    if base.is_file(target_lib):
+      return
+    # go to the build directory
+    base.create_dir(build_dir)
+    os.chdir(build_dir)
+    # run build
+    build_with_cmake(platform, cmake_args, build_type)
+    # for ios copy target library from the default build path
+    if platform.find("ios") != -1:
+      xcode_sdk = get_xcode_sdk(platform)
+      base.copy_file(f"libde265/{build_type}-{xcode_sdk}/libde265.a", "libde265")
+    # copy header
+    base.copy_file(base_dir + "/libde265/libde265/de265.h", "libde265")
+    # reset directory
+    os.chdir(base_dir)
+    return
 
-  # LINUX
-  if "linux" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    ]
-    # linux_64
-    if config.check_option("platform", "linux_64"):
-      build_unix("linux_64", cmake_args_base + cmake_args_platform)
-    # linux_arm64
-    if config.check_option("platform", "linux_arm64"):
-      build_unix("linux_arm64", cmake_args_base + cmake_args_platform)
-
-  # MAC
-  if "mac" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-    ]
-    # mac_64
-    if config.check_option("platform", "mac_64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
-      if base.is_os_arm():
-        cmake_args_ext += [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
-        ]
-      build_unix("mac_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # mac_arm64
-    if config.check_option("platform", "mac_arm64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
-      build_unix("mac_arm64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-    # IOS
-    if -1 != config.option("platform").find("ios"):
-      cmake_toolchain_file = base_dir + "/ios-cmake/ios.toolchain.cmake"
-      cmake_args_platform = [
-        "-G", "Xcode",
-        "-DCMAKE_TOOLCHAIN_FILE=" + cmake_toolchain_file,
-        "-DDEPLOYMENT_TARGET=11.0"
-      ]
-      # ios (arm64)
-      cmake_args_ext = ["-DPLATFORM=OS64"]
-      build_ios("ios", cmake_args_base + cmake_args_platform + cmake_args_ext)
-      # ios simulator (x86_64 and arm64 FAT lib)
-      cmake_args_ext = ["-DPLATFORM=SIMULATOR64COMBINED"]
-      build_ios("ios_simulator", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-  os.chdir(base_dir)
+  make_common(build_de265, cmake_args)
   return
 
 def make_heif(base_dir, build_type):
-  # clones repo
-  def fetch(version):
-    tag_name = f"v{version}"
-    base.cmd("git", ["clone", "--depth", "1", "--branch", tag_name, "https://github.com/strukturag/libheif.git"])
-    return
-
-  # builds library (Unix specific)
-  def build_unix(platform, cmake_args):
-    # prepare build dir
-    build_dir = os.path.join(base_dir, "libheif/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libheif/libheif.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # add paths to dependent libraries and includes to cmake args
-    de265_build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    x265_build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    cmake_args_ext = [
-      f"-DLIBDE265_INCLUDE_DIR={de265_build_dir}",
-      f"-DLIBDE265_LIBRARY={de265_build_dir}/libde265/libde265.a",
-      f"-DX265_INCLUDE_DIR={x265_build_dir}",
-      f"-DX265_LIBRARY={x265_build_dir}/libx265.a"
-    ]
-    # build
-    base.cmd("cmake", cmake_args + cmake_args_ext)
-    base.cmd("make", ["-j4"])
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (Windows specific)
-  def build_win(platform, cmake_args):
-    # check build dir
-    build_dir = os.path.join(base_dir, "libheif/build", platform, build_type.lower())
-    if base.is_file(os.path.join(build_dir, "libheif", build_type, "heif.lib")):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # add paths to dependent libraries and includes to cmake args
-    de265_build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    x265_build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    cmake_args_ext = [
-      f"-DLIBDE265_INCLUDE_DIR={de265_build_dir}",
-      f"-DLIBDE265_LIBRARY={de265_build_dir}/libde265/{build_type}/libde265.lib",
-      f"-DX265_INCLUDE_DIR={x265_build_dir}",
-      f"-DX265_LIBRARY={x265_build_dir}/{build_type}/x265-static.lib"
-    ]
-    # build
-    base.cmd("cmake", cmake_args + cmake_args_ext)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # builds library (iOS specific)
-  def build_ios(platform, cmake_args):
-    # prepare build dir
-    build_dir = os.path.join(base_dir, "libheif/build", platform, build_type.lower())
-    if base.is_file(build_dir + "/libheif/libheif.a"):
-      return
-    base.create_dir(build_dir)
-    # go to build dir
-    old_dir = os.getcwd()
-    os.chdir(build_dir)
-    # add paths to dependent libraries and includes to cmake args
-    de265_build_dir = os.path.join(base_dir, "libde265/build", platform, build_type.lower())
-    x265_build_dir = os.path.join(base_dir, "x265_git/build", platform, build_type.lower())
-    cmake_args_ext = [
-      f"-DLIBDE265_INCLUDE_DIR={de265_build_dir}",
-      f"-DLIBDE265_LIBRARY={de265_build_dir}/libde265/libde265.a",
-      f"-DX265_INCLUDE_DIR={x265_build_dir}",
-      f"-DX265_LIBRARY={x265_build_dir}/libx265.a"
-    ]
-    # build
-    base.cmd("cmake", cmake_args + cmake_args_ext)
-    base.cmd("cmake", ["--build", ".", "--config", build_type])
-    # copy lib
-    platform_xcode = "iphoneos"
-    if platform.find("simulator") != -1:
-      platform_xcode = "iphonesimulator"
-    base.copy_file(build_dir + f"/libheif/{build_type}-{platform_xcode}/libheif.a", build_dir + "/libheif")
-    # restore old dir
-    os.chdir(old_dir)
-    return
-
-  # set version here
-  # NOTE: 1.18.2 - the latest version of libheif supporting C++11 build (as for now)
-  heif_version = "1.18.2"
+  # fetch lib repo
   if not base.is_dir("libheif"):
-    fetch(heif_version)
+    fetch_repo("https://github.com/strukturag/libheif.git", f"v{HEIF_VERSION}")
     # do not build heifio module
     base.replaceInFile(
       base_dir + "/libheif/CMakeLists.txt",
@@ -431,8 +231,9 @@ def make_heif(base_dir, build_type):
       "# add_subdirectory(heifio)"
     )
 
+  # prepare cmake args
   cmake_dir = base_dir + "/libheif"
-  cmake_args_base = [
+  cmake_args = [
     cmake_dir,
     "--preset=release-noplugins",                     # preset to disable plugins system
     "-DCMAKE_BUILD_TYPE=" + build_type,
@@ -440,79 +241,57 @@ def make_heif(base_dir, build_type):
     "-DWITH_LIBSHARPYUV=OFF",                         # do not build libsharpyuv (for RGB <--> YUV color space conversions)
     "-DWITH_AOM_DECODER=OFF",                         # do not build AOM V1 decoder (for AVIF image format)
     "-DWITH_AOM_ENCODER=OFF",                         # do not build AOM V1 encoder (for AVIF image format)
+    "-DWITH_GDK_PIXBUF=OFF",                          # do not build gdk-pixbuf plugin (UNIX only)
+    "-DWITH_GNOME=OFF",                               # do not build gnome plugin (Linux only)
     "-DWITH_EXAMPLES=OFF",                            # do not build examples
     "-DWITH_EXAMPLE_HEIF_VIEW=OFF",                   # do not build heif-view CLI tool
     "-DWITH_X265=ON",                                 # enable x265 codec
     "-DWITH_LIBDE265=ON",                             # enable de265 codec
-    "-DCMAKE_CXX_FLAGS=-DLIBDE265_STATIC_BUILD",      # add define to properly compile with de265 static library
-    "-DCMAKE_C_FLAGS=-DLIBDE265_STATIC_BUILD",        # ^
+    "-DCMAKE_CXX_FLAGS=-DLIBDE265_STATIC_BUILD",      # add macro definition to properly compile with de265 static library
+    "-DCMAKE_C_FLAGS=-DLIBDE265_STATIC_BUILD",        # same ^
   ]
 
-  # WINDOWS
-  if "windows" == base.host_platform():
-    cmake_args_platform = [
-      "-G", f"Visual Studio {get_vs_version()}"
+  # lib build function
+  def build_heif(platform, cmake_args):
+    # check if target lib has already been built
+    build_dir = get_build_dir(base_dir, "libheif", platform, build_type)
+    if platform.find("win") != -1:
+      target_lib = os.path.join(build_dir, "libheif", build_type, "heif.lib")
+    else:
+      target_lib = os.path.join(build_dir, "libheif/libheif.a")
+    if base.is_file(target_lib):
+      return
+    # go to the build directory
+    base.create_dir(build_dir)
+    os.chdir(build_dir)
+    # add paths to dependent libraries and includes to cmake args
+    de265_build_dir = get_build_dir(base_dir, "libde265", platform, build_type)
+    x265_build_dir = get_build_dir(base_dir, "x265_git", platform, build_type)
+    cmake_args_ext = [
+      f"-DLIBDE265_INCLUDE_DIR={de265_build_dir}",
+      f"-DX265_INCLUDE_DIR={x265_build_dir}"
     ]
-    # win_64
-    if config.check_option("platform", "win_64"):
-      cmake_args_ext = ["-A", "x64"]
-      build_win("win_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # win_32
-    if config.check_option("platform", "win_32"):
-      cmake_args_ext = ["-A", "Win32"]
-      build_win("win_32", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-  # LINUX
-  if "linux" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
-      "-DWITH_GDK_PIXBUF=OFF",                  # do not build gdk-pixbuf plugin
-      "-DWITH_GNOME=OFF",                       # do not build gnome plugin
-    ]
-    # linux_64
-    if config.check_option("platform", "linux_64"):
-      build_unix("linux_64", cmake_args_base + cmake_args_platform)
-    # linux_arm64
-    if config.check_option("platform", "linux_arm64"):
-      build_unix("linux_arm64", cmake_args_base + cmake_args_platform)
-
-  # MAC
-  if "mac" == base.host_platform():
-    cmake_args_platform = [
-      "-G", "Unix Makefiles",
-      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
-      "-DWITH_GDK_PIXBUF=OFF",                  # do not build gdk-pixbuf plugin
-    ]
-    # mac_64
-    if config.check_option("platform", "mac_64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
-      if base.is_os_arm():
-        cmake_args_ext += [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
-        ]
-      build_unix("mac_64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-    # mac_arm64
-    if config.check_option("platform", "mac_arm64"):
-      cmake_args_ext = ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
-      build_unix("mac_arm64", cmake_args_base + cmake_args_platform + cmake_args_ext)
-
-    # IOS
-    if -1 != config.option("platform").find("ios"):
-      cmake_toolchain_file = base_dir + "/ios-cmake/ios.toolchain.cmake"
-      cmake_args_platform = [
-        "-G", "Xcode",
-        "-DCMAKE_TOOLCHAIN_FILE=" + cmake_toolchain_file,
-        "-DDEPLOYMENT_TARGET=11.0"
+    if platform.find("win") != -1:
+      cmake_args_ext += [
+        f"-DLIBDE265_LIBRARY={de265_build_dir}/libde265/{build_type}/libde265.lib",
+        f"-DX265_LIBRARY={x265_build_dir}/{build_type}/x265-static.lib"
       ]
-      # ios (arm64)
-      cmake_args_ext = ["-DPLATFORM=OS64"]
-      build_ios("ios", cmake_args_base + cmake_args_platform + cmake_args_ext)
-      # ios simulator (x86_64 and arm64 FAT lib)
-      cmake_args_ext = ["-DPLATFORM=SIMULATOR64COMBINED"]
-      build_ios("ios_simulator", cmake_args_base + cmake_args_platform + cmake_args_ext)
+    else:
+      cmake_args_ext += [
+        f"-DLIBDE265_LIBRARY={de265_build_dir}/libde265/libde265.a",
+        f"-DX265_LIBRARY={x265_build_dir}/libx265.a"
+      ]
+    # run build
+    build_with_cmake(platform, cmake_args + cmake_args_ext, build_type)
+    # for ios copy target library from the default build path
+    if platform.find("ios") != -1:
+      xcode_sdk = get_xcode_sdk(platform)
+      base.copy_file(f"libheif/{build_type}-{xcode_sdk}/libheif.a", "libheif")
+    # reset directory
+    os.chdir(base_dir)
+    return
 
-  os.chdir(base_dir)
+  make_common(build_heif, cmake_args)
   return
 
 def make():
@@ -522,18 +301,20 @@ def make():
   old_dir = os.getcwd()
   os.chdir(base_dir)
 
-  # TODO: do we really need debug builds for libheif ???
   build_type = "Release"
   if (-1 != config.option("config").lower().find("debug")):
     build_type = "Debug"
 
   # fetch custom cmake toolchain for ios
-  if -1 != config.option("platform").find("ios") and not base.is_dir("ios-cmake"):
-    fetch_ios_cmake()
+  if -1 != config.option("platform").find("ios"):
+    if not base.is_dir("ios-cmake"):
+      fetch_repo("https://github.com/leetal/ios-cmake.git", IOS_CMAKE_VERSION)
+    global CMAKE_TOOLCHAIN_FILE
+    CMAKE_TOOLCHAIN_FILE = os.path.join(base_dir, CMAKE_TOOLCHAIN_FILE)
 
-  # build encoder libraries
+  # build encoder library
   make_x265(base_dir, build_type)
-  # build decoder libraries
+  # build decoder library
   make_de265(base_dir, build_type)
 
   # build libheif

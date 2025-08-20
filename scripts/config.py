@@ -109,7 +109,10 @@ def parse():
     options["sdkjs-plugin-server"] = "default"
 
   if not "arm64-toolchain-bin" in options:
-    options["arm64-toolchain-bin"] = "/usr/bin"
+    if base.is_dir(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin"):
+      options["arm64-toolchain-bin"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")
+    else:
+      options["arm64-toolchain-bin"] = "/usr/bin"
 
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):

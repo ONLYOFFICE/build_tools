@@ -132,7 +132,7 @@ def make():
       base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "editors_helper")
-    
+
     if isUseQt:
       base.qt_copy_lib("Qt5Core", root_dir)
       base.qt_copy_lib("Qt5Gui", root_dir)
@@ -256,9 +256,14 @@ def make():
       base.delete_file(root_dir + "/cef_sandbox.lib")
       base.delete_file(root_dir + "/libcef.lib")
 
-    isMacArmPlaformOnIntel = False
-    if (platform == "mac_arm64") and not base.is_os_arm():
-      isMacArmPlaformOnIntel = True
+    is_host_not_arm = False
+    host_platform = ""
+    if (platform == "mac_arm64" or platform == "win_arm64") and not base.is_os_arm():
+      is_host_not_arm = True
+      if platform == "mac_arm64":
+        host_platform = "mac_64"
+      elif platform == "win_arm64":
+        host_platform = "win_64"
 
     # all themes generate ----
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
@@ -267,12 +272,12 @@ def make():
     if (0 == platform.find("mac")):
       base.mac_correct_rpath_desktop(root_dir)
 
-    if isMacArmPlaformOnIntel:
+    if is_host_not_arm:
       sdkjs_dir = root_dir + "/editors/sdkjs"
-      end_find_platform = sdkjs_dir.rfind("/mac_arm64/")
-      sdkjs_dir_mac64 = sdkjs_dir[0:end_find_platform] + "/mac_64/" + sdkjs_dir[end_find_platform+11:]
+      end_find_platform = sdkjs_dir.rfind("/" + platform + "/")
+      sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
       base.delete_dir(sdkjs_dir)
-      base.copy_dir(sdkjs_dir_mac64, sdkjs_dir)
+      base.copy_dir(sdkjs_dir_64, sdkjs_dir)
     else:
       themes_params = []
       if ("" != config.option("themesparams")):

@@ -25,7 +25,7 @@ def get_j_num():
 
 def check_support_platform(platform):
   qt_dir = base.qt_setup(platform)
-  if not base.is_file(qt_dir + "/bin/qmake") and not base.is_file(qt_dir + "/bin/qmake.exe"):
+  if not base.is_file(qt_dir + "/bin/qmake") and not base.is_file(qt_dir + "/bin/qmake.exe") and not base.is_file(qt_dir + "/bin/qmake.bat"):
     return False
   return True
 
@@ -91,6 +91,7 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
   build_params = ["-nocache", file_pro] + base.qt_config_as_param(config_param) + qmake_addon
 
   qmake_app = qt_dir + "/bin/qmake"
+
   # non windows platform
   if not base.is_windows():
     if base.is_file(qt_dir + "/onlyoffice_qt.conf"):
@@ -117,16 +118,16 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       qmake_addon_string = " " + qmake_addon_string
 
     vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
-    qmake_spec = ""
-    if platform == "win_arm64":
-      vcvarsall_arch += "_arm64"
-      qmake_spec = "-spec win32-arm64-msvc2017 "
+    qmake_env_addon = base.get_env("QT_QMAKE_ADDON")
+    if (qmake_env_addon != ""):
+      qmake_env_addon += " "
+
     qmake_bat = []
     qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + vcvarsall_arch)
     qmake_addon_string = ""
     if ("" != config.option("qmake_addon")):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
-    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + qmake_spec + file_pro + config_params_string + qmake_addon_string)
+    qmake_bat.append("call \"" + qmake_app + "\" -nocache " + qmake_env_addon + file_pro + config_params_string + qmake_addon_string)
     if ("1" == config.option("clean")):
       qmake_bat.append("call nmake " + " ".join(clean_params))
       qmake_bat.append("call nmake " + " ".join(distclean_params))

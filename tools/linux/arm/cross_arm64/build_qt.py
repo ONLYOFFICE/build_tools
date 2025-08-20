@@ -20,7 +20,6 @@ def make():
     "-qt-libjpeg",
     "-qt-pcre",
     "-no-sql-sqlite",
-    "-no-qml-debug",
     "-no-opengl",
     "-nomake", "examples",
     "-nomake", "tests",
@@ -31,6 +30,7 @@ def make():
     "-skip", "qt3d",
     "-skip", "qtwebview",
     "-skip", "qtwebengine",
+    "-skip", "qtdeclarative",
     "-xplatform", "linux-aarch64-gnu-g++", # be sure that aarch64 gnu compiler is installed
     "-no-pch"]
 

@@ -72,8 +72,9 @@ def make_windows():
   else:
     make_zip("xp")
     make_inno("xp")
-  if common.platform == "windows_x86_xp":
-    make_online()
+  # Disable build online installer
+  # if common.platform == "windows_x86_xp":
+  #  make_online()
 
   utils.set_cwd(common.workspace_dir)
   return

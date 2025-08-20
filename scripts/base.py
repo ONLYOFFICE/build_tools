@@ -737,6 +737,14 @@ def qt_setup(platform):
     if ("gcc_arm" == compiler_platform):
       qt_dir = config.option("qt-dir") + "/gcc"
 
+  # OVERRIDE IF NEEDED
+  set_env("QT_QMAKE_ADDON", "")
+  if platform == "win_arm64" and not is_dir(qt_dir):
+    override_qt_directory = os.path.abspath(os.path.dirname(__file__) + "/../tools/win/arm64/qt_build/Qt-5.15.2/win_arm64")
+    if is_dir(override_qt_directory):
+      qt_dir = os.path.abspath(override_qt_directory).replace("\\", "/")
+      set_env("QT_QMAKE_ADDON", "-spec win32-arm64-msvc2017")
+
   set_env("QT_DEPLOY", qt_dir + "/bin")
 
   if ("linux_arm64" == platform):
@@ -858,6 +866,12 @@ def qt_config_as_param(value):
 
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
+
+  # TODO: remove version from library name
+  qt_major = qt_major_version()
+  if ("5" != qt_major):
+    lib = lib.replace("Qt5", "Qt" + qt_major)
+
   if ("windows" == host_platform()):
     if ("" == qt_dst_postfix()):
       copy_lib(qt_dir, dir, lib)
@@ -866,7 +880,7 @@ def qt_copy_lib(lib, dir):
   else:
     src_file = qt_dir + "/../lib/lib" + lib + ".so." + qt_version()
     if (is_file(src_file)):
-      copy_file(src_file, dir + "/lib" + lib + ".so." + qt_major_version())
+      copy_file(src_file, dir + "/lib" + lib + ".so." + qt_major)
     else:
       libFramework = lib
       libFramework = libFramework.replace("Qt5", "Qt")

@@ -132,11 +132,7 @@ def make():
       base.copy_dir(core_build_dir + "/bin/" + platform_postfix + "/editors_helper.app", root_dir + "/editors_helper.app")
     else:
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix + ("/xp" if isWindowsXP else ""), root_dir, "editors_helper")
-      
-    qt_win_arm64_dir = os.path.abspath(os.path.dirname(__file__) + "/../tools/win/arm64/qt_build/Qt-5.15.2/win_arm64/bin")
-    if platform == "win_arm64" and base.is_dir(qt_win_arm64_dir):
-      os.environ["QT_DEPLOY"] = qt_win_arm64_dir
-    
+
     if isUseQt:
       base.qt_copy_lib("Qt5Core", root_dir)
       base.qt_copy_lib("Qt5Gui", root_dir)

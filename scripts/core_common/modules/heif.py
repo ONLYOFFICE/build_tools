@@ -15,7 +15,10 @@ HEIF_VERSION = "1.18.2"
 
 # ios cmake toolchain
 IOS_CMAKE_VERSION = "4.5.0"
-CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
+IOS_CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
+
+# android cmake toolchain
+ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
 
 
 def get_vs_version():
@@ -37,7 +40,7 @@ def fetch_repo(repo_url, branch_or_tag):
 def get_build_dir(base_dir, repo_dir, platform, build_type):
   return os.path.join(base_dir, repo_dir, "build", platform, build_type.lower())
 
-# general build function (supposing we are located in the build directory)
+# general build function that builds for ONE platform (supposing we are located in the build directory)
 def build_with_cmake(platform, cmake_args, build_type):
   # extend cmake arguments
   cmake_args_ext = []
@@ -68,13 +71,33 @@ def build_with_cmake(platform, cmake_args, build_type):
   elif "ios" in platform:
     cmake_args_ext = [
       "-G", "Xcode",
-      "-DCMAKE_TOOLCHAIN_FILE=" + CMAKE_TOOLCHAIN_FILE,
+      "-DCMAKE_TOOLCHAIN_FILE=" + IOS_CMAKE_TOOLCHAIN_FILE,
       "-DDEPLOYMENT_TARGET=11.0"
     ]
     if platform == "ios":
       cmake_args_ext += ["-DPLATFORM=OS64"]
     elif platform == "ios_simulator":
       cmake_args_ext += ["-DPLATFORM=SIMULATOR64COMBINED"]
+  # ANDROID
+  elif "android" in platform:
+    cmake_args_ext = [
+      "-G", "Unix Makefiles",
+      "-DCMAKE_TOOLCHAIN_FILE=" + ANDROID_CMAKE_TOOLCHAIN_FILE,
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+    ]
+    def get_cmake_args_android(arch, api_level):
+      return [
+        "-DANDROID_ABI=" + arch,
+        "-DANDROID_NATIVE_API_LEVEL=" + api_level
+      ]
+    if platform == "android_arm64_v8a":
+      cmake_args_ext += get_cmake_args_android("arm64-v8a", "21")
+    elif platform == "android_armv7":
+      cmake_args_ext += get_cmake_args_android("armeabi-v7a", "16")
+    elif platform == "android_x86":
+      cmake_args_ext += get_cmake_args_android("x86", "16")
+    elif platform == "android_x86_64":
+      cmake_args_ext += get_cmake_args_android("x86_64", "21")
 
   # run cmake
   base.cmd("cmake", cmake_args + cmake_args_ext)
@@ -85,7 +108,7 @@ def build_with_cmake(platform, cmake_args, build_type):
     base.cmd("cmake", ["--build", ".", "--config", build_type])
   return
 
-# general make function that calls `build_func` callback for needed platform(s) with specified cmake arguments
+# general make function that calls `build_func` callback for configured platform(s) with specified cmake arguments
 def make_common(build_func, cmake_args):
   # WINDOWS
   if "windows" == base.host_platform():
@@ -120,6 +143,22 @@ def make_common(build_func, cmake_args):
       build_func("ios", cmake_args)
       # ios simulator (x86_64 and arm64 FAT lib)
       build_func("ios_simulator", cmake_args)
+
+  # ANDROID
+  if -1 != config.option("platform").find("android"):
+    # android_arm64_v8a
+    if config.check_option("platform", "android_arm64_v8a"):
+      build_func("android_arm64_v8a", cmake_args)
+    # android_armv7
+    if config.check_option("platform", "android_armv7"):
+      build_func("android_armv7", cmake_args)
+    # android_x86
+    if config.check_option("platform", "android_x86"):
+      build_func("android_x86", cmake_args)
+    # android_x86_64
+    if config.check_option("platform", "android_x86_64"):
+      build_func("android_x86_64", cmake_args)
+
   return
 
 def make_x265(base_dir, build_type):
@@ -309,8 +348,8 @@ def make():
   if -1 != config.option("platform").find("ios"):
     if not base.is_dir("ios-cmake"):
       fetch_repo("https://github.com/leetal/ios-cmake.git", IOS_CMAKE_VERSION)
-    global CMAKE_TOOLCHAIN_FILE
-    CMAKE_TOOLCHAIN_FILE = os.path.join(base_dir, CMAKE_TOOLCHAIN_FILE)
+    global IOS_CMAKE_TOOLCHAIN_FILE
+    IOS_CMAKE_TOOLCHAIN_FILE = os.path.join(base_dir, IOS_CMAKE_TOOLCHAIN_FILE)
 
   # build encoder library
   make_x265(base_dir, build_type)

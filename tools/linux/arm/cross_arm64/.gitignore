@@ -3,3 +3,5 @@ qt_binary*
 qt_build*
 qt-*
 gcc-linaro-*
+sysroot-glibc-linaro-*
+glib*

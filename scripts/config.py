@@ -24,7 +24,7 @@ def parse():
 
   # all platforms
   global platforms
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", 
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "win_arm64", 
                "linux_64", "linux_32", "linux_arm64",
                "mac_64", "mac_arm64",
                "ios", 
@@ -56,6 +56,10 @@ def parse():
   if ("mac" == host_platform) and check_option("platform", "mac_arm64") and not base.is_os_arm():
     if not check_option("platform", "mac_64"):
       options["platform"] = "mac_64 " + options["platform"]
+      
+  if ("windows" == host_platform) and check_option("platform", "win_arm64") and not base.is_os_arm():
+    if not check_option("platform", "win_64"):
+      options["platform"] = "win_64 " + options["platform"]
 
   if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
     if not check_option("platform", "linux_64"):
@@ -139,6 +143,9 @@ def check_compiler(platform):
   if (0 == platform.find("win")):
     compiler["compiler"] = "msvc" + options["vs-version"]
     compiler["compiler_64"] = "msvc" + options["vs-version"] + "_64"
+    if (0 == platform.find("win_arm")):
+      compiler["compiler"] = "msvc" + options["vs-version"] + "_arm"
+      compiler["compiler_64"] = "msvc" + options["vs-version"] + "_arm64"
   elif (0 == platform.find("linux")):
     compiler["compiler"] = "gcc"
     compiler["compiler_64"] = "gcc_64"

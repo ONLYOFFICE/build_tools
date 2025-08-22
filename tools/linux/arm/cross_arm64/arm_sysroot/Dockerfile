@@ -26,4 +26,6 @@ RUN apt-get -y install \
     libxcb* \
     libxi-dev \
     libxrender-dev \
-    libxss-dev
+    libxss-dev \
+	libxkbcommon-dev \
+	libxkbcommon-x11-dev

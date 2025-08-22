@@ -41,7 +41,5 @@ def make():
     
     fix_symlinks.fix_symlinks(sysroot_ubuntu16_04_arm64v8_dir)
     
-    #rename libpcre.so.3.0 -> libpcre.so.3
-    
 if __name__ == "__main__":
     make()

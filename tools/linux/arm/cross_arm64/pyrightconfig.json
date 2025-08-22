@@ -1,6 +1,8 @@
 {
   "exclude": [
     "qt-everywhere-src-5.15.2/**",
-    "arm_toolchain/**"
+    "arm_toolchain/**",
+    "arm_sysroot/**",
+    "qt_build/**",
   ]
 }

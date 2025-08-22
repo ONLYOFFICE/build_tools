@@ -13,13 +13,12 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "win_arm64"]
 
   for platform in platforms:
     if not config.check_option("platform", platform):
       continue
 
-    # url = "http://d2ettrnqo7v976.cloudfront.net/cef/"
     url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/cef/"
     archive_name = "./cef_binary.7z"
 

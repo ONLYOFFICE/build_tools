@@ -85,8 +85,18 @@ def make():
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
+    if (-1 != config.option("platform").find("win_arm64") and not base.is_file("../build/win_arm64/lib/libboost_system-" + win_vs_version + "-mt-a64-1_72.lib")):
+      boost_bat = []
+      boost_bat.append("call bootstrap.bat " + win_boot_arg) # first build b2 for win64, so vcvarsall_call with arm64 later
+      vcvarsall_call = ("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + "x64_arm64")
+      boost_bat.append(vcvarsall_call)
+      boost_bat.append("call b2.exe headers")
+      boost_bat.append("call b2.exe --clean")
+      boost_bat.append("call b2.exe --prefix=./../build/win_arm64 architecture=arm link=static --with-filesystem --with-system --with-date_time --with-regex --toolset=" + win_toolset + " address-model=64 install")
+      base.run_as_bat(boost_bat)
     correct_install_includes_win(base_dir, "win_64")
-    correct_install_includes_win(base_dir, "win_32")    
+    correct_install_includes_win(base_dir, "win_32")
+    correct_install_includes_win(base_dir, "win_arm64")
 
   if config.check_option("platform", "linux_64") and not base.is_dir("../build/linux_64"):
     if config.option("custom-sysroot") == "":

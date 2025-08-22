@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["../../../../sdkjs/word/apiBuilder.js", "../../../../sdkjs/slide/apiBuilder.js", "../../../../sdkjs/cell/apiBuilder.js"]
+    "include": ["../../../../../sdkjs/pdf/apiBuilder.js"]
   },
   "plugins": ["./correct_doclets.js"],
   "opts": {

@@ -1,8 +1,8 @@
 {
   "source": {
-    "include": ["../../../../sdkjs-forms/apiPlugins.js"]
+    "include": ["../../../../../sdkjs/common/base-plugin-events.js"]
   },
-  "plugins": ["./correct_doclets.js"],
+  "plugins": ["../correct_doclets.js"],
   "opts": {
     "destination": "./out",
     "recurse": true,

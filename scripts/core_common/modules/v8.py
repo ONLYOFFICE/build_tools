@@ -26,6 +26,8 @@ def clean():
 def is_main_platform():
   if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
     return True
+  if (config.check_option("platform", "win_arm64")):
+    return True
   if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32") or config.check_option("platform", "linux_arm64")):
     return True
   if config.check_option("platform", "mac_64"):

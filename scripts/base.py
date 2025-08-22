@@ -15,6 +15,7 @@ import stat
 import json
 
 __file__script__path__ = os.path.dirname( os.path.realpath(__file__))
+icu_ver = "74"
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -521,6 +522,27 @@ def git_get_origin():
   os.chdir(cur_dir)
   return ret
 
+def git_get_base_url():
+  """Get the base URL for git operations, with fallback to GitHub"""
+  origin = git_get_origin()
+  if origin:
+    # Extract base URL from origin
+    if origin.startswith("https://"):
+      # For HTTPS URLs like https://git.example.com/owner/repo.git
+      parts = origin.split("/")
+      if len(parts) >= 4:
+        return "/".join(parts[:3]) + "/"
+    elif ":" in origin and "@" in origin:
+      # For SSH URLs like git@git.example.com:owner/repo.git
+      at_pos = origin.find("@")
+      colon_pos = origin.find(":", at_pos)
+      if at_pos != -1 and colon_pos != -1:
+        host = origin[at_pos+1:colon_pos]
+        return f"https://{host}/"
+  
+  # Fallback to GitHub
+  return "https://github.com/"
+
 def git_is_ssh():
   git_protocol = config.option("git-protocol")
   if (git_protocol == "https"):
@@ -542,7 +564,7 @@ def get_ssh_base_url():
 def git_update(repo, is_no_errors=False, is_current_dir=False, git_owner=""):
   print("[git] update: " + repo)
   owner = git_owner if git_owner else "ONLYOFFICE"
-  url = "https://github.com/" + owner + "/" + repo + ".git"
+  url = git_get_base_url() + owner + "/" + repo + ".git"
   if git_is_ssh():
     url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -614,7 +636,7 @@ def get_branding_repositories(checker):
 
 def create_pull_request(branches_to, repo, is_no_errors=False, is_current_dir=False):
   print("[git] create pull request: " + repo)
-  url = "https://github.com/ONLYOFFICE/" + repo + ".git"
+  url = git_get_base_url() + "ONLYOFFICE/" + repo + ".git"
   if git_is_ssh():
     url = get_ssh_base_url() + repo + ".git"
   folder = get_script_dir() + "/../../" + repo
@@ -715,6 +737,14 @@ def qt_setup(platform):
     if ("gcc_arm" == compiler_platform):
       qt_dir = config.option("qt-dir") + "/gcc"
 
+  # OVERRIDE IF NEEDED
+  set_env("QT_QMAKE_ADDON", "")
+  if platform == "win_arm64" and not is_dir(qt_dir):
+    override_qt_directory = os.path.abspath(os.path.dirname(__file__) + "/../tools/win/arm64/qt_build/Qt-5.15.2/win_arm64")
+    if is_dir(override_qt_directory):
+      qt_dir = os.path.abspath(override_qt_directory).replace("\\", "/")
+      set_env("QT_QMAKE_ADDON", "-spec win32-arm64-msvc2017")
+
   set_env("QT_DEPLOY", qt_dir + "/bin")
 
   if ("linux_arm64" == platform):
@@ -808,6 +838,9 @@ def qt_config(platform):
 
   if ("linux_arm64" == platform):
     config_param += " linux_arm64"
+    
+  if ("win_arm64" == platform):
+    config_param += " win_arm64"
 
   config_param += qt_config_platform_addon(platform)
   return config_param
@@ -833,6 +866,12 @@ def qt_config_as_param(value):
 
 def qt_copy_lib(lib, dir):
   qt_dir = get_env("QT_DEPLOY")
+
+  # TODO: remove version from library name
+  qt_major = qt_major_version()
+  if ("5" != qt_major):
+    lib = lib.replace("Qt5", "Qt" + qt_major)
+
   if ("windows" == host_platform()):
     if ("" == qt_dst_postfix()):
       copy_lib(qt_dir, dir, lib)
@@ -841,7 +880,7 @@ def qt_copy_lib(lib, dir):
   else:
     src_file = qt_dir + "/../lib/lib" + lib + ".so." + qt_version()
     if (is_file(src_file)):
-      copy_file(src_file, dir + "/lib" + lib + ".so." + qt_major_version())
+      copy_file(src_file, dir + "/lib" + lib + ".so." + qt_major)
     else:
       libFramework = lib
       libFramework = libFramework.replace("Qt5", "Qt")
@@ -1224,12 +1263,13 @@ def mac_correct_rpath_binary(path, libs):
 def mac_correct_rpath_library(name, libs):
   return mac_correct_rpath_binary("./lib" + name + ".dylib", libs)
 
+mac_icu_libs = ["icudata." + icu_ver, "icuuc." + icu_ver]
 def mac_correct_rpath_x2t(dir):
   cur_dir = os.getcwd()
   os.chdir(dir)
-  mac_correct_rpath_library("icudata.58", [])
-  mac_correct_rpath_library("icuuc.58", ["icudata.58"])
-  mac_correct_rpath_library("UnicodeConverter", ["icuuc.58", "icudata.58"])
+  mac_correct_rpath_library("icudata." + icu_ver, [])
+  mac_correct_rpath_library("icuuc." + icu_ver, ["icudata." + icu_ver])
+  mac_correct_rpath_library("UnicodeConverter", mac_icu_libs)
   mac_correct_rpath_library("kernel", ["UnicodeConverter"])
   mac_correct_rpath_library("kernel_network", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("graphics", ["UnicodeConverter", "kernel"])
@@ -1246,23 +1286,23 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("HWPFile", ["UnicodeConverter", "kernel", "graphics"])
   cmd("chmod", ["-v", "+x", "./x2t"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
+  mac_correct_rpath_binary("./x2t", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
   if is_file("./allfontsgen"):
     cmd("chmod", ["-v", "+x", "./allfontsgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
-    mac_correct_rpath_binary("./allfontsgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics"])
+    mac_correct_rpath_binary("./allfontsgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
     cmd("chmod", ["-v", "+x", "./allthemesgen"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
-    mac_correct_rpath_binary("./allthemesgen", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
+    mac_correct_rpath_binary("./allthemesgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
   if is_file("./pluginsmanager"):
     cmd("chmod", ["-v", "+x", "./pluginsmanager"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
-    mac_correct_rpath_binary("./pluginsmanager", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
+    mac_correct_rpath_binary("./pluginsmanager", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
   if is_file("./vboxtester"):
     cmd("chmod", ["-v", "+x", "./vboxtester"])
     cmd("install_name_tool", ["-add_rpath", "@executable_path", "./vboxtester"], True)
-    mac_correct_rpath_binary("./vboxtester", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network"])
+    mac_correct_rpath_binary("./vboxtester", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
   os.chdir(cur_dir)
   return
 
@@ -1271,14 +1311,14 @@ def mac_correct_rpath_docbuilder(dir):
   os.chdir(dir)
   cmd("chmod", ["-v", "+x", "./docbuilder"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path", "./docbuilder"], True)
-  mac_correct_rpath_binary("./docbuilder", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "IWorkFile", "HWPFile", "doctrenderer", "DocxRenderer"])  
-  mac_correct_rpath_library("docbuilder.c", ["icudata.58", "icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
+  mac_correct_rpath_binary("./docbuilder", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "IWorkFile", "HWPFile", "doctrenderer", "DocxRenderer"])  
+  mac_correct_rpath_library("docbuilder.c", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
 
   def add_loader_path_to_rpath(libs):
     for lib in libs:
       cmd("install_name_tool", ["-add_rpath", "@loader_path", "lib" + lib + ".dylib"], True)
 
-  add_loader_path_to_rpath(["icuuc.58", "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer", "docbuilder.c"])
+  add_loader_path_to_rpath(["icuuc." + icu_ver, "UnicodeConverter", "kernel", "kernel_network", "graphics", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer", "docbuilder.c"])
   os.chdir(cur_dir)
   return
 
@@ -1288,9 +1328,9 @@ def mac_correct_rpath_desktop(dir):
   os.chdir(dir)
   mac_correct_rpath_library("hunspell", [])
   mac_correct_rpath_library("ooxmlsignature", ["kernel"])
-  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_library("ascdocumentscore", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "PdfFile", "XpsFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-change", "@executable_path/../Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework", "@rpath/Chromium Embedded Framework.framework/Chromium Embedded Framework", "libascdocumentscore.dylib"])
-  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature"])
+  mac_correct_rpath_binary("./editors_helper.app/Contents/MacOS/editors_helper", ["ascdocumentscore", "UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "hunspell", "ooxmlsignature", "doctrenderer"])
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Frameworks", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("install_name_tool", ["-add_rpath", "@executable_path/../../../../Resources/converter", "./editors_helper.app/Contents/MacOS/editors_helper"], True)
   cmd("chmod", ["-v", "+x", "./editors_helper.app/Contents/MacOS/editors_helper"])
@@ -1324,7 +1364,7 @@ def linux_set_origin_rpath_libraries(dir, libs):
   return
 
 def linux_correct_rpath_docbuilder(dir):
-  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so.58", "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so", "PdfFile.so", "XpsFile.so", "OFDFile.so", "DjVuFile.so", "DocxRenderer.so"])
+  linux_set_origin_rpath_libraries(dir, ["docbuilder.jni.so", "docbuilder.c.so", "icuuc.so." + icu_ver, "doctrenderer.so", "graphics.so", "kernel.so", "kernel_network.so", "UnicodeConverter.so", "PdfFile.so", "XpsFile.so", "OFDFile.so", "DjVuFile.so", "DocxRenderer.so"])
   return
 
 def common_check_version(name, good_version, clean_func):
@@ -1407,7 +1447,7 @@ def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, i
   plugins_dir = __file__script__path__ + "/../../onlyoffice.github.io/sdkjs-plugins/content"
   plugins_list_config = config.option("sdkjs-plugin")
   if isXp:
-    plugins_list_config="photoeditor, macros, highlightcode, doc2md"
+    plugins_list_config="photoeditor, highlightcode, doc2md"
   if ("" == plugins_list_config):
     return
   plugins_list = plugins_list_config.rsplit(", ")
@@ -1662,7 +1702,7 @@ def convert_ios_framework_to_xcframework_folder(folder, libs):
 
 def change_elf_rpath(path, origin):
   # excludes ---
-  if (-1 != path.find("libicudata.so.58")):
+  if (-1 != path.find("libicudata.so." + icu_ver)):
     return
   # ------------
   tools_dir = get_script_dir() + "/../tools/linux/elf/"
@@ -1849,6 +1889,9 @@ def create_x2t_js_cache(dir, product, platform):
   if ((platform == "linux_arm64") and not is_os_arm()):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
     return
+  
+  if platform == "win_arm64": # copying sdkjs later
+    return
 
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
@@ -1857,4 +1900,25 @@ def setup_local_qmake(dir_qmake):
   dir_base = os.path.dirname(dir_qmake)
   writeFile(dir_base + "/onlyoffice_qt.conf", "Prefix = " + dir_base)  
   return
-  
+
+def deploy_icu(core_dir, dst_dir, platform):
+  if (0 == platform.find("android")):
+    src_dir = core_dir + "/Common/3dParty/icu/android/build/" + platform[8:]
+    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")
+    return
+
+  src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
+
+  if (0 == platform.find("win")):
+    copy_file(src_dir + "/icudt" + icu_ver + ".dll", dst_dir + "/icudt" + icu_ver + ".dll")
+    copy_file(src_dir + "/icuuc" + icu_ver + ".dll", dst_dir + "/icuuc" + icu_ver + ".dll")
+
+  if (0 == platform.find("linux")):
+    copy_file(src_dir + "/libicudata.so." + icu_ver, dst_dir + "/libicudata.so." + icu_ver)
+    copy_file(src_dir + "/libicuuc.so." + icu_ver, dst_dir + "/libicuuc.so." + icu_ver)
+
+  if (0 == platform.find("mac")):
+    copy_file(src_dir + "/libicudata." + icu_ver + ".dylib", dst_dir + "/libicudata." + icu_ver + ".dylib")
+    copy_file(src_dir + "/libicuuc." + icu_ver + ".dylib", dst_dir + "/libicuuc." + icu_ver + ".dylib")
+
+  return

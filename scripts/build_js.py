@@ -65,10 +65,6 @@ def make():
     deldirs = ['ie', 'mobile', 'embed']
     [base.delete_dir(root + "/" + d) for root, dirs, f in os.walk(out_dir + "/desktop/web-apps/apps") for d in dirs if d in deldirs]
 
-    # for bug 62528. remove empty folders
-    walklist = list(os.walk(out_dir + "/desktop/sdkjs"))
-    [os.remove(p) for p, _, _ in walklist[::-1] if len(os.listdir(p)) == 0]
-
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
     build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
@@ -109,7 +105,10 @@ def make():
 
 # JS build
 def _run_npm(directory):
-  return base.cmd_in_dir(directory, "npm", ["install"])
+  retValue = base.cmd_in_dir(directory, "npm", ["install"], True)
+  if (0 != retValue):
+    retValue = base.cmd_in_dir(directory, "npm", ["install", "--verbose"])
+  return retValue
 
 def _run_npm_ci(directory):
   return base.cmd_in_dir(directory, "npm", ["ci"])
@@ -122,7 +121,7 @@ def _run_grunt(directory, params=[]):
 
 def build_interface(directory):
   _run_npm(directory)
-  _run_grunt(directory, ["--force"] + base.web_apps_addons_param())
+  _run_grunt(directory, ["--force", "--verbose"] + base.web_apps_addons_param())
   return
 
 def get_build_param(minimize=True):

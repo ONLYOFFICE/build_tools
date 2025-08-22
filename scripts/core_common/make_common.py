@@ -21,6 +21,7 @@ import md
 import hunspell
 import glew
 import harfbuzz
+import oo_brotli
 import hyphen
 import googletest
 import libvlc
@@ -51,6 +52,7 @@ def make():
   glew.make()
   hyphen.make()
   googletest.make()
+  oo_brotli.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()

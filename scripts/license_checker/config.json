@@ -198,6 +198,11 @@
 				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.h",
 				"editors-ios/Vendor/ThreadSafeMutable/ThreadSafeMutableDictionary.m"
 			]
+		},
+		{
+			"dir": "editors-webview-ios",
+			"fileExtensions": [".swift", ".xcconfig"],
+			"licensePath": "header.license",
 		}
 	]
 }

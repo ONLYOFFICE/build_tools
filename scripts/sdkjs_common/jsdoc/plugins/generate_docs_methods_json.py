@@ -3,24 +3,17 @@ import subprocess
 import json
 import argparse
 import re
-import platform
-
-root = '../../../..'
 
 # Configuration files
 configs = [
-    "./config/builder/word.json",
-    "./config/builder/cell.json",
-    "./config/builder/slide.json",
-    "./config/builder/forms.json"
+    "./config/methods/common.json",
+    "./config/methods/word.json",
+    "./config/methods/cell.json",
+    "./config/methods/slide.json",
+    "./config/methods/forms.json"
 ]
 
-editors_maps = {
-    "word":     "CDE",
-    "cell":     "CSE",
-    "slide":    "CPE",
-    "forms":    "CFE"
-}
+root = '../../../../..'
 
 def generate(output_dir, md=False):
     if not os.path.exists(output_dir):
@@ -30,31 +23,40 @@ def generate(output_dir, md=False):
     for config in configs:
         editor_name = config.split('/')[-1].replace('.json', '')
         output_file = os.path.join(output_dir, editor_name + ".json")
-        command_set_env = "export"
-        if (platform.system().lower() == "windows"):
-            command_set_env = "set"
-        command = f"{command_set_env} EDITOR={editors_maps[editor_name]} && npx jsdoc -c {config} -X > {output_file}"
+        command = f"npx jsdoc -c {config} -X > {output_file}"
         print(f"Generating {editor_name}.json: {command}")
         subprocess.run(command, shell=True)
 
+    common_doclets_file = os.path.join(output_dir, 'common.json')
+    with open(common_doclets_file, 'r', encoding='utf-8') as f:
+        common_doclets_json = json.dumps(json.load(f))
+    os.remove(common_doclets_file)
+    
     # Append examples to JSON documentation
     for config in configs:
+        if (config.find('common') != -1):
+            continue
+        
         editor_name = config.split('/')[-1].replace('.json', '')
+        example_folder_name = editor_name # name of folder with examples
         output_file = os.path.join(output_dir, editor_name + ".json")
         
         # Read the JSON file
         with open(output_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
+            start_common_doclet_idx = len(data)
+            data += json.loads(common_doclets_json)
         
         # Modify JSON data
-        for doclet in data:
+        for idx, doclet in enumerate(data):
+            if idx >= start_common_doclet_idx:
+                example_folder_name = 'common'
+            elif editor_name == 'forms':
+                example_folder_name = 'word'
+
             if 'see' in doclet:
                 if doclet['see'] is not None:
-                    if editor_name == 'forms':
-                        doclet['see'][0] = doclet['see'][0].replace('{Editor}', 'Word')
-                    else:
-                        doclet['see'][0] = doclet['see'][0].replace('{Editor}', editor_name.title())
-
+                    doclet['see'][0] = doclet['see'][0].replace('{Editor}', example_folder_name.title())
                     file_path = f'{root}/' + doclet['see'][0]
 
                     if os.path.exists(file_path):
@@ -70,8 +72,7 @@ def generate(output_dir, md=False):
                             comment = ''
                             code_content = example_content
                         
-                        if md == True:
-                            doclet['example'] = remove_js_comments(comment) + "```js\n" + code_content + "\n```"
+                        doclet['examples'] = [remove_js_comments(comment) + code_content]
                         
                         if md == False:
                             document_type = editor_name
@@ -83,7 +84,7 @@ def generate(output_dir, md=False):
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("Documentation generation for builder completed.")
+    print("Documentation generation for plugin methods completed.")
 
 def remove_builder_lines(text):
     lines = text.splitlines()  # Split text into lines
@@ -104,7 +105,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default=f"{root}/office-js-api-declarations/office-js-api"
+        default=f"{root}/office-js-api-declarations/office-js-api-plugins"
     )
     args = parser.parse_args()
     generate(args.destination)

@@ -6,7 +6,7 @@ sys.path.append('../../../../scripts')
 
 import base
   
-def update_qmake_conf(arm_toolchain_path):
+def update_qmake_conf(arm_toolchain_path, arm_sysroot_path):
   replace_file = "./qt-everywhere-src-5.15.2/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
   arm_toolchain_bin = arm_toolchain_path + "/bin"
   
@@ -36,6 +36,11 @@ def update_qmake_conf(arm_toolchain_path):
   replace_dst += "QMAKE_NM                = " + arm_toolchain_bin + "/aarch64-linux-gnu-nm -P\n"
   replace_dst += "QMAKE_STRIP             = " + arm_toolchain_bin + "/aarch64-linux-gnu-strip\n"
   
+  lflags = "-Wl,--disable-new-dtags "
+  lflags += "-Wl,-rpath," + arm_sysroot_path + "/lib/aarch64-linux-gnu "
+  lflags += "-Wl,-rpath," + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu "
+  replace_dst += "QMAKE_LFLAGS            = " + lflags + "\n"
+  
   base.replaceInFile(replace_file, replace_src, replace_dst)
 
 def make(arm_toolchain_path="", arm_sysroot_path=""):
@@ -57,8 +62,8 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
     "-qt-libjpeg",
     "-qt-pcre",
     "-glib",
-#    "-gstreamer", "1.0",
-#    "-xcb",
+    "-gstreamer", "1.0",
+    "-xcb",
     "-no-sql-sqlite",
     "-no-opengl",
     "-nomake", "examples",
@@ -75,8 +80,10 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
     "-no-pch",
     "-no-use-gold-linker",
     "-recheck-all",
-    "-sysroot " + "\"" + arm_sysroot_path + "\""] # test config.qtbase_corelib.libraries.glib FAILED
+    "-rpath",
+    "-sysroot", "\"" + arm_sysroot_path + "\""]
   
+  # test config.qtbase_corelib.libraries.glib FAILED
   qt_params_str = ""
   for param in qt_params:
       qt_params_str += (param + " ")
@@ -97,8 +104,8 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
     filedata = additional_gcc_11 + filedata
     base.writeFile(chanage_file, filedata)
     
-  if arm_toolchain_path != "":
-    update_qmake_conf(arm_toolchain_path)
+  if arm_toolchain_path != "" and arm_sysroot_path != "":
+    update_qmake_conf(arm_toolchain_path, arm_sysroot_path)
     
   os.environ["PKG_CONFIG_LIBDIR"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""
   os.environ["PKG_CONFIG_PATH"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""
@@ -109,7 +116,7 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
   
 if __name__ == "__main__":
   arm_toolchain_path = "./arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu"
-  arm_sysroot_path = "./arm_toolchain/sysroot-glibc-linaro-2.21-2017.05-aarch64-linux-gnu"
+  arm_sysroot_path = "./arm_sysroot/sysroot-ubuntu16.04-arm64v8"
 
   if len(sys.argv) >= 3:
     arm_toolchain_path = sys.argv[1]

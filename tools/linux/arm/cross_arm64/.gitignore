@@ -3,3 +3,5 @@ qt_binary*
 qt_build*
 qt-*
 arm_toolchain
+arm_sysroot/*
+!arm_sysroot/Dockerfile

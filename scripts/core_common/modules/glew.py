@@ -26,7 +26,7 @@ def make():
   base.common_check_version("glew", "1", clean)
 
   if not base.is_dir("glew-2.1.0"):
-    base.download("https://deac-ams.dl.sourceforge.net/project/glew/glew/2.1.0/glew-2.1.0-win32.zip", "./archive.zip")
+    base.download("https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/glew/glew-2.1.0-win32.zip", "./archive.zip")
     base.extract("./archive.zip", "./")
     base.delete_file("./archive.zip")
 

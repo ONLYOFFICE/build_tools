@@ -1853,6 +1853,7 @@ def check_python():
   directory_bin = __file__script__path__ + "/../tools/linux/python3/bin"
 
   if not is_dir(directory + "/python3"):
+    download('https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/python3.tar.gz', directory + "/python3.tar.gz")
     cmd("tar", ["xfz", directory + "/python3.tar.gz", "-C", directory])
     cmd("ln", ["-s", directory_bin + "/python3", directory_bin + "/python"])
   directory_bin = directory_bin.replace(" ", "\\ ")

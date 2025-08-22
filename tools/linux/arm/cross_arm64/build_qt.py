@@ -2,6 +2,8 @@
 
 import sys
 import os
+
+import download_arm_toolchain
 sys.path.append('../../../../scripts')
 
 import base
@@ -121,5 +123,11 @@ if __name__ == "__main__":
   if len(sys.argv) >= 3:
     arm_toolchain_path = sys.argv[1]
     arm_sysroot_path = sys.argv[2]
+  else:
+    if not base.is_dir(arm_toolchain_path):
+      download_arm_toolchain()
+    
+    if not base.is_dir(arm_sysroot_path):
+      download_arm_sysroot_path()
     
   make(arm_toolchain_path, arm_sysroot_path)

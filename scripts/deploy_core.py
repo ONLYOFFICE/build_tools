@@ -53,7 +53,8 @@ def make():
     if ("windows" == base.host_platform()):
       base.copy_files(core_dir + "/Common/3dParty/icu/" + platform + "/build/*.dll", archive_dir + "/")
     else:
-      base.copy_files(core_dir + "/Common/3dParty/icu/" + platform + "/build/*", archive_dir + "/")
+      if not (0 == platform.find("mac") and config.check_option("config", "bundle_dylibs")):
+        base.copy_files(core_dir + "/Common/3dParty/icu/" + platform + "/build/*", archive_dir + "/")
     base.copy_v8_files(core_dir, archive_dir, platform)
 
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "allfontsgen")
@@ -65,6 +66,10 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "vboxtester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "metafiletester")
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, archive_dir, "dictionariestester")
+
+    # correct mac frameworks
+    if (0 == platform.find("mac")):
+      base.generate_plist(archive_dir, "mac", max_depth=1)
 
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
@@ -79,4 +84,3 @@ def make():
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)
   return
-

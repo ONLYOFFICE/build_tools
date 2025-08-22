@@ -25,6 +25,7 @@ import oo_brotli
 import hyphen
 import googletest
 import libvlc
+import heif
 
 def check_android_ndk_macos_arm(dir):
   if base.is_dir(dir + "/darwin-x86_64") and not base.is_dir(dir + "/darwin-arm64"):
@@ -53,10 +54,11 @@ def make():
   hyphen.make()
   googletest.make()
   oo_brotli.make()
+  heif.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()
-  
+
   if config.check_option("module", "mobile"):
     if (config.check_option("platform", "android")):
       curl.make()

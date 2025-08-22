@@ -59,7 +59,7 @@ def make():
 
     # icu
     base.deploy_icu(core_dir, root_dir, platform)
-    
+
     # doctrenderer
     if isWindowsXP:
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix + "/xp", root_dir, "doctrenderer")
@@ -97,23 +97,24 @@ def make():
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder_midl.h", root_dir + "/include/docbuilder_midl.h")
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
-    
+
     if ("win_64" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_64/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_64/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
-      
+
     elif ("win_32" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_32/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_32/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir)
+      base.generate_plist(root_dir, "ios")
 
     if (0 == platform.find("linux")):
       base.linux_correct_rpath_docbuilder(root_dir)
 
     if (0 == platform.find("mac")):
+      base.generate_plist(root_dir, "mac", max_depth=1)
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 
@@ -125,17 +126,17 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
-    
+
     if native_platform == "win_arm64":
       base.delete_dir(root_dir + "/sdkjs")
       base.copy_dir(root_dir_win64 + "/sdkjs", root_dir + "/sdkjs")
       return
-  
+
     # delete unnecessary builder files
     def delete_files(files):
       for file in files:
         base.delete_file(file)
-    
+
     delete_files(base.find_files(root_dir, "*.wasm"))
     delete_files(base.find_files(root_dir, "*_ie.js"))
     base.delete_file(root_dir + "/sdkjs/pdf/src/engine/cmap.bin")
@@ -149,4 +150,3 @@ def make():
     base.delete_dir(root_dir + "/sdkjs/common/Images")
 
   return
-

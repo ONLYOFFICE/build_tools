@@ -269,6 +269,11 @@ def make_heif(base_dir, build_type):
       "add_subdirectory(heifio)",
       "# add_subdirectory(heifio)"
     )
+    base.replaceInFile(
+      base_dir + "/libheif/CMakeLists.txt",
+      "if (DOXYGEN_FOUND)",
+      "if (FALSE)"
+    )
 
   # prepare cmake args
   cmake_dir = base_dir + "/libheif"
@@ -333,12 +338,23 @@ def make_heif(base_dir, build_type):
   make_common(build_heif, cmake_args)
   return
 
+def clear_module():
+  if base.is_dir("libde265"):
+    base.delete_dir_with_access_error("libde265")
+  if base.is_dir("x265_git"):
+    base.delete_dir_with_access_error("x265_git")
+  if base.is_dir("libheif"):
+    base.delete_dir_with_access_error("libheif")
+  return
+
 def make():
   print("[fetch & build]: heif")
 
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/heif"
   old_dir = os.getcwd()
   os.chdir(base_dir)
+
+  base.check_module_version("1", clear_module)
 
   build_type = "Release"
   if (-1 != config.option("config").lower().find("debug")):

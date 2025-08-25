@@ -60,13 +60,9 @@ def build_with_cmake(platform, cmake_args, build_type):
       "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"  # on UNIX we need to compile with fPIC
     ]
     if platform == "mac_64":
-      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
-      if base.is_os_arm():
-        cmake_args_ext += [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
-        ]
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11", "-DCMAKE_OSX_ARCHITECTURES=x86_64"]
     elif platform == "mac_arm64":
-      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0", "-DCMAKE_OSX_ARCHITECTURES=arm64"]
   # IOS
   elif "ios" in platform:
     cmake_args_ext = [

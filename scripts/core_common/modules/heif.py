@@ -15,7 +15,7 @@ HEIF_VERSION = "1.18.2"
 
 # ios cmake toolchain
 IOS_CMAKE_VERSION = "4.5.0"
-IOS_CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
+IOS_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../../core/Common/3dParty/heif/ios-cmake/ios.toolchain.cmake"
 
 # android cmake toolchain
 ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
@@ -367,10 +367,8 @@ def make():
 
   # fetch custom cmake toolchain for ios
   if -1 != config.option("platform").find("ios"):
-    if not base.is_dir("ios-cmake"):
+    if not base.is_file(IOS_CMAKE_TOOLCHAIN_FILE):
       fetch_repo("https://github.com/leetal/ios-cmake.git", IOS_CMAKE_VERSION)
-    global IOS_CMAKE_TOOLCHAIN_FILE
-    IOS_CMAKE_TOOLCHAIN_FILE = os.path.join(base_dir, IOS_CMAKE_TOOLCHAIN_FILE)
 
   # build encoder library
   make_x265(base_dir, build_type)

@@ -20,6 +20,8 @@ IOS_CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
 # android cmake toolchain
 ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
 
+# linux arm64 cmake toolchain
+LINUX_ARM64_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/arm/cross_arm64/linux-arm64.toolchain.cmake"
 
 def get_vs_version():
   vs_version = "14 2015"
@@ -65,6 +67,8 @@ def build_with_cmake(platform, cmake_args, build_type):
       cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11", "-DCMAKE_OSX_ARCHITECTURES=x86_64"]
     elif platform == "mac_arm64":
       cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0", "-DCMAKE_OSX_ARCHITECTURES=arm64"]
+    elif platform == "linux_arm64":
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_ARM64_CMAKE_TOOLCHAIN_FILE]
   # IOS
   elif "ios" in platform:
     cmake_args_ext = [

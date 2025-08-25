@@ -53,6 +53,8 @@ def build_with_cmake(platform, cmake_args, build_type):
       cmake_args_ext += ["-A", "x64"]
     elif platform == "win_32":
       cmake_args_ext += ["-A", "Win32"]
+    elif platform == "win_arm64":
+      cmake_args_ext += ["-A", "ARM64"]
   # LINUX, MAC
   elif "linux" in platform or "mac" in platform:
     cmake_args_ext = [
@@ -114,6 +116,9 @@ def make_common(build_func, cmake_args):
     # win_32
     if config.check_option("platform", "win_32"):
       build_func("win_32", cmake_args)
+    # win_arm64
+    if config.check_option("platform", "win_arm64"):
+      build_func("win_arm64", cmake_args)
 
   # LINUX
   elif "linux" == base.host_platform():

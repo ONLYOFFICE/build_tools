@@ -51,9 +51,9 @@ def build_with_cmake(platform, cmake_args, build_type):
     cmake_args_ext = [
       "-G", f"Visual Studio {get_vs_version()}"
     ]
-    if platform == "win_64":
+    if platform == "win_64" or platform == "win_64_xp":
       cmake_args_ext += ["-A", "x64"]
-    elif platform == "win_32":
+    elif platform == "win_32" or platform == "win_32_xp":
       cmake_args_ext += ["-A", "Win32"]
     elif platform == "win_arm64":
       cmake_args_ext += ["-A", "ARM64"]
@@ -115,10 +115,10 @@ def make_common(build_func, cmake_args):
   # WINDOWS
   if "windows" == base.host_platform():
     # win_64
-    if config.check_option("platform", "win_64"):
+    if config.check_option("platform", "win_64") or config.check_option("platform", "win_64_xp"):
       build_func("win_64", cmake_args)
     # win_32
-    if config.check_option("platform", "win_32"):
+    if config.check_option("platform", "win_32") or config.check_option("platform", "win_32_xp"):
       build_func("win_32", cmake_args)
     # win_arm64
     if config.check_option("platform", "win_arm64"):

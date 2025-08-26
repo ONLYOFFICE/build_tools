@@ -123,7 +123,12 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if ("" != qmake_addon_string):
       qmake_addon_string = " " + qmake_addon_string
 
-    vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
+    vcvarsall_arch = "x64"
+    if base.platform_is_32(platform):
+      vcvarsall_arch = "x86"
+    if (platform == "win_arm64"):
+      vcvarsall_arch = "x64_arm64"
+
     qmake_env_addon = base.get_env("QT_QMAKE_ADDON")
     if (qmake_env_addon != ""):
       qmake_env_addon += " "

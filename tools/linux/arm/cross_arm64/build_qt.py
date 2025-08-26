@@ -40,8 +40,6 @@ def update_qmake_conf(arm_toolchain_path, arm_sysroot_path):
   replace_dst += "QMAKE_STRIP             = " + arm_toolchain_bin + "/aarch64-linux-gnu-strip\n"
   
   lflags = "-Wl,--disable-new-dtags "
-  lflags += "-Wl,-rpath," + arm_sysroot_path + "/lib/aarch64-linux-gnu "
-  lflags += "-Wl,-rpath," + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu "
   replace_dst += "QMAKE_LFLAGS            = " + lflags + "\n"
   
   base.replaceInFile(replace_file, replace_src, replace_dst)
@@ -83,8 +81,9 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
     "-no-pch",
     "-no-use-gold-linker",
     "-recheck-all",
-    "-rpath",
-    "-sysroot", "\"" + arm_sysroot_path + "\""]
+    "-sysroot", "\"" + arm_sysroot_path + "\"",
+    "-R", "\"" + arm_sysroot_path + "/lib/aarch64-linux-gnu" + "\"", 
+    "-R", "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu" + "\"", ]
   
   # test config.qtbase_corelib.libraries.glib FAILED
   qt_params_str = ""

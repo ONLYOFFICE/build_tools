@@ -359,7 +359,7 @@ def make():
   old_dir = os.getcwd()
   os.chdir(base_dir)
 
-  base.check_module_version("1", clear_module)
+  base.check_module_version("2", clear_module)
 
   build_type = "Release"
   if (-1 != config.option("config").lower().find("debug")):

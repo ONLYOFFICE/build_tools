@@ -761,6 +761,7 @@ def qt_setup(platform):
       set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
     if ("" != arm64_sysroot):
       set_env("ARM64_SYSROOT", arm64_sysroot)
+      set_env("PKG_CONFIG_PATH", arm64_sysroot + "/usr/lib/aarch64-linux-gnu/pkgconfig")
 
   return qt_dir
 

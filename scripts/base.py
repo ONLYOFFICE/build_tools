@@ -755,9 +755,12 @@ def qt_setup(platform):
 
   if ("linux_arm64" == platform):
     cross_compiler_arm64 = config.option("arm64-toolchain-bin")
+    arm64_sysroot = config.option("arm64-sysroot")
     if ("" != cross_compiler_arm64):
       set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
       set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
+    if ("" != arm64_sysroot):
+      set_env("ARM64_SYSROOT", arm64_sysroot)
 
   return qt_dir
 

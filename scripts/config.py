@@ -137,6 +137,12 @@ def parse():
     else:
       options["arm64-toolchain-bin"] = "/usr/bin"
       
+  if not "arm64-sysroot" in options:
+    if base.is_dir(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu16.04-arm64v8"):
+      options["arm64-sysroot"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu16.04-arm64v8")
+    else:
+      options["arm64-sysroot"] = ""
+      
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):
       if not check_option("config", "bundle_xcframeworks"):

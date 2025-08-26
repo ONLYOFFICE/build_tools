@@ -2,12 +2,12 @@
 
 import sys
 import os
-sys.path.append('../../../../scripts')
+sys.path.append(os.path.dirname(__file__) + '/../../../../scripts')
 
 import base
 
 def make():
-    arm_toolchain_dir = os.path.abspath("./arm_toolchain")
+    arm_toolchain_dir = os.path.abspath(os.path.dirname(__file__)  + "/arm_toolchain")
     if not base.is_dir(arm_toolchain_dir):
         os.makedirs(arm_toolchain_dir)
     

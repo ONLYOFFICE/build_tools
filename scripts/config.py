@@ -61,12 +61,6 @@ def parse():
     if not check_option("platform", "win_64"):
       options["platform"] = "win_64 " + options["platform"]
 
-  if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
-    if not check_option("platform", "linux_64"):
-      # linux_64 binaries need only for desktop
-      if check_option("module", "desktop"):
-        options["platform"] = "linux_64 " + options["platform"]
-
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
 
@@ -132,8 +126,8 @@ def parse():
   if not "arm64-toolchain-bin" in options:
     if "custom-sysroot" in options:
       options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
-    elif base.is_dir(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin"):
-      options["arm64-toolchain-bin"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")
+    elif base.is_dir(os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")):
+      options["arm64-toolchain-bin"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")
     else:
       options["arm64-toolchain-bin"] = "/usr/bin"
       

@@ -431,7 +431,13 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
 
 def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
   if (platform == "linux_arm64"):
-    return cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
+    additional_libdir = ""
+    if config.option("arm64-sysroot") != "":
+      additional_libdir = "-L " + config.option("arm64-sysroot") + "/usr/lib/aarch64-linux-gnu "
+      additional_libdir += "-L " + config.option("arm64-sysroot") + "/lib/aarch64-linux-gnu"
+    else:
+      additional_libdir = "/usr/aarch64-linux-gnu"
+    return cmd_in_dir(directory, "qemu-aarch64", [additional_libdir, prog] + args, is_no_errors)
   if (platform == "linux_arm32"):
     return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
   return 0
@@ -760,7 +766,6 @@ def qt_setup(platform):
       set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
       set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
     if ("" != arm64_sysroot):
-      set_env("ARM64_SYSROOT", arm64_sysroot)
       set_env("PKG_CONFIG_PATH", arm64_sysroot + "/usr/lib/aarch64-linux-gnu/pkgconfig")
 
   return qt_dir

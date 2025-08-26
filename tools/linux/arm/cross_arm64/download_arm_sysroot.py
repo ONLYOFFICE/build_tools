@@ -2,14 +2,14 @@
 
 import sys
 import os
-sys.path.append('../../../../scripts')
+sys.path.append(os.path.dirname(__file__) + '/../../../../scripts')
 
 import base
 
 
 def make():
-  tar_path = "./arm_sysroot/sysroot_ubuntu_1604_arm64v8.tar.xz"
-  sysroot_dir = "./arm_sysroot"
+  sysroot_dir = os.path.abspath(os.path.dirname(__file__) + "/arm_sysroot")
+  tar_path = sysroot_dir + "/sysroot_ubuntu_1604_arm64v8.tar.xz"
   sysroot_url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604_arm64v8.tar.xz"
   
   if not base.is_file(tar_path):

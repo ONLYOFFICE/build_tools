@@ -11,7 +11,7 @@ def change_icu_defs(arch):
   param = "-arch x86_64"
   if arch == "arm64":
     param = "-arch arm64"
-  
+
   param += " -isysroot " + base.find_mac_sdk()
   param += " -mmacosx-version-min=10.12"
 
@@ -39,9 +39,9 @@ if not base.is_dir(current_dir + "/mac_cross_64"):
   os.chdir(current_dir + "/mac_cross_64")
 
   old_env = change_icu_defs("x86_64")
-  
+
   base.cmd("../icu/source/runConfigureICU", ["MacOSX",
-    "--prefix=" + current_dir + "/mac_cross_64"])
+    "--prefix=" + current_dir + "/mac_cross_64", "--enable-static"])
 
   base.cmd("make", ["-j4"])
   base.cmd("make", ["install"], True)
@@ -58,8 +58,8 @@ addon = []
 if not base.is_os_arm():
   addon = ["--host=aarch64-apple-darwin"]
 
-base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64", 
-  "--with-cross-build=" + current_dir + "/mac_cross_64", "VERBOSE=1"] + addon)
+base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64",
+  "--with-cross-build=" + current_dir + "/mac_cross_64", "--enable-static", "VERBOSE=1"] + addon)
 
 base.cmd("make", ["-j4"])
 base.cmd("make", ["install"])
@@ -81,12 +81,22 @@ base.create_dir(current_dir + "/mac_arm64")
 base.create_dir(current_dir + "/mac_arm64/build")
 
 base.copy_dir(current_dir + "/mac_cross_64/include", current_dir + "/mac_64/build/include")
+# copy shared libs
 base.copy_file(current_dir + "/mac_cross_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicudata." + icu_major + ".dylib")
 base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicuuc." + icu_major + ".dylib")
+# copy static libs
+base.copy_file(current_dir + "/mac_cross_64/lib/libicudata.a", current_dir + "/mac_64/build")
+base.copy_file(current_dir + "/mac_cross_64/lib/libicui18n.a", current_dir + "/mac_64/build")
+base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc.a", current_dir + "/mac_64/build")
 
 base.copy_dir(current_dir + "/mac_arm_64/include", current_dir + "/mac_arm64/build/include")
+# copy shared libs
 base.copy_file(current_dir + "/mac_arm_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicudata." + icu_major + ".dylib")
 base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicuuc." + icu_major + ".dylib")
+# copy static libs
+base.copy_file(current_dir + "/mac_arm_64/lib/libicudata.a", current_dir + "/mac_arm64/build")
+base.copy_file(current_dir + "/mac_arm_64/lib/libicui18n.a", current_dir + "/mac_arm64/build")
+base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc.a", current_dir + "/mac_arm64/build")
 
 base.delete_dir(current_dir + "/mac_cross_64")
 base.delete_dir(current_dir + "/mac_arm_64")

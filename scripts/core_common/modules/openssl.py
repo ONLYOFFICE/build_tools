@@ -88,20 +88,35 @@ def make():
     return
 
   if (-1 != config.option("platform").find("linux")) and not base.is_dir("../build/linux_64"):
+    ld_library_path_copy = ''
+
     base.cmd("./config", ["enable-md2", "no-shared", "no-asm", "--prefix=" + old_cur_dir + "/build/linux_64", "--openssldir=" + old_cur_dir + "/build/linux_64"])
     if "1" == config.option("use-clang"):
       base.replaceInFile("./Makefile", "CC=$(CROSS_COMPILE)gcc", "CC=$(CROSS_COMPILE)clang")
       base.replaceInFile("./Makefile", "CXX=$(CROSS_COMPILE)g++", "CXX=$(CROSS_COMPILE)clang++")
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden -stdlib=libc++")
-      base.replaceInFile("./Makefile", "LDFLAGS", "LDFLAGS=-stdlib=libc++")
-    else:
+      base.replaceInFile("./Makefile", "LDFLAGS=", "LDFLAGS=-stdlib=libc++")
+    elif config.option("custom-sysroot") == "":
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
-      
-    base.cmd("make")
-    base.cmd("make", ["install"])
-    base.cmd("make", ["clean"], True)
+    else:
+      if 'LD_LIBRARY_PATH' in os.environ:
+        ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
+      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+      base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"),)
+      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
+
+    if config.option("custom-sysroot") == "":
+      base.cmd("make", [])
+      base.cmd("make", ["install"])
+      base.cmd("make", ["clean"], True)
+    else:
+      base.cmd_exe("make", [])
+      base.cmd_exe("make", ["install"])
+      base.cmd_exe("make", ["clean"], True)
+      os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
     # TODO: support x86
 
   if (-1 != config.option("platform").find("linux_arm64")) and not base.is_dir("../build/linux_arm64"):

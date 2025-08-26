@@ -47,7 +47,7 @@ def is_use_clang():
   gcc_version = base.get_gcc_version()  
     
   is_clang = "false"
-  if (gcc_version >= 6000 or "1" == config.option("use-clang")):
+  if config.option("custom-sysroot") == "" and (gcc_version >= 6000 or "1" == config.option("use-clang")):
     is_clang = "true"
 
   print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)

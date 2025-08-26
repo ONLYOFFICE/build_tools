@@ -95,12 +95,16 @@ def make():
 
     # icu
     base.deploy_icu(core_dir, converter_dir, platform)
-        
+
     base.copy_v8_files(core_dir, converter_dir, platform)
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
     base.copy_dir(git_dir + "/document-templates/new/en-US", converter_dir + "/empty")
+
+    # correct mac frameworks
+    if (0 == platform.find("mac")):
+      base.generate_plist(converter_dir, "mac", max_depth=1)
 
     # js
     js_dir = root_dir
@@ -114,7 +118,7 @@ def make():
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
-    
+
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
     base.copy_marketplace_plugin(js_dir + "/sdkjs-plugins", False, True)
@@ -136,7 +140,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
     if ("1" != config.option("preinstalled-plugins")):
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "pluginsmanager")
-    
+
     branding_dir = server_dir + "/branding"
     if("" != config.option("branding") and "onlyoffice" != config.option("branding")):
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
@@ -218,4 +222,3 @@ def make():
       base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return
-

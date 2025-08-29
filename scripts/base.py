@@ -1937,7 +1937,7 @@ def setup_local_qmake(dir_qmake):
 def deploy_icu(core_dir, dst_dir, platform):
   if (0 == platform.find("android")):
     src_dir = core_dir + "/Common/3dParty/icu/android/build/" + platform[8:]
-    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")
+    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", dst_dir + "/icudt" + icu_ver + "l.dat")
     return
 
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"

@@ -431,12 +431,11 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
 
 def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
   if (platform == "linux_arm64"):
-    additional_libdir = []
     if config.option("arm64-sysroot") != "":
-      additional_libdir = ["-L", config.option("arm64-sysroot")]
+      os.environ["QEMU_LD_PREFIX"] = config.option("arm64-sysroot")
     else:
-      additional_libdir = ["-L", "/usr/aarch64-linux-gnu"]
-    return cmd_in_dir(directory, "qemu-aarch64", additional_libdir + [prog] + args, is_no_errors)
+      os.environ["QEMU_LD_PREFIX"] = "/usr/aarch64-linux-gnu"
+    return cmd_in_dir(directory, "qemu-aarch64", [prog] + args, is_no_errors)
   if (platform == "linux_arm32"):
     return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
   return 0

@@ -9,7 +9,7 @@ sys.path.append('../../../../scripts')
 
 import base
   
-def update_qmake_conf(arm_toolchain_path, arm_sysroot_path):
+def update_qmake_conf():
   replace_file = "./qt-everywhere-src-5.15.2/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
   arm_toolchain_bin = arm_toolchain_path + "/bin"
   
@@ -28,21 +28,24 @@ def update_qmake_conf(arm_toolchain_path, arm_sysroot_path):
   
   replace_dst = ""
   replace_dst += "# modifications to g++.conf\n"
-  replace_dst += "QMAKE_CC                = " + arm_toolchain_bin + "/aarch64-linux-gnu-gcc\n"
-  replace_dst += "QMAKE_CXX               = " + arm_toolchain_bin + "/aarch64-linux-gnu-g++\n"
-  replace_dst += "QMAKE_LINK              = " + arm_toolchain_bin + "/aarch64-linux-gnu-g++\n"
-  replace_dst += "QMAKE_LINK_SHLIB        = " + arm_toolchain_bin + "/aarch64-linux-gnu-g++\n"
+  replace_dst += "ARM64_TOOLCHAIN_BIN = $$(ARM64_TOOLCHAIN_BIN)/\n"
+  replace_dst += "ARM64_SYSROOT       = $$(ARM64_SYSROOT)\n"
+  replace_dst += "\n"
+  replace_dst += "QMAKE_CC          = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-gcc\")\n"
+  replace_dst += "QMAKE_CXX         = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-g++\")\n"
+  replace_dst += "QMAKE_LINK        = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-g++\")\n"
+  replace_dst += "QMAKE_LINK_SHLIB  = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-g++\")\n"
   replace_dst += "\n"
   replace_dst += "# modifications to linux.conf\n"
-  replace_dst += "QMAKE_AR                = " + arm_toolchain_bin + "/aarch64-linux-gnu-ar cqs\n"
-  replace_dst += "QMAKE_OBJCOPY           = " + arm_toolchain_bin + "/aarch64-linux-gnu-objcopy\n"
-  replace_dst += "QMAKE_NM                = " + arm_toolchain_bin + "/aarch64-linux-gnu-nm -P\n"
-  replace_dst += "QMAKE_STRIP             = " + arm_toolchain_bin + "/aarch64-linux-gnu-strip\n"
+  replace_dst += "QMAKE_AR          = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-ar cqs\")\n"
+  replace_dst += "QMAKE_OBJCOPY     = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-objcopy\")\n"
+  replace_dst += "QMAKE_NM          = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-nm -P\")\n"
+  replace_dst += "QMAKE_STRIP       = $$join(ARM64_TOOLCHAIN_BIN, , , \"aarch64-linux-gnu-strip\")\n"
   
   lflags = "-Wl,--disable-new-dtags "
-  lflags += "-Wl,-rpath-link," + arm_sysroot_path + "/lib/aarch64-linux-gnu "
-  lflags += "-Wl,-rpath-link," + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu "
-  replace_dst += "QMAKE_LFLAGS            = " + lflags + "\n"
+  lflags += "-Wl,-rpath-link,$$ARM64_SYSROOT/lib/aarch64-linux-gnu "
+  lflags += "-Wl,-rpath-link,$$ARM64_SYSROOT/usr/lib/aarch64-linux-gnu "
+  replace_dst += "QMAKE_LFLAGS      = " + lflags + "\n"
   
   base.replaceInFile(replace_file, replace_src, replace_dst)
 
@@ -106,7 +109,9 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
     base.writeFile(chanage_file, filedata)
     
   if arm_toolchain_path != "" and arm_sysroot_path != "":
-    update_qmake_conf(arm_toolchain_path, arm_sysroot_path)
+    os.environ["ARM64_TOOLCHAIN_BIN"] = arm_toolchain_path + "/bin"
+    os.environ["ARM64_SYSROOT"] = arm_sysroot_path
+    update_qmake_conf()
     
   os.environ["PKG_CONFIG_LIBDIR"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""
   os.environ["PKG_CONFIG_PATH"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""

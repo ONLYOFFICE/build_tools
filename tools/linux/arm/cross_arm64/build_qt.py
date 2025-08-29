@@ -11,7 +11,6 @@ import base
   
 def update_qmake_conf():
   replace_file = "./qt-everywhere-src-5.15.2/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
-  arm_toolchain_bin = arm_toolchain_path + "/bin"
   
   replace_src = ""
   replace_src += "# modifications to g++.conf\n"

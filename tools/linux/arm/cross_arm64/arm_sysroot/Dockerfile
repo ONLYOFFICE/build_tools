@@ -1,4 +1,4 @@
-FROM nimmis/ubuntu:16.04-arm64v8
+FROM nimmis/ubuntu:18.04-arm64v8
 
 SHELL ["/bin/bash", "-c"]
 

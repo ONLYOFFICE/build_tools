@@ -133,7 +133,7 @@ def parse():
       
   if not "arm64-sysroot" in options:
     if base.is_dir(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu16.04-arm64v8"):
-      options["arm64-sysroot"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu16.04-arm64v8")
+      options["arm64-sysroot"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu18.04-arm64v8")
     else:
       options["arm64-sysroot"] = ""
       

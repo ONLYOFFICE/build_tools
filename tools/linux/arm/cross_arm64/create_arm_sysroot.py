@@ -17,12 +17,12 @@ def make():
     curr_dir = os.path.abspath(os.path.curdir)
     os.chdir(arm_sysroot_dir)
     
-    sysroot_ubuntu_arm64v8_dir = os.path.abspath("./sysroot-ubuntu18.04-arm64v8")
+    sysroot_ubuntu_arm64v8_dir = os.path.abspath("./sysroot-ubuntu20.04-arm64v8")
     if not base.is_dir(sysroot_ubuntu_arm64v8_dir):
         os.makedirs(sysroot_ubuntu_arm64v8_dir)
         
-    img_name = "image-ubuntu18.04-arm64v8:v1"
-    container_name = "sysroot-ubuntu18.04-arm64v8"
+    img_name = "image-ubuntu20.04-arm64v8:v1"
+    container_name = "sysroot-ubuntu20.04-arm64v8"
     
     base.cmd("docker run --rm --privileged multiarch/qemu-user-static:register --reset")
     base.cmd("docker buildx install")

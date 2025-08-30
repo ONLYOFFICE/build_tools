@@ -1,6 +1,4 @@
-FROM nimmis/ubuntu:18.04-arm64v8
-
-SHELL ["/bin/bash", "-c"]
+FROM nimmis/ubuntu:20.04
 
 # basic dependencies
 RUN apt-get -y update && \

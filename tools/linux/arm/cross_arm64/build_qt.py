@@ -121,7 +121,7 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
   
 if __name__ == "__main__":
   arm_toolchain_path = "./arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu"
-  arm_sysroot_path = "./arm_sysroot/sysroot-ubuntu18.04-arm64v8"
+  arm_sysroot_path = "./arm_sysroot/sysroot-ubuntu20.04-arm64v8"
 
   if len(sys.argv) >= 3:
     arm_toolchain_path = sys.argv[1]

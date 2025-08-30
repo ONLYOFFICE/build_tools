@@ -9,8 +9,8 @@ import base
 
 def make():
   sysroot_dir = os.path.abspath(os.path.dirname(__file__) + "/arm_sysroot")
-  tar_path = sysroot_dir + "/sysroot_ubuntu_1804_arm64v8.tar.xz"
-  sysroot_url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1804_arm64v8.tar.xz"
+  tar_path = sysroot_dir + "/sysroot_ubuntu_2004_arm64v8.tar.xz"
+  sysroot_url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_2004_arm64v8.tar.xz"
   
   if not base.is_file(tar_path):
     base.download(sysroot_url, tar_path)
@@ -18,7 +18,7 @@ def make():
   if not base.is_dir(sysroot_dir):
     os.makedirs(sysroot_dir)
 
-  if not base.is_dir(sysroot_dir + "/sysroot_ubuntu_1804_arm64v8"):
+  if not base.is_dir(sysroot_dir + "/sysroot-ubuntu20.04-arm64v8"):
     base.cmd("tar", ["-xf", tar_path, "-C", sysroot_dir])
 
 if __name__ == "__main__":

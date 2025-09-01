@@ -11,8 +11,8 @@ current_dir = os.path.abspath(current_dir)
 if not current_dir.endswith("/"):
   current_dir += "/"
 
-icu_major = "58"
-icu_minor = "3"
+icu_major = "74"
+icu_minor = "2"
 
 options = {
   "--enable-strict"       : "no",
@@ -126,9 +126,6 @@ def make():
     base.create_dir(current_dir)
 
   old_env = dict(os.environ)
-
-  icu_major = "74"
-  icu_minor = "2"
 
   fetch_icu(icu_major, icu_minor)
 

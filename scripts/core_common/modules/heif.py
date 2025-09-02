@@ -92,7 +92,7 @@ def build_with_cmake(platform, cmake_args, build_type):
     elif platform == "linux_arm64":
       cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_ARM64_CMAKE_TOOLCHAIN_FILE]
     elif config.option("custom-sysroot") != "":
-      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE] # force use custom CXXFLAGS with Release build
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE] # force use custom CXXFLAGS with Release/Debug build
   # IOS
   elif "ios" in platform:
     cmake_args_ext = [

@@ -29,7 +29,35 @@ def download_sysroot():
 
     bash_chroot('apt update -y', tmp_sysroot_ubuntu_dir)
     bash_chroot('apt upgrade -y', tmp_sysroot_ubuntu_dir)
-    bash_chroot('apt install -y build-essential curl libpthread-stubs0-dev zlib1g-dev', tmp_sysroot_ubuntu_dir)
+    
+    apt_libs = ["build-essential"]
+    apt_libs += ["libpthread-stubs0-dev"]
+    apt_libs += ["zlib1g-dev"]
+    apt_libs += ["curl"]
+    apt_libs += ["libc6-dev"]
+    apt_libs += ["glib-2.0-dev"]
+    apt_libs += ["libglu1-mesa-dev"]
+    apt_libs += ["libgtk-3-dev"]
+    apt_libs += ["libpulse-dev"]
+    apt_libs += ["libasound2-dev"]
+    apt_libs += ["libatspi2.0-dev"]
+    apt_libs += ["libcups2-dev"]
+    apt_libs += ["libdbus-1-dev"]
+    apt_libs += ["libicu-dev"]
+    apt_libs += ["libgstreamer1.0-dev"]
+    apt_libs += ["libgstreamer-plugins-base1.0-dev"]
+    apt_libs += ["libx11-xcb-dev"]
+    apt_libs += ["libxcb*"]
+    apt_libs += ["libxi-dev"]
+    apt_libs += ["libxrender-dev"]
+    apt_libs += ["libxss-dev"]
+    apt_libs += ["libxkbcommon-dev"]
+    apt_libs += ["libxkbcommon-x11-dev"]
+    
+    apt_libs_str = ""
+    for apt_lib in apt_libs:
+        apt_libs_str += apt_lib + " "
+    bash_chroot('apt install -y ' + apt_libs_str, tmp_sysroot_ubuntu_dir)
 
     # # downloading arm toolchain
     arm_toolchain_url = 'https://releases.linaro.org/components/toolchain/binaries/5.4-2017.05/aarch64-linux-gnu/'

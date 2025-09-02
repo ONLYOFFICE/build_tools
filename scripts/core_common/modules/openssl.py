@@ -105,7 +105,7 @@ def make():
         ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
       base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
-      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"),)
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
 
     if config.option("custom-sysroot") == "":

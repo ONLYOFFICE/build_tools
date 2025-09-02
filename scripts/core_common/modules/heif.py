@@ -23,6 +23,25 @@ ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/
 # linux arm64 cmake toolchain
 LINUX_ARM64_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/arm/cross_arm64/linux-arm64.toolchain.cmake"
 
+OLD_ENV = dict()
+
+# get custom sysroot vars as str
+def setup_custom_sysroot_env() -> str:
+  env_vars = []
+  env_vars += ['LDFLAGS=-Wl,-rpath-link=\"' + config.get_custom_sysroot_lib() + "\""]
+  env_vars += ['CC=\"' + config.get_custom_sysroot_bin() + "/gcc\""]
+  env_vars += ['XX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
+  env_vars += ['AR=\"' + config.get_custom_sysroot_bin() + "/ar\""]
+  env_vars += ['RABLIB=\"' + config.get_custom_sysroot_bin() + "/ranlib\""]
+  env_vars += ['CFLAGS=\"' + "--sysroot=" + config.option("custom-sysroot") + "\""]
+  env_vars += ['CXXFLAGS=\"' + "--sysroot=" + config.option("custom-sysroot") + "\""]
+  
+  env_str = ""
+  for env_var in env_vars:
+    env_str += env_var + " "
+    
+  return env_str
+  
 def get_vs_version():
   vs_version = "14 2015"
   if config.option("vs-version") == "2019":
@@ -103,9 +122,13 @@ def build_with_cmake(platform, cmake_args, build_type):
 
   # run cmake
   base.cmd("cmake", cmake_args + cmake_args_ext)
+  
+  # env setup for custom sysroot
+  env_str = setup_custom_sysroot_env() if config.option("custom-sysroot") != "" else ""
+      
   # build
   if "Unix Makefiles" in cmake_args_ext:
-    base.cmd("make", ["-j4"])
+    base.cmd(env_str + "make", ["-j4"])
   else:
     base.cmd("cmake", ["--build", ".", "--config", build_type])
   return

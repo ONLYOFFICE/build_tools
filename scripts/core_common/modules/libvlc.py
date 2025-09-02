@@ -79,16 +79,20 @@ def make():
   base.copy_file("tools/ignore-cache-time.patch", "vlc")
 
   # windows
-  if "windows" == base.host_platform():
-    if config.check_option("platform", "win_64"):
-      base.copy_file("tools/win_64/build.patch", "vlc")
-      docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
-      form_build_win(vlc_dir + "/build/win64/vlc-" + vlc_version, base_dir + "/build/win_64")
+  if config.check_option("platform", "win_64"):
+    base.copy_file("tools/win_64/build.patch", "vlc")
+    docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
+    form_build_win(vlc_dir + "/build/win64/vlc-" + vlc_version, base_dir + "/build/win_64")
 
-    if config.check_option("platform", "win_32"):
-      base.copy_file("tools/win_32/build.patch", "vlc")
-      docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
-      form_build_win(vlc_dir + "/build/win32/vlc-" + vlc_version, base_dir + "/build/win_32")
+  if config.check_option("platform", "win_32"):
+    base.copy_file("tools/win_32/build.patch", "vlc")
+    docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
+    form_build_win(vlc_dir + "/build/win32/vlc-" + vlc_version, base_dir + "/build/win_32")
+
+  if config.check_option("platform", "win_arm64"):
+    base.copy_file("tools/win_64/build.patch", "vlc")
+    docker_build("libvlc-winarm64", base_dir + "/tools/win_arm64", base_dir)
+    form_build_win(vlc_dir + "/build/winarm64/vlc-" + vlc_version, base_dir + "/build/win_arm64")
 
   # linux
   if config.check_option("platform", "linux_64"):

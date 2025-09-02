@@ -916,10 +916,24 @@ def _check_icu_common(dir, out):
 
   return isExist
 
-def qt_copy_icu(out):
-  tests = [get_env("QT_DEPLOY") + "/../lib", "/lib", "/lib/x86_64-linux-gnu", "/lib64", "/lib64/x86_64-linux-gnu"]
-  tests += ["/usr/lib", "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib64/x86_64-linux-gnu"]
-  tests += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
+def qt_copy_icu(out, platform):
+  tests = [get_env("QT_DEPLOY") + "/../lib"]
+  prefix = ""
+  postfixes = []
+  
+  if platform == "linux_arm64" and config.option("arm64-sysroot") != "":
+    prefix = config.option("arm64-sysroot")
+    postfixes = ["aarch64-linux-gnu"]
+  else:
+    prefix = "" # empty for '/lib' etc.
+    postfixes = ["x86_64-linux-gnu"]
+    postfixes = ["i386-linux-gnu"]
+      
+  for postfix in postfixes:
+    tests += [prefix + "/lib/" + postfix]
+    tests += [prefix + "/lib64/" + postfix]
+    tests += [prefix + "/usr/lib/" + postfix]
+    tests += [prefix + "/usr/lib64/" + postfix]
 
   for test in tests:
     if (_check_icu_common(test, out)):

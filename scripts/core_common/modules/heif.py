@@ -28,13 +28,14 @@ OLD_ENV = dict()
 # get custom sysroot vars as str
 def setup_custom_sysroot_env() -> str:
   env_vars = []
-  env_vars += ['LDFLAGS=-Wl,-rpath-link=\"' + config.get_custom_sysroot_lib() + "\""]
+  env_vars += ['LD_LIBRARY_PATH=\"' + config.get_custom_sysroot_lib() + "\""]
   env_vars += ['CC=\"' + config.get_custom_sysroot_bin() + "/gcc\""]
-  env_vars += ['XX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
+  env_vars += ['CXX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
   env_vars += ['AR=\"' + config.get_custom_sysroot_bin() + "/ar\""]
   env_vars += ['RABLIB=\"' + config.get_custom_sysroot_bin() + "/ranlib\""]
   env_vars += ['CFLAGS=\"' + "--sysroot=" + config.option("custom-sysroot") + "\""]
   env_vars += ['CXXFLAGS=\"' + "--sysroot=" + config.option("custom-sysroot") + "\""]
+  env_vars += ['LDFLAGS=\"' + "--sysroot=" + config.option("custom-sysroot") + "\""]
   
   env_str = ""
   for env_var in env_vars:

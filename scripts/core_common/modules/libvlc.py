@@ -18,7 +18,7 @@ def docker_build(image_name, dockerfile_dir, base_dir):
   base.cmd("docker", ["image", "rm", image_name])
   return
 
-def form_build_win(src_dir, dest_dir):
+def form_build_win(src_dir, dest_dir, run_plugins_cache_gen=True):
   if not base.is_dir(dest_dir):
     base.create_dir(dest_dir)
   # copy include dir
@@ -31,8 +31,9 @@ def form_build_win(src_dir, dest_dir):
   base.copy_file(src_dir + "/libvlc.dll", dest_dir + "/lib")
   base.copy_file(src_dir + "/libvlccore.dll", dest_dir + "/lib")
   base.copy_file(src_dir + "/vlc-cache-gen.exe", dest_dir + "/lib")
-  # generate cache file 'plugins.dat' for plugins loading
-  base.cmd_exe(dest_dir + "/lib/vlc-cache-gen", [dest_dir + "/lib/plugins"])
+  if run_plugins_cache_gen and "windows" == base.host_platform():
+    # generate cache file 'plugins.dat' for plugins loading
+    base.cmd_exe(dest_dir + "/lib/vlc-cache-gen", [dest_dir + "/lib/plugins"])
   return
 
 def form_build_linux(src_dir, dest_dir):
@@ -85,18 +86,21 @@ def make():
   # windows
   if config.check_option("platform", "win_64"):
     base.copy_file("tools/win_32/build-win.patch", "vlc")
-    # docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
+    docker_build("libvlc-win64", base_dir + "/tools/win_64", base_dir)
     form_build_win(vlc_dir + "/build/win64/vlc-" + VLC_UPSTREAM_VERSION, base_dir + "/build/win_64")
 
-  # if config.check_option("platform", "win_32"):
-  #   base.copy_file("tools/win_32/build-win.patch", "vlc")
-  #   docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
-  #   form_build_win(vlc_dir + "/build/win32/vlc-" + VLC_UPSTREAM_VERSION, base_dir + "/build/win_32")
+  if config.check_option("platform", "win_32"):
+    base.copy_file("tools/win_32/build-win.patch", "vlc")
+    docker_build("libvlc-win32", base_dir + "/tools/win_32", base_dir)
+    form_build_win(vlc_dir + "/build/win32/vlc-" + VLC_UPSTREAM_VERSION, base_dir + "/build/win_32")
 
-  # if config.check_option("platform", "win_arm64"):
-  #   base.copy_file("tools/win_32/build-win.patch", "vlc")
-  #   docker_build("libvlc-winarm64", base_dir + "/tools/win_arm64", base_dir)
-  #   form_build_win(vlc_dir + "/build/winarm64/vlc-" + VLC_UPSTREAM_VERSION, base_dir + "/build/win_arm64")
+  if config.check_option("platform", "win_arm64"):
+    base.copy_file("tools/win_32/build-win.patch", "vlc")
+    base.copy_file("tools/win_arm64/contrib-vpx.patch", "vlc")
+    base.copy_file("tools/win_arm64/contrib-ffmpeg.patch", "vlc")
+    base.copy_file("tools/win_arm64/disable-npapi.patch", "vlc")
+    docker_build("libvlc-winarm64", base_dir + "/tools/win_arm64", base_dir)
+    form_build_win(vlc_dir + "/build/winarm64-ucrt/vlc-" + VLC_UPSTREAM_VERSION, base_dir + "/build/win_arm64", False)
 
   # linux
   if config.check_option("platform", "linux_64"):

@@ -58,6 +58,14 @@ def make():
     base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
     base.copy_file(server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node", build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
 
+    # AdminPanel server part
+    base.create_dir(build_server_dir + '/AdminPanel/server')
+    base.copy_exe(server_dir + "/AdminPanel/server", build_server_dir + '/AdminPanel/server', "adminpanel")
+
+    # AdminPanel client part
+    base.create_dir(build_server_dir + '/AdminPanel/client/build')
+    base.copy_dir(server_dir + '/AdminPanel/client/build', build_server_dir + '/AdminPanel/client/build')
+
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
 

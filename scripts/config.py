@@ -272,7 +272,7 @@ def parse_defaults():
   return
 
 def is_cef_107():
-  if ("linux" == base.host_platform()) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
+  if ("linux" == base.host_platform()) and (5004 < base.get_gcc_version()) and not check_option("platform", "android"):
     return True
   return False
 

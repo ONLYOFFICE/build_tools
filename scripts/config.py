@@ -81,6 +81,27 @@ def parse():
 
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
+      
+  # custom-sysroot setup
+  if "linux" != host_platform and "custom-sysroot" in options:
+    options["custom-sysroot"] = ""
+
+  if "linux" == host_platform and "custom-sysroot" in options:
+    if options["custom-sysroot"] == "0":
+      options["custom-sysroot"] = ""
+    elif options["custom-sysroot"] == "1":
+      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
+      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
+      options["custom-sysroot"] = custom_sysroot
+      if not os.path.isdir(custom_sysroot):
+        print("Custom sysroot is not found, downloading...")
+        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
+        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
+        os.mkdir(custom_sysroot)
+        print("Unpacking...")
+        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
+        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
+          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
 
   if is_cef_107():
     extend_option("config", "cef_version_107")
@@ -107,27 +128,6 @@ def parse():
     options["sdkjs-plugin"] = "default"
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"
-
-  # custom-sysroot setup
-  if "linux" != host_platform and "custom-sysroot" in options:
-    options["custom-sysroot"] = ""
-
-  if "linux" == host_platform and "custom-sysroot" in options:
-    if options["custom-sysroot"] == "0":
-      options["custom-sysroot"] = ""
-    elif options["custom-sysroot"] == "1":
-      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
-      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
-      options["custom-sysroot"] = custom_sysroot
-      if not os.path.isdir(custom_sysroot):
-        print("Custom sysroot is not found, downloading...")
-        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
-        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
-        os.mkdir(custom_sysroot)
-        print("Unpacking...")
-        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
-        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
-          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
 
   if not "arm64-toolchain-bin" in options:
     if not "custom-sysroot" in options:
@@ -272,7 +272,7 @@ def parse_defaults():
   return
 
 def is_cef_107():
-  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+  if ("linux" == base.host_platform()) and (5004 <= base.get_gcc_version()) and not check_option("platform", "android"):
     return True
   return False
 
@@ -280,7 +280,7 @@ def is_v8_60():
   if check_option("platform", "linux_arm64"):
     return False
 
-  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android") and config.options("custom-sysroot") == "":
     return True
 
   if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):

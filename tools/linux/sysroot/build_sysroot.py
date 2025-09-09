@@ -53,6 +53,7 @@ def download_sysroot():
     apt_libs += ["libxss-dev"]
     apt_libs += ["libxkbcommon-dev"]
     apt_libs += ["libxkbcommon-x11-dev"]
+    apt_libs += ["libnotify-dev"]
     
     apt_libs_str = ""
     for apt_lib in apt_libs:

@@ -698,8 +698,8 @@ def get_prefix_cross_compiler_arm64():
 
 def get_gcc_version():
   gcc_path = "gcc"
-  if config.option("custom-sysroot") != "":
-    gcc_path = config.option("custom-sysroot") + "/usr/bin/gcc"
+  if config.option("sysroot") != "":
+    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
   gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
@@ -915,8 +915,8 @@ def qt_copy_icu(out):
     prefix = config.option("arm64-sysroot")
     postfixes = ["aarch64-linux-gnu"]
   else:
-    if config.option("custom-sysroot") != "":
-      prefix = config.option("custom-sysroot")
+    if config.option("sysroot") != "":
+      prefix = config.option("sysroot")
     else:
       prefix = "" # empty for '/lib' etc.
       

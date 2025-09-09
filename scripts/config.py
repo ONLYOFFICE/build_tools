@@ -82,19 +82,19 @@ def parse():
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
       
-  # custom-sysroot setup
-  if "linux" != host_platform and "custom-sysroot" in options:
-    options["custom-sysroot"] = ""
+  # sysroot setup
+  if "linux" != host_platform and "sysroot" in options:
+    options["sysroot"] = ""
 
-  if "linux" == host_platform and "custom-sysroot" in options:
-    if options["custom-sysroot"] == "0":
-      options["custom-sysroot"] = ""
-    elif options["custom-sysroot"] == "1":
+  if "linux" == host_platform and "sysroot" in options:
+    if options["sysroot"] == "0":
+      options["sysroot"] = ""
+    elif options["sysroot"] == "1":
       dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
       custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
-      options["custom-sysroot"] = custom_sysroot
+      options["sysroot"] = custom_sysroot
       if not os.path.isdir(custom_sysroot):
-        print("Custom sysroot is not found, downloading...")
+        print("Sysroot is not found, downloading...")
         sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
         base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
         os.mkdir(custom_sysroot)
@@ -130,7 +130,7 @@ def parse():
     options["sdkjs-plugin-server"] = "default"
 
   if not "arm64-toolchain-bin" in options:
-    if not "custom-sysroot" in options:
+    if not "sysroot" in options:
       options["arm64-toolchain-bin"] = "/usr/bin"
     else:
       options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
@@ -235,12 +235,12 @@ def is_mobile_platform():
   return False
 
 def get_custom_sysroot_bin():
-  return option("custom-sysroot") + "/usr/bin"
+  return option("sysroot") + "/usr/bin"
 
 # todo 32bit support?
 def get_custom_sysroot_lib():
   if base.is_os_64bit():
-    return option("custom-sysroot") + "/usr/lib/x86_64-linux-gnu"
+    return option("sysroot") + "/usr/lib/x86_64-linux-gnu"
 
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"
@@ -280,7 +280,7 @@ def is_v8_60():
   if check_option("platform", "linux_arm64"):
     return False
 
-  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android") and config.options("custom-sysroot") == "":
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android") and config.options("sysroot") == "":
     return True
 
   if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):

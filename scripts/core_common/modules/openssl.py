@@ -97,7 +97,7 @@ def make():
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden -stdlib=libc++")
       base.replaceInFile("./Makefile", "LDFLAGS=", "LDFLAGS=-stdlib=libc++")
-    elif config.option("custom-sysroot") == "":
+    elif config.option("sysroot") == "":
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
     else:
@@ -105,10 +105,10 @@ def make():
         ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
       base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
-      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
-      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("custom-sysroot"))
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
+      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
 
-    if config.option("custom-sysroot") == "":
+    if config.option("sysroot") == "":
       base.cmd("make", [])
       base.cmd("make", ["install"])
       base.cmd("make", ["clean"], True)

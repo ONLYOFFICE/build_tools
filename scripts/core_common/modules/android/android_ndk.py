@@ -71,13 +71,6 @@ else:
     "arch" : "darwin-x86_64"
   }
 
-def get_android_ndk_version():
-  #return "26.2.11394342"
-  return "21.1.6352462"
-
-def get_android_ndk_version_major():
-  return int(get_android_ndk_version().split(".")[0])
-
 def get_options_dict_as_array(opts):
   value = []
   for key in opts:

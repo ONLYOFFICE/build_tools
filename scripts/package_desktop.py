@@ -58,41 +58,43 @@ def make_windows():
     utils.delete_files("*.zip")
     utils.delete_files("data\\*.exe")
 
-  make_prepare()
   if not xp:
+    make_prepare()
     make_zip()
-    make_zip("commercial")
     make_inno()
-    make_inno("commercial")
     if branding.onlyoffice:
       make_inno("standalone")
       make_inno("update")
     make_advinst()
+
+    make_prepare("commercial")
+    make_zip("commercial")
+    make_inno("commercial")
     make_advinst("commercial")
   else:
+    make_prepare("xp")
     make_zip("xp")
     make_inno("xp")
 
   utils.set_cwd(common.workspace_dir)
   return
 
-def make_prepare():
+def make_prepare(edition = "opensource"):
   args = [
     "-Version", package_version,
-    "-Arch", arch
+    "-Arch", arch,
+    "-Target", edition
   ]
-  if xp:
-    args += ["-Target", "xp"]
   if common.sign:
     args += ["-Sign"]
 
-  utils.log_h2("desktop prepare")
+  utils.log_h2("desktop prepare " + edition)
   ret = utils.ps1("make.ps1", args, verbose=True)
-  utils.set_summary("desktop prepare", ret)
+  utils.set_summary("desktop prepare " + edition, ret)
   return
 
 def make_zip(edition = "opensource"):
-  if   edition == "commercial": zip_file = "%s-Commercial-%s-%s.zip"
+  if   edition == "commercial": zip_file = "%s-Enterprise-%s-%s.zip"
   elif edition == "xp":         zip_file = "%s-XP-%s-%s.zip"
   else:                         zip_file = "%s-%s-%s.zip"
   zip_file = zip_file % (package_name, package_version, arch)
@@ -115,7 +117,7 @@ def make_zip(edition = "opensource"):
   return
 
 def make_inno(edition = "opensource"):
-  if   edition == "commercial": inno_file = "%s-Commercial-%s-%s.exe"
+  if   edition == "commercial": inno_file = "%s-Enterprise-%s-%s.exe"
   elif edition == "standalone": inno_file = "%s-Standalone-%s-%s.exe"
   elif edition == "update":     inno_file = "%s-Update-%s-%s.exe"
   elif edition == "xp":         inno_file = "%s-XP-%s-%s.exe"
@@ -140,7 +142,7 @@ def make_inno(edition = "opensource"):
   return
 
 def make_advinst(edition = "opensource"):
-  if edition == "commercial": advinst_file = "%s-Commercial-%s-%s.msi"
+  if edition == "commercial": advinst_file = "%s-Enterprise-%s-%s.msi"
   else:                       advinst_file = "%s-%s-%s.msi"
   advinst_file = advinst_file % (package_name, package_version, arch)
   args = [
@@ -167,7 +169,7 @@ def make_advinst(edition = "opensource"):
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    suffix, lane, scheme, released_updates_dir
+    suffix, lane, scheme, source_dir, released_updates_dir
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
@@ -232,32 +234,34 @@ def make_macos():
   dmg = make_dmg()
   if dmg and sparkle_updates:
     make_sparkle_updates()
+  if common.platform != "darwin_x86_64_v8":
+    make_dmg("commercial")
 
   utils.set_cwd(common.workspace_dir)
   return
 
-def make_dmg():
-  utils.log_h2("desktop dmg build")
-  utils.log_h3(scheme)
+def make_dmg(target = "opensource"):
+  utils.log_h2("desktop dmg " + target + " build")
   utils.log_h3("build/" + package_name + ".app")
-  dmg = utils.sh(
-      "bundler exec fastlane " + lane + " skip_git_bump:true",
-      verbose=True
-  )
-  utils.set_summary("desktop dmg build", dmg)
+  args = ["bundler", "exec", "fastlane", lane, "skip_git_bump:true"]
+  if target == "commercial":
+    args += ["edition:Enterprise"]
+  dmg = utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("desktop dmg " + target + " build", dmg)
 
   if common.deploy and dmg:
-    utils.log_h2("desktop dmg deploy")
+    utils.log_h2("desktop dmg " + target + " deploy")
     ret = s3_upload(
       utils.glob_path("build/*.dmg"),
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
     utils.set_summary("desktop dmg deploy", ret)
 
-    utils.log_h2("desktop zip deploy")
+  if common.deploy and dmg and target != "commercial":
+    utils.log_h2("desktop zip " + target + " deploy")
     ret = s3_upload(
       ["build/%s-%s.zip" % (scheme, common.version)],
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
-    utils.set_summary("desktop zip deploy", ret)
+    utils.set_summary("desktop zip " + target + " deploy", ret)
   return dmg
 
 def make_sparkle_updates():

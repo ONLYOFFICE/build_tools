@@ -183,7 +183,7 @@ def make_online():
 
 def make_macos():
   global package_name, build_dir, branding_dir, updates_dir, changes_dir, \
-    suffix, lane, scheme, released_updates_dir
+    suffix, lane, scheme, source_dir, released_updates_dir
   package_name = branding.desktop_package_name
   build_dir = branding.desktop_build_dir
   branding_dir = branding.desktop_branding_dir
@@ -248,32 +248,34 @@ def make_macos():
   dmg = make_dmg()
   if dmg and sparkle_updates:
     make_sparkle_updates()
+  if common.platform != "darwin_x86_64_v8":
+    make_dmg("commercial")
 
   utils.set_cwd(common.workspace_dir)
   return
 
-def make_dmg():
-  utils.log_h2("desktop dmg build")
-  utils.log_h3(scheme)
+def make_dmg(target = "opensource"):
+  utils.log_h2("desktop dmg " + target + " build")
   utils.log_h3("build/" + package_name + ".app")
-  dmg = utils.sh(
-      "bundler exec fastlane " + lane + " skip_git_bump:true",
-      verbose=True
-  )
-  utils.set_summary("desktop dmg build", dmg)
+  args = ["bundler", "exec", "fastlane", lane, "skip_git_bump:true"]
+  if target == "commercial":
+    args += ["edition:Enterprise"]
+  dmg = utils.sh(" ".join(args), verbose=True)
+  utils.set_summary("desktop dmg " + target + " build", dmg)
 
   if common.deploy and dmg:
-    utils.log_h2("desktop dmg deploy")
+    utils.log_h2("desktop dmg " + target + " deploy")
     ret = s3_upload(
       utils.glob_path("build/*.dmg"),
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
     utils.set_summary("desktop dmg deploy", ret)
 
-    utils.log_h2("desktop zip deploy")
+  if common.deploy and dmg and target != "commercial":
+    utils.log_h2("desktop zip " + target + " deploy")
     ret = s3_upload(
       ["build/%s-%s.zip" % (scheme, common.version)],
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
-    utils.set_summary("desktop zip deploy", ret)
+    utils.set_summary("desktop zip " + target + " deploy", ret)
   return dmg
 
 def make_sparkle_updates():

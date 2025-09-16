@@ -16,6 +16,7 @@ import json
 
 __file__script__path__ = os.path.dirname( os.path.realpath(__file__))
 icu_ver = "74"
+icu_ver_old = "58"  # for win_xp support
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -1943,8 +1944,12 @@ def deploy_icu(core_dir, dst_dir, platform):
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
 
   if (0 == platform.find("win")):
-    copy_file(src_dir + "/icudt" + icu_ver + ".dll", dst_dir + "/icudt" + icu_ver + ".dll")
-    copy_file(src_dir + "/icuuc" + icu_ver + ".dll", dst_dir + "/icuuc" + icu_ver + ".dll")
+    icu_ver_win = icu_ver
+    if platform.endswith("xp"):
+      icu_ver_win = icu_ver_old
+      src_dir += "/xp"
+    copy_file(src_dir + "/icudt" + icu_ver_win + ".dll", dst_dir + "/icudt" + icu_ver_win + ".dll")
+    copy_file(src_dir + "/icuuc" + icu_ver_win + ".dll", dst_dir + "/icuuc" + icu_ver_win + ".dll")
 
   if (0 == platform.find("linux")):
     copy_file(src_dir + "/libicudata.so." + icu_ver, dst_dir + "/libicudata.so." + icu_ver)

@@ -58,7 +58,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
-    base.deploy_icu(core_dir, root_dir, platform)
+    base.deploy_icu(core_dir, root_dir, native_platform)
 
     # doctrenderer
     if isWindowsXP:

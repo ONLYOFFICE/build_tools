@@ -1941,11 +1941,15 @@ def deploy_icu(core_dir, dst_dir, platform):
     copy_file(src_dir + "/icudt" + icu_ver + "l.dat", dst_dir + "/icudt" + icu_ver + "l.dat")
     return
 
+  isXp = False
+  if platform.endswith("xp"):
+    isXp = True
+    platform = platform[0:-3]
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
 
   if (0 == platform.find("win")):
     icu_ver_win = icu_ver
-    if platform.endswith("xp"):
+    if isXp:
       icu_ver_win = icu_ver_old
       src_dir += "/xp"
     copy_file(src_dir + "/icudt" + icu_ver_win + ".dll", dst_dir + "/icudt" + icu_ver_win + ".dll")

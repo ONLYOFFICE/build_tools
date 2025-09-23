@@ -230,7 +230,11 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
-    if (True):
+    isUseAgent = True
+    if isWindowsXP:
+      isUseAgent = False
+
+    if (isUseAgent):
       if (False):
         agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
         base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)

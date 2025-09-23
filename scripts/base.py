@@ -909,25 +909,21 @@ def _check_icu_common(dir, out):
 def qt_copy_icu(out):
   tests = [get_env("QT_DEPLOY") + "/../lib"]
   prefix = ""
-  postfixes = []
-  
-  if platform == "linux_arm64" and config.option("arm64-sysroot") != "":
-    prefix = config.option("arm64-sysroot")
-    postfixes = ["aarch64-linux-gnu"]
+  postfixes = [""]
+    
+  # TODO add for linux arm desktop build
+  if config.option("sysroot") != "":
+    prefix = config.option("sysroot")
   else:
-    if config.option("sysroot") != "":
-      prefix = config.option("sysroot")
-    else:
-      prefix = "" # empty for '/lib' etc.
-      
-    postfixes = ["x86_64-linux-gnu"]
-    postfixes = ["i386-linux-gnu"]
+    prefix = ""
+    postfixes += ["/x86_64-linux-gnu"]
+    postfixes += ["/i386-linux-gnu"]
       
   for postfix in postfixes:
-    tests += [prefix + "/lib/" + postfix]
-    tests += [prefix + "/lib64/" + postfix]
-    tests += [prefix + "/usr/lib/" + postfix]
-    tests += [prefix + "/usr/lib64/" + postfix]
+    tests += [prefix + "/lib" + postfix]
+    tests += [prefix + "/lib64" + postfix]
+    tests += [prefix + "/usr/lib" + postfix]
+    tests += [prefix + "/usr/lib64" + postfix]
 
   for test in tests:
     if (_check_icu_common(test, out)):

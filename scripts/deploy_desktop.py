@@ -235,8 +235,8 @@ def make():
       isUseAgent = False
 
     if (isUseAgent):
-      if (False):
-        agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
+      agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
+      if (False):        
         base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)
         base.cmd_in_dir(agent_plugin_dir, "npm", ["run", "build"], True)
         base.copy_dir(agent_plugin_dir + "/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")

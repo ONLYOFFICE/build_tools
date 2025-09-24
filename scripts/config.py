@@ -272,7 +272,7 @@ def parse_defaults():
   return
 
 def is_cef_107():
-  if ("linux" == base.host_platform()) and (5004 < base.get_gcc_version()) and not check_option("platform", "android"):
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
     return True
   return False
 
@@ -280,7 +280,7 @@ def is_v8_60():
   if check_option("platform", "linux_arm64"):
     return False
 
-  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android") and config.options("sysroot") == "":
+  if ("linux" == base.host_platform()) and (5004 > base.get_gcc_version()) and not check_option("platform", "android"):
     return True
 
   if ("windows" == base.host_platform()) and ("2015" == option("vs-version")):

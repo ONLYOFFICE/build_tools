@@ -56,10 +56,12 @@ def parse():
   if ("mac" == host_platform) and check_option("platform", "mac_arm64") and not base.is_os_arm():
     if not check_option("platform", "mac_64"):
       options["platform"] = "mac_64 " + options["platform"]
-      
-  if ("windows" == host_platform) and check_option("platform", "win_arm64") and not base.is_os_arm():
-    if not check_option("platform", "win_64"):
-      options["platform"] = "win_64 " + options["platform"]
+
+  if (False):
+    # use qemu on deploy for emulation 
+    if ("windows" == host_platform) and check_option("platform", "win_arm64") and not base.is_os_arm():
+      if not check_option("platform", "win_64"):
+        options["platform"] = "win_64 " + options["platform"]
 
   if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
     if not check_option("platform", "linux_64"):
@@ -81,6 +83,27 @@ def parse():
 
   if ("windows" == host_platform) and ("2019" == option("vs-version")):
       extend_option("config", "vs2019")
+      
+  # sysroot setup
+  if "linux" != host_platform and "sysroot" in options:
+    options["sysroot"] = ""
+
+  if "linux" == host_platform and "sysroot" in options:
+    if options["sysroot"] == "0":
+      options["sysroot"] = ""
+    elif options["sysroot"] == "1":
+      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
+      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
+      options["sysroot"] = custom_sysroot
+      if not os.path.isdir(custom_sysroot):
+        print("Sysroot is not found, downloading...")
+        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
+        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
+        os.mkdir(custom_sysroot)
+        print("Unpacking...")
+        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
+        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
+          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
 
   if is_cef_107():
     extend_option("config", "cef_version_107")
@@ -108,29 +131,8 @@ def parse():
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"
 
-  # custom-sysroot setup
-  if "linux" != host_platform and "custom-sysroot" in options:
-    options["custom-sysroot"] = ""
-
-  if "linux" == host_platform and "custom-sysroot" in options:
-    if options["custom-sysroot"] == "0":
-      options["custom-sysroot"] = ""
-    elif options["custom-sysroot"] == "1":
-      dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
-      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
-      options["custom-sysroot"] = custom_sysroot
-      if not os.path.isdir(custom_sysroot):
-        print("Custom sysroot is not found, downloading...")
-        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
-        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
-        os.mkdir(custom_sysroot)
-        print("Unpacking...")
-        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
-        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
-          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
-
   if not "arm64-toolchain-bin" in options:
-    if not "custom-sysroot" in options:
+    if not "sysroot" in options:
       options["arm64-toolchain-bin"] = "/usr/bin"
     else:
       options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
@@ -235,12 +237,12 @@ def is_mobile_platform():
   return False
 
 def get_custom_sysroot_bin():
-  return option("custom-sysroot") + "/usr/bin"
+  return option("sysroot") + "/usr/bin"
 
 # todo 32bit support?
 def get_custom_sysroot_lib():
   if base.is_os_64bit():
-    return option("custom-sysroot") + "/usr/lib/x86_64-linux-gnu"
+    return option("sysroot") + "/usr/lib/x86_64-linux-gnu"
 
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"

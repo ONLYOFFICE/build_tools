@@ -60,7 +60,7 @@ def make_args(args, platform, is_64=True, is_debug=False):
   
   linux_clang = False
   if platform == "linux":
-    if "" != config.option("custom-sysroot"):
+    if "" != config.option("sysroot"):
       args_copy.append("use_sysroot=false")
       args_copy.append("is_clang=false")
     else:
@@ -207,13 +207,13 @@ def make():
 
   if config.check_option("platform", "linux_64"):
     ld_library_path_copy = ''
-    if config.option("custom-sysroot") != "":
+    if config.option("sysroot") != "":
       if 'LD_LIBRARY_PATH' in os.environ:
         ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
 
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
-      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("custom-sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("custom-sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("custom-sysroot") + "\"]"
+      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
       base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
 
       src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""

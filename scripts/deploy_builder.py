@@ -58,7 +58,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
-    base.deploy_icu(core_dir, root_dir, platform)
+    base.deploy_icu(core_dir, root_dir, native_platform)
 
     # doctrenderer
     if isWindowsXP:
@@ -126,11 +126,6 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
-
-    if native_platform == "win_arm64":
-      base.delete_dir(root_dir + "/sdkjs")
-      base.copy_dir(root_dir_win64 + "/sdkjs", root_dir + "/sdkjs")
-      return
 
     # delete unnecessary builder files
     def delete_files(files):

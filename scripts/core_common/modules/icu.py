@@ -133,7 +133,7 @@ def make():
       if "1" == config.option("use-clang"):
         command_configure = "CXXFLAGS=-stdlib=libc++ " + command_configure
         command_compile_addon = "-stdlib=libc++"
-      if "" == config.option("custom-sysroot"):
+      if "" == config.option("sysroot"):
         base.cmd(command_configure, ["Linux", "--prefix=" + base_dir + "/icu/cross_build_install"])
         base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) " + command_compile_addon)
       else:
@@ -143,11 +143,11 @@ def make():
         base.cmd_exe("./../source/configure", ["--prefix=" + base_dir + "/icu/cross_build_install",
                                            "CC=" + config.get_custom_sysroot_bin() + "/gcc", "CXX=" + config.get_custom_sysroot_bin() + "/g++",
                                            "AR=" + config.get_custom_sysroot_bin() + "/ar", "RANLIB=" + config.get_custom_sysroot_bin() + "/ranlib",
-                                           "CFLAGS=--sysroot=" + config.option("custom-sysroot"),
-                                           "CXXFLAGS=--sysroot=" + config.option("custom-sysroot") + " " + command_compile_addon,
-                                           "LDFLAGS=--sysroot=" + config.option("custom-sysroot")])
+                                           "CFLAGS=--sysroot=" + config.option("sysroot"),
+                                           "CXXFLAGS=--sysroot=" + config.option("sysroot") + " " + command_compile_addon,
+                                           "LDFLAGS=--sysroot=" + config.option("sysroot")])
 
-      if "" == config.option("custom-sysroot"):
+      if "" == config.option("sysroot"):
         base.cmd("make", ["-j4"])
         base.cmd("make", ["install"], True)
       else:

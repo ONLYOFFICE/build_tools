@@ -71,7 +71,10 @@ if not base.is_file("./node_js_setup_14.x"):
 
 if not base.is_dir("./qt_build"):
   print("install qt...")
-  install_qt_prebuild()
+  if base.get_env("DO_NOT_USE_PREBUILD_QT") == "1":
+    install_qt()
+  else:
+    install_qt_prebuild()
 
 branch = get_branch_name("../..")
 

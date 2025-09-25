@@ -698,9 +698,12 @@ def get_prefix_cross_compiler_arm64():
   return ""
 
 def get_gcc_version():
+  gcc_path = "gcc"
+  if config.option("sysroot") != "":
+    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
-  gcc_version_str = run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
   if (gcc_version_str != ""):
     try:
       gcc_ver = gcc_version_str.split(".")
@@ -905,9 +908,23 @@ def _check_icu_common(dir, out):
   return isExist
 
 def qt_copy_icu(out):
-  tests = [get_env("QT_DEPLOY") + "/../lib", "/lib", "/lib/x86_64-linux-gnu", "/lib64", "/lib64/x86_64-linux-gnu"]
-  tests += ["/usr/lib", "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib64/x86_64-linux-gnu"]
-  tests += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
+  tests = [get_env("QT_DEPLOY") + "/../lib"]
+  prefix = ""
+  postfixes = [""]
+    
+  # TODO add for linux arm desktop build
+  if config.option("sysroot") != "":
+    prefix = config.option("sysroot")
+  else:
+    prefix = ""
+    postfixes += ["/x86_64-linux-gnu"]
+    postfixes += ["/i386-linux-gnu"]
+      
+  for postfix in postfixes:
+    tests += [prefix + "/lib" + postfix]
+    tests += [prefix + "/lib64" + postfix]
+    tests += [prefix + "/usr/lib" + postfix]
+    tests += [prefix + "/usr/lib64" + postfix]
 
   for test in tests:
     if (_check_icu_common(test, out)):
@@ -1924,9 +1941,6 @@ def create_x2t_js_cache(dir, product, platform):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
     return
 
-  if platform == "win_arm64": # copying sdkjs later
-    return
-
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
 
@@ -1941,11 +1955,15 @@ def deploy_icu(core_dir, dst_dir, platform):
     copy_file(src_dir + "/icudt" + icu_ver + "l.dat", dst_dir + "/icudt" + icu_ver + "l.dat")
     return
 
+  isXp = False
+  if platform.endswith("xp"):
+    isXp = True
+    platform = platform[0:-3]
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
 
   if (0 == platform.find("win")):
     icu_ver_win = icu_ver
-    if platform.endswith("xp"):
+    if isXp:
       icu_ver_win = icu_ver_old
       src_dir += "/xp"
     copy_file(src_dir + "/icudt" + icu_ver_win + ".dll", dst_dir + "/icudt" + icu_ver_win + ".dll")

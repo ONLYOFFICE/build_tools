@@ -80,7 +80,7 @@ def make():
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir, "ios")
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
       deploy_fonts(git_dir, root_dir)
       base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 

@@ -112,7 +112,7 @@ def make():
 
     # correct mac frameworks
     if (0 == platform.find("mac")):
-      base.generate_plist(converter_dir, "mac", max_depth=1)
+      base.for_each_framework(converter_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
 
     # js
     js_dir = root_dir

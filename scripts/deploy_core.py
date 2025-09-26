@@ -69,7 +69,7 @@ def make():
 
     # correct mac frameworks
     if (0 == platform.find("mac")):
-      base.generate_plist(archive_dir, "mac", max_depth=1)
+      base.for_each_framework(archive_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
       base.mac_correct_rpath_x2t(archive_dir)
 
     # js cache

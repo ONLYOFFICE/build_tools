@@ -911,7 +911,7 @@ def qt_copy_icu(out):
   tests = [get_env("QT_DEPLOY") + "/../lib"]
   prefix = ""
   postfixes = [""]
-    
+
   # TODO add for linux arm desktop build
   if config.option("sysroot") != "":
     prefix = config.option("sysroot")
@@ -919,7 +919,7 @@ def qt_copy_icu(out):
     prefix = ""
     postfixes += ["/x86_64-linux-gnu"]
     postfixes += ["/i386-linux-gnu"]
-      
+
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]
     tests += [prefix + "/lib64" + postfix]
@@ -1013,7 +1013,7 @@ def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries 
   file.close()
   return
 
-def generate_plist_framework_folder(file, platform):
+def generate_plist(file, platform):
   bundle_id_url = "com.onlyoffice."
   if ("" != get_env("PUBLISHER_BUNDLE_ID")):
     bundle_id_url = get_env("PUBLISHER_BUNDLE_ID")
@@ -1064,7 +1064,29 @@ def generate_plist_framework_folder(file, platform):
   fileInfo.close()
   return
 
-def generate_plist(path, platform, max_depth=512):
+def generate_xcprivacy(file, platform):
+  content = \
+"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+\t<key>NSPrivacyTracking</key>
+\t<false/>
+\t<key>NSPrivacyCollectedDataTypes</key>
+\t<array/>
+\t<key>NSPrivacyTrackingDomains</key>
+\t<array/>
+\t<key>NSPrivacyAccessedAPITypes</key>
+\t<array/>
+</dict>
+</plist>"""
+  fileDst = os.path.join(file, "PrivacyInfo.xcprivacy")
+  fileInfo = codecs.open(fileDst, "w", "utf-8")
+  fileInfo.write(content)
+  fileInfo.close()
+  return
+
+def for_each_framework(path, platform, callbacks, max_depth=512):
   if not config.check_option("config", "bundle_dylibs"):
     return
   if max_depth == 0:
@@ -1076,9 +1098,10 @@ def generate_plist(path, platform, max_depth=512):
   for file in glob.glob(src_folder):
     if (is_dir(file)):
       if file.endswith(".framework"):
-        generate_plist_framework_folder(file, platform)
+        for callback in callbacks:
+          callback(file, platform)
       else:
-        generate_plist(file, platform, max_depth - 1)
+        for_each_framework(file, platform, callbacks, max_depth - 1)
   return
 
 def correct_bundle_identifier(bundle_identifier):

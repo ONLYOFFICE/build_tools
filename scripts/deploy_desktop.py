@@ -240,7 +240,7 @@ def make():
 
     if (isUseAgent):
       agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
-      if (False):        
+      if (False):
         base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)
         base.cmd_in_dir(agent_plugin_dir, "npm", ["run", "build"], True)
         base.copy_dir(agent_plugin_dir + "/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
@@ -296,7 +296,7 @@ def make():
 
     if (0 == platform.find("mac")):
       # gen plists with max_depth 2 because frameworks are only located in root_dir and converter subdirectory
-      base.generate_plist(root_dir, "mac", max_depth=2)
+      base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=2)
       base.mac_correct_rpath_desktop(root_dir)
 
     if is_host_not_arm:

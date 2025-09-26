@@ -698,9 +698,12 @@ def get_prefix_cross_compiler_arm64():
   return ""
 
 def get_gcc_version():
+  gcc_path = "gcc"
+  if config.option("sysroot") != "":
+    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
-  gcc_version_str = run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
   if (gcc_version_str != ""):
     try:
       gcc_ver = gcc_version_str.split(".")
@@ -905,9 +908,23 @@ def _check_icu_common(dir, out):
   return isExist
 
 def qt_copy_icu(out):
-  tests = [get_env("QT_DEPLOY") + "/../lib", "/lib", "/lib/x86_64-linux-gnu", "/lib64", "/lib64/x86_64-linux-gnu"]
-  tests += ["/usr/lib", "/usr/lib/x86_64-linux-gnu", "/usr/lib64", "/usr/lib64/x86_64-linux-gnu"]
-  tests += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
+  tests = [get_env("QT_DEPLOY") + "/../lib"]
+  prefix = ""
+  postfixes = [""]
+    
+  # TODO add for linux arm desktop build
+  if config.option("sysroot") != "":
+    prefix = config.option("sysroot")
+  else:
+    prefix = ""
+    postfixes += ["/x86_64-linux-gnu"]
+    postfixes += ["/i386-linux-gnu"]
+      
+  for postfix in postfixes:
+    tests += [prefix + "/lib" + postfix]
+    tests += [prefix + "/lib64" + postfix]
+    tests += [prefix + "/usr/lib" + postfix]
+    tests += [prefix + "/usr/lib64" + postfix]
 
   for test in tests:
     if (_check_icu_common(test, out)):

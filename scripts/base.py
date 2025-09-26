@@ -1349,25 +1349,24 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DocxRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("IWorkFile", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("HWPFile", ["UnicodeConverter", "kernel", "graphics"])
-  cmd("chmod", ["-v", "+x", "./x2t"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
+
+  def correct_core_executable(name, libs):
+    cmd("chmod", ["-v", "+x", name])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", name], True)
+    mac_correct_rpath_binary(name, mac_icu_libs + libs)
+    return
+
+  correct_core_executable("x2t", ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
   if is_file("./allfontsgen"):
-    cmd("chmod", ["-v", "+x", "./allfontsgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
-    mac_correct_rpath_binary("./allfontsgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics"])
+    correct_core_executable("allfontsgen", ["UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
-    cmd("chmod", ["-v", "+x", "./allthemesgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
-    mac_correct_rpath_binary("./allthemesgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
+    correct_core_executable("allthemesgen", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
   if is_file("./pluginsmanager"):
-    cmd("chmod", ["-v", "+x", "./pluginsmanager"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
-    mac_correct_rpath_binary("./pluginsmanager", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
+    correct_core_executable("pluginsmanager", ["UnicodeConverter", "kernel", "kernel_network"])
   if is_file("./vboxtester"):
-    cmd("chmod", ["-v", "+x", "./vboxtester"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./vboxtester"], True)
-    mac_correct_rpath_binary("./vboxtester", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
+    correct_core_executable("vboxtester", ["UnicodeConverter", "kernel", "kernel_network"])
+  if is_file("./x2ttester"):
+    correct_core_executable("x2ttester", ["UnicodeConverter", "kernel", "graphics"])
   os.chdir(cur_dir)
   return
 

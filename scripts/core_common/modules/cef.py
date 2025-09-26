@@ -5,6 +5,13 @@ sys.path.append('../..')
 import config
 import base
 import os
+import glob
+
+def clear_module():
+  for child in glob.glob("./*"):
+    if base.is_dir(child):
+      base.delete_dir(child)
+  return
 
 def make():
   print("[fetch & build]: cef")
@@ -13,6 +20,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
+  base.check_module_version("1", clear_module)
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "win_arm64"]
 
   for platform in platforms:

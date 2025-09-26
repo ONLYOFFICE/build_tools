@@ -108,13 +108,13 @@ def make():
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir, "ios")
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
 
     if (0 == platform.find("linux")):
       base.linux_correct_rpath_docbuilder(root_dir)
 
     if (0 == platform.find("mac")):
-      base.generate_plist(root_dir, "mac", max_depth=1)
+      base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 

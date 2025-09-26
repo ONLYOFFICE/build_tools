@@ -117,10 +117,6 @@ def make():
     else:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/" + build_dir_name + "/*", root_dir)
 
-    if (0 == platform.find("mac")):
-      framework_path = root_dir + "/Chromium Embedded Framework.framework"
-      base.copy_file(framework_path + "/Resources/Info.plist", framework_path + "/Info.plist")
-
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
       isUseQt = False

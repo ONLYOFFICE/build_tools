@@ -125,11 +125,10 @@ def make():
       base.move_file("Chromium Embedded Framework", "Versions/A/Chromium Embedded Framework")
       base.move_dir("Resources", "Versions/A/Resources")
       base.move_dir("Libraries", "Versions/A/Libraries")
-      base.cmd("ln", ["-sf", "Versions/A", "Versions/Current"])
-      base.cmd("ln", ["-sf", "Versions/A/Chromium Embedded Framework", "Chromium Embedded Framework"])
-      base.cmd("ln", ["-sf", "Versions/A/Resources", "Resources"])
-      base.cmd("ln", ["-sf", "Versions/A/Libraries", "Libraries"])
-      base.delete_dir("./Chromium Embedded Framework.framework")
+      base.cmd("ln", ["-s", "Versions/A/Chromium Embedded Framework", "Chromium Embedded Framework"])
+      base.cmd("ln", ["-s", "Versions/A/Resources", "Resources"])
+      base.cmd("ln", ["-s", "Versions/A/Libraries", "Libraries"])
+      base.cmd("ln", ["-s", "A", "Versions/Current"])
       os.chdir(dir_base_old);
 
     isUseQt = True

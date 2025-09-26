@@ -20,7 +20,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  base.check_module_version("1", clear_module)
+  base.check_module_version("2", clear_module)
   platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "win_arm64"]
 
   for platform in platforms:
@@ -85,20 +85,6 @@ def make():
     if (0 == platform.find("mac")):
       base.cmd("mv", ["Chromium Embedded Framework.framework", build_dir_name + "/Chromium Embedded Framework.framework"])
       base.delete_dir("./Chromium Embedded Framework.framework")
-      # pack
-      dir_base_old = os.getcwd()
-      os.chdir(build_dir_name + "/Chromium Embedded Framework.framework")
-      base.create_dir("Versions")
-      base.create_dir("Versions/A")
-      base.move_file("Chromium Embedded Framework", "Versions/A/Chromium Embedded Framework")
-      base.move_dir("Resources", "Versions/A/Resources")
-      base.move_dir("Libraries", "Versions/A/Libraries")
-      base.cmd("ln", ["-sf", "Versions/A", "Versions/Current"])
-      base.cmd("ln", ["-sf", "Versions/A/Chromium Embedded Framework", "Chromium Embedded Framework"])
-      base.cmd("ln", ["-sf", "Versions/A/Resources", "Resources"])
-      base.cmd("ln", ["-sf", "Versions/A/Libraries", "Libraries"])
-      base.delete_dir("./Chromium Embedded Framework.framework")
-      os.chdir(dir_base_old);
     else:
       base.copy_files("cef_binary/Release/*", build_dir_name + "/")
       base.copy_files("cef_binary/Resources/*", build_dir_name + "/")

@@ -117,6 +117,21 @@ def make():
     else:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/" + build_dir_name + "/*", root_dir)
 
+    if (0 == platform.find("mac")):
+      dir_base_old = os.getcwd()
+      os.chdir(root_dir + "/Chromium Embedded Framework.framework")
+      base.create_dir("Versions")
+      base.create_dir("Versions/A")
+      base.move_file("Chromium Embedded Framework", "Versions/A/Chromium Embedded Framework")
+      base.move_dir("Resources", "Versions/A/Resources")
+      base.move_dir("Libraries", "Versions/A/Libraries")
+      base.cmd("ln", ["-sf", "Versions/A", "Versions/Current"])
+      base.cmd("ln", ["-sf", "Versions/A/Chromium Embedded Framework", "Chromium Embedded Framework"])
+      base.cmd("ln", ["-sf", "Versions/A/Resources", "Resources"])
+      base.cmd("ln", ["-sf", "Versions/A/Libraries", "Libraries"])
+      base.delete_dir("./Chromium Embedded Framework.framework")
+      os.chdir(dir_base_old);
+
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
       isUseQt = False

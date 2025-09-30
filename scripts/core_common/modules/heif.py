@@ -38,13 +38,13 @@ def setup_custom_sysroot_env() -> str:
   env_vars += ['CFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
   env_vars += ['CXXFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
   env_vars += ['LDFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
-  
+
   env_str = ""
   for env_var in env_vars:
     env_str += env_var + " "
-    
+
   return env_str
-  
+
 def get_vs_version():
   vs_version = "14 2015"
   if config.option("vs-version") == "2019":
@@ -124,13 +124,13 @@ def build_with_cmake(platform, cmake_args, build_type):
       cmake_args_ext += get_cmake_args_android("x86", "16")
     elif platform == "android_x86_64":
       cmake_args_ext += get_cmake_args_android("x86_64", "21")
-      
+
   # env setup for custom sysroot
   env_str = setup_custom_sysroot_env() if config.option("sysroot") != "" else ""
 
   # run cmake
   base.cmd(env_str + "cmake", cmake_args + cmake_args_ext)
-      
+
   # build
   if "Unix Makefiles" in cmake_args_ext:
     base.cmd(env_str + "make", ["-j4"])
@@ -213,6 +213,7 @@ def make_x265(base_dir, build_type):
     "-DENABLE_CLI=OFF",                 # do not build standalone CLI app
     "-DENABLE_SHARED=OFF",              # do not build shared libs
     "-DENABLE_ASSEMBLY=OFF",            # disable assembly optimizations
+    "-DENABLE_LIBNUMA=OFF",             # disable libnuma usage (affects Linux only)
   ]
 
   # lib build function

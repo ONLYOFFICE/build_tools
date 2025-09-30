@@ -39,6 +39,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "OFDFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "Fb2File")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "EpubFile")
@@ -125,7 +126,14 @@ def make():
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 
-    base.create_x2t_js_cache(root_dir, "builder")
+    base.create_x2t_js_cache(root_dir, "builder", platform)
+
+    base.create_dir(root_dir + "/fonts")
+    base.copy_dir(git_dir  + "/core-fonts/asana",      root_dir + "/fonts/asana")
+    base.copy_dir(git_dir  + "/core-fonts/caladea",    root_dir + "/fonts/caladea")
+    base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
+    base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
+    base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
   
     # delete unnecessary builder files
     def delete_files(files):
@@ -138,6 +146,11 @@ def make():
     if 0 != platform.find("mac"):
       delete_files(base.find_files(root_dir, "sdk-all.js"))
       delete_files(base.find_files(root_dir, "sdk-all-min.js"))
+    base.delete_dir(root_dir + "/sdkjs/slide/themes")
+    base.delete_dir(root_dir + "/sdkjs/cell/css")
+    base.delete_file(root_dir + "/sdkjs/pdf/src/engine/viewer.js")
+    base.delete_file(root_dir + "/sdkjs/common/spell/spell/spell.js.mem")
+    base.delete_dir(root_dir + "/sdkjs/common/Images")
 
   return
 

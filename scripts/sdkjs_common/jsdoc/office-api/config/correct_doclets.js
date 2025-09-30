@@ -82,6 +82,11 @@ exports.handlers = {
                 doclet.longname = cleanName(doclet.longname);
                 doclet.name     = cleanName(doclet.name);
 
+                // skip inherited methods if ovveriden in child class
+                if (doclet.inherited && filteredDoclets.find((addedDoclet) => addedDoclet['name'] == doclet['name'] && addedDoclet['memberof'] == doclet['memberof'])) {
+                    continue;
+                }
+
                 const filteredDoclet = {
                     comment:        doclet.comment,
                     description:    doclet.description,

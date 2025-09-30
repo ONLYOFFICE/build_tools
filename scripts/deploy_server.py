@@ -77,6 +77,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "OFDFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, converter_dir, "Fb2File")
@@ -119,7 +120,7 @@ def make():
               + glob.glob(js_dir + "/web-apps/apps/*/mobile/dist/js/*.js.map"):
       base.delete_file(file)
 
-    base.create_x2t_js_cache(converter_dir, "server")
+    base.create_x2t_js_cache(converter_dir, "server", platform)
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
@@ -184,6 +185,7 @@ def make():
     base.copy_file(license_file1, build_server_dir)
     base.copy_file(license_file2, build_server_dir)
     base.copy_dir(license_dir, license)
+    base.copy_dir(server_dir + '/dictionaries', build_server_dir + '/dictionaries')
 
     #branding
     welcome_files = branding_dir + '/welcome'

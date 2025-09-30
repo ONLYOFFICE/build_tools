@@ -8,7 +8,7 @@ import run_server
 import config
 import base
 
-git_dir = sys.argv[1];
+git_dir = sys.argv[1]
 
 base.print_info('argv :'+' '.join(sys.argv))
 base.cmd_in_dir(git_dir + '/build_tools/', 'python3', ['configure.py', '--develop', '1'] + sys.argv[2:])
@@ -18,7 +18,7 @@ config.parse_defaults()
 
 if base.is_exist(git_dir + "/server/FileConverter/bin/fonts.log"):
   base.print_info('remove font cache to regenerate fonts in external sdkjs volume')
-  base.delete_file(git_dir + "/server/FileConverter/bin/fonts.log");
+  base.delete_file(git_dir + "/server/FileConverter/bin/fonts.log")
 
 # external server volume
 if base.is_exist(sys.argv[1] + '/server/DocService/package.json'):
@@ -28,7 +28,7 @@ if base.is_exist(sys.argv[1] + '/server/DocService/package.json'):
   base.replaceInFileRE("/etc/supervisor/conf.d/ds-converter.conf", "command=.*", "command=node " + git_dir + "/server/FileConverter/sources/convertermaster.js")
   base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-converter.conf", "command=.*", "command=node " + git_dir + "/server/FileConverter/sources/convertermaster.js")
   base.print_info('run_server.run_docker_server')
-  run_server.run_docker_server();
+  run_server.run_docker_server()
 else:
   #Fix theme generation for external sdkjs volume
   if base.is_exist(git_dir + "/server/FileConverter/bin/DoctRenderer.config"):

@@ -17,9 +17,11 @@ import websocket_all
 import v8
 import html2
 import iwork
+import md
 import hunspell
 import glew
 import harfbuzz
+import oo_brotli
 import hyphen
 import googletest
 import libvlc
@@ -44,11 +46,13 @@ def make():
   v8.make()
   html2.make()
   iwork.make(False)
+  md.make()
   hunspell.make(False)
   harfbuzz.make()
   glew.make()
   hyphen.make()
   googletest.make()
+  oo_brotli.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()

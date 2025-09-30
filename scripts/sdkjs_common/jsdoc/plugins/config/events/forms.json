@@ -1,0 +1,16 @@
+{
+  "source": {
+    "include": ["../../../../../sdkjs-forms/plugin-events.js"]
+  },
+  "plugins": ["../correct_doclets.js"],
+  "opts": {
+    "destination": "./out",
+    "recurse": true,
+    "encoding": "utf8"
+  },
+  "templates": {
+    "json": {
+      "pretty": true
+    }
+  }
+}

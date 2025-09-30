@@ -8,8 +8,8 @@ necessary for the compilation process, all the dependencies required for the
  correct work, as well as to get the latest version of
 **ONLYOFFICE products** source code and build all their components.
 
-**Important!**  We can only guarantee the correct work of the products built from
-the `master` branch.
+**Important!**  We can only guarantee the correct work of the products built
+from the `master` branch.
 
 ## How to use - Linux
 

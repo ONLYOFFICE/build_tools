@@ -30,23 +30,6 @@ if utils.is_macos():
 builder_product_name = "Document Builder"
 
 if utils.is_linux():
-  builder_make_targets = [
-    {
-      "make": "tar",
-      "src": "tar/*.tar*",
-      "dst": "builder/linux/generic/"
-    },
-    {
-      "make": "deb",
-      "src": "deb/*.deb",
-      "dst": "builder/linux/debian/"
-    },
-    {
-      "make": "rpm",
-      "src": "rpm/build/RPMS/*/*.rpm",
-      "dst": "builder/linux/rhel/"
-    }
-  ]
   desktop_make_targets = [
     {
       "make": "tar",

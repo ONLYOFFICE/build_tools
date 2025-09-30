@@ -38,7 +38,8 @@ def make():
   if(base.is_exist(custom_public_key)):
       base.copy_file(custom_public_key, server_dir + '/Common/sources')
 
-  pkg_target = "node16"
+  #node22 packaging has issue https://github.com/yao-pkg/pkg/issues/87
+  pkg_target = "node20"
 
   if ("linux" == base.host_platform()):
     pkg_target += "-linux"
@@ -64,10 +65,9 @@ def build_server_with_addons():
   for addon in addons:
     if (addon):
       addon_dir = base.get_script_dir() + "/../../" + addon
-      base.cmd_in_dir(addon_dir, "npm", ["ci"])
-      base.cmd_in_dir(addon_dir, "npm", ["run", "build"])
+      if (base.is_exist(addon_dir)):
+        base.cmd_in_dir(addon_dir, "npm", ["ci"])
+        base.cmd_in_dir(addon_dir, "npm", ["run", "build"])
 
 def build_server_develop():
-  server_dir = base.get_script_dir() + "/../../server"
-  base.cmd_in_dir(server_dir, "npm", ["ci"])
-  base.cmd_in_dir(server_dir, "grunt", ["develop", "-v"] + base.server_addons_param())
+  build_server_with_addons()

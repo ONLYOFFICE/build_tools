@@ -1,8 +1,8 @@
 {
   "source": {
-    "include": ["../../../../sdkjs/word/apiBuilder.js", "../../../../sdkjs/slide/apiBuilder.js"]
+    "include": ["../../../../../sdkjs/word/api_plugins.js", "../../../../../sdkjs-forms/apiPlugins.js"]
   },
-  "plugins": ["./correct_doclets.js"],
+  "plugins": ["../correct_doclets.js"],
   "opts": {
     "destination": "./out",
     "recurse": true,

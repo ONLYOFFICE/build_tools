@@ -32,6 +32,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "doctrenderer")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "DjVuFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "XpsFile")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "OFDFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "PdfFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "HtmlFile2")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, archive_dir, "UnicodeConverter")
@@ -67,7 +68,7 @@ def make():
 
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
-    base.create_x2t_js_cache(archive_dir, "core")
+    base.create_x2t_js_cache(archive_dir, "core", platform)
     base.delete_file(archive_dir + "/DoctRenderer.config")
 
     # dictionaries

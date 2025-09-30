@@ -97,7 +97,7 @@ def get_projects(pro_json_path, platform):
     records_src = data[module]
     records = get_full_projects_list(data, records_src)
 
-    print(records)
+    #print(records)
 
     for rec in records:
       params = []
@@ -133,7 +133,7 @@ def get_projects(pro_json_path, platform):
       is_needed_platform_exist = False
       for pl in platform_records:
         if is_exist_in_array(params, pl):
-          is_needed_platform_exist = True;
+          is_needed_platform_exist = True
           break
 
       # if one config exists => all needed must exists
@@ -144,7 +144,7 @@ def get_projects(pro_json_path, platform):
         if is_exist_in_array(platform_records, item):
           continue
         is_needed_config_exist = True
-        break;
+        break
 
       if is_needed_platform_exist:
         if not is_exist_in_array(params, platform):
@@ -163,6 +163,18 @@ def get_projects(pro_json_path, platform):
           break
       if is_append:
         result.append(root_dir + record)
+
+  # delete duplicates
+  old_results = result
+  result = []
+
+  map_results = set()
+  for item in old_results:
+    proj = item.replace("\\", "/")
+    if proj in map_results:
+      continue
+    map_results.add(proj)
+    result.append(proj)
 
   if is_log:
     print(result)

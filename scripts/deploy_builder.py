@@ -58,7 +58,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
-    base.deploy_icu(core_dir, root_dir, platform)
+    base.deploy_icu(core_dir, root_dir, native_platform)
 
     # doctrenderer
     if isWindowsXP:
@@ -108,13 +108,13 @@ def make():
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir, "ios")
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
 
     if (0 == platform.find("linux")):
       base.linux_correct_rpath_docbuilder(root_dir)
 
     if (0 == platform.find("mac")):
-      base.generate_plist(root_dir, "mac", max_depth=1)
+      base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 
@@ -126,11 +126,6 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
-
-    if native_platform == "win_arm64":
-      base.delete_dir(root_dir + "/sdkjs")
-      base.copy_dir(root_dir_win64 + "/sdkjs", root_dir + "/sdkjs")
-      return
 
     # delete unnecessary builder files
     def delete_files(files):

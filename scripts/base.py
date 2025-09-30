@@ -16,6 +16,7 @@ import json
 
 __file__script__path__ = os.path.dirname( os.path.realpath(__file__))
 icu_ver = "74"
+icu_ver_old = "58"  # for win_xp support
 
 # common functions --------------------------------------
 def get_script_dir(file=""):
@@ -701,9 +702,12 @@ def get_prefix_cross_compiler_arm64():
   return ""
 
 def get_gcc_version():
+  gcc_path = "gcc"
+  if config.option("sysroot") != "":
+    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
-  gcc_version_str = run_command("gcc -dumpfullversion -dumpversion")['stdout']
+  gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
   if (gcc_version_str != ""):
     try:
       gcc_ver = gcc_version_str.split(".")
@@ -916,24 +920,29 @@ def _check_icu_common(dir, out):
 
   return isExist
 
-def qt_copy_icu(out, platform):
+def qt_copy_icu(out):
   tests = [get_env("QT_DEPLOY") + "/../lib"]
   prefix = ""
-  postfixes = []
-  
+  postfixes = [""]
+
   if platform == "linux_arm64" and config.option("arm64-sysroot") != "":
-    prefix = config.option("arm64-sysroot")
     postfixes = ["aarch64-linux-gnu"]
+    prefix = config.option("arm64-sysroot")
   else:
-    prefix = "" # empty for '/lib' etc.
-    postfixes = ["x86_64-linux-gnu"]
-    postfixes = ["i386-linux-gnu"]
+    postfixes += ["/x86_64-linux-gnu"]
+    postfixes += ["/i386-linux-gnu"]
+    if config.option("sysroot") != "":
+      prefix = config.option("sysroot")
+    else:
+      prefix = ""
       
+
   for postfix in postfixes:
-    tests += [prefix + "/lib/" + postfix]
-    tests += [prefix + "/lib64/" + postfix]
-    tests += [prefix + "/usr/lib/" + postfix]
-    tests += [prefix + "/usr/lib64/" + postfix]
+    tests += [prefix + "/lib" + postfix]
+    tests += [prefix + "/lib64" + postfix]
+    tests += [prefix + "/usr/lib" + postfix]
+    tests += [prefix + "/usr/lib64" + postfix]
+
 
   for test in tests:
     if (_check_icu_common(test, out)):
@@ -1022,7 +1031,7 @@ def generate_doctrenderer_config(path, root, product, vendor = "", dictionaries 
   file.close()
   return
 
-def generate_plist_framework_folder(file, platform):
+def generate_plist(file, platform):
   bundle_id_url = "com.onlyoffice."
   if ("" != get_env("PUBLISHER_BUNDLE_ID")):
     bundle_id_url = get_env("PUBLISHER_BUNDLE_ID")
@@ -1073,7 +1082,29 @@ def generate_plist_framework_folder(file, platform):
   fileInfo.close()
   return
 
-def generate_plist(path, platform, max_depth=512):
+def generate_xcprivacy(file, platform):
+  content = \
+"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+\t<key>NSPrivacyTracking</key>
+\t<false/>
+\t<key>NSPrivacyCollectedDataTypes</key>
+\t<array/>
+\t<key>NSPrivacyTrackingDomains</key>
+\t<array/>
+\t<key>NSPrivacyAccessedAPITypes</key>
+\t<array/>
+</dict>
+</plist>"""
+  fileDst = os.path.join(file, "PrivacyInfo.xcprivacy")
+  fileInfo = codecs.open(fileDst, "w", "utf-8")
+  fileInfo.write(content)
+  fileInfo.close()
+  return
+
+def for_each_framework(path, platform, callbacks, max_depth=512):
   if not config.check_option("config", "bundle_dylibs"):
     return
   if max_depth == 0:
@@ -1085,9 +1116,10 @@ def generate_plist(path, platform, max_depth=512):
   for file in glob.glob(src_folder):
     if (is_dir(file)):
       if file.endswith(".framework"):
-        generate_plist_framework_folder(file, platform)
+        for callback in callbacks:
+          callback(file, platform)
       else:
-        generate_plist(file, platform, max_depth - 1)
+        for_each_framework(file, platform, callbacks, max_depth - 1)
   return
 
 def correct_bundle_identifier(bundle_identifier):
@@ -1335,25 +1367,24 @@ def mac_correct_rpath_x2t(dir):
   mac_correct_rpath_library("DocxRenderer", ["UnicodeConverter", "kernel", "graphics"])
   mac_correct_rpath_library("IWorkFile", ["UnicodeConverter", "kernel"])
   mac_correct_rpath_library("HWPFile", ["UnicodeConverter", "kernel", "graphics"])
-  cmd("chmod", ["-v", "+x", "./x2t"])
-  cmd("install_name_tool", ["-add_rpath", "@executable_path", "./x2t"], True)
-  mac_correct_rpath_binary("./x2t", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
+
+  def correct_core_executable(name, libs):
+    cmd("chmod", ["-v", "+x", name])
+    cmd("install_name_tool", ["-add_rpath", "@executable_path", name], True)
+    mac_correct_rpath_binary(name, mac_icu_libs + libs)
+    return
+
+  correct_core_executable("x2t", ["UnicodeConverter", "kernel", "kernel_network", "graphics", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "HtmlFile2", "Fb2File", "EpubFile", "doctrenderer", "DocxRenderer", "IWorkFile", "HWPFile"])
   if is_file("./allfontsgen"):
-    cmd("chmod", ["-v", "+x", "./allfontsgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allfontsgen"], True)
-    mac_correct_rpath_binary("./allfontsgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics"])
+    correct_core_executable("allfontsgen", ["UnicodeConverter", "kernel", "graphics"])
   if is_file("./allthemesgen"):
-    cmd("chmod", ["-v", "+x", "./allthemesgen"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./allthemesgen"], True)
-    mac_correct_rpath_binary("./allthemesgen", mac_icu_libs + ["UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
+    correct_core_executable("allthemesgen", ["UnicodeConverter", "kernel", "graphics", "kernel_network", "doctrenderer", "PdfFile", "XpsFile", "OFDFile", "DjVuFile", "DocxRenderer"])
   if is_file("./pluginsmanager"):
-    cmd("chmod", ["-v", "+x", "./pluginsmanager"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./pluginsmanager"], True)
-    mac_correct_rpath_binary("./pluginsmanager", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
+    correct_core_executable("pluginsmanager", ["UnicodeConverter", "kernel", "kernel_network"])
   if is_file("./vboxtester"):
-    cmd("chmod", ["-v", "+x", "./vboxtester"])
-    cmd("install_name_tool", ["-add_rpath", "@executable_path", "./vboxtester"], True)
-    mac_correct_rpath_binary("./vboxtester", mac_icu_libs + ["UnicodeConverter", "kernel", "kernel_network"])
+    correct_core_executable("vboxtester", ["UnicodeConverter", "kernel", "kernel_network"])
+  if is_file("./x2ttester"):
+    correct_core_executable("x2ttester", ["UnicodeConverter", "kernel", "graphics"])
   os.chdir(cur_dir)
   return
 
@@ -1950,9 +1981,6 @@ def create_x2t_js_cache(dir, product, platform):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
     return
 
-  if platform == "win_arm64": # copying sdkjs later
-    return
-
   cmd_in_dir(dir, "./x2t", ["-create-js-snapshots"], True)
   return
 
@@ -1964,14 +1992,22 @@ def setup_local_qmake(dir_qmake):
 def deploy_icu(core_dir, dst_dir, platform):
   if (0 == platform.find("android")):
     src_dir = core_dir + "/Common/3dParty/icu/android/build/" + platform[8:]
-    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", root_dir + "/icudt" + icu_ver + "l.dat")
+    copy_file(src_dir + "/icudt" + icu_ver + "l.dat", dst_dir + "/icudt" + icu_ver + "l.dat")
     return
 
+  isXp = False
+  if platform.endswith("xp"):
+    isXp = True
+    platform = platform[0:-3]
   src_dir = core_dir + "/Common/3dParty/icu/" + platform + "/build"
 
   if (0 == platform.find("win")):
-    copy_file(src_dir + "/icudt" + icu_ver + ".dll", dst_dir + "/icudt" + icu_ver + ".dll")
-    copy_file(src_dir + "/icuuc" + icu_ver + ".dll", dst_dir + "/icuuc" + icu_ver + ".dll")
+    icu_ver_win = icu_ver
+    if isXp:
+      icu_ver_win = icu_ver_old
+      src_dir += "/xp"
+    copy_file(src_dir + "/icudt" + icu_ver_win + ".dll", dst_dir + "/icudt" + icu_ver_win + ".dll")
+    copy_file(src_dir + "/icuuc" + icu_ver_win + ".dll", dst_dir + "/icuuc" + icu_ver_win + ".dll")
 
   if (0 == platform.find("linux")):
     copy_file(src_dir + "/libicudata.so." + icu_ver, dst_dir + "/libicudata.so." + icu_ver)

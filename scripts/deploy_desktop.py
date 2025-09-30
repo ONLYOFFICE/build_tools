@@ -82,7 +82,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir + "/converter")
 
     # icu
-    base.deploy_icu(core_dir, root_dir + "/converter", platform)
+    base.deploy_icu(core_dir, root_dir + "/converter", native_platform)
 
     # doctrenderer
     if isWindowsXP:
@@ -116,6 +116,20 @@ def make():
       base.copy_files(core_dir + "/Common/3dParty/cef/" + platform + "/" + build_dir_name + "/*", root_dir)
     else:
       base.copy_files(core_dir + "/Common/3dParty/cef/" + native_platform + "/" + build_dir_name + "/*", root_dir)
+
+    if (0 == platform.find("mac")):
+      dir_base_old = os.getcwd()
+      os.chdir(root_dir + "/Chromium Embedded Framework.framework")
+      base.create_dir("Versions")
+      base.create_dir("Versions/A")
+      base.move_file("Chromium Embedded Framework", "Versions/A/Chromium Embedded Framework")
+      base.move_dir("Resources", "Versions/A/Resources")
+      base.move_dir("Libraries", "Versions/A/Libraries")
+      base.cmd("ln", ["-s", "Versions/A/Chromium Embedded Framework", "Chromium Embedded Framework"])
+      base.cmd("ln", ["-s", "Versions/A/Resources", "Resources"])
+      base.cmd("ln", ["-s", "Versions/A/Libraries", "Libraries"])
+      base.cmd("ln", ["-s", "A", "Versions/Current"])
+      os.chdir(dir_base_old);
 
     isUseQt = True
     if (0 == platform.find("mac")) or (0 == platform.find("ios")):
@@ -230,6 +244,19 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
+    isUseAgent = True
+    if isWindowsXP:
+      isUseAgent = False
+
+    if (isUseAgent):
+      agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
+      if (False):
+        base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)
+        base.cmd_in_dir(agent_plugin_dir, "npm", ["run", "build"], True)
+        base.copy_dir(agent_plugin_dir + "/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
+      else:
+        base.copy_dir(agent_plugin_dir + "/deploy/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
+
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
     base.create_dir(root_dir + "/editors/webext")
     base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
@@ -239,6 +266,11 @@ def make():
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers/onlyoffice", root_dir + "/providers/onlyoffice")
     else:
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
+
+    # license
+    if (0 == platform.find("mac")):
+      base.create_dir(root_dir + "/license")
+      base.copy_file(git_dir + "/desktop-apps/common/package/license/opensource/EULA.html", root_dir + "/license/EULA.html")
 
     isUseJSC = False
     if (0 == platform.find("mac")):
@@ -274,7 +306,7 @@ def make():
 
     if (0 == platform.find("mac")):
       # gen plists with max_depth 2 because frameworks are only located in root_dir and converter subdirectory
-      base.generate_plist(root_dir, "mac", max_depth=2)
+      base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=2)
       base.mac_correct_rpath_desktop(root_dir)
 
     if is_host_not_arm:
@@ -291,8 +323,8 @@ def make():
         base.cmd_in_dir_qemu(platform, "./", root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""])
         base.cmd_in_dir_qemu(platform, "./", root_dir + "/converter/allthemesgen", ["--save-env=1 --converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params)
       else:
-        base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""])
-        base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params)
+        base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
+        base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params, True)
       base.delete_file(root_dir + "/converter/AllFonts.js")
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/converter/fonts.log")

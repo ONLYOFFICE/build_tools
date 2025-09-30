@@ -15,11 +15,35 @@ HEIF_VERSION = "1.18.2"
 
 # ios cmake toolchain
 IOS_CMAKE_VERSION = "4.5.0"
-IOS_CMAKE_TOOLCHAIN_FILE = "ios-cmake/ios.toolchain.cmake"
+IOS_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../../core/Common/3dParty/heif/ios-cmake/ios.toolchain.cmake"
 
 # android cmake toolchain
 ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
 
+# linux arm64 cmake toolchain
+LINUX_ARM64_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/arm/cross_arm64/linux-arm64.toolchain.cmake"
+
+LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/sysroot/custom-sysroot.toolchain.cmake"
+
+OLD_ENV = dict()
+
+# get custom sysroot vars as str
+def setup_custom_sysroot_env() -> str:
+  env_vars = []
+  env_vars += ['LD_LIBRARY_PATH=\"' + config.get_custom_sysroot_lib() + "\""]
+  env_vars += ['CC=\"' + config.get_custom_sysroot_bin() + "/gcc\""]
+  env_vars += ['CXX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
+  env_vars += ['AR=\"' + config.get_custom_sysroot_bin() + "/ar\""]
+  env_vars += ['RABLIB=\"' + config.get_custom_sysroot_bin() + "/ranlib\""]
+  env_vars += ['CFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
+  env_vars += ['CXXFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
+  env_vars += ['LDFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
+
+  env_str = ""
+  for env_var in env_vars:
+    env_str += env_var + " "
+
+  return env_str
 
 def get_vs_version():
   vs_version = "14 2015"
@@ -49,10 +73,12 @@ def build_with_cmake(platform, cmake_args, build_type):
     cmake_args_ext = [
       "-G", f"Visual Studio {get_vs_version()}"
     ]
-    if platform == "win_64":
+    if platform == "win_64" or platform == "win_64_xp":
       cmake_args_ext += ["-A", "x64"]
-    elif platform == "win_32":
+    elif platform == "win_32" or platform == "win_32_xp":
       cmake_args_ext += ["-A", "Win32"]
+    elif platform == "win_arm64":
+      cmake_args_ext += ["-A", "ARM64"]
   # LINUX, MAC
   elif "linux" in platform or "mac" in platform:
     cmake_args_ext = [
@@ -60,13 +86,13 @@ def build_with_cmake(platform, cmake_args, build_type):
       "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"  # on UNIX we need to compile with fPIC
     ]
     if platform == "mac_64":
-      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11"]
-      if base.is_os_arm():
-        cmake_args_ext += [
-          "-DCMAKE_OSX_ARCHITECTURES=x86_64"
-        ]
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11", "-DCMAKE_OSX_ARCHITECTURES=x86_64"]
     elif platform == "mac_arm64":
-      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"]
+      cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0", "-DCMAKE_OSX_ARCHITECTURES=arm64"]
+    elif platform == "linux_arm64":
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_ARM64_CMAKE_TOOLCHAIN_FILE]
+    elif config.option("sysroot") != "":
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE] # force use custom CXXFLAGS with Release/Debug build
   # IOS
   elif "ios" in platform:
     cmake_args_ext = [
@@ -99,11 +125,15 @@ def build_with_cmake(platform, cmake_args, build_type):
     elif platform == "android_x86_64":
       cmake_args_ext += get_cmake_args_android("x86_64", "21")
 
+  # env setup for custom sysroot
+  env_str = setup_custom_sysroot_env() if config.option("sysroot") != "" else ""
+
   # run cmake
-  base.cmd("cmake", cmake_args + cmake_args_ext)
+  base.cmd(env_str + "cmake", cmake_args + cmake_args_ext)
+
   # build
   if "Unix Makefiles" in cmake_args_ext:
-    base.cmd("make", ["-j4"])
+    base.cmd(env_str + "make", ["-j4"])
   else:
     base.cmd("cmake", ["--build", ".", "--config", build_type])
   return
@@ -113,11 +143,14 @@ def make_common(build_func, cmake_args):
   # WINDOWS
   if "windows" == base.host_platform():
     # win_64
-    if config.check_option("platform", "win_64"):
+    if config.check_option("platform", "win_64") or config.check_option("platform", "win_64_xp"):
       build_func("win_64", cmake_args)
     # win_32
-    if config.check_option("platform", "win_32"):
+    if config.check_option("platform", "win_32") or config.check_option("platform", "win_32_xp"):
       build_func("win_32", cmake_args)
+    # win_arm64
+    if config.check_option("platform", "win_arm64"):
+      build_func("win_arm64", cmake_args)
 
   # LINUX
   elif "linux" == base.host_platform():
@@ -180,6 +213,7 @@ def make_x265(base_dir, build_type):
     "-DENABLE_CLI=OFF",                 # do not build standalone CLI app
     "-DENABLE_SHARED=OFF",              # do not build shared libs
     "-DENABLE_ASSEMBLY=OFF",            # disable assembly optimizations
+    "-DENABLE_LIBNUMA=OFF",             # disable libnuma usage (affects Linux only)
   ]
 
   # lib build function
@@ -269,6 +303,11 @@ def make_heif(base_dir, build_type):
       "add_subdirectory(heifio)",
       "# add_subdirectory(heifio)"
     )
+    base.replaceInFile(
+      base_dir + "/libheif/CMakeLists.txt",
+      "if (DOXYGEN_FOUND)",
+      "if (FALSE)"
+    )
 
   # prepare cmake args
   cmake_dir = base_dir + "/libheif"
@@ -333,6 +372,15 @@ def make_heif(base_dir, build_type):
   make_common(build_heif, cmake_args)
   return
 
+def clear_module():
+  if base.is_dir("libde265"):
+    base.delete_dir_with_access_error("libde265")
+  if base.is_dir("x265_git"):
+    base.delete_dir_with_access_error("x265_git")
+  if base.is_dir("libheif"):
+    base.delete_dir_with_access_error("libheif")
+  return
+
 def make():
   print("[fetch & build]: heif")
 
@@ -340,16 +388,16 @@ def make():
   old_dir = os.getcwd()
   os.chdir(base_dir)
 
+  base.check_module_version("2", clear_module)
+
   build_type = "Release"
   if (-1 != config.option("config").lower().find("debug")):
     build_type = "Debug"
 
   # fetch custom cmake toolchain for ios
   if -1 != config.option("platform").find("ios"):
-    if not base.is_dir("ios-cmake"):
+    if not base.is_file(IOS_CMAKE_TOOLCHAIN_FILE):
       fetch_repo("https://github.com/leetal/ios-cmake.git", IOS_CMAKE_VERSION)
-    global IOS_CMAKE_TOOLCHAIN_FILE
-    IOS_CMAKE_TOOLCHAIN_FILE = os.path.join(base_dir, IOS_CMAKE_TOOLCHAIN_FILE)
 
   # build encoder library
   make_x265(base_dir, build_type)

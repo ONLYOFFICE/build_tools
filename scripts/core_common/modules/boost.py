@@ -99,7 +99,7 @@ def make():
     correct_install_includes_win(base_dir, "win_arm64")
 
   if config.check_option("platform", "linux_64") and not base.is_dir("../build/linux_64"):
-    if config.option("custom-sysroot") == "":
+    if config.option("sysroot") == "":
       addon_config = []
       addon_compile = []
       if "1" == config.option("use-clang"):

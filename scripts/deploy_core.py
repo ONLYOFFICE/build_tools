@@ -69,17 +69,13 @@ def make():
 
     # correct mac frameworks
     if (0 == platform.find("mac")):
-      base.generate_plist(archive_dir, "mac", max_depth=1)
+      base.for_each_framework(archive_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
+      base.mac_correct_rpath_x2t(archive_dir)
 
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
     base.create_x2t_js_cache(archive_dir, "core", platform)
     base.delete_file(archive_dir + "/DoctRenderer.config")
-    
-    # just copy sdkjs to avoid executing arm64 x2t on non-arm system
-    if native_platform == "win_arm64" :
-      base.delete_dir(archive_dir + "/sdkjs")
-      base.copy_dir(archive_dir + "/../../../win_64/" + branding + "/core/sdkjs", archive_dir + "/sdkjs")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", archive_dir + "/dictionaries", True, False)

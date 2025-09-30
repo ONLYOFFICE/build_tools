@@ -100,9 +100,10 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if "1" == config.option("use-clang"):
       build_params.append("-spec")
       build_params.append("linux-clang-libc++")
-    if "" != config.option("custom-sysroot"):
+    if "" != config.option("sysroot"):
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-      os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("custom-sysroot")
+      os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
       base.cmd_exe(qmake_app, build_params) # calls cmd_exe to pass os.env
     else:
       base.cmd(qmake_app, build_params)
@@ -123,7 +124,12 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if ("" != qmake_addon_string):
       qmake_addon_string = " " + qmake_addon_string
 
-    vcvarsall_arch = ("x86" if base.platform_is_32(platform) else "x64")
+    vcvarsall_arch = "x64"
+    if base.platform_is_32(platform):
+      vcvarsall_arch = "x86"
+    if (platform == "win_arm64"):
+      vcvarsall_arch = "x64_arm64"
+
     qmake_env_addon = base.get_env("QT_QMAKE_ADDON")
     if (qmake_env_addon != ""):
       qmake_env_addon += " "

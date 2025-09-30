@@ -37,7 +37,7 @@ def make():
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir, "ios")
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
 
   for native_platform in platforms:
     if native_platform == "android":

@@ -17,6 +17,8 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
   # for b2 checks
   if config.option("sysroot") != "":
     base.set_sysroot_env()
+    b2_addon = "cflags=\"--sysroot=" + config.option("sysroot") + "\""
+    b2_addon = "cxxflags=\"--sysroot=" + config.option("sysroot") + "\""
     b2_addon = "linkflags=\"--sysroot=" + config.option("sysroot") + "\""
     
   base.cmd("./bootstrap.sh", ["--with-libraries=system"])   

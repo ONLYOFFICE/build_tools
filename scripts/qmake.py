@@ -104,6 +104,7 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
       os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
       os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
       base.cmd_exe(qmake_app, build_params) # calls cmd_exe to pass os.env
     else:
       base.cmd(qmake_app, build_params)

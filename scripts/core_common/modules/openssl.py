@@ -101,9 +101,9 @@ def make():
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
     else:
-      if 'LD_LIBRARY_PATH' in os.environ:
-        ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
+      old_env = dict(os.environ)
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
       base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
@@ -116,8 +116,8 @@ def make():
       base.cmd_exe("make", [])
       base.cmd_exe("make", ["install"])
       base.cmd_exe("make", ["clean"], True)
-      os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
-    # TODO: support x86
+      os.environ.clear()
+      os.environ.update(old_env)
 
   if (-1 != config.option("platform").find("linux_arm64")) and not base.is_dir("../build/linux_arm64"):
     if ("x86_64" != platform.machine()):

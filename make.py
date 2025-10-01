@@ -28,7 +28,6 @@ if (args.build_only_branding):
 
 # parse configuration
 config.parse()
-base.setup_path()
 base.check_python()
 
 base_dir = base.get_script_dir(__file__)

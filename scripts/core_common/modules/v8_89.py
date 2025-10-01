@@ -216,12 +216,10 @@ def make():
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
       
       old_env = dict(os.environ)
-      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+      base.set_sysroot_env()
       base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
       base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
-      os.environ.clear()
-      os.environ.update(old_env)
+      base.restore_sysroot_env()
     else:
       base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
       base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)

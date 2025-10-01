@@ -218,8 +218,6 @@ def make():
       old_env = dict(os.environ)
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
       os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
-      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
-      base.check_python() # sysroot contains python, so we need to rewrite PATH to set the "right" python first
       base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
       base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
       os.environ.clear()

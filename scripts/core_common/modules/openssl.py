@@ -103,7 +103,7 @@ def make():
     else:
       old_env = dict(os.environ)
       os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
+      
       base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))

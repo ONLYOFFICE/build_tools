@@ -137,9 +137,7 @@ def make():
         base.replaceInFile("./../source/icudefs.mk.in", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS)", "LDFLAGS = @LDFLAGS@ $(RPATHLDFLAGS) " + command_compile_addon)
       else:
         old_env = dict(os.environ)
-        os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-        base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
-        
+        os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()       
         base.cmd_exe("./../source/configure", ["--prefix=" + base_dir + "/icu/cross_build_install",
                                            "CC=" + config.get_custom_sysroot_bin() + "/gcc", "CXX=" + config.get_custom_sysroot_bin() + "/g++",
                                            "AR=" + config.get_custom_sysroot_bin() + "/ar", "RANLIB=" + config.get_custom_sysroot_bin() + "/ranlib",

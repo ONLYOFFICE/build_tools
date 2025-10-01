@@ -19,8 +19,6 @@ import make_common
 import develop
 import argparse
 
-base.check_python()
-
 parser = argparse.ArgumentParser(description="options")
 parser.add_argument("--build-only-branding", action="store_true")
 args = parser.parse_args()
@@ -30,6 +28,8 @@ if (args.build_only_branding):
 
 # parse configuration
 config.parse()
+base.setup_path()
+base.check_python()
 
 base_dir = base.get_script_dir(__file__)
 

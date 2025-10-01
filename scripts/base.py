@@ -1886,6 +1886,10 @@ def check_module_version(actual_version, clear_func):
   clear_func()
   return
 
+def setup_path():
+  if "linux" != host_platform() and config.option("sysroot") != "":
+    set_env("PATH", config.option("sysroot") + "/usr/bin:" + get_env("PATH"))
+    
 def check_python():
   if ("linux" != host_platform()):
     return

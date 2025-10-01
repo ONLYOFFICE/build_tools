@@ -75,6 +75,12 @@ def make():
     # icu
     base.deploy_icu(core_dir, root_dir, platform)
 
+    # openssl
+    if ("ios" == platform):
+      openssl_dir = core_dir + "/Common/3dParty/openssl/build/ios/openssl-xc/lib"
+      base.copy_dir(openssl_dir + "/crypto.xcframework", root_dir + "/crypto.xcframework")
+      base.copy_dir(openssl_dir + "/ssl.xcframework", root_dir + "/ssl.xcframework")
+
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
 

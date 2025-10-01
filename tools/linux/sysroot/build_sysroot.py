@@ -35,7 +35,6 @@ def download_sysroot():
     apt_libs += ["zlib1g-dev"]
     apt_libs += ["curl"]
     apt_libs += ["libc6-dev"]
-    apt_libs += ["glib-2.0"]
     apt_libs += ["glib-2.0-dev"]
     apt_libs += ["libglu1-mesa-dev"]
     apt_libs += ["libgtk-3-dev"]
@@ -55,7 +54,6 @@ def download_sysroot():
     apt_libs += ["libxkbcommon-dev"]
     apt_libs += ["libxkbcommon-x11-dev"]
     apt_libs += ["libnotify-dev"]
-    apt_libs += ["gtk+-3.0"]
     apt_libs += ["gtk+-3.0-dev"]
     
     apt_libs_str = ""

@@ -207,10 +207,6 @@ def make():
 
   if config.check_option("platform", "linux_64"):
     if config.option("sysroot") != "":
-      old_env = dict(os.environ)
-      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
-
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
       dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
       base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
@@ -218,11 +214,20 @@ def make():
       src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
       dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
+      
+      old_env = dict(os.environ)
+      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+      base.set_env("PATH", config.option("sysroot") + "/usr/bin:" + base.get_env("PATH"))
+      base.check_python() # sysroot contains python, so we need to rewrite PATH to set the "right" python first
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
+      os.environ.clear()
+      os.environ.update(old_env)
+    else:
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
 
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
-    base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
-    os.environ.clear()
-    os.environ.update(old_env)
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])

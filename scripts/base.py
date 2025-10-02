@@ -917,8 +917,9 @@ def qt_copy_icu(out):
     prefix = config.option("sysroot")
   else:
     prefix = ""
-    postfixes += ["/x86_64-linux-gnu"]
-    postfixes += ["/i386-linux-gnu"]
+    
+  postfixes += ["/x86_64-linux-gnu"]
+  postfixes += ["/i386-linux-gnu"]
 
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]

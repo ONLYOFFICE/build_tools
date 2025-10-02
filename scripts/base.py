@@ -925,17 +925,16 @@ def qt_copy_icu(out):
   prefix = ""
   postfixes = [""]
 
-  if platform == "linux_arm64" and config.option("arm64-sysroot") != "":
+  if config.check_option("platform", "linux_arm64") and config.option("arm64-sysroot") != "":
     postfixes = ["aarch64-linux-gnu"]
     prefix = config.option("arm64-sysroot")
   else:
-    postfixes += ["/x86_64-linux-gnu"]
-    postfixes += ["/i386-linux-gnu"]
     if config.option("sysroot") != "":
       prefix = config.option("sysroot")
-    else:
-      prefix = ""
-      
+
+    postfixes += ["/x86_64-linux-gnu"]
+    postfixes += ["/i386-linux-gnu"]
+
 
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]
@@ -1904,6 +1903,25 @@ def check_module_version(actual_version, clear_func):
   clear_func()
   return
 
+
+def set_sysroot_env():
+  global ENV_BEFORE_SYSROOT
+  ENV_BEFORE_SYSROOT = dict(os.environ)
+  if "linux" == host_platform() and config.option("sysroot") != "":
+    os.environ['PATH'] = config.option("sysroot") + "/usr/bin:" + get_env("PATH")
+    os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+    os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
+    os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+    os.environ['CC'] = config.get_custom_sysroot_bin() + "/gcc"
+    os.environ['CXX'] = config.get_custom_sysroot_bin() + "/g++"
+    os.environ['CFLAGS'] = "--sysroot=" + config.option("sysroot")
+    os.environ['CXXFLAGS'] = "--sysroot=" + config.option("sysroot")
+    check_python()
+    
+def restore_sysroot_env():
+  os.environ.clear()
+  os.environ.update(ENV_BEFORE_SYSROOT)
+    
 def check_python():
   if ("linux" != host_platform()):
     return

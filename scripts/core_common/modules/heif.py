@@ -31,6 +31,7 @@ OLD_ENV = dict()
 def setup_custom_sysroot_env() -> str:
   env_vars = []
   env_vars += ['LD_LIBRARY_PATH=\"' + config.get_custom_sysroot_lib() + "\""]
+  env_vars += ['PATH=\"' + config.option("sysroot") + "/usr/bin:" + base.get_env("PATH") + "\""]
   env_vars += ['CC=\"' + config.get_custom_sysroot_bin() + "/gcc\""]
   env_vars += ['CXX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
   env_vars += ['AR=\"' + config.get_custom_sysroot_bin() + "/ar\""]

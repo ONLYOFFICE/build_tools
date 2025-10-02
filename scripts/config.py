@@ -126,10 +126,7 @@ def parse():
     options["sdkjs-plugin-server"] = "default"
 
   if not "arm64-toolchain-bin" in options:
-
-    if not "sysroot" in options:
-      options["arm64-toolchain-bin"] = "/usr/bin"
-    else:
+    if options["sysroot"] != "":
       options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
     elif base.is_dir(os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")):
       options["arm64-toolchain-bin"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")

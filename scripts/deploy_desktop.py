@@ -267,11 +267,6 @@ def make():
     else:
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
 
-    # license
-    if (0 == platform.find("mac")):
-      base.create_dir(root_dir + "/license")
-      base.copy_file(git_dir + "/desktop-apps/common/package/license/opensource/EULA.html", root_dir + "/license/EULA.html")
-
     isUseJSC = False
     if (0 == platform.find("mac")):
       doctrenderer_lib = "libdoctrenderer.dylib"

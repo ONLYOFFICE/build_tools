@@ -206,12 +206,7 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
-    ld_library_path_copy = ''
     if config.option("sysroot") != "":
-      if 'LD_LIBRARY_PATH' in os.environ:
-        ld_library_path_copy = os.environ['LD_LIBRARY_PATH']
-      os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
       dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
       base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
@@ -219,10 +214,16 @@ def make():
       src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
       dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
+      
+      old_env = dict(os.environ)
+      base.set_sysroot_env()
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
+      base.restore_sysroot_env()
+    else:
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
 
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
-    base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
-    os.environ['LD_LIBRARY_PATH'] = ld_library_path_copy
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])

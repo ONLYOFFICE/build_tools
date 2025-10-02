@@ -9,11 +9,24 @@ import qmake
 
 def make(src_dir, modules, build_platform="android", qmake_addon=""):
   old_cur = os.getcwd()
+  old_env = dict(os.environ)
+  b2_addon = ""
 
   print("boost-headers...")
-  base.cmd("./bootstrap.sh", ["--with-libraries=system"])
-  base.cmd("./b2", ["--prefix=./../build/" + build_platform, "headers", "install"])
-
+  
+  # for b2 checks
+  if config.option("sysroot") != "":
+    base.set_sysroot_env()
+    b2_addon = "cflags=\"--sysroot=" + config.option("sysroot") + "\""
+    b2_addon = "cxxflags=\"--sysroot=" + config.option("sysroot") + "\""
+    b2_addon = "linkflags=\"--sysroot=" + config.option("sysroot") + "\""
+    
+  base.cmd("./bootstrap.sh", ["--with-libraries=system"])   
+  base.cmd("./b2", ["--prefix=./../build/" + build_platform, "headers", "install", b2_addon])
+  
+  if config.option("sysroot") != "":
+    base.restore_sysroot_env()
+  
   for module in modules:
     print("boost-module: " + module + " ...")
     module_dir = src_dir + "/libs/" + module
@@ -40,6 +53,8 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
     base.save_as_script(module_dir + "/" + module + ".pro", pro_file_content)
     os.chdir(module_dir)
     qmake.make_all_platforms(module_dir + "/" + module + ".pro", qmake_addon)
-  
+
+  os.environ.clear()
+  os.environ.update(old_env)
   os.chdir(old_cur)
   return

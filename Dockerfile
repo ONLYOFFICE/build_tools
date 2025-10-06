@@ -5,13 +5,15 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get -y update && \
     apt-get -y install tar \
-                       sudo
+                       sudo \
+                       wget
 
 ADD . /build_tools
 WORKDIR /build_tools
 
 RUN mkdir -p /opt/python3 && \
-    tar -xzf /build_tools/tools/linux/python3.tar.gz -C /opt/python3 --strip-components=1
+    wget -P /opt/python3/ https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/python3.tar.gz && \
+    tar -xzf /opt/python3/python3.tar.gz -C /opt/python3 --strip-components=1
 
 ENV PATH="/opt/python3/bin:${PATH}"
 

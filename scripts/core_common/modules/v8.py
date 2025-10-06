@@ -26,6 +26,8 @@ def clean():
 def is_main_platform():
   if (config.check_option("platform", "win_64") or config.check_option("platform", "win_32")):
     return True
+  if (config.check_option("platform", "win_arm64")):
+    return True
   if (config.check_option("platform", "linux_64") or config.check_option("platform", "linux_32") or config.check_option("platform", "linux_arm64")):
     return True
   if config.check_option("platform", "mac_64"):
@@ -45,7 +47,7 @@ def is_use_clang():
   gcc_version = base.get_gcc_version()  
     
   is_clang = "false"
-  if (gcc_version >= 6000 or "1" == config.option("use-clang")):
+  if config.option("sysroot") == "" and (gcc_version >= 6000 or "1" == config.option("use-clang")):
     is_clang = "true"
 
   print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)

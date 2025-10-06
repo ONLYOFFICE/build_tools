@@ -18,7 +18,7 @@ def deploy_fonts(git_dir, root_dir, platform=""):
   if (platform == "android"):
     base.copy_dir(git_dir + "/core-fonts/dejavu", root_dir + "/fonts/dejavu")
     base.copy_dir(git_dir + "/core-fonts/liberation", root_dir + "/fonts/liberation")
-  return 
+  return
 
 def make():
   base_dir = base.get_script_dir() + "/../out"
@@ -35,7 +35,7 @@ def make():
 
     if base.get_env("DESTDIR_BUILD_OVERRIDE") != "":
       return
-      
+
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -73,29 +73,14 @@ def make():
       base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "x2t")
 
     # icu
-    if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/icudt58.dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/icuuc58.dll")
-
-    if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/libicuuc.so.58")
-
-    if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
-    
-    if (0 == platform.find("android")):
-      #base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicudata.so", root_dir + "/libicudata.so")
-      #base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/libicuuc.so", root_dir + "/libicuuc.so")
-      base.copy_file(core_dir + "/Common/3dParty/icu/android/build/" + platform[8:] + "/icudt58l.dat", root_dir + "/icudt58l.dat")
+    base.deploy_icu(core_dir, root_dir, platform)
 
     # js
     base.copy_dir(base_dir + "/js/" + branding + "/mobile/sdkjs", root_dir + "/sdkjs")
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir)
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
       deploy_fonts(git_dir, root_dir)
       base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 
@@ -115,7 +100,7 @@ def make():
       deploy_fonts(git_dir, root_dir, "android")
       base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
       # app
-      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")      
+      base.generate_doctrenderer_config(root_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
       libs_dir = root_dir + "/lib"
       base.create_dir(libs_dir + "/arm64-v8a")
       base.copy_files(base_dir + "/android_arm64_v8a/" + branding + "/mobile/*.so", libs_dir + "/arm64-v8a")

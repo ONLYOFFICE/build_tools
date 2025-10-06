@@ -1,0 +1,5 @@
+{
+  "exclude": [
+    "qt-everywhere-src-5.15.2/**"
+  ]
+}

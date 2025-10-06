@@ -58,6 +58,14 @@ def make():
     base.create_dir(build_server_dir + '/Metrics/node_modules/modern-syslog/build/Release')
     base.copy_file(server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node", build_server_dir + "/Metrics/node_modules/modern-syslog/build/Release/core.node")
 
+    # AdminPanel server part
+    base.create_dir(build_server_dir + '/AdminPanel/server')
+    base.copy_exe(server_dir + "/AdminPanel/server", build_server_dir + '/AdminPanel/server', "adminpanel")
+
+    # AdminPanel client part
+    base.create_dir(build_server_dir + '/AdminPanel/client/build')
+    base.copy_dir(server_dir + '/AdminPanel/client/build', build_server_dir + '/AdminPanel/client/build')
+
     qt_dir = base.qt_setup(native_platform)
     platform = native_platform
 
@@ -94,23 +102,17 @@ def make():
     base.generate_doctrenderer_config(converter_dir + "/DoctRenderer.config", "../../../", "server", "", "../../../dictionaries")
 
     # icu
-    if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", converter_dir + "/icudt58.dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", converter_dir + "/icuuc58.dll")
+    base.deploy_icu(core_dir, converter_dir, platform)
 
-    if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", converter_dir + "/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", converter_dir + "/libicuuc.so.58")
-
-    if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", converter_dir + "/libicudata.58.dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", converter_dir + "/libicuuc.58.dylib")
-    
     base.copy_v8_files(core_dir, converter_dir, platform)
 
     # builder
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, converter_dir, "docbuilder")
     base.copy_dir(git_dir + "/document-templates/new/en-US", converter_dir + "/empty")
+
+    # correct mac frameworks
+    if (0 == platform.find("mac")):
+      base.for_each_framework(converter_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
 
     # js
     js_dir = root_dir
@@ -124,7 +126,7 @@ def make():
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
-    
+
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
     base.copy_marketplace_plugin(js_dir + "/sdkjs-plugins", False, True)
@@ -146,7 +148,7 @@ def make():
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "allthemesgen")
     if ("1" != config.option("preinstalled-plugins")):
       base.copy_exe(core_build_dir + "/bin/" + platform_postfix, tools_dir, "pluginsmanager")
-    
+
     branding_dir = server_dir + "/branding"
     if("" != config.option("branding") and "onlyoffice" != config.option("branding")):
       branding_dir = git_dir + '/' + config.option("branding") + '/server'
@@ -228,4 +230,3 @@ def make():
       base.delete_file(root_dir_snap + '/example/nodejs/example')
 
   return
-

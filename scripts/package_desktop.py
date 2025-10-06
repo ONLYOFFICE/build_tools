@@ -131,6 +131,9 @@ def make_inno(edition = "opensource"):
   if common.sign:
     args += ["-Sign"]
 
+  if xp:
+    args += ["-TimestampServer", "http://timestamp.comodoca.com/authenticode"]
+
   utils.log_h2("desktop inno " + edition + " build")
   ret = utils.ps1("make_inno.ps1", args, verbose=True)
   utils.set_summary("desktop inno " + edition + " build", ret)

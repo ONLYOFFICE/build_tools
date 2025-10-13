@@ -1,7 +1,12 @@
 FROM ubuntu:20.04
 
 ENV TZ=Etc/UTC
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN echo 'keyboard-configuration keyboard-configuration/layoutcode string us' | debconf-set-selections && \
+    echo 'keyboard-configuration keyboard-configuration/modelcode string pc105' | debconf-set-selections
 
 RUN apt-get -y update && \
     apt-get -y install tar \

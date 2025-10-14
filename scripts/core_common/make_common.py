@@ -56,6 +56,7 @@ def make():
   googletest.make()
   oo_brotli.make()
   heif.make()
+  webp.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()

@@ -8,6 +8,13 @@ import dependence
 import traceback
 import develop
 
+# if (sys.version_info[0] >= 3):
+  # unicode = str
+  
+# host_platform = base.host_platform()
+# if (host_platform == 'windows'):
+  # import libwindows
+
 base_dir = base.get_script_dir(__file__)
 
 def install_module(path):
@@ -21,11 +28,18 @@ def find_rabbitmqctl(base_path):
   return base.find_file(os.path.join(base_path, 'RabbitMQ Server'), 'rabbitmqctl.bat')
 
 def restart_win_rabbit():
+  # todo maybe restarting is not relevant after many years and versions?
   base.print_info('restart RabbitMQ node to prevent "Erl.exe high CPU usage every Monday morning on Windows" https://groups.google.com/forum/#!topic/rabbitmq-users/myl74gsYyYg')
   rabbitmqctl = find_rabbitmqctl(os.environ['PROGRAMW6432']) or find_rabbitmqctl(os.environ['ProgramFiles(x86)'])
   if rabbitmqctl is not None:
-    base.cmd_in_dir(base.get_script_dir(rabbitmqctl), 'rabbitmqctl.bat', ['stop_app'])
-    base.cmd_in_dir(base.get_script_dir(rabbitmqctl), 'rabbitmqctl.bat', ['start_app'])
+    try:
+      # code = libwindows.sudo(unicode(sys.executable), ['net', 'stop', 'rabbitmq'])
+      # code = libwindows.sudo(unicode(sys.executable), ['net', 'start', 'rabbitmq'])
+      base.cmd_in_dir(base.get_script_dir(rabbitmqctl), 'rabbitmqctl.bat', ['stop_app'])
+      base.cmd_in_dir(base.get_script_dir(rabbitmqctl), 'rabbitmqctl.bat', ['start_app'])
+    except SystemExit:
+      base.print_error('Perhaps Erlang cookies are different: Replace %userprofile%/.erlang.cookie with %WINDIR%/System32/config/systemprofile/.erlang.cookie')
+      raise
   else:
     base.print_info('Missing rabbitmqctl.bat')
 

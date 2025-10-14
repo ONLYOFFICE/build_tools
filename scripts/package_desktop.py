@@ -75,8 +75,9 @@ def make_windows():
     make_prepare("xp")
     make_zip("xp")
     make_inno("xp")
-  if common.platform == "windows_x86_xp":
-    make_online()
+  # Disable build online installer
+  # if common.platform == "windows_x86_xp":
+  #  make_online()
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -132,6 +133,9 @@ def make_inno(edition = "opensource"):
   ]
   if common.sign:
     args += ["-Sign"]
+
+  if xp:
+    args += ["-TimestampServer", "http://timestamp.comodoca.com/authenticode"]
 
   utils.log_h2("desktop inno " + edition + " build")
   ret = utils.ps1("make_inno.ps1", args, verbose=True)

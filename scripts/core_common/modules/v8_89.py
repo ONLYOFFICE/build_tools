@@ -44,7 +44,13 @@ def make_args(args, platform, is_64=True, is_debug=False):
     args_copy.append("target_cpu=\\\"arm64\\\"")
     args_copy.append("v8_target_cpu=\\\"arm64\\\"")
     args_copy.append("use_sysroot=true")
-  
+    
+  if (platform == "win_arm64"):
+    args_copy = args[:]
+    args_copy.append("target_cpu=\\\"arm64\\\"")
+    args_copy.append("v8_target_cpu=\\\"arm64\\\"")
+    args_copy.append("is_clang=false")
+    
   if is_debug:
     args_copy.append("is_debug=true")
     if (platform == "windows"):
@@ -53,13 +59,18 @@ def make_args(args, platform, is_64=True, is_debug=False):
     args_copy.append("is_debug=false")
   
   linux_clang = False
-  if (platform == "linux"):
-    args_copy.append("is_clang=true")
-    if "1" == config.option("use-clang"):
-      args_copy.append("use_sysroot=true")
-      linux_clang = True
-    else:
+  if platform == "linux":
+    if "" != config.option("sysroot"):
       args_copy.append("use_sysroot=false")
+      args_copy.append("is_clang=false")
+    else:
+      args_copy.append("is_clang=true")
+      if "1" == config.option("use-clang"):
+        linux_clang = True
+      else:
+        args_copy.append("use_sysroot=false")
+
+
   if (platform == "windows"):
     args_copy.append("is_clang=false")
 
@@ -68,12 +79,21 @@ def make_args(args, platform, is_64=True, is_debug=False):
 
   return "--args=\"" + " ".join(args_copy) + "\""
 
-def ninja_windows_make(args, is_64=True, is_debug=False):
+def ninja_windows_make(args, is_64=True, is_debug=False, is_arm=False):
   directory_out = "out.gn/"
-  directory_out += ("win_64/" if is_64 else "win_32/")
+    
+  if is_arm:
+    directory_out += "win_arm64/"
+  else:
+    directory_out += ("win_64/" if is_64 else "win_32/")
+    
   directory_out += ("debug" if is_debug else "release")
 
-  base.cmd2("gn", ["gen", directory_out, make_args(args, "windows", is_64, is_debug)])
+  if is_arm:
+    base.cmd2("gn", ["gen", directory_out, make_args(args, "win_arm64", is_64, is_debug)])
+  else:
+    base.cmd2("gn", ["gen", directory_out, make_args(args, "windows", is_64, is_debug)])
+    
   base.copy_file("./" + directory_out + "/obj/v8_wrappers.ninja", "./" + directory_out + "/obj/v8_wrappers.ninja.bak")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "target_output_name = v8_wrappers", "target_output_name = v8_wrappers\nbuild obj/v8_wrappers.obj: cxx ../../../src/base/platform/wrappers.cc")
   base.replaceInFile("./" + directory_out + "/obj/v8_wrappers.ninja", "build obj/v8_wrappers.lib: alink", "build obj/v8_wrappers.lib: alink obj/v8_wrappers.obj")
@@ -83,7 +103,10 @@ def ninja_windows_make(args, is_64=True, is_debug=False):
   if (-1 == win_toolset_wrapper_file_content.find("line = line.decode('utf8')")):
     base.replaceInFile(win_toolset_wrapper_file, "for line in link.stdout:\n", "for line in link.stdout:\n      line = line.decode('utf8')\n")
 
+
   base.cmd("ninja", ["-C", directory_out, "v8_wrappers"])
+  if is_arm:
+    base.copy_file('./' + directory_out + '/obj/v8_wrappers.lib', './' + directory_out + '/x64/obj/v8_wrappers.lib')
   base.cmd("ninja", ["-C", directory_out])
   base.delete_file("./" + directory_out + "/obj/v8_wrappers.ninja")
   base.move_file("./" + directory_out + "/obj/v8_wrappers.ninja.bak", "./" + directory_out + "/obj/v8_wrappers.ninja")
@@ -149,8 +172,19 @@ def make():
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")
+    
+    # fix for new depot_tools and vs2019, as VC folder contains a folder with a symbol in the name
+    # sorting is done by increasing version, so 0 is a dummy value
+    replace_src = "  def to_int_if_int(x):\n    try:\n      return int(x)\n    except ValueError:\n      return x"
+    replace_dst = "  def to_int_if_int(x):\n    try:\n      return int(x)\n    except ValueError:\n      return 0"
+    base.replaceInFile("v8/build/vs_toolchain.py", replace_src, replace_dst)
+    
+    
     if not base.is_file("v8/src/base/platform/wrappers.cc"):
       base.writeFile("v8/src/base/platform/wrappers.cc", "#include \"src/base/platform/wrappers.h\"\n")
+  
+    if config.check_option("platform", "win_arm64"):
+      base.replaceInFile("v8/build/toolchain/win/setup_toolchain.py", "SDK_VERSION = \'10.0.26100.0\'", "SDK_VERSION = \'10.0.22621.0\'")
   else:
     base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
 
@@ -172,8 +206,24 @@ def make():
              "treat_warnings_as_errors=false"]
 
   if config.check_option("platform", "linux_64"):
-    base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")])
-    base.cmd("ninja", ["-C", "out.gn/linux_64"])
+    if config.option("sysroot") != "":
+      src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
+      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
+      base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
+
+      src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
+      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
+      base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
+      
+      old_env = dict(os.environ)
+      base.set_sysroot_env()
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
+      base.restore_sysroot_env()
+    else:
+      base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
+      base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
+
 
   if config.check_option("platform", "linux_32"):
     base.cmd2("gn", ["gen", "out.gn/linux_32", make_args(gn_args, "linux", False)])
@@ -187,6 +237,9 @@ def make():
   if config.check_option("platform", "mac_64"):
     base.cmd2("gn", ["gen", "out.gn/mac_64", make_args(gn_args, "mac")])
     base.cmd("ninja", ["-C", "out.gn/mac_64"])
+    
+  if config.check_option("platform", "win_arm64") and not base.is_file("out.gn/win_arm64/release/obj/v8_monolith.lib"):
+    ninja_windows_make(gn_args, True, False, True)
 
   if config.check_option("platform", "win_64"):
     if (-1 != config.option("config").lower().find("debug")):

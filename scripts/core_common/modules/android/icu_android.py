@@ -11,8 +11,8 @@ current_dir = os.path.abspath(current_dir)
 if not current_dir.endswith("/"):
   current_dir += "/"
 
-icu_major = "58"
-icu_minor = "3"
+icu_major = "74"
+icu_minor = "2"
 
 options = {
   "--enable-strict"       : "no",
@@ -41,12 +41,12 @@ cpp_flags_base = [
 cpp_flags = [
   "-fno-short-wchar",
   "-fno-short-enums",
-  
+
   "-DU_USING_ICU_NAMESPACE=0",
   "-DU_HAVE_NL_LANGINFO_CODESET=0",
   "-DU_TIMEZONE=0",
   "-DU_DISABLE_RENAMING=0",
-  
+
   "-DUCONFIG_NO_COLLATION=0",
   "-DUCONFIG_NO_FORMATTING=0",
   "-DUCONFIG_NO_REGULAR_EXPRESSIONS=0",
@@ -55,16 +55,11 @@ cpp_flags = [
   "-DU_STATIC_IMPLEMENTATION"
 ]
 
-def fetch_icu():
+def fetch_icu(major, minor):
   if not base.is_dir(current_dir + "icu"):
-    base.cmd("git", ["clone", "--depth", "1", "--branch", "maint/maint-" + icu_major, "https://github.com/unicode-org/icu.git", current_dir + "icu2"])
+    base.cmd("git", ["clone", "--depth", "1", "--branch", "release-" + major + "-" + minor, "https://github.com/unicode-org/icu.git", current_dir + "icu2"])
     base.copy_dir(current_dir + "icu2/icu4c", current_dir + "icu")
     base.delete_dir_with_access_error(current_dir + "icu2")
-    
-    if ("linux" == base.host_platform()):
-      base.replaceInFile(current_dir + "/icu/source/i18n/digitlst.cpp", "xlocale", "locale")
-    if False and ("mac" == base.host_platform()):
-      base.replaceInFile(current_dir + "/icu/source/tools/pkgdata/pkgdata.cpp", "cmd, \"%s %s -o %s%s %s %s%s %s %s\",", "cmd, \"%s %s -o %s%s %s %s %s %s %s\",")
   return
 
 def build_host():
@@ -111,9 +106,9 @@ def build_arch(arch):
   cross_build_dir = os.path.abspath(current_dir + "icu/cross_build")
   arch_build_dir = os.path.abspath(current_dir + "build/tmp")
   base.create_dir(arch_build_dir)
-  
+
   os.chdir(arch_build_dir)
-  base.cmd("./../../icu/source/configure", ["--with-cross-build=" + cross_build_dir] + 
+  base.cmd("./../../icu/source/configure", ["--with-cross-build=" + cross_build_dir] +
     android_ndk.get_options_dict_as_array(options) + ["--host=" + android_ndk.platforms[arch]["target"], "--prefix=" + arch_build_dir])
   base.cmd("make", ["-j4"])
   os.chdir(current_dir)
@@ -132,7 +127,7 @@ def make():
 
   old_env = dict(os.environ)
 
-  fetch_icu()
+  fetch_icu(icu_major, icu_minor)
 
   build_host()
 

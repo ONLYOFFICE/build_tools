@@ -15,6 +15,7 @@ def make():
       continue
 
     root_dir = base_dir + ("/" + native_platform + "/" + branding + ("/DocumentBuilder" if base.is_windows() else "/documentbuilder"))
+    root_dir_win64 = base_dir + "/win_64/" + branding + "/DocumentBuilder"
     if (base.is_dir(root_dir)):
       base.delete_dir(root_dir)
     base.create_dir(root_dir)
@@ -57,17 +58,7 @@ def make():
     #  base.generate_check_linux_system(git_dir + "/build_tools", root_dir)
 
     # icu
-    if (0 == platform.find("win")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icudt58.dll", root_dir + "/icudt58.dll")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/icuuc58.dll", root_dir + "/icuuc58.dll")
-
-    if (0 == platform.find("linux")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.so.58", root_dir + "/libicudata.so.58")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.so.58", root_dir + "/libicuuc.so.58")
-
-    if (0 == platform.find("mac")):
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicudata.58.dylib", root_dir + "/libicudata.58.dylib")
-      base.copy_file(core_dir + "/Common/3dParty/icu/" + platform + "/build/libicuuc.58.dylib", root_dir + "/libicuuc.58.dylib")
+    base.deploy_icu(core_dir, root_dir, native_platform)
 
     # doctrenderer
     if isWindowsXP:
@@ -106,23 +97,24 @@ def make():
     if (0 == platform.find("win")):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/src/docbuilder_midl.h", root_dir + "/include/docbuilder_midl.h")
     base.replaceInFile(root_dir + "/include/docbuilder.h", "Q_DECL_EXPORT", "BUILDING_DOCBUILDER")
-    
+
     if ("win_64" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_64/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_64/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
-      
+
     elif ("win_32" == platform):
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.com/deploy/win_32/docbuilder.com.dll", root_dir + "/docbuilder.com.dll")
       base.copy_file(core_dir + "/DesktopEditor/doctrenderer/docbuilder.net/deploy/win_32/docbuilder.net.dll", root_dir + "/docbuilder.net.dll")
 
     # correct ios frameworks
     if ("ios" == platform):
-      base.generate_plist(root_dir)
+      base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
 
     if (0 == platform.find("linux")):
       base.linux_correct_rpath_docbuilder(root_dir)
 
     if (0 == platform.find("mac")):
+      base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=1)
       base.mac_correct_rpath_x2t(root_dir)
       base.mac_correct_rpath_docbuilder(root_dir)
 
@@ -134,12 +126,12 @@ def make():
     base.copy_dir(git_dir  + "/core-fonts/crosextra",  root_dir + "/fonts/crosextra")
     base.copy_dir(git_dir  + "/core-fonts/openoffice", root_dir + "/fonts/openoffice")
     base.copy_file(git_dir + "/core-fonts/ASC.ttf",    root_dir + "/fonts/ASC.ttf")
-  
+
     # delete unnecessary builder files
     def delete_files(files):
       for file in files:
         base.delete_file(file)
-    
+
     delete_files(base.find_files(root_dir, "*.wasm"))
     delete_files(base.find_files(root_dir, "*_ie.js"))
     base.delete_file(root_dir + "/sdkjs/pdf/src/engine/cmap.bin")
@@ -153,4 +145,3 @@ def make():
     base.delete_dir(root_dir + "/sdkjs/common/Images")
 
   return
-

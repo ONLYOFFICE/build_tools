@@ -20,7 +20,7 @@ def get_branch_name(directory):
 def install_qt():
   # qt
   if not base.is_file("./qt_source_5.9.9.tar.xz"):
-    base.download("https://download.qt.io/new_archive/qt/5.9/5.9.9/single/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
+    base.download("https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/qt/qt-everywhere-opensource-src-5.9.9.tar.xz", "./qt_source_5.9.9.tar.xz")
 
   if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
     base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
@@ -57,7 +57,7 @@ def install_qt():
   return
   
 def install_qt_prebuild():
-  url_amd64 = "https://s3.eu-west-1.amazonaws.com/static-doc.teamlab.eu.com/qt/5.9.9/linux_amd64/qt_binary.7z"
+  url_amd64 = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/qt/qt_binary_linux_amd64.7z"
   base.download(url_amd64, "./qt_amd64.7z")
   base.extract("./qt_amd64.7z", "./qt_build")
   base.create_dir("./qt_build/Qt-5.9.9")
@@ -71,7 +71,10 @@ if not base.is_file("./node_js_setup_14.x"):
 
 if not base.is_dir("./qt_build"):
   print("install qt...")
-  install_qt_prebuild()
+  if base.get_env("DO_NOT_USE_PREBUILD_QT") == "1":
+    install_qt()
+  else:
+    install_qt_prebuild()
 
 branch = get_branch_name("../..")
 

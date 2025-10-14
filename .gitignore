@@ -7,6 +7,7 @@ config
 *.*~
 **~
 *.DS_Store
+.idea
 scripts/license_checker/reports
 tests/puppeteer/node_modules
 tests/puppeteer/work_directory
@@ -14,3 +15,6 @@ tests/puppeteer/package.json
 tests/puppeteer/package-lock.json
 scripts/sdkjs_common/jsdoc/node_modules
 scripts/sdkjs_common/jsdoc/package-lock.json
+tools/linux/python3/
+tools/linux/python3.tar.gz
+tools/linux/sysroot/sysroot_ubuntu_1604

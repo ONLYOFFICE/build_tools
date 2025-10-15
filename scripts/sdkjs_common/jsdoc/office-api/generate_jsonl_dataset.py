@@ -21,7 +21,9 @@ editors_names = {
     "forms": "Forms"
 }
 
-root = '../../../../..'
+script_path = os.path.abspath(__file__)
+root = os.path.abspath(os.path.join(os.path.dirname(script_path), '../../../../..'))
+
 missing_examples = []
 
 def load_json(file_path):
@@ -199,6 +201,8 @@ def process_doclets(doclets, output_entries, editor_name, model):
                 output_entries.append(create_entry(system_message, comment, assistant_message, model))
             
 def generate(output_dir, model):
+    os.chdir(os.path.dirname(script_path))
+    
     print('Generating documentation JSONL dataset...')
     
     shutil.rmtree(output_dir, ignore_errors=True)
@@ -228,7 +232,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../../office-js-api/dataset"  # Default value
+        default=f"{root}/office-js-api/dataset"  # Default value
     )
     parser.add_argument(
         "model", 

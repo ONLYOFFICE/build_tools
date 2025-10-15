@@ -13,6 +13,9 @@ editors = {
     "forms": "form-api"
 }
 
+script_path = os.path.abspath(__file__)
+root = os.path.abspath(os.path.join(os.path.dirname(script_path), '../../../../..'))
+
 missing_examples = []
 used_enumerations = set()
 
@@ -614,6 +617,8 @@ def process_doclets(data, output_dir, editor_name):
             missing_examples.append(os.path.relpath(enum_file_path, output_dir))
 
 def generate(output_dir):
+    os.chdir(os.path.dirname(script_path))
+
     print('Generating Markdown documentation...')
     
     if output_dir[-1] == '/':
@@ -637,7 +642,7 @@ if __name__ == "__main__":
         type=str, 
         help="Destination directory for the generated documentation",
         nargs='?',  # Indicates the argument is optional
-        default="../../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/"  # Default value
+        default=f"{root}/api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/"  # Default value
     )
     args = parser.parse_args()
     generate(args.destination)

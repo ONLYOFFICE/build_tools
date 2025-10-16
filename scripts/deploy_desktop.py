@@ -338,8 +338,12 @@ def make():
         
         automate_bat_data += f"shutdown /s /f /t 10\n"
         base.writeFile(git_dir + "/automate.bat", automate_bat_data)
-        start_qemu_bat_path = f"{git_dir}\\win-arm-tools\\start.bat"
-        base.cmd_exe(start_qemu_bat_path, [])
+        
+        old_curr_dir = os.path.abspath(os.curdir)
+        os.chdir(git_dir + "/win-arm-tools")
+        start_qemu_bat_path = f"start.bat"
+        base.cmd(start_qemu_bat_path, [])
+        os.chdir(old_curr_dir)
     else:
       base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
       base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + [themes_params], True)

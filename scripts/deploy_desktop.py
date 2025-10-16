@@ -304,16 +304,39 @@ def make():
       base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=2)
       base.mac_correct_rpath_desktop(root_dir)
 
+    themes_params = []
+    if ("" != config.option("themesparams")):
+      themes_params = ["--params=\"" + config.option("themesparams") + "\""]
     if is_host_not_arm:
-      sdkjs_dir = root_dir + "/editors/sdkjs"
-      end_find_platform = sdkjs_dir.rfind("/" + platform + "/")
-      sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
-      base.delete_dir(sdkjs_dir)
-      base.copy_dir(sdkjs_dir_64, sdkjs_dir)
+      if platform == "mac_arm64":
+        sdkjs_dir = root_dir + "/editors/sdkjs"
+        end_find_platform = sdkjs_dir.rfind("/" + platform + "/")
+        sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
+        base.delete_dir(sdkjs_dir)
+        base.copy_dir(sdkjs_dir_64, sdkjs_dir)
+      if platform == "win_arm64": # create bat file and start qemu to execute win arm binaries
+        qemu_git_dir = f"\\\\10.0.2.2\\{os.path.basename(os.path.abspath(git_dir))}"
+        qemu_root_dir = qemu_git_dir + "\\out\\" + native_platform + "\\" + branding + "\\DesktopEditors" 
+        
+        automate_bat_data = ""
+        automate_bat_data = f"call {qemu_root_dir}/converter/x2t -create-js-snapshots\n"
+        
+        automate_bat_data += f"call {qemu_root_dir}/converter/allfontsgen "
+        automate_bat_data += f"--use-system=\"1\" "
+        automate_bat_data += f"--input=\"{qemu_root_dir}/fonts\" "
+        automate_bat_data += f"--input=\"{qemu_git_dir}/core-fonts\" "
+        automate_bat_data += f"--allfonts=\"{qemu_root_dir}/converter/AllFonts.js\" "
+        automate_bat_data += f"--selection=\"{qemu_root_dir}/converter/font_selection.bin\"\n"
+        
+        automate_bat_data += f"call {qemu_root_dir}/converter/allthemesgen "
+        automate_bat_data += f"--converter-dir=\"{qemu_root_dir}/converter\" "
+        automate_bat_data += f"--src=\"{qemu_root_dir}/editors/sdkjs/slide/themes\" "
+        automate_bat_data += f"--allfonts=\"AllFonts.js\" "
+        automate_bat_data += f"--output=\"{qemu_root_dir}/editors/sdkjs/common/Images\" "
+        automate_bat_data += f"--params=\"{config.option("themesparams")}\"\n"
+        
+        base.writeFile(root_dir + "/automate.bat", automate_bat_data)
     else:
-      themes_params = []
-      if ("" != config.option("themesparams")):
-        themes_params = ["--params=\"" + config.option("themesparams") + "\""]
       base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
       base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params, True)
       base.delete_file(root_dir + "/converter/AllFonts.js")

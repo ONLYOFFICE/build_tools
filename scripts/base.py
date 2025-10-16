@@ -1978,6 +1978,10 @@ def create_x2t_js_cache(dir, product, platform):
     doctrenderer_lib = "libdoctrenderer.dylib" if is_file(dir + "/libdoctrenderer.dylib") else "doctrenderer.framework/doctrenderer"
     if os.path.getsize(dir + "/" + doctrenderer_lib) < 5*1024*1024:
       return
+  
+  # generating later in win arm qemu  
+  if (platform == "win_arm64" and not is_os_arm()):
+    return
 
   if ((platform == "linux_arm64") and not is_os_arm()):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)

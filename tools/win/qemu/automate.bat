@@ -47,4 +47,4 @@ for %%m in (!module_list!) do (
 		call %base_out_dir%\core\x2t -create-js-snapshots
 	)
 )
-pause
+shutdown /s /f /t 10

@@ -1973,11 +1973,12 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
 def create_artifacts_qemu_win_arm():
-  old_curr_dir = os.path.abspath(os.curdir)
-  qemu_dir = os.path.abspath(config.option("qemu-win-arm64-dir"))
-  if qemu_dir == "":
+  if config.option("qemu-win-arm64-dir") == "":
     print("For deploying win_arm64 on non arm host you should provide qemu-win-arm64-dir. More info in tools/win/qemu/README.md")
     return
+    
+  old_curr_dir = os.path.abspath(os.curdir)
+  qemu_dir = os.path.abspath(config.option("qemu-win-arm64-dir"))
 
   os.chdir(qemu_dir)
   start_qemu_bat_path = f"start.bat"

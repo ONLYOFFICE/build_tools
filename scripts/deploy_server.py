@@ -123,6 +123,8 @@ def make():
       base.delete_file(file)
 
     base.create_x2t_js_cache(converter_dir, "server", platform)
+    if platform == "win_arm64":
+      base.create_artifacts_qemu_win_arm(git_dir, "server", branding, True)
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])

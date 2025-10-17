@@ -33,9 +33,9 @@ set "base_out_dir=%script_dir%..\..\..\out\win_arm64\%branding_value%"
 for %%m in (!module_list!) do (
 	set "out_module_name=%%m"
 	if "%%m"=="desktop" (
-		call %base_out_dir%\DesktopEditors\converter\x2t -create-js-snapshots
-		call %base_out_dir%\DesktopEditors\converter\allfontsgen --use-system="1" --input="%base_out_dir%\DesktopEditors\fonts" --input="%git_dir%\core-fonts" --allfonts="%base_out_dir%\DesktopEditors\converter\AllFonts.js" --selection="%base_out_dir%\DesktopEditors\converter\font_selection.bin"
-		call %base_out_dir%\DesktopEditors\converter\allthemesgen --converter-dir="%base_out_dir%\DesktopEditors\converter" --src="%base_out_dir%\DesktopEditors\editors\sdkjs\slide\themes" --allfonts="AllFonts.js" --output="%base_out_dir%\DesktopEditors\editors\sdkjs\common\Images" --params="%themesparams%"
+		call %base_out_dir%\DesktopEditors\converter\x2t.exe -create-js-snapshots
+		call %base_out_dir%\DesktopEditors\converter\allfontsgen.exe --use-system="1" --input="%base_out_dir%\DesktopEditors\fonts" --input="%git_dir%\core-fonts" --allfonts="%base_out_dir%\DesktopEditors\converter\AllFonts.js" --selection="%base_out_dir%\DesktopEditors\converter\font_selection.bin"
+		call %base_out_dir%\DesktopEditors\converter\allthemesgen.exe --converter-dir="%base_out_dir%\DesktopEditors\converter" --src="%base_out_dir%\DesktopEditors\editors\sdkjs\slide\themes" --allfonts="AllFonts.js" --output="%base_out_dir%\DesktopEditors\editors\sdkjs\common\Images" --params="%themesparams%"
 	)
 	if "%%m"=="server" (
 		call %base_out_dir%\documentserver\server\FileConverter\bin\x2t -create-js-snapshots

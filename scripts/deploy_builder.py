@@ -119,8 +119,6 @@ def make():
       base.mac_correct_rpath_docbuilder(root_dir)
 
     base.create_x2t_js_cache(root_dir, "builder", platform)
-    if platform == "win_arm64" and not base.is_os_arm() and config.option("use-qemu") == "1":
-      base.create_artifacts_qemu_win_arm(git_dir, "builder", branding, True)
 
     base.create_dir(root_dir + "/fonts")
     base.copy_dir(git_dir  + "/core-fonts/asana",      root_dir + "/fonts/asana")

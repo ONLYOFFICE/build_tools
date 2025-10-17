@@ -75,8 +75,6 @@ def make():
     # js cache
     base.generate_doctrenderer_config(archive_dir + "/DoctRenderer.config", "./", "builder", "", "./dictionaries")
     base.create_x2t_js_cache(archive_dir, "core", platform)
-    if platform == "win_arm64" and not base.is_os_arm() and config.option("use-qemu") == "1":
-      base.create_artifacts_qemu_win_arm(git_dir, "core", branding, True)
     base.delete_file(archive_dir + "/DoctRenderer.config")
 
     # dictionaries

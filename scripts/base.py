@@ -1972,38 +1972,17 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
-def create_artifacts_qemu_win_arm(git_dir, branding, product, only_snapshots=False, themes_params=""):
-  qemu_git_dir = f"\\\\10.0.2.2\\{os.path.basename(os.path.abspath(git_dir))}"
-  qemu_root_dir = qemu_git_dir + "\\build_tools\\out\\win_arm64\\" + branding + "\\" + product 
-  
-  automate_bat_data = ""
-  automate_bat_data = f"call {qemu_root_dir}\\converter\\x2t -create-js-snapshots\n"
-  
-  if not only_snapshots:
-    automate_bat_data += f"call {qemu_root_dir}\\converter\\allfontsgen "
-    automate_bat_data += f"--use-system=\"1\" "
-    automate_bat_data += f"--input=\"{qemu_root_dir}\\fonts\" "
-    automate_bat_data += f"--input=\"{qemu_git_dir}\\core-fonts\" "
-    automate_bat_data += f"--allfonts=\"{qemu_root_dir}\\converter\\AllFonts.js\" "
-    automate_bat_data += f"--selection=\"{qemu_root_dir}\\converter\\font_selection.bin\"\n"
-    
-    automate_bat_data += f"call {qemu_root_dir}\\converter\\allthemesgen "
-    automate_bat_data += f"--converter-dir=\"{qemu_root_dir}\\converter\" "
-    automate_bat_data += f"--src=\"{qemu_root_dir}\\editors\\sdkjs\\slide\\themes\" "
-    automate_bat_data += f"--allfonts=\"AllFonts.js\" "
-    automate_bat_data += f"--output=\"{qemu_root_dir}\\editors\\sdkjs\\common\\Images\" "
-    automate_bat_data += f"--params=\"{themes_params}\"\n"
-  
-  automate_bat_data += f"shutdown /s /f /t 10\n"
-  writeFile(git_dir + "/automate.bat", automate_bat_data)
-  
+def create_artifacts_qemu_win_arm():
   old_curr_dir = os.path.abspath(os.curdir)
-  os.chdir(git_dir + "/win-arm-tools")
+  qemu_dir = os.path.abspath(config.option("qemu-win-arm64-dir"))
+  if qemu_dir == "":
+    print("For deploying win_arm64 on non arm host you should provide qemu-win-arm64-dir. More info in tools/win/qemu/README.md")
+    return
+
+  os.chdir(qemu_dir)
   start_qemu_bat_path = f"start.bat"
   cmd(start_qemu_bat_path, [])
   os.chdir(old_curr_dir)
-  
-  delete_file(git_dir + "/automate.bat")
 
 def create_x2t_js_cache(dir, product, platform):
   # mac

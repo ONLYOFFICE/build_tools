@@ -315,8 +315,6 @@ def make():
         sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
         base.delete_dir(sdkjs_dir)
         base.copy_dir(sdkjs_dir_64, sdkjs_dir)
-      if platform == "win_arm64" and config.option("use-qemu") == "1": # create bat file and start qemu to execute win arm binaries
-        base.create_artifacts_qemu_win_arm(git_dir, branding, "DesktopEditors", False, themes_params)
     else:
       base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
       base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + [themes_params], True)

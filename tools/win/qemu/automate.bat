@@ -31,7 +31,6 @@ if "!branding_value!"=="" (
 set "base_out_dir=%script_dir%..\..\..\out\win_arm64\%branding_value%"
 
 for %%m in (!module_list!) do (
-	set "out_module_name=%%m"
 	if "%%m"=="desktop" (
 		call %base_out_dir%\DesktopEditors\converter\x2t.exe -create-js-snapshots
 		call %base_out_dir%\DesktopEditors\converter\allfontsgen.exe --use-system="1" --input="%base_out_dir%\DesktopEditors\fonts" --input="%git_dir%\core-fonts" --allfonts="%base_out_dir%\DesktopEditors\converter\AllFonts.js" --selection="%base_out_dir%\DesktopEditors\converter\font_selection.bin"

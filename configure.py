@@ -43,6 +43,7 @@ parser.add_option("--vs-path", action="store", type="string", dest="vs-path", de
 parser.add_option("--siteUrl", action="store", type="string", dest="siteUrl", default="127.0.0.1", help="site url")
 parser.add_option("--multiprocess", action="store", type="string", dest="multiprocess", default="1", help="provides ability to specify single process for make")
 parser.add_option("--sysroot", action="store", type="string", dest="sysroot", default="0", help="provides ability to use sysroot (ubuntu 16.04) to build c++ code. If value is \"1\", then the sysroot from tools/linux/sysroot will be used, and if it is not there, it will download it and unpack it. You can also set value as the path to the your own sysroot (rarely used). Only for linux")
+parser.add_option("--use-qemu", action="store", type="string", dest="use-qemu", default="0", help="Use qemu for win_arm64 cross build.")
 
 (options, args) = parser.parse_args(arguments)
 configOptions = vars(options)

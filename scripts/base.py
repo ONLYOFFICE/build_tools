@@ -2002,6 +2002,8 @@ def create_artifacts_qemu_win_arm(git_dir, branding, product, only_snapshots=Fal
   start_qemu_bat_path = f"start.bat"
   cmd(start_qemu_bat_path, [])
   os.chdir(old_curr_dir)
+  
+  delete_file(git_dir + "/automate.bat")
 
 def create_x2t_js_cache(dir, product, platform):
   # mac

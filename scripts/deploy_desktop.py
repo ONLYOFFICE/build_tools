@@ -321,7 +321,7 @@ def make():
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/converter/fonts.log")
 
-    if (base.is_use_create_artifacts_qemu(platform)):
+    if not base.is_use_create_artifacts_qemu(platform):
       base.delete_exe(root_dir + "/converter/allfontsgen")
       base.delete_exe(root_dir + "/converter/allthemesgen")
 

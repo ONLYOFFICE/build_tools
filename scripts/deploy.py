@@ -22,4 +22,6 @@ def make():
     deploy_mobile.make()
   if config.check_option("module", "osign"):
     deploy_osign.make()
+  if base.is_use_create_artifacts_qemu_any_platform():
+    base.create_artifacts_qemu_any_platform()
   return

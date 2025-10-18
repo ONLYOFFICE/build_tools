@@ -1972,13 +1972,43 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
+def is_use_create_artifacts_qemu_any_platform():
+  if config.check_option("platform", "win_arm64") and not base.is_os_arm():
+    return True
+  return False
+
+def is_use_create_artifacts_qemu(platform):
+  if platform == "win_arm64" and not base.is_os_arm():
+    return True
+  return False
+
+def create_artifacts_qemu_any_platform():
+  if not is_use_create_artifacts_qemu_any_platform():
+    return
+  if config.check_option("platform", "win_arm64"):
+    create_artifacts_qemu_win_arm()
+  return;
+
+def create_artifacts_qemu_win_arm():
+  if config.option("qemu-win-arm64-dir") == "":
+    print("For deploying win_arm64 on non arm host you should provide qemu-win-arm64-dir. More info in tools/win/qemu/README.md")
+    return
+    
+  old_curr_dir = os.path.abspath(os.curdir)
+  qemu_dir = os.path.abspath(config.option("qemu-win-arm64-dir"))
+
+  os.chdir(qemu_dir)
+  start_qemu_bat_path = f"start.bat"
+  cmd(start_qemu_bat_path, [])
+  os.chdir(old_curr_dir)
+
 def create_x2t_js_cache(dir, product, platform):
   # mac
   if is_file(dir + "/libdoctrenderer.dylib") or is_dir(dir + "/doctrenderer.framework"):
     doctrenderer_lib = "libdoctrenderer.dylib" if is_file(dir + "/libdoctrenderer.dylib") else "doctrenderer.framework/doctrenderer"
     if os.path.getsize(dir + "/" + doctrenderer_lib) < 5*1024*1024:
       return
-
+  
   if ((platform == "linux_arm64") and not is_os_arm()):
     cmd_in_dir_qemu(platform, dir, "./x2t", ["-create-js-snapshots"], True)
     return

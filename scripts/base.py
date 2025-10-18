@@ -1972,6 +1972,23 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   download_addon = download_branch + "/" + download_build + "/" + product + "-" + download_platform + ".7z"
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
+def is_use_create_artifacts_qemu_any_platform():
+  if config.check_option("platform", "win_arm64") and not base.is_os_arm():
+    return True
+  return False
+
+def is_use_create_artifacts_qemu(platform):
+  if platform == "win_arm64" and not base.is_os_arm():
+    return True
+  return False
+
+def create_artifacts_qemu_any_platform():
+  if not is_use_create_artifacts_qemu_any_platform():
+    return
+  if config.check_option("platform", "win_arm64"):
+    create_artifacts_qemu_win_arm()
+  return;
+
 def create_artifacts_qemu_win_arm():
   if config.option("qemu-win-arm64-dir") == "":
     print("For deploying win_arm64 on non arm host you should provide qemu-win-arm64-dir. More info in tools/win/qemu/README.md")

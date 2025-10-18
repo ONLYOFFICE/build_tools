@@ -35,6 +35,9 @@ for %%m in (!module_list!) do (
 		call %base_out_dir%\DesktopEditors\converter\x2t.exe -create-js-snapshots
 		call %base_out_dir%\DesktopEditors\converter\allfontsgen.exe --use-system="1" --input="%base_out_dir%\DesktopEditors\fonts" --input="%git_dir%\core-fonts" --allfonts="%base_out_dir%\DesktopEditors\converter\AllFonts.js" --selection="%base_out_dir%\DesktopEditors\converter\font_selection.bin"
 		call %base_out_dir%\DesktopEditors\converter\allthemesgen.exe --converter-dir="%base_out_dir%\DesktopEditors\converter" --src="%base_out_dir%\DesktopEditors\editors\sdkjs\slide\themes" --allfonts="AllFonts.js" --output="%base_out_dir%\DesktopEditors\editors\sdkjs\common\Images" --params="%themesparams%"
+		del %base_out_dir%\DesktopEditors\converter\allfontsgen.exe
+		del %base_out_dir%\DesktopEditors\converter\allthemesgen.exe
+
 	)
 	if "%%m"=="server" (
 		call %base_out_dir%\documentserver\server\FileConverter\bin\x2t -create-js-snapshots

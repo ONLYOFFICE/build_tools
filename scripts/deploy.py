@@ -22,6 +22,6 @@ def make():
     deploy_mobile.make()
   if config.check_option("module", "osign"):
     deploy_osign.make()
-  if config.option("platform").find("win_arm64") != -1 and not base.is_os_arm():
-    base.create_artifacts_qemu_win_arm()
+  if base.is_use_create_artifacts_qemu_any_platform():
+    base.create_artifacts_qemu_any_platform()
   return

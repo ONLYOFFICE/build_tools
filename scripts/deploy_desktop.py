@@ -288,12 +288,12 @@ def make():
 
     is_host_not_arm = False
     host_platform = ""
-    if (platform == "mac_arm64" or platform == "win_arm64") and not base.is_os_arm():
+
+    # TODO: fix this on mac_arm64 (qemu)
+    # on windows we are using qemu
+    if (platform == "mac_arm64") and not base.is_os_arm():
       is_host_not_arm = True
-      if platform == "mac_arm64":
-        host_platform = "mac_64"
-      elif platform == "win_arm64":
-        host_platform = "win_64"
+      host_platform = "mac_64"
 
     # all themes generate ----
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
@@ -304,26 +304,26 @@ def make():
       base.for_each_framework(root_dir, "mac", callbacks=[base.generate_plist], max_depth=2)
       base.mac_correct_rpath_desktop(root_dir)
 
-    themes_params = ""
-    if ("" != config.option("themesparams")):
-      themes_params = "--params=\"" + config.option("themesparams") + "\""
-      
     if is_host_not_arm:
-      if platform == "mac_arm64":
-        sdkjs_dir = root_dir + "/editors/sdkjs"
-        end_find_platform = sdkjs_dir.rfind("/" + platform + "/")
-        sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
-        base.delete_dir(sdkjs_dir)
-        base.copy_dir(sdkjs_dir_64, sdkjs_dir)
+      sdkjs_dir = root_dir + "/editors/sdkjs"
+      str1 = "/" + platform + "/"
+      str2 = "/" + host_platform + "/"
+      sdkjs_dir_host = sdkjs_dir.replace(str1, str2)
+      base.delete_dir(sdkjs_dir)
+      base.copy_dir(sdkjs_dir_host, sdkjs_dir)
     else:
+      themes_params = []
+      if ("" != config.option("themesparams")):
+        themes_params = ["--params=\"" + config.option("themesparams") + "\""]
       base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
-      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + [themes_params], True)
+      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params, True)
       base.delete_file(root_dir + "/converter/AllFonts.js")
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/converter/fonts.log")
 
-    base.delete_exe(root_dir + "/converter/allfontsgen")
-    base.delete_exe(root_dir + "/converter/allthemesgen")
+    if (base.is_use_create_artifacts_qemu(platform)):
+      base.delete_exe(root_dir + "/converter/allfontsgen")
+      base.delete_exe(root_dir + "/converter/allthemesgen")
 
     if not isUseJSC:
       base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")

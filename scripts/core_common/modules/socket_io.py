@@ -8,6 +8,11 @@ import os
 import subprocess
 import glob
 
+def clean():
+  if base.is_dir("socket.io-client-cpp"):
+    base.delete_dir_with_access_error("socket.io-client-cpp")
+  return
+
 def correct_namespace(dir):
   folder = dir
   if ("/" != folder[-1:]):
@@ -25,6 +30,12 @@ def correct_namespace(dir):
 
 def make():
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/socketio"
+
+  old_cur = os.getcwd()
+  os.chdir(base_dir)
+  base.common_check_version("socketio", "1", clean)
+  os.chdir(old_cur)
+
   if not base.is_dir(base_dir + "/socket.io-client-cpp"):
     base.cmd_in_dir(base_dir, "git", ["clone", "https://github.com/socketio/socket.io-client-cpp.git"])
     base.cmd_in_dir(base_dir + "/socket.io-client-cpp", "git", ["checkout", "da779141a7379cc30c870d48295033bc16a23c66"])
@@ -37,6 +48,7 @@ def make():
     base.apply_patch(base_dir + "/socket.io-client-cpp/src/internal/sio_client_impl.cpp", base_dir + "/patches/sio_client_impl_fail.patch")
     base.apply_patch(base_dir + "/socket.io-client-cpp/src/internal/sio_client_impl.cpp", base_dir + "/patches/sio_client_impl_open.patch")
     base.apply_patch(base_dir + "/socket.io-client-cpp/src/internal/sio_client_impl.cpp", base_dir + "/patches/sio_client_impl_close_timeout.patch")
+    base.apply_patch(base_dir + "/socket.io-client-cpp/src/internal/sio_client_impl.cpp", base_dir + "/patches/sio_client_impl_encode.patch")
 
     # no tls realization (remove if socket.io fix this)
     dst_dir = base_dir + "/socket.io-client-cpp/src_no_tls"

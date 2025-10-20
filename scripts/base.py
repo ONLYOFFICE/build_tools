@@ -1973,12 +1973,12 @@ def get_autobuild_version(product, platform="", branch="", build=""):
   return "http://repo-doc-onlyoffice-com.s3.amazonaws.com/archive/" + download_addon
 
 def is_use_create_artifacts_qemu_any_platform():
-  if config.check_option("platform", "win_arm64") and not base.is_os_arm():
+  if config.check_option("platform", "win_arm64") and not is_os_arm():
     return True
   return False
 
 def is_use_create_artifacts_qemu(platform):
-  if platform == "win_arm64" and not base.is_os_arm():
+  if platform == "win_arm64" and not is_os_arm():
     return True
   return False
 

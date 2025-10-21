@@ -16,7 +16,11 @@ def change_bootstrap():
   content += "infra/3pp/tools/cpython/${platform} version:2@2.7.18.chromium.39\n\n"
 
   content += "@Subdir python3\n"
-  content += "infra/3pp/tools/cpython3/${platform} version:2@3.8.10.chromium.23\n\n"
+
+  if ("windows" == base.host_platform()):
+    content += "infra/3pp/tools/cpython3/${platform} version:2@3.11.8.chromium.35\n\n"
+  else:
+    content += "infra/3pp/tools/cpython3/${platform} version:2@3.8.10.chromium.23\n\n"
 
   content += "@Subdir git\n"
   content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"

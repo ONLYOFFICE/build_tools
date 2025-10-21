@@ -14,6 +14,9 @@ editors = {
     "forms": "form-api"
 }
 
+script_path = os.path.abspath(__file__)
+root = os.path.abspath(os.path.join(os.path.dirname(script_path), '../../../../..'))
+
 missing_examples = []
 used_enumerations = set()
 
@@ -372,6 +375,8 @@ def process_events(data, editor_dir):
     write_markdown_file(os.path.join(events_dir, "Events.md"), generate_events_summary(events))
 
 def generate_events(output_dir):
+    os.chdir(os.path.dirname(script_path))
+    
     if output_dir.endswith('/'):
         output_dir = output_dir[:-1]
     tmp = os.path.join(output_dir, 'tmp_json')
@@ -391,7 +396,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "destination",
         nargs="?",
-        default="../../../../../api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/",
+        default=f"{root}/api.onlyoffice.com/site/docs/plugin-and-macros/interacting-with-editors/",
         help="Output directory"
     )
     args = parser.parse_args()

@@ -44,7 +44,8 @@ def make_windows():
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
     "windows_x86":    "x86",
-    "windows_x86_xp": "x86"
+    "windows_x86_xp": "x86",
+    "windows_arm64":  "arm64"
   }[common.platform]
   xp = common.platform.endswith("_xp")
 

@@ -11,8 +11,13 @@ def make():
     old_dir = os.getcwd()
     os.chdir(base_dir)
 
+    if (base.is_dir("build")):
+        base.delete_dir_with_access_error("build")
+    if (base.is_dir("libwebp")):
+        base.delete_dir_with_access_error("libwebp")
+
     if not base.is_dir("libwebp"):
-        base.cmd("git", ["clone", "https://chromium.googlesource.com/webm/libwebp"])
+        base.cmd("git", ["clone", "v1.6.0", "https://chromium.googlesource.com/webm/libwebp"])
 
     base_dir = base_dir + "/libwebp"
     os.chdir(base_dir)
@@ -49,27 +54,29 @@ def make():
     # LINUX
     elif "linux" == base.host_platform():
         platform = "linux_64"
-        arch = "x86_64"
+        arch = "x86_64-linux-gnu"
         target_file = "libwebp.a"
-        make_args = ["-f", "makefile.unix", target_file]
 
-        debug = ""
+        cflags = "-O3 -DNDEBUG"
         if build_type == "debug":
-            debug = " -g "
+            cflags = "-O0 -g"
 
         if config.check_option("platform", "linux_arm64"):
             platform = "linux_arm64"
-            arch = "armv8-a"
+            arch = "aarch64-linux-gnu"
 
         build_dir = "./../build/" + platform + "/" + build_type
-        make_args.append("CFLAGS=\"" + debug + "-march=" + arch + "\"")
         if not base.is_dir(build_dir):
             base.create_dir(build_dir)
-        if base.is_file(build_dir + "/" + target_file):
+        if base.is_file(build_dir + "/src/.libs/" + target_file):
             return
 
-        base.cmd("make", make_args)
-        base.copy_file(target_file, build_dir)
+        base.cmd("./autogen.sh")
+        os.chdir(build_dir)
+        base.cmd("./../../../libwebp/configure",  ["--host=" + arch, "--enable-static", "--disable-shared", "--disable-libwebpdecoder",
+                                                   "--disable-libwebpdemux", "--disable-libwebpmux", "--disable-libwebpextras", 
+                                                   "CFLAGS=" + cflags, "LDFLAGS=-static"])
+        base.cmd("make", ["-j$(nproc)"])
 
     os.chdir(old_dir)
     return

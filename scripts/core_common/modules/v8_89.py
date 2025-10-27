@@ -78,6 +78,9 @@ def make_args(args, platform, is_64=True, is_debug=False):
   if (platform == "windows"):
     args_copy.append("is_clang=false")
 
+  if (platform == "mac") and base.is_os_arm():
+    args_copy.append("host_cpu=\\\"x64\\\"")
+
   if linux_clang != True:
     args_copy.append("use_custom_libcxx=false")
 

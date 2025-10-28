@@ -62,16 +62,16 @@ def make_windows():
   if not xp:
     make_prepare()
     make_zip()
-    make_inno()
     if branding.onlyoffice:
+      make_inno()
       make_inno("standalone")
       make_inno("update")
-    make_advinst()
+      make_advinst()
 
-    make_prepare("commercial")
-    make_zip("commercial")
-    make_inno("commercial")
-    make_advinst("commercial")
+      make_prepare("commercial")
+      make_zip("commercial")
+      make_inno("commercial")
+      make_advinst("commercial")
   else:
     make_prepare("xp")
     make_zip("xp")
@@ -87,7 +87,8 @@ def make_prepare(edition = "opensource"):
   args = [
     "-Version", package_version,
     "-Arch", arch,
-    "-Target", edition
+    "-Target", edition,
+    "-CompanyName", branding.company_name
   ]
   if common.sign:
     args += ["-Sign"]
@@ -105,7 +106,8 @@ def make_zip(edition = "opensource"):
   args = [
     "-Version", package_version,
     "-Arch", arch,
-    "-Target", edition
+    "-Target", edition,
+    "-CompanyName", branding.company_name
   ]
   # if common.sign:
   #   args += ["-Sign"]

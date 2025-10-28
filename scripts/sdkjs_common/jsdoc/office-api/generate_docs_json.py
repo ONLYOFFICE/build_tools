@@ -5,7 +5,8 @@ import argparse
 import re
 import platform
 
-root = '../../../../..'
+script_path = os.path.abspath(__file__)
+root = os.path.abspath(os.path.join(os.path.dirname(script_path), '../../../../..'))
 
 # Configuration files
 configs = [
@@ -23,6 +24,8 @@ editors_maps = {
 }
 
 def generate(output_dir, md=False):
+    os.chdir(os.path.dirname(script_path))
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

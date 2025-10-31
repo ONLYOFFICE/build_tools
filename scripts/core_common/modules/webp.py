@@ -34,8 +34,6 @@ def fetch_repo():
     old_dir = os.getcwd()
     os.chdir(base_dir)
 
-    if (base.is_dir("build")):
-        base.delete_dir_with_access_error("build")
     if (base.is_dir("libwebp")):
         base.delete_dir_with_access_error("libwebp")
 
@@ -45,6 +43,7 @@ def fetch_repo():
     return old_dir
 
 def create_build_dir(platform, build_type) -> str:
+    build_dir = ""
     if "win" in platform:
         target_file = "libwebp"
         if build_type == "debug":
@@ -53,18 +52,17 @@ def create_build_dir(platform, build_type) -> str:
         build_dir = "./../build/" + platform + "/"
         if not base.is_dir(build_dir):
             base.create_dir(build_dir)
-            return build_dir
         elif base.is_file(build_dir + build_type + "/" + ARCHES[platform] + "/lib/" + target_file):
-            return ""
+            build_dir = ""
     else:
         build_dir = "./../build/" + platform + "/" + build_type
         if not base.is_dir(build_dir):
             base.create_dir(build_dir)
-            return build_dir
         if base.is_file(build_dir + "/src/.libs/libwebp.a"):
-            return ""
+            build_dir = ""
+    return build_dir
 
-def get_args(platform, build_type):
+def get_args(platform, build_type, build_dir):
     if "win" in platform:
         args = []
         args.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + ARCHES[platform])
@@ -128,8 +126,9 @@ def make():
     if -1 != config.option("config").lower().find("debug"):
         build_type = "debug"
     platform = config.option("platform")
-    args = get_args(platform, build_type)
     build_dir = create_build_dir(platform, build_type)
+    args = get_args(platform, build_type, build_dir)
+    
     
     if build_dir == "":
         return

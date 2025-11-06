@@ -4,6 +4,7 @@
 import package_utils as utils
 import package_common as common
 import package_branding as branding
+import urllib.request
 
 def make():
   utils.log_h1("BUILDER")
@@ -177,6 +178,16 @@ def make_wheel():
 
   old_cwd = utils.get_cwd()
   utils.set_cwd("python/docbuilder")
+
+  # Download builder long-description
+  readme_url = "https://raw.githubusercontent.com/ONLYOFFICE/DocumentBuilder/master/README.md"
+  readme_path = "../README.md"
+  try:
+    utils.log("Downloading DocumentBuilder README.md from GitHub...")
+    urllib.request.urlretrieve(readme_url, readme_path)
+    utils.log("README.md downloaded successfully")
+  except Exception as e:
+    utils.log(f"Failed to download README.md: {e}")
 
   if not utils.is_file("docbuilder.py"):
     utils.copy_file("lib/docbuilder.py", "docbuilder.py")

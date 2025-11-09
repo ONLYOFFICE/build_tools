@@ -180,11 +180,11 @@ def make_wheel():
   utils.set_cwd("python/docbuilder")
 
   # Download builder long-description
-  readme_url = "https://raw.githubusercontent.com/ONLYOFFICE/DocumentBuilder/master/README.md"
-  readme_path = "../README.md"
+  description_url = "https://raw.githubusercontent.com/ONLYOFFICE/DocumentBuilder/master/README.md"
+  description_path = "../README.md"
   try:
     utils.log("Downloading DocumentBuilder README.md from GitHub...")
-    urllib.request.urlretrieve(readme_url, readme_path)
+    urllib.request.urlretrieve(description_url, description_path)
     utils.log("README.md downloaded successfully")
   except Exception as e:
     utils.log(f"Failed to download README.md: {e}")

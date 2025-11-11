@@ -5,7 +5,7 @@ import os
 import platform
 import sys
 
-sys.path.append(os.path.dirname(__file__) + '/tools/linux/arm/cross_arm64') 
+sys.path.append(os.path.dirname(__file__) + '/../tools/linux/arm/cross_arm64') 
 import download_arm_sysroot
 import download_arm_toolchain
 
@@ -103,6 +103,24 @@ def parse():
         base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
         if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
           os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
+    
+  # setup Qt for cross-complilation
+  if check_option("platform", "linux_arm64") and not base.is_os_arm():
+    gcc_64_qt_dir = os.path.abspath(options["qt-dir"] + "/gcc_64")
+    arm_64_qt_dir = os.path.abspath(options["qt-dir"] + "/gcc_arm64")
+    
+    if not os.path.exists(arm_64_qt_dir):
+      print("For success desktop module cross build arm64, add Qt binaries for arm64 platform in your qt-dir.")
+  
+    ln_files = []
+    ln_files.append("/bin/qmake")
+    ln_files.append("/bin/rcc")
+    ln_files.append("/bin/moc")
+    
+    for ln_file in ln_files:
+      if not os.path.islink(arm_64_qt_dir + ln_file):
+        os.rename(arm_64_qt_dir + ln_file, arm_64_qt_dir + ln_file + ".bak")
+        os.symlink(gcc_64_qt_dir + ln_file, arm_64_qt_dir + ln_file)
 
   if is_cef_107():
     extend_option("config", "cef_version_107")

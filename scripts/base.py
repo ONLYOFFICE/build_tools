@@ -735,17 +735,11 @@ def qt_setup(platform):
             copy_file(get_script_dir() + "/../tools/mac/toolchain.prf", old_path_file)
           except IOError as e:
             print("Unable to copy file: " + old_path_file)
-
+        
   compiler_platform = compiler["compiler"] if platform_is_32(platform) else compiler["compiler_64"]
   qt_dir = qt_dir + "/" + compiler_platform
   
-  # setup Qt for cross-complilation
-  if platform == "linux_arm64" and not is_dir(qt_dir) and not is_os_arm():
-    override_qt_directory = os.path.abspath(os.path.dirname(__file__) + "/../tools/linux/arm/cross_arm64/qt_build/Qt-5.15.2/linux_arm64")
-    if is_dir(override_qt_directory):
-      qt_dir = os.path.abspath(override_qt_directory)
-
-  if (0 == platform.find("linux_arm")) and not is_dir(qt_dir):
+  if (0 == platform.find("linux_arm")) and not is_dir(qt_dir) and is_os_arm():
     if ("gcc_arm64" == compiler_platform):
       qt_dir = config.option("qt-dir") + "/gcc_64"
     if ("gcc_arm" == compiler_platform):

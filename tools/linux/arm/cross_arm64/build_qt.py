@@ -7,10 +7,10 @@ import download_arm_toolchain
 import download_arm_sysroot
 sys.path.append('../../../../scripts')
 
-import base
+import base # type: ignore
   
 def update_qmake_conf():
-  replace_file = "./qt-everywhere-src-5.15.2/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
+  replace_file = "./qt-everywhere-opensource-src-5.9.9/qtbase/mkspecs/linux-aarch64-gnu-g++/qmake.conf"
   
   replace_src = ""
   replace_src += "# modifications to g++.conf\n"
@@ -52,7 +52,7 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
   arm_toolchain_path = os.path.abspath(arm_toolchain_path)
   arm_sysroot_path = os.path.abspath(arm_sysroot_path)
   
-  qt_build_path = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.15.2/linux_arm64"
+  qt_build_path = os.path.dirname(os.path.abspath(__file__)) + "/qt_build/Qt-5.9.9/linux_arm64"
   qt_params = ["-opensource",
     "-confirm-license",
     "-release",
@@ -91,17 +91,17 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
   for param in qt_params:
       qt_params_str += (param + " ")
 
-  qt_url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/qt/qt-everywhere-src-5.15.2.tar.xz"
-  if not base.is_file("./qt_source_5.15.2.tar.xz"):
-    base.download(qt_url, "./qt_source_5.15.2.tar.xz")
+  qt_url = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/qt/qt-everywhere-opensource-src-5.9.9.tar.xz"
+  if not base.is_file("./qt_source_5.9.9.tar.xz"):
+    base.download(qt_url, "./qt_source_5.9.9.tar.xz")
   
-  if not base.is_dir("./qt-everywhere-src-5.15.2"):
-    base.cmd("tar", ["-xf", "./qt_source_5.15.2.tar.xz"])
+  if not base.is_dir("./qt-everywhere-opensource-src-5.9.9"):
+    base.cmd("tar", ["-xf", "./qt_source_5.9.9.tar.xz"])
     
   # https://bugreports.qt.io/browse/QTBUG-93452
   # for GCC 11 and Qt5/Qt6
   additional_gcc_11 = "#ifdef __cplusplus\n#include <limits>\n#endif\n"
-  chanage_file = "./qt-everywhere-src-5.15.2/qtbase/src/corelib/global/qglobal.h"
+  chanage_file = "./qt-everywhere-opensource-src-5.9.9/qtbase/src/corelib/global/qglobal.h"
   filedata = base.readFile(chanage_file)
   if filedata.find(additional_gcc_11) == -1:
     filedata = additional_gcc_11 + filedata
@@ -115,9 +115,9 @@ def make(arm_toolchain_path="", arm_sysroot_path=""):
   os.environ["PKG_CONFIG_LIBDIR"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""
   os.environ["PKG_CONFIG_PATH"] = "\"" + arm_sysroot_path + "/usr/lib/aarch64-linux-gnu/pkgconfig" + "\""
 
-  base.cmd_in_dir("./qt-everywhere-src-5.15.2", "./configure " + qt_params_str)
-  base.cmd_in_dir("./qt-everywhere-src-5.15.2", "make -j4")
-  base.cmd_in_dir("./qt-everywhere-src-5.15.2", "make install")
+  base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "./configure " + qt_params_str)
+  base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make -j4")
+  base.cmd_in_dir("./qt-everywhere-opensource-src-5.9.9", "make install")
   
 if __name__ == "__main__":
   arm_toolchain_path = "./arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu"

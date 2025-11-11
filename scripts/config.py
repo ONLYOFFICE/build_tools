@@ -3,8 +3,11 @@
 import base
 import os
 import platform
+import sys
 
-from tools.linux.arm.cross_arm64 import download_arm_sysroot, download_arm_toolchain
+sys.path.append(os.path.dirname(__file__) + '/tools/linux/arm/cross_arm64') 
+import download_arm_sysroot
+import download_arm_toolchain
 
 def parse():
   configfile = open(base.get_script_dir() + "/../config", "r")

@@ -6,8 +6,8 @@ import os
 sys.path.append('../../../../scripts')
 sys.path.append('../../sysroot')
 
-import base
-import fix_symlinks
+import base # type: ignore
+import fix_symlinks # type: ignore
 
 def make():
     arm_sysroot_dir = os.path.abspath("./arm_sysroot")

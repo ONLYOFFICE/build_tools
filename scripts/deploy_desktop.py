@@ -267,11 +267,6 @@ def make():
     else:
       base.copy_dir(git_dir + "/desktop-apps/common/loginpage/providers", root_dir + "/providers")
 
-    # license
-    if (0 == platform.find("mac")):
-      base.create_dir(root_dir + "/license")
-      base.copy_file(git_dir + "/desktop-apps/common/package/license/opensource/EULA.html", root_dir + "/license/EULA.html")
-
     isUseJSC = False
     if (0 == platform.find("mac")):
       doctrenderer_lib = "libdoctrenderer.dylib"
@@ -293,12 +288,12 @@ def make():
 
     is_host_not_arm = False
     host_platform = ""
-    if (platform == "mac_arm64" or platform == "win_arm64") and not base.is_os_arm():
+
+    # TODO: fix this on mac_arm64 (qemu)
+    # on windows we are using qemu
+    if (platform == "mac_arm64") and not base.is_os_arm():
       is_host_not_arm = True
-      if platform == "mac_arm64":
-        host_platform = "mac_64"
-      elif platform == "win_arm64":
-        host_platform = "win_64"
+      host_platform = "mac_64"
 
     # all themes generate ----
     base.copy_exe(core_build_dir + "/bin/" + platform_postfix, root_dir + "/converter", "allfontsgen")
@@ -311,10 +306,11 @@ def make():
 
     if is_host_not_arm:
       sdkjs_dir = root_dir + "/editors/sdkjs"
-      end_find_platform = sdkjs_dir.rfind("/" + platform + "/")
-      sdkjs_dir_64 = sdkjs_dir[0:end_find_platform] + "/" + host_platform + "/" + sdkjs_dir[end_find_platform+11:]
+      str1 = "/" + platform + "/"
+      str2 = "/" + host_platform + "/"
+      sdkjs_dir_host = sdkjs_dir.replace(str1, str2)
       base.delete_dir(sdkjs_dir)
-      base.copy_dir(sdkjs_dir_64, sdkjs_dir)
+      base.copy_dir(sdkjs_dir_host, sdkjs_dir)
     else:
       themes_params = []
       if ("" != config.option("themesparams")):
@@ -329,8 +325,9 @@ def make():
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/converter/fonts.log")
 
-    base.delete_exe(root_dir + "/converter/allfontsgen")
-    base.delete_exe(root_dir + "/converter/allthemesgen")
+    if not base.is_use_create_artifacts_qemu(platform):
+      base.delete_exe(root_dir + "/converter/allfontsgen")
+      base.delete_exe(root_dir + "/converter/allthemesgen")
 
     if not isUseJSC:
       base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")

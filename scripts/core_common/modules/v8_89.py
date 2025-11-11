@@ -7,6 +7,25 @@ import base
 import os
 import subprocess
 
+def clean():
+  if base.is_dir("depot_tools"):
+    base.delete_dir_with_access_error("depot_tools")
+    base.delete_dir("depot_tools")
+  if base.is_dir("v8"):
+    base.delete_dir_with_access_error("v8")
+    base.delete_dir("v8")
+  if base.is_exist("./.gclient"):
+    base.delete_file("./.gclient")
+  if base.is_exist("./.gclient_entries"):
+    base.delete_file("./.gclient_entries")
+  if base.is_exist("./.gclient_previous_sync_commits"):
+    base.delete_file("./.gclient_previous_sync_commits")
+  if base.is_exist("./.gcs_entries"):
+    base.delete_file("./.gcs_entries")
+  if base.is_exist("./.cipd"):
+    base.delete_dir("./.cipd")
+  return
+
 def change_bootstrap():
   base.move_file("./depot_tools/bootstrap/manifest.txt", "./depot_tools/bootstrap/manifest.txt.bak")
   content = "# changed by build_tools\n\n"
@@ -16,7 +35,11 @@ def change_bootstrap():
   content += "infra/3pp/tools/cpython/${platform} version:2@2.7.18.chromium.39\n\n"
 
   content += "@Subdir python3\n"
-  content += "infra/3pp/tools/cpython3/${platform} version:2@3.8.10.chromium.23\n\n"
+
+  if ("windows" == base.host_platform()):
+    content += "infra/3pp/tools/cpython3/${platform} version:2@3.11.8.chromium.35\n\n"
+  else:
+    content += "infra/3pp/tools/cpython3/${platform} version:2@3.8.10.chromium.23\n\n"
 
   content += "@Subdir git\n"
   content += "infra/3pp/tools/git/${platform} version:2@2.41.0.chromium.11\n"
@@ -73,6 +96,9 @@ def make_args(args, platform, is_64=True, is_debug=False):
 
   if (platform == "windows"):
     args_copy.append("is_clang=false")
+
+  if (platform == "mac") and base.is_os_arm():
+    args_copy.append("host_cpu=\\\"x64\\\"")
 
   if linux_clang != True:
     args_copy.append("use_custom_libcxx=false")
@@ -141,6 +167,8 @@ def make():
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/v8_89"
   if not base.is_dir(base_dir):
     base.create_dir(base_dir)
+
+  base.common_check_version("v8", "1", clean)
 
   if ("mac" == base.host_platform()):
     base.cmd("git", ["config", "--global", "http.postBuffer", "157286400"], True)

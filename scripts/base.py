@@ -922,7 +922,6 @@ def qt_copy_icu(out):
 
   if config.check_option("platform", "linux_arm64") and config.option("arm64-sysroot") != "":
     postfixes = ["/aarch64-linux-gnu"]
-    prefix = config.option("arm64-sysroot")
   else:
     if config.option("sysroot") != "":
       prefix = config.option("sysroot")

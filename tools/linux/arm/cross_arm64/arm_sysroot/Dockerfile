@@ -26,4 +26,5 @@ RUN apt-get -y install \
     libxrender-dev \
     libxss-dev \
 	libxkbcommon-dev \
-	libxkbcommon-x11-dev
+	libxkbcommon-x11-dev \
+    libnotify-dev

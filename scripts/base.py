@@ -921,7 +921,7 @@ def qt_copy_icu(out):
   postfixes = [""]
 
   if config.check_option("platform", "linux_arm64") and config.option("arm64-sysroot") != "":
-    postfixes = ["aarch64-linux-gnu"]
+    postfixes = ["/aarch64-linux-gnu"]
     prefix = config.option("arm64-sysroot")
   else:
     if config.option("sysroot") != "":
@@ -930,13 +930,11 @@ def qt_copy_icu(out):
     postfixes += ["/x86_64-linux-gnu"]
     postfixes += ["/i386-linux-gnu"]
 
-
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]
     tests += [prefix + "/lib64" + postfix]
     tests += [prefix + "/usr/lib" + postfix]
     tests += [prefix + "/usr/lib64" + postfix]
-
 
   for test in tests:
     if (_check_icu_common(test, out)):

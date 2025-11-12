@@ -155,9 +155,9 @@ def parse():
       download_arm_toolchain.make()
       options["arm64-toolchain-bin"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_toolchain/gcc-linaro-5.4.1-2017.05-x86_64_aarch64-linux-gnu/bin")
       
-      
   if not "arm64-sysroot" in options:
     download_arm_sysroot.make()
+    options["arm64-sysroot"] = os.path.abspath(base.get_script_dir() + "/../tools/linux/arm/cross_arm64/arm_sysroot/sysroot-ubuntu20.04-arm64v8")
       
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):

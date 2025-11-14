@@ -1894,7 +1894,6 @@ def set_sysroot_env():
   if "linux" == host_platform() and config.option("sysroot") != "":
     os.environ['PATH'] = config.option("sysroot") + "/usr/bin:" + get_env("PATH")
     os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-    os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
     os.environ['CC'] = config.get_custom_sysroot_bin() + "/gcc"
     os.environ['CXX'] = config.get_custom_sysroot_bin() + "/g++"
     os.environ['CFLAGS'] = "--sysroot=" + config.option("sysroot")

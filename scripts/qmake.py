@@ -103,6 +103,7 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       
     if "" != config.option("sysroot"):
       os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
       
     base.cmd_exe(qmake_app, build_params)
     

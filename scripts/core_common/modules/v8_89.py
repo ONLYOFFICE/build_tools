@@ -191,7 +191,7 @@ def make():
       os.chdir("v8")
       base.cmd("git", ["config", "--system", "core.longpaths", "true"], True)
       os.chdir("../")
-    v8_branch_version = "8.9-lkgr"
+    v8_branch_version = "remotes/branch-heads/8.9"
     if ("mac" == base.host_platform()):
       v8_branch_version = "remotes/branch-heads/9.9"
     base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)

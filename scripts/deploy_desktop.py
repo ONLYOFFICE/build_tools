@@ -247,6 +247,8 @@ def make():
     isUseAgent = True
     if isWindowsXP:
       isUseAgent = False
+    if (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
+      isUseAgent = False
 
     if (isUseAgent):
       agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"

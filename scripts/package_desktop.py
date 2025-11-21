@@ -65,7 +65,8 @@ def make_windows():
     if branding.onlyoffice:
       make_inno()
       make_inno("standalone")
-      make_inno("update")
+      if arch != "arm64":
+        make_inno("update")
       make_advinst()
 
       make_prepare("commercial")
@@ -347,7 +348,9 @@ def make_linux():
     if common.deploy:
       for t in branding.desktop_make_targets:
         utils.log_h2("desktop " + edition + " " + t["make"] + " deploy")
-        ret = s3_upload(utils.glob_path(t["src"]), t["dst"])
+        ret = s3_upload(
+          [i for i in utils.glob_path(t["src"]) if "enterprise-help" not in i],
+          t["dst"])
         utils.set_summary("desktop " + edition + " " + t["make"] + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

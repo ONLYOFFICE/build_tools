@@ -244,8 +244,10 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
-    isUseAgent = False
+    isUseAgent = True
     if isWindowsXP:
+      isUseAgent = False
+    if (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
       isUseAgent = False
 
     if (isUseAgent):

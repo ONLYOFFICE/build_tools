@@ -100,11 +100,15 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if "1" == config.option("use-clang"):
       build_params.append("-spec")
       build_params.append("linux-clang-libc++")
+      
+    if "" != config.option("sysroot"):
+      os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+      
+    base.cmd_exe(qmake_app, build_params)
+    
     if "" != config.option("sysroot"):
       base.set_sysroot_env()
-      base.cmd_exe(qmake_app, build_params) # calls cmd_exe to pass os.env
-    else:
-      base.cmd(qmake_app, build_params)
 
     base.correct_makefile_after_qmake(platform, makefile)
     if ("1" == config.option("clean")):

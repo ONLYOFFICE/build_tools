@@ -44,7 +44,8 @@ def make_windows():
     "windows_x64":    "x64",
     "windows_x64_xp": "x64",
     "windows_x86":    "x86",
-    "windows_x86_xp": "x86"
+    "windows_x86_xp": "x86",
+    "windows_arm64":  "arm64"
   }[common.platform]
   xp = common.platform.endswith("_xp")
 
@@ -61,16 +62,17 @@ def make_windows():
   if not xp:
     make_prepare()
     make_zip()
-    make_inno()
     if branding.onlyoffice:
+      make_inno()
       make_inno("standalone")
-      make_inno("update")
-    make_advinst()
+      if arch != "arm64":
+        make_inno("update")
+      make_advinst()
 
-    make_prepare("commercial")
-    make_zip("commercial")
-    make_inno("commercial")
-    make_advinst("commercial")
+      make_prepare("commercial")
+      make_zip("commercial")
+      make_inno("commercial")
+      make_advinst("commercial")
   else:
     make_prepare("xp")
     make_zip("xp")
@@ -86,7 +88,8 @@ def make_prepare(edition = "opensource"):
   args = [
     "-Version", package_version,
     "-Arch", arch,
-    "-Target", edition
+    "-Target", edition,
+    "-CompanyName", branding.company_name
   ]
   if common.sign:
     args += ["-Sign"]
@@ -104,7 +107,8 @@ def make_zip(edition = "opensource"):
   args = [
     "-Version", package_version,
     "-Arch", arch,
-    "-Target", edition
+    "-Target", edition,
+    "-CompanyName", branding.company_name
   ]
   # if common.sign:
   #   args += ["-Sign"]
@@ -344,7 +348,9 @@ def make_linux():
     if common.deploy:
       for t in branding.desktop_make_targets:
         utils.log_h2("desktop " + edition + " " + t["make"] + " deploy")
-        ret = s3_upload(utils.glob_path(t["src"]), t["dst"])
+        ret = s3_upload(
+          [i for i in utils.glob_path(t["src"]) if "enterprise-help" not in i],
+          t["dst"])
         utils.set_summary("desktop " + edition + " " + t["make"] + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

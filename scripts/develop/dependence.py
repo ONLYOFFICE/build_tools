@@ -919,8 +919,19 @@ def check_postgreConfig(postgrePath = ''):
     print('Database creation result: ' + str(create_result))
     
     if create_result:
+      # Give user rights to database and schema
+      print('\nGranting database privileges to user ' + dbUser + '...')
+      db_grant_cmd = postgreLoginRoot + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + dbUser + ';"'
+      db_grant_result = base.run_command_in_dir(postgre_path_to_bin, db_grant_cmd)
+      print('Database grant result: ' + str(db_grant_result['returncode']))
+      
+      print('Granting schema privileges to user ' + dbUser + '...')
+      schema_cmd = postgreLoginRoot + '-d ' + dbName + ' -c "GRANT ALL ON SCHEMA public TO ' + dbUser + ';"'
+      schema_result = base.run_command_in_dir(postgre_path_to_bin, schema_cmd)
+      print('Schema grant result: ' + str(schema_result['returncode']))
+      
       print('\nConfiguring database with createdb.sql...')
-      configure_result = configureDb(rootUser, dbName, creatdb_path, postgre_path_to_bin)
+      configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
       print('Database configuration result: ' + str(configure_result))
       result = create_result and configure_result
     else:
@@ -934,18 +945,37 @@ def check_postgreConfig(postgrePath = ''):
     
     if table_count_result['stdout'].find(' 0') != -1:
       print('Database ' + dbName + ' has no tables - configuring...')
-      base.print_info('Configuring ' + dbName + ' database...')
-      configure_result = configureDb(rootUser, dbName, creatdb_path, postgre_path_to_bin)
-      print('Configuration completed: ' + ('SUCCESS' if configure_result else 'FAILED'))
-      result = configure_result and result
     else:
-      print('Database ' + dbName + ' already has tables - skipping configuration')
+      print('Database ' + dbName + ' has tables - checking ownership...')
+      # Check if tables belong to postgres instead of onlyoffice user
+      owner_check = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-d ' + dbName + ' -c "\dt"')
+      if owner_check['stdout'].find('postgres') != -1 and owner_check['stdout'].find(dbUser) == -1:
+        print('Tables belong to postgres, not ' + dbUser + ' - need to recreate')
+        print('Dropping existing tables...')
+        drop_result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-d ' + dbName + ' -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"')
+        print('Schema recreation result: ' + str(drop_result['returncode']))
+        print('Will proceed to recreate tables with correct owner...')
+      else:
+        print('Database ' + dbUser + ' already has correct tables - skipping configuration')
+        return result
 
-  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
-    print('User ' + dbUser + ' has no database privileges!')
-    base.print_info('Setting database privileges for user ' + dbUser + '...')
-    result = set_dbPrivilegesForUser(dbUser, dbName, postgre_path_to_bin) and result
-  print('User ' + dbUser + ' has database privileges')
+    # Configure database (either empty or after recreation)
+    print('Granting database privileges to user ' + dbUser + '...')
+    db_grant_cmd = postgreLoginRoot + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + dbUser + ';"'
+    db_grant_result = base.run_command_in_dir(postgre_path_to_bin, db_grant_cmd)
+    print('Database grant result: ' + str(db_grant_result['returncode']))
+    
+    print('Granting schema privileges to user ' + dbUser + '...')
+    schema_cmd = postgreLoginRoot + '-d ' + dbName + ' -c "GRANT ALL ON SCHEMA public TO ' + dbUser + ';"'
+    schema_result = base.run_command_in_dir(postgre_path_to_bin, schema_cmd)
+    print('Schema grant result: ' + str(schema_result['returncode']))
+    
+    base.print_info('Configuring ' + dbName + ' database...')
+    configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+    print('Configuration completed: ' + ('SUCCESS' if configure_result else 'FAILED'))
+    result = configure_result and result
+
+  # User privileges are set above when configuring database
 
   print('\n=== PostgreSQL Configuration Summary ===')
   print('Database: ' + dbName + ' - ' + ('READY' if result else 'FAILED'))

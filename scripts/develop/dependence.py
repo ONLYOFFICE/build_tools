@@ -927,22 +927,19 @@ def check_postgreConfig(postgrePath = ''):
       result = False
   else:
     print('Database ' + dbName + ' exists')
-    print('\nChecking database size...')
-    size_check_cmd = postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"'
-    size_check_result = base.run_command_in_dir(postgre_path_to_bin, size_check_cmd)
-    print('Size check command: ' + size_check_cmd)
-    print('Size check stdout: ' + size_check_result['stdout'])
-    if size_check_result['stderr']:
-      print('Size check stderr: ' + size_check_result['stderr'])
+    # Simple check: if 0 tables, configure database
+    print('Checking tables in database...')
+    table_count_result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "SELECT count(*) FROM information_schema.tables WHERE table_schema = \'public\';"')
+    print('Table count result: ' + table_count_result['stdout'].strip())
     
-    if (size_check_result['stdout'].find('7559 kB') != -1):
-      print('Database ' + dbName + ' not configured (size is 7559 kB - empty database)')
+    if table_count_result['stdout'].find(' 0') != -1:
+      print('Database ' + dbName + ' has no tables - configuring...')
       base.print_info('Configuring ' + dbName + ' database...')
       configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
-      print('Database configuration result: ' + str(configure_result))
+      print('Configuration completed: ' + ('SUCCESS' if configure_result else 'FAILED'))
       result = configure_result and result
     else:
-      print('Database ' + dbName + ' is valid (size: ' + size_check_result['stdout'] + ')')
+      print('Database ' + dbName + ' already has tables - skipping configuration')
 
   if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
     print('User ' + dbUser + ' has no database privileges!')
@@ -950,6 +947,10 @@ def check_postgreConfig(postgrePath = ''):
     result = set_dbPrivilegesForUser(dbUser, dbName, postgre_path_to_bin) and result
   print('User ' + dbUser + ' has database privileges')
 
+  print('\n=== PostgreSQL Configuration Summary ===')
+  print('Database: ' + dbName + ' - ' + ('READY' if result else 'FAILED'))
+  print('User: ' + dbUser + ' - configured')
+  
   return result
 def create_postgreDb(dbName, postgre_path_to_bin = ''):
   print('\nCreating database: ' + dbName)
@@ -1064,8 +1065,17 @@ def configureDb(userName, dbName, scriptPath, postgre_path_to_bin = ''):
   print('\nVerifying table creation...')
   verify_cmd = postgreLoginSrt + ' -d ' + dbName + ' -c "\dt;"'
   verify_result = base.run_command_in_dir(postgre_path_to_bin, verify_cmd)
-  print('Tables in database:')
-  print(verify_result['stdout'])
+  
+  # Count lines with table names (skip header)
+  table_lines = [line for line in verify_result['stdout'].split('\n') if '|' in line and 'table' in line.lower()]
+  table_count = len(table_lines)
+  
+  if table_count > 0:
+    print('SUCCESS: Created ' + str(table_count) + ' tables')
+    print('Database is ready for use!')
+  else:
+    print('WARNING: No tables found after script execution')
+    print(verify_result['stdout'])
   
   return True
 def uninstall_postgresql():

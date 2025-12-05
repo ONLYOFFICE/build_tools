@@ -111,7 +111,8 @@ def check_dependencies():
   if (host_platform == 'windows'):
     checksResult.append(check_nodejs())
 
-  if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
+  sql_type = config.option("sql-type")
+  if (sql_type == 'mysql' and host_platform == 'windows'):
     checksResult.append(check_mysqlServer())
   else:
     checksResult.append(check_postgreSQL())
@@ -300,9 +301,21 @@ def check_rabbitmq():
       print('RabbitMQ is installed')
       return dependence
   elif (host_platform == 'linux'):
-    result = base.run_command('service rabbitmq-server status')['stdout']
-    if (result != ''):
-      print('Installed RabbitMQ is valid')
+    result = ''
+    
+    # Prefer systemctl for systemd
+    systemctl_result = base.run_command('systemctl status rabbitmq-server')
+    if systemctl_result['returncode'] == 0 and systemctl_result['stdout']:
+      result = systemctl_result['stdout']
+    
+    # Fallback to service for SysV
+    if result == '':
+      command_result = base.run_command('service rabbitmq-server status')
+      if command_result['returncode'] == 0 and command_result['stdout']:
+        result = command_result['stdout']
+    
+    if result != '':
+      print('RabbitMQ is installed')
       return dependence
 
   print('RabbitMQ not found')
@@ -517,8 +530,9 @@ def check_mysqlServer():
   if (host_platform != 'windows'):
     result = os.system(mysqlLoginSrt + ' -e "exit"')
     if (result == 0):
-      connectionResult = base.run_command(connectionString)['stdout']
-      if (connectionResult.find('port') != -1 and connectionResult.find(config.option("db-port")) != -1):
+      connectionResult = base.run_command(connectionString)
+      expected_port = config.option("db-port")
+      if (connectionResult['stdout'].find('port') != -1 and connectionResult['stdout'].find(expected_port) != -1):
         print('MySQL configuration is valid')
         dependence.sqlPath = 'mysql'
         return dependence
@@ -533,13 +547,15 @@ def check_mysqlServer():
       continue
 
     mysql_full_name = 'MySQL Server ' + info['Version'] + ' '
-
-    connectionResult = base.run_command_in_dir(get_mysql_path_to_bin(info['Location']), connectionString)['stdout']
-    if (connectionResult.find('port') != -1 and connectionResult.find(config.option("db-port")) != -1):
+    mysql_bin_path = get_mysql_path_to_bin(info['Location'])
+    connectionResult = base.run_command_in_dir(mysql_bin_path, connectionString)
+    
+    expected_port = config.option("db-port")
+    if (connectionResult['stdout'].find('port') != -1 and connectionResult['stdout'].find(expected_port) != -1):
       print(mysql_full_name + 'configuration is valid')
       dependence.sqlPath = info['Location']
       return dependence
-    print(mysql_full_name + 'configuration is not valid:' + connectionResult)
+    print(mysql_full_name + 'configuration is not valid')
     # if path exists, then further removal and installation fails(according to startup statistics). it is better to fix issue manually.
     return dependence
 
@@ -632,8 +648,8 @@ def get_postrgre_path_to_bin(postgrePath = ''):
   return postgrePath
 def get_postgreLoginSrting(userName):
   if (host_platform == 'windows'):
-    return 'psql -U' + userName + ' '
-  return 'PGPASSWORD="' + config.option("db-pass") + '" psql -U' + userName + ' -hlocalhost '
+    return 'psql -U ' + userName + ' -h localhost '
+  return 'PGPASSWORD="' + config.option("db-pass") + '" psql -U ' + userName + ' -h localhost '
 def get_postgreSQLInfoByFlag(flag):
   arrInfo = []
 
@@ -667,9 +683,10 @@ def check_postgreSQL():
 
   if (host_platform == 'linux'):
     result = os.system(postgreLoginSrt + ' -c "\q"')
-    connectionResult = base.run_command(connectionString)['stdout']
+    connectionResult = base.run_command(connectionString)
+    expected_port = config.option("db-port")
 
-    if (result != 0 or connectionResult.find(config.option("db-port")) == -1):
+    if (result != 0 or connectionResult['stdout'].find(expected_port) == -1):
       print('Valid PostgreSQL not found!')
       dependence.append_install('PostgreSQL')
       dependence.append_uninstall('PostgreSQL')
@@ -680,18 +697,20 @@ def check_postgreSQL():
 
   arrInfo = get_postgreSQLInfo()
   base.set_env('PGPASSWORD', config.option("db-pass"))
+  
   for info in arrInfo:
     if (base.is_dir(info['Location']) == False):
       continue
     
     postgre_full_name = 'PostgreSQL ' + info['Version'][:2] + ' '
-    connectionResult = base.run_command_in_dir(get_postrgre_path_to_bin(info['Location']), connectionString)['stdout']
-
-    if (connectionResult.find(config.option("db-port")) != -1):
+    postgre_bin_path = get_postrgre_path_to_bin(info['Location'])
+    connectionResult = base.run_command_in_dir(postgre_bin_path, connectionString)
+    
+    expected_port = config.option("db-port")
+    if (connectionResult['stdout'].find(expected_port) != -1):
       print(postgre_full_name + 'configuration is valid')
       dependence.sqlPath = info['Location']
       return dependence
-    print(postgre_full_name + 'configuration is not valid')
 
   print('Valid PostgreSQL not found')
 
@@ -704,6 +723,8 @@ def check_postgreSQL():
   return dependence
 def check_postgreConfig(postgrePath = ''):
   result = True
+  base.print_info('Checking PostgreSQL configuration')
+  
   if (host_platform == 'windows'):
     base.set_env('PGPASSWORD', config.option("db-pass"))
 
@@ -711,53 +732,78 @@ def check_postgreConfig(postgrePath = ''):
   dbUser = config.option("db-user")
   dbName = config.option("db-name")
   dbPass = config.option("db-pass")
+  
   postgre_path_to_bin = get_postrgre_path_to_bin(postgrePath)
   postgreLoginRoot = get_postgreLoginSrting(rootUser)
   postgreLoginDbUser = get_postgreLoginSrting(dbUser)
   creatdb_path = base.get_script_dir() + "/../../server/schema/postgresql/createdb.sql"
 
-  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "\du ' + dbUser + '"')['stdout'].find(dbUser) != -1):
-    print('User ' + dbUser + ' is exist')
+  # Check if user exists
+  user_check_result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "\du ' + dbUser + '"')
+  
+  if (user_check_result['stdout'].find(dbUser) != -1):
+    # User exists, check password
     if (os.system(postgreLoginDbUser + '-c "\q"') != 0):
-      print('Invalid user password!')
-      base.print_info('Changing password...')
+      print('Invalid user password, changing...')
       result = change_userPass(dbUser, dbPass, postgre_path_to_bin) and result
   else:
-    print('User ' + dbUser + ' not exist!')
-    base.print_info('Creating ' + dbName + ' user...')
+    print('Creating user ' + dbUser + '...')
     result = create_postgreUser(dbUser, dbPass, postgre_path_to_bin) and result
 
-  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')['stdout'].find(config.option("db-name")) == -1):
-    print('Database ' + dbName + ' not found')
-    base.print_info('Creating ' + dbName + ' database...')
-    result = create_postgreDb(dbName, postgre_path_to_bin) and configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+  # Check if database exists
+  db_check_result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + ' -c "SELECT datname FROM pg_database;"')
+  
+  if (db_check_result['stdout'].find(dbName) == -1):
+    print('Creating database ' + dbName + '...')
+    create_result = create_postgreDb(dbName, postgre_path_to_bin)
+    
+    if create_result:
+      # Grant privileges to user on database and schema
+      base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + dbUser + ';"')
+      base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-d ' + dbName + ' -c "GRANT ALL ON SCHEMA public TO ' + dbUser + ';"')
+      
+      configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+      result = create_result and configure_result
+    else:
+      result = False
   else:
-    if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "SELECT pg_size_pretty(pg_database_size(' + "'" + dbName + "'" + '));"')['stdout'].find('7559 kB') != -1):
-      print('Database ' + dbName + ' not configured')
-      base.print_info('Configuring ' + dbName + ' database...')
-      result = configureDb(dbName, creatdb_path, postgre_path_to_bin) and result
-    print('Database ' + dbName + ' is valid')
-
-  if (base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "\l+ ' + dbName + '"')['stdout'].find(dbUser +'=CTc/' + rootUser) == -1):
-    print('User ' + dbUser + ' has no database privileges!')
-    base.print_info('Setting database privileges for user ' + dbUser + '...')
-    result = set_dbPrivilegesForUser(dbUser, dbName, postgre_path_to_bin) and result
-  print('User ' + dbUser + ' has database privileges')
-
+    # Database exists - check if tables need to be created
+    table_count_result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "SELECT count(*) FROM information_schema.tables WHERE table_schema = \'public\';"')
+    
+    needs_configure = False
+    
+    if table_count_result['stdout'].find(' 0') != -1:
+      # No tables - need to configure
+      needs_configure = True
+    
+    if needs_configure:
+      # Grant privileges and configure
+      base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + dbUser + ';"')
+      base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-d ' + dbName + ' -c "GRANT ALL ON SCHEMA public TO ' + dbUser + ';"')
+      
+      configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+      result = configure_result and result
+  
   return result
 def create_postgreDb(dbName, postgre_path_to_bin = ''):
   postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "CREATE DATABASE ' + dbName +';"') != 0):
+  result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "CREATE DATABASE ' + dbName +';"')
+  if (result['returncode'] != 0):
+    print('Database creation failed!')
     return False
   return True
 def set_dbPrivilegesForUser(userName, dbName, postgre_path_to_bin = ''):
   postgreLoginUser = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + userName + ';"') != 0):
+  result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginUser + '-c "GRANT ALL privileges ON DATABASE ' + dbName + ' TO ' + userName + ';"')
+  if (result['returncode'] != 0):
+    print('Grant privileges failed!')
     return False
   return True
 def create_postgreUser(userName, userPass, postgre_path_to_bin = ''):
   postgreLoginRoot = get_postgreLoginSrting(install_params['PostgreSQL']['root'])
-  if (base.exec_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "CREATE USER ' + userName + ' WITH password ' + "'" + userPass + "'" + ';"') != 0):
+  result = base.run_command_in_dir(postgre_path_to_bin, postgreLoginRoot + '-c "CREATE USER ' + userName + ' WITH password ' + "'" + userPass + "'" + ';"')
+  if (result['returncode'] != 0):
+    print('User creation failed!')
     return False
   return True
 def change_userPass(userName, userPass, postgre_path_to_bin = ''):
@@ -766,13 +812,24 @@ def change_userPass(userName, userPass, postgre_path_to_bin = ''):
     return False
   return True
 def configureDb(userName, dbName, scriptPath, postgre_path_to_bin = ''):
-  print('Execution ' + scriptPath)
-  postgreLoginSrt = get_postgreLoginSrting(userName)
-
-  code = base.exec_command_in_dir(postgre_path_to_bin, postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"')
-  if (code != 0):
-    print('Execution failed!')
+  print('Executing ' + scriptPath)
+  
+  if not base.is_file(scriptPath):
+    print('ERROR: Script file does not exist!')
     return False
+  
+  postgreLoginSrt = get_postgreLoginSrting(userName)
+  full_command = postgreLoginSrt + ' -d ' + dbName + ' -f "' + scriptPath + '"'
+  
+  # Use run_command_in_dir to capture output
+  result = base.run_command_in_dir(postgre_path_to_bin, full_command)
+  
+  if (result['returncode'] != 0):
+    print('Execution failed!')
+    if result['stderr']:
+      print('Error: ' + result['stderr'])
+    return False
+  
   print('Execution completed')
   return True
 def uninstall_postgresql():

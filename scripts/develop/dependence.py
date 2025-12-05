@@ -920,7 +920,7 @@ def check_postgreConfig(postgrePath = ''):
     
     if create_result:
       print('\nConfiguring database with createdb.sql...')
-      configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+      configure_result = configureDb(rootUser, dbName, creatdb_path, postgre_path_to_bin)
       print('Database configuration result: ' + str(configure_result))
       result = create_result and configure_result
     else:
@@ -935,7 +935,7 @@ def check_postgreConfig(postgrePath = ''):
     if table_count_result['stdout'].find(' 0') != -1:
       print('Database ' + dbName + ' has no tables - configuring...')
       base.print_info('Configuring ' + dbName + ' database...')
-      configure_result = configureDb(dbUser, dbName, creatdb_path, postgre_path_to_bin)
+      configure_result = configureDb(rootUser, dbName, creatdb_path, postgre_path_to_bin)
       print('Configuration completed: ' + ('SUCCESS' if configure_result else 'FAILED'))
       result = configure_result and result
     else:

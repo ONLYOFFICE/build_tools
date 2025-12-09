@@ -100,7 +100,8 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if "1" == config.option("use-clang"):
       build_params.append("-spec")
       build_params.append("linux-clang-libc++")
-    if "" != config.option("sysroot"):
+        	
+    if "" != config.option("sysroot") and platform != "linux_arm64":
       base.set_sysroot_env()
       base.cmd_exe(qmake_app, build_params) # calls cmd_exe to pass os.env
     else:

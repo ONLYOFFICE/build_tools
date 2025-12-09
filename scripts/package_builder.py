@@ -131,6 +131,8 @@ def make_tar():
   make_args = ["tar"]
   if common.platform == "darwin_arm64":
     make_args += ["-e", "UNAME_M=arm64"]
+  if common.platform == "darwin_x86_64":
+    make_args += ["-e", "UNAME_M=x86_64"]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:

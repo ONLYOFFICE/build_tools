@@ -87,17 +87,11 @@ def parse():
       options["sysroot"] = ""
     elif options["sysroot"] == "1":
       dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
-      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
-      options["sysroot"] = custom_sysroot
-      if not os.path.isdir(custom_sysroot):
-        print("Sysroot is not found, downloading...")
-        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
-        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
-        os.mkdir(custom_sysroot)
-        print("Unpacking...")
-        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
-        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
-          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
+      dst_dir_amd64 = dst_dir + "/ubuntu16-amd64-sysroot"
+      dst_dir_arm64 = dst_dir + "/ubuntu16-arm64-sysroot"
+      if not base.is_dir(dst_dir_amd64) or not base.is_dir(dst_dir_arm64):
+        base.cmd_in_dir(dst_dir, "python3", ["./fetch.py"])
+      options["sysroot"] = dst_dir
 
   if is_cef_107():
     extend_option("config", "cef_version_107")

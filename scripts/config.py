@@ -63,12 +63,6 @@ def parse():
       if not check_option("platform", "win_64"):
         options["platform"] = "win_64 " + options["platform"]
 
-  if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
-    if not check_option("platform", "linux_64"):
-      # linux_64 binaries need only for desktop
-      if check_option("module", "desktop"):
-        options["platform"] = "linux_64 " + options["platform"]
-
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
 

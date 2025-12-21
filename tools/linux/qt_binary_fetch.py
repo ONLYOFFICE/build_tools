@@ -61,7 +61,7 @@ def main():
 
   if "arm64" in targets and not base.is_os_arm():
     base.move_dir("./qt_build/Qt-5.9.9/gcc_arm64/bin", "./qt_build/Qt-5.9.9/gcc_arm64/_bin")
-    base.move_dir("./qt_build/Qt-5.9.9/gcc_64/bin", "./qt_build/Qt-5.9.9/gcc_arm64/bin")
+    base.copy_dir("./qt_build/Qt-5.9.9/gcc_64/bin", "./qt_build/Qt-5.9.9/gcc_arm64/bin")
 
 if __name__ == "__main__":
     main()

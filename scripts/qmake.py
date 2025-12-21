@@ -118,7 +118,8 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       base.correct_makefile_after_qmake(platform, makefile)
     base.cmd_and_return_cwd("make", ["-f", makefile] + get_j_num(), is_no_errors)
 
-    base.restore_sysroot_env()
+    if "" != config.option("sysroot"):
+      base.restore_sysroot_env()
   else:
     config_params_array = base.qt_config_as_param(config_param)
     config_params_string = ""

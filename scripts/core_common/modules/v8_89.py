@@ -235,12 +235,14 @@ def make():
 
   if config.check_option("platform", "linux_64"):
     if config.option("sysroot") != "":
+      sysroot_path = config.option("sysroot_linux_64")
+      sysroot_path_bin = config.get_custom_sysroot_bin("linux_64")
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
-      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
+      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + sysroot_path + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + sysroot_path + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + sysroot_path + "\"]"
       base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
 
       src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
-      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
+      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ sysroot_path_bin + "/gcc\"\n  cxx = \"" + sysroot_path_bin + "/g++\""
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
       
       old_env = dict(os.environ)

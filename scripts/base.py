@@ -691,18 +691,19 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
-def get_prefix_cross_compiler_arm64():
+def get_prefix_cross_compiler_arm64(dir):
   cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-  if is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-gcc"):
+  if is_file(dir + "/aarch64-linux-gnu-g++") and is_file(dir + "/aarch64-linux-gnu-gcc"):
     return "aarch64-linux-gnu-"
-  if is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-gcc"):
+  if is_file(dir + "/aarch64-unknown-linux-gnu-g++") and is_file(dir + "/aarch64-unknown-linux-gnu-gcc"):
     return "aarch64-unknown-linux-gnu-"
   return ""
 
 def get_gcc_version():
-  gcc_path = "gcc"
+  # if use sysroot - fix gcc version
   if config.option("sysroot") != "":
-    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
+    return 5004
+  gcc_path = "gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
   gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
@@ -909,20 +910,23 @@ def _check_icu_common(dir, out):
 
   return isExist
 
-def qt_copy_icu(out):
+def qt_copy_icu(out, platform):
   tests = [get_env("QT_DEPLOY") + "/../lib"]
   prefix = ""
   postfixes = [""]
 
-  # TODO add for linux arm desktop build
-  if config.option("sysroot") != "":
-    prefix = config.option("sysroot")
+  if config.option("sysroot_" + platform) != "":
+    prefix = config.option("sysroot_" + platform)
   else:
     prefix = ""
-    
-  postfixes += ["/x86_64-linux-gnu"]
-  postfixes += ["/i386-linux-gnu"]
 
+  if ("linux_64" == platform):
+    postfixes += ["/x86_64-linux-gnu"]
+  elif ("linux_arm64" == platform):
+    postfixes += ["/aarch64-linux-gnu"]
+  elif ("linux_32" == platform):
+    postfixes += ["/i386-linux-gnu"]
+    
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]
     tests += [prefix + "/lib64" + postfix]
@@ -1889,17 +1893,19 @@ def check_module_version(actual_version, clear_func):
   clear_func()
   return
 
-
-def set_sysroot_env():
+def set_sysroot_env(platform):
   global ENV_BEFORE_SYSROOT
   ENV_BEFORE_SYSROOT = dict(os.environ)
-  if "linux" == host_platform() and config.option("sysroot") != "":
-    os.environ['PATH'] = config.option("sysroot") + "/usr/bin:" + get_env("PATH")
-    os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
+  if "linux" != host_platform():
+    return
+  path = config.option("sysroot_" + platform)
+  if path != "":
+    os.environ['PATH'] = path + "/usr/bin:" + get_env("PATH")
+    os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib(platform)
     os.environ['CC'] = config.get_custom_sysroot_bin() + "/gcc"
     os.environ['CXX'] = config.get_custom_sysroot_bin() + "/g++"
-    os.environ['CFLAGS'] = "--sysroot=" + config.option("sysroot")
-    os.environ['CXXFLAGS'] = "--sysroot=" + config.option("sysroot")
+    os.environ['CFLAGS'] = "--sysroot=" + path
+    os.environ['CXXFLAGS'] = "--sysroot=" + path
     check_python()
     
 def restore_sysroot_env():
@@ -1914,8 +1920,9 @@ def check_python():
 
   if not is_dir(directory + "/python3"):
     download('https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/python3.tar.gz', directory + "/python3.tar.gz")
-    cmd("tar", ["xfz", directory + "/python3.tar.gz", "-C", directory])
-    cmd("ln", ["-s", directory_bin + "/python3", directory_bin + "/python"])
+    download('https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/extract.sh', directory + "/extract.sh")
+    cmd_in_dir(directory, "chmod", ["+x", "./extract.sh"])
+    cmd_in_dir(directory, "./extract.sh")    
   directory_bin = directory_bin.replace(" ", "\\ ")
   os.environ["PATH"] = directory_bin + os.pathsep + os.environ["PATH"]
   return

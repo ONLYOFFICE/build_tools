@@ -99,23 +99,23 @@ def make():
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
     else:
-      base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin() + "/")
-      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
-      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot"))
+      base.replaceInFile("./Makefile", "CROSS_COMPILE=", "CROSS_COMPILE=" + config.get_custom_sysroot_bin("linux_64") + "/")
+      base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot_linux_64"))
+      base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden --sysroot=" + config.option("sysroot_linux_64"))
 
     if config.option("sysroot") == "":
       base.cmd("make", [])
       base.cmd("make", ["install"])
       base.cmd("make", ["clean"], True)
     else:
-      base.set_sysroot_env()
+      base.set_sysroot_env("linux_64")
       base.cmd_exe("make", [])
       base.cmd_exe("make", ["install"])
       base.cmd_exe("make", ["clean"], True)
       base.restore_sysroot_env()
 
   if (-1 != config.option("platform").find("linux_arm64")) and not base.is_dir("../build/linux_arm64"):
-    if ("x86_64" != platform.machine()):
+    if (base.is_os_arm()):
       base.copy_dir("../build/linux_64", "../build/linux_arm64")
     else:
       cross_compiler_arm64 = config.option("arm64-toolchain-bin")

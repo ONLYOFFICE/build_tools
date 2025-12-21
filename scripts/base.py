@@ -1902,8 +1902,8 @@ def set_sysroot_env(platform):
   if path != "":
     os.environ['PATH'] = path + "/usr/bin:" + get_env("PATH")
     os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib(platform)
-    os.environ['CC'] = config.get_custom_sysroot_bin() + "/gcc"
-    os.environ['CXX'] = config.get_custom_sysroot_bin() + "/g++"
+    os.environ['CC'] = config.get_custom_sysroot_bin(platform) + "/gcc"
+    os.environ['CXX'] = config.get_custom_sysroot_bin(platform) + "/g++"
     os.environ['CFLAGS'] = "--sysroot=" + path
     os.environ['CXXFLAGS'] = "--sysroot=" + path
     check_python()

@@ -16,7 +16,7 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
   
   # for b2 checks
   if config.option("sysroot") != "":
-    base.set_sysroot_env()
+    base.set_sysroot_env(build_platform)
     sysroot_path = config.option("sysroot_" + build_platform)
     b2_addon = "cflags=\"--sysroot=" + sysroot_path + "\""
     b2_addon = "cxxflags=\"--sysroot=" + sysroot_path + "\""

@@ -246,7 +246,7 @@ def make():
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
       
       old_env = dict(os.environ)
-      base.set_sysroot_env()
+      base.set_sysroot_env("linux_64")
       base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
       base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
       base.restore_sysroot_env()

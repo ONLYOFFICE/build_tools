@@ -29,7 +29,7 @@ OLD_ENV = dict()
 # get custom sysroot vars as str
 def setup_custom_sysroot_env(platform) -> str:
   sysroot_path = config.option("sysroot_" + platform)
-  sysroot_path_bin config.get_custom_sysroot_lib(platform)
+  sysroot_path_bin = config.get_custom_sysroot_lib(platform)
 
   env_vars = []
   env_vars += ['LD_LIBRARY_PATH=\"' + config.get_custom_sysroot_lib(platform) + "\""]

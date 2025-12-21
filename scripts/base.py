@@ -691,11 +691,11 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
-def get_prefix_cross_compiler_arm64(dir):
-  cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-  if is_file(dir + "/aarch64-linux-gnu-g++") and is_file(dir + "/aarch64-linux-gnu-gcc"):
+def get_prefix_cross_compiler_arm64():
+  directory = config.option("arm64-toolchain-bin")
+  if is_file(directory + "/aarch64-linux-gnu-g++") and is_file(directory + "/aarch64-linux-gnu-gcc"):
     return "aarch64-linux-gnu-"
-  if is_file(dir + "/aarch64-unknown-linux-gnu-g++") and is_file(dir + "/aarch64-unknown-linux-gnu-gcc"):
+  if is_file(directory + "/aarch64-unknown-linux-gnu-g++") and is_file(directory + "/aarch64-unknown-linux-gnu-gcc"):
     return "aarch64-unknown-linux-gnu-"
   return ""
 

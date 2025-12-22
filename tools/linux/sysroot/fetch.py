@@ -187,7 +187,7 @@ def fix_absolute_symlinks(sysroot_path, arch):
 
 def download_and_extract(name):
   archive = SYSROOTS[name]
-  #base.download(URL + archive, "./" + archive)
+  base.download(URL + archive, "./" + archive)
   base.cmd("tar", ["-xzf", "./" + archive])
 
   sysroot_name = archive.replace(".tar.gz", "")

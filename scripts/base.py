@@ -691,13 +691,19 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
-def get_prefix_cross_compiler_arm64():
-  directory = config.option("arm64-toolchain-bin")
-  if is_file(directory + "/aarch64-linux-gnu-g++") and is_file(directory + "/aarch64-linux-gnu-gcc"):
-    return "aarch64-linux-gnu-"
-  if is_file(directory + "/aarch64-unknown-linux-gnu-g++") and is_file(directory + "/aarch64-unknown-linux-gnu-gcc"):
-    return "aarch64-unknown-linux-gnu-"
-  return ""
+def get_compiler_gcc_prefix(platform):
+  directory = "/usr/bin"
+
+  if config.option("sysroot") != "":
+    use_platform = platform
+    if ("linux_arm64" == platform and not is_os_arm()):
+      use_platform = "linux_64"
+    directory = config.option("sysroot_" + use_platform) + "/usr/bin"
+
+  if ("linux_arm64" == platform and not is_os_arm()):
+    return directory + "/aarch64-linux-gnu-"
+
+  return directory + "/"
 
 def get_gcc_version():
   # if use sysroot - fix gcc version
@@ -753,13 +759,6 @@ def qt_setup(platform):
       set_env("QT_QMAKE_ADDON", "-spec win32-arm64-msvc2017")
 
   set_env("QT_DEPLOY", qt_dir + "/bin")
-
-  if ("linux_arm64" == platform):
-    cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-    if ("" != cross_compiler_arm64):
-      set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
-      set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
-
   return qt_dir
 
 def qt_version():
@@ -1898,15 +1897,26 @@ def set_sysroot_env(platform):
   ENV_BEFORE_SYSROOT = dict(os.environ)
   if "linux" != host_platform():
     return
+  if config.option("sysroot") == "":
+    return
+
   path = config.option("sysroot_" + platform)
-  if path != "":
-    os.environ['PATH'] = path + "/usr/bin:" + get_env("PATH")
-    os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib(platform)
-    os.environ['CC'] = config.get_custom_sysroot_bin(platform) + "/gcc"
-    os.environ['CXX'] = config.get_custom_sysroot_bin(platform) + "/g++"
-    os.environ['CFLAGS'] = "--sysroot=" + path
-    os.environ['CXXFLAGS'] = "--sysroot=" + path
-    check_python()
+  sysroot_path_bin = config.get_custom_sysroot_bin(platform)
+  compiler_gcc_prefix = get_compiler_gcc_prefix(platform)
+  
+  os.environ['PATH'] = sysroot_path_bin + ":" + get_env("PATH")
+  os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib(platform)
+
+  os.environ['CC'] = compiler_gcc_prefix + "gcc"
+  os.environ['CXX'] = compiler_gcc_prefix + "g++"
+  os.environ['AR'] = compiler_gcc_prefix + "ar"
+  os.environ['RANLIB'] = compiler_gcc_prefix + "ranlib"
+  
+  os.environ['CFLAGS'] = "--sysroot=" + path
+  os.environ['CXXFLAGS'] = "--sysroot=" + path
+  os.environ['LDFLAGS'] = "--sysroot=" + path
+
+  check_python()
     
 def restore_sysroot_env():
   os.environ.clear()

@@ -163,9 +163,11 @@ def make():
     if config.check_option("platform", "linux_arm64") and not base.is_dir(base_dir + "/linux_arm64") and not base.is_os_arm():
       base.create_dir(base_dir + "/icu/linux_arm64")
       os.chdir(base_dir + "/icu/linux_arm64")
-      base_arm_tool_dir = config.option('arm64-toolchain-bin') + '/' + base.get_prefix_cross_compiler_arm64()
+      compiler_gcc_prefix = base.get_compiler_gcc_prefix("linux_arm64")
+      if config.option("sysroot") != "":
+        base.set_sysroot_env("linux_arm64")
       base.cmd("./../source/configure", ["--host=arm-linux", "--prefix=" + base_dir + "/icu/linux_arm64_install", "--with-cross-build=" + base_dir + "/icu/cross_build",
-        "CC=" + base_arm_tool_dir + "gcc", "CXX=" + base_arm_tool_dir + "g++", "AR=" + base_arm_tool_dir + "ar", "RANLIB=" + base_arm_tool_dir + "ranlib"])
+        "CC=" + compiler_gcc_prefix + "gcc", "CXX=" + compiler_gcc_prefix + "g++", "AR=" + compiler_gcc_prefix + "ar", "RANLIB=" + compiler_gcc_prefix + "ranlib"])
       base.cmd("make", ["-j4"])
       base.cmd("make", ["install"], True)
       base.create_dir(base_dir + "/linux_arm64")
@@ -173,6 +175,8 @@ def make():
       base.copy_file(base_dir + "/icu/linux_arm64_install/lib/libicudata.so." + icu_major + "." + icu_minor, base_dir + "/linux_arm64/build/libicudata.so." + icu_major)
       base.copy_file(base_dir + "/icu/linux_arm64_install/lib/libicuuc.so." + icu_major + "." + icu_minor, base_dir + "/linux_arm64/build/libicuuc.so." + icu_major)
       base.copy_dir(base_dir + "/icu/linux_arm64_install/include", base_dir + "/linux_arm64/build/include")
+      if config.option("sysroot") != "":
+        base.restore_sysroot_env()
 
       os.chdir("../..")
 

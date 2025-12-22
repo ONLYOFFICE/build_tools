@@ -102,8 +102,11 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       build_params.append("linux-clang-libc++")
       
     if "" != config.option("sysroot"):
-      os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot_" + platform)
-      #os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib(platform) + "/pkgconfig"
+      sysroot_path = config.option("sysroot_" + platform)
+      os.environ['QMAKE_CUSTOM_SYSROOT'] = sysroot_path
+      os.environ['QMAKE_CUSTOM_SYSROOT_BIN'] = config.get_custom_sysroot_bin(platform)
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib(platform, True) + "/pkgconfig"
+      os.environ['PKG_CONFIG_SYSROOT_DIR'] = sysroot_path
       
     base.cmd_exe(qmake_app, build_params)
     

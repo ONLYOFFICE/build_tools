@@ -125,11 +125,6 @@ def parse():
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"
 
-  if not "arm64-toolchain-bin" in options and not "sysroot" in options:
-    options["arm64-toolchain-bin"] = "/usr/bin"
-  else:
-    options["arm64-toolchain-bin"] = get_custom_sysroot_bin("linux_arm64")
-
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):
       if not check_option("config", "bundle_xcframeworks"):
@@ -230,12 +225,22 @@ def is_mobile_platform():
   return False
 
 def get_custom_sysroot_bin(platform):
-  return option("sysroot_" + platform) + "/usr/bin"
+  use_platform = platform
+  if "linux_arm64" == platform and not base.is_os_arm():
+    # use cross compiler
+    use_platform = "linux_64"
 
-def get_custom_sysroot_lib(platform):
-  if ("linux_64" == platform):
+  return option("sysroot_" + use_platform) + "/usr/bin"
+
+def get_custom_sysroot_lib(platform, isNatural=False):
+  use_platform = platform
+  if "linux_arm64" == platform and not base.is_os_arm() and not isNatural:
+    # use cross compiler
+    use_platform = "linux_64"
+
+  if ("linux_64" == use_platform):
     return option("sysroot_linux_64") + "/usr/lib/x86_64-linux-gnu"
-  if ("linux_arm64" == platform):
+  if ("linux_arm64" == use_platform):
     return option("sysroot_linux_arm64") + "/usr/lib/aarch64-linux-gnu"
   return ""
 

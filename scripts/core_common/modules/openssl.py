@@ -118,15 +118,15 @@ def make():
     if (base.is_os_arm()):
       base.copy_dir("../build/linux_64", "../build/linux_arm64")
     else:
-      cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-      if ("" == cross_compiler_arm64):
-        cross_compiler_arm64 = "/usr/bin"
-      cross_compiler_arm64_prefix = cross_compiler_arm64 + "/" + base.get_prefix_cross_compiler_arm64()
-      base.cmd("./Configure", ["linux-aarch64", "--cross-compile-prefix=" + cross_compiler_arm64_prefix, "enable-md2", "no-shared", "no-asm", "no-tests", "--prefix=" + old_cur_dir + "/build/linux_arm64", "--openssldir=" + old_cur_dir + "/build/linux_arm64"])
+      if config.option("sysroot") != "":
+        base.set_sysroot_env("linux_arm64")
+      base.cmd("./Configure", ["linux-aarch64", "enable-md2", "no-shared", "no-asm", "no-tests", "--prefix=" + old_cur_dir + "/build/linux_arm64", "--openssldir=" + old_cur_dir + "/build/linux_arm64"])
       base.replaceInFile("./Makefile", "CFLAGS=-Wall -O3", "CFLAGS=-Wall -O3 -fvisibility=hidden")
       base.replaceInFile("./Makefile", "CXXFLAGS=-Wall -O3", "CXXFLAGS=-Wall -O3 -fvisibility=hidden")
       base.cmd("make", [], True)
       base.cmd("make", ["install"], True)
+      if config.option("sysroot") != "":
+        base.restore_sysroot_env()
 
   if (-1 != config.option("platform").find("mac")) and not base.is_dir("../build/mac_64"):
     base.cmd("./Configure", ["enable-md2", "no-shared", "no-asm", "darwin64-x86_64-cc", "--prefix=" + old_cur_dir + "/build/mac_64", "--openssldir=" + old_cur_dir + "/build/mac_64", "-mmacosx-version-min=10.11"])

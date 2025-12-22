@@ -433,11 +433,46 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   return ret
 
 def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
-  if (platform == "linux_arm64"):
-    return cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
-  if (platform == "linux_arm32"):
-    return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
-  return 0
+  platform_config = {
+    "linux_arm64": {
+      "qemu": "qemu-aarch64",
+      "default_libs": "/usr/aarch64-linux-gnu"
+    },
+    "linux_arm32": {
+      "qemu": "qemu-arm",
+      "default_libs": "/usr/arm-linux-gnueabi"
+    }
+  }
+  
+  if platform not in platform_config:
+    return 0
+
+  libs_path = platform_config[platform]["default_libs"]
+  if config.option("sysroot") != "":
+    libs_path = config.option("sysroot_" + platform)
+  
+  return cmd_in_dir(directory, platform_config[platform]["qemu"], ["-L", libs_path, prog] + args, is_no_errors)
+
+def create_qemu_wrapper(binary_path, platform):
+  binary_dir = os.path.dirname(binary_path)
+  binary_name = os.path.basename(binary_path)
+  binary_bin = binary_path + '.bin'
+  sysroot = config.option("sysroot_" + platform)
+  
+  if os.path.exists(binary_path):
+    os.rename(binary_path, binary_bin)
+  
+  wrapper_content = f'''#!/bin/bash
+DIR="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" && pwd)"
+export QEMU_LD_PREFIX={sysroot}
+exec qemu-aarch64 -L {sysroot} "$DIR/{binary_name}.bin" "$@"
+'''
+  
+  with open(binary_path, 'w') as f:
+    f.write(wrapper_content)
+  
+  os.chmod(binary_path, 0o755)
+  return binary_bin
 
 def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
   cur_dir = os.getcwd()
@@ -899,14 +934,16 @@ def qt_copy_lib(lib, dir):
 def _check_icu_common(dir, out):
   isExist = False
   for file in glob.glob(dir + "/libicu*"):
-    isExist = True
-    break
-
+    # Skip static libraries
+    if not file.endswith('.a'):
+      isExist = True
+      break
   if isExist:
-    copy_files(dir + "/libicui18n*", out)
-    copy_files(dir + "/libicuuc*", out)
-    copy_files(dir + "/libicudata*", out)
-
+    # Copy only shared libraries (skip .a files)
+    for pattern in ["/libicui18n*", "/libicuuc*", "/libicudata*"]:
+      for file in glob.glob(dir + pattern):
+        if not file.endswith('.a'):
+          copy_file(file, out)
   return isExist
 
 def qt_copy_icu(out, platform):

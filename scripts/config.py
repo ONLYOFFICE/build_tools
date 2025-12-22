@@ -90,7 +90,7 @@ def parse():
       dst_dir_amd64 = dst_dir + "/ubuntu16-amd64-sysroot"
       dst_dir_arm64 = dst_dir + "/ubuntu16-arm64-sysroot"
       if not base.is_dir(dst_dir_amd64) or not base.is_dir(dst_dir_arm64):
-        base.cmd_in_dir(dst_dir, "python3", ["./fetch.py"])
+        base.cmd_in_dir(dst_dir, "python3", ["./fetch.py", "all"])
       options["sysroot_linux_64"] = dst_dir_amd64
       options["sysroot_linux_arm64"] = dst_dir_arm64
     else:

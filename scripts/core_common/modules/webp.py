@@ -31,6 +31,8 @@ def get_ios_min_version(platform):
 
 def fetch_repo():
     base_dir = base.get_script_dir() + "/../../core/Common/3dParty/webp"
+    if not base.is_dir(base_dir):
+        base.create_dir(base_dir)
     old_dir = os.getcwd()
     os.chdir(base_dir)
 
@@ -154,7 +156,7 @@ def make():
             base.restore_sysroot_env()
 
     #MAC, IOS
-    elif -1 != cplatform.find("mac") or -1 != platform.find("ios"):
+    elif -1 != platform.find("mac") or -1 != platform.find("ios"):
         base.cmd("./autogen.sh")
         os.chdir(build_dir)
         base.cmd("./../../../libwebp/configure",  args)

@@ -170,7 +170,7 @@ def make_wheel():
 
   utils.delete_dir("python")
   utils.copy_dir("../onlyoffice/build_tools/packaging/docbuilder/resources", "python")
-  utils.copy_dir(builder_dir, "python/docbuilder/lib")
+  utils.copy_dir(builder_dir, "python/docbuilder/lib", True, True)
 
   desktop_dir = "../desktop-apps/macos/build/ONLYOFFICE.app/Contents/Resources/converter"
   if utils.is_macos() and "desktop" in common.targets and utils.is_exist(desktop_dir):

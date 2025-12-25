@@ -201,12 +201,12 @@ def copy_files(src, dst, override=True, verbose=True):
       copy_files(file + "/*", dst + "/" + file_name, override)
   return
 
-def copy_dir(src, dst, verbose=True):
+def copy_dir(src, dst, verbose=True, symlinks=False):
   if verbose:
     log("- copy_dir:")
     log("    src: " + src)
     log("    dst: " + dst)
-  shutil.copytree(src, dst)
+  shutil.copytree(src, dst, symlinks=symlinks)
   return
 
 def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose=True):

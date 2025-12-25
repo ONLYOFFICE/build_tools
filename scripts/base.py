@@ -1706,6 +1706,9 @@ def replaceFileLicence(path, license):
 def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (-1 != config.option("config").find("use_javascript_core")):
     return
+  if (0 == platform.find("mac")) and not (config.check_option("config", "use_v8")):
+    return
+
   directory_v8 = core_dir + "/Common/3dParty"
 
   if is_xp:

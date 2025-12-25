@@ -21,7 +21,7 @@ def make():
   os.chdir(base_dir)
 
   base.check_module_version("2", clear_module)
-  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "win_arm64"]
+  platforms = ["win_64", "win_32", "win_64_xp", "win_32_xp", "linux_64", "linux_32", "mac_64", "mac_arm64", "win_arm64", "linux_arm64"]
 
   for platform in platforms:
     if not config.check_option("platform", platform):

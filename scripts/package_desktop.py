@@ -348,9 +348,12 @@ def make_linux():
     if common.deploy:
       for t in branding.desktop_make_targets:
         utils.log_h2("desktop " + edition + " " + t["make"] + " deploy")
-        ret = s3_upload(
-          [i for i in utils.glob_path(t["src"]) if "enterprise-help" not in i],
-          t["dst"])
+        uploads = []
+        for f in utils.glob_path(t["src"]):
+          if "help" in f and not \
+            ("x86_64" in common.platform and edition == "opensource"): continue
+          uploads.append(f)
+        ret = s3_upload(uploads, t["dst"])
         utils.set_summary("desktop " + edition + " " + t["make"] + " deploy", ret)
 
   utils.set_cwd(common.workspace_dir)

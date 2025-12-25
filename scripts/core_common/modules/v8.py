@@ -44,14 +44,9 @@ def is_xp_platform():
   return False
 
 def is_use_clang():
-  gcc_version = base.get_gcc_version()  
-    
-  is_clang = "false"
-  if config.option("sysroot") == "" and (gcc_version >= 6000 or "1" == config.option("use-clang")):
-    is_clang = "true"
-
-  print("gcc version: " + str(gcc_version) + ", use clang:" + is_clang)
-  return is_clang
+  if config.option("sysroot") == "" and "1" == config.option("use-clang"):
+    return "true"
+  return "false"
 
 def make():
   if not is_main_platform():

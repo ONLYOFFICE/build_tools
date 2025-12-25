@@ -102,13 +102,16 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       build_params.append("linux-clang-libc++")
       
     if "" != config.option("sysroot"):
-      os.environ['QMAKE_CUSTOM_SYSROOT'] = config.option("sysroot")
-      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib() + "/pkgconfig"
+      sysroot_path = config.option("sysroot_" + platform)
+      os.environ['QMAKE_CUSTOM_SYSROOT'] = sysroot_path
+      os.environ['QMAKE_CUSTOM_SYSROOT_BIN'] = config.get_custom_sysroot_bin(platform)
+      os.environ['PKG_CONFIG_PATH'] = config.get_custom_sysroot_lib(platform, True) + "/pkgconfig"
+      os.environ['PKG_CONFIG_SYSROOT_DIR'] = sysroot_path
       
     base.cmd_exe(qmake_app, build_params)
     
     if "" != config.option("sysroot"):
-      base.set_sysroot_env()
+      base.set_sysroot_env(platform)
 
     base.correct_makefile_after_qmake(platform, makefile)
     if ("1" == config.option("clean")):
@@ -117,6 +120,9 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       base.cmd(qmake_app, build_params)
       base.correct_makefile_after_qmake(platform, makefile)
     base.cmd_and_return_cwd("make", ["-f", makefile] + get_j_num(), is_no_errors)
+
+    if "" != config.option("sysroot"):
+      base.restore_sysroot_env()
   else:
     config_params_array = base.qt_config_as_param(config_param)
     config_params_string = ""

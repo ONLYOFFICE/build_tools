@@ -1,0 +1,5 @@
+qt_build
+packages_complete
+python3
+python3.tar.gz
+extract.sh

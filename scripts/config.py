@@ -63,12 +63,6 @@ def parse():
       if not check_option("platform", "win_64"):
         options["platform"] = "win_64 " + options["platform"]
 
-  if ("linux" == host_platform) and check_option("platform", "linux_arm64") and not base.is_os_arm():
-    if not check_option("platform", "linux_64"):
-      # linux_64 binaries need only for desktop
-      if check_option("module", "desktop"):
-        options["platform"] = "linux_64 " + options["platform"]
-
   if check_option("platform", "xp") and ("windows" == host_platform):
     options["platform"] += " win_64_xp win_32_xp"
 
@@ -93,17 +87,17 @@ def parse():
       options["sysroot"] = ""
     elif options["sysroot"] == "1":
       dst_dir = os.path.abspath(base.get_script_dir(__file__) + '/../tools/linux/sysroot')
-      custom_sysroot = dst_dir + '/sysroot_ubuntu_1604'
-      options["sysroot"] = custom_sysroot
-      if not os.path.isdir(custom_sysroot):
-        print("Sysroot is not found, downloading...")
-        sysroot_url = 'https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/sysroot/sysroot_ubuntu_1604.tar.xz'
-        base.download(sysroot_url, dst_dir + '/sysroot_ubuntu_1604.tar.xz')
-        os.mkdir(custom_sysroot)
-        print("Unpacking...")
-        base.cmd2('tar', ['-xf', dst_dir + '/sysroot_ubuntu_1604.tar.xz', '-C', dst_dir])
-        if os.path.exists(dst_dir + '/sysroot_ubuntu_1604.tar.xz'):
-          os.remove(dst_dir + '/sysroot_ubuntu_1604.tar.xz')
+      dst_dir_amd64 = dst_dir + "/ubuntu16-amd64-sysroot"
+      dst_dir_arm64 = dst_dir + "/ubuntu16-arm64-sysroot"
+      if not base.is_dir(dst_dir_amd64) or not base.is_dir(dst_dir_arm64):
+        base.cmd_in_dir(dst_dir, "python3", ["./fetch.py", "all"])
+      options["sysroot_linux_64"] = dst_dir_amd64
+      options["sysroot_linux_arm64"] = dst_dir_arm64
+    else:
+      # specific sysroot => one platform for build!
+      options["sysroot"] = "1"
+      options["sysroot_linux_64"] = options["sysroot"]
+      options["sysroot_linux_arm64"] = options["sysroot"]
 
   if is_cef_107():
     extend_option("config", "cef_version_107")
@@ -130,12 +124,6 @@ def parse():
     options["sdkjs-plugin"] = "default"
   if not "sdkjs-plugin-server" in options:
     options["sdkjs-plugin-server"] = "default"
-
-  if not "arm64-toolchain-bin" in options:
-    if not "sysroot" in options:
-      options["arm64-toolchain-bin"] = "/usr/bin"
-    else:
-      options["arm64-toolchain-bin"] = get_custom_sysroot_bin()
 
   if check_option("platform", "ios"):
     if not check_option("config", "no_bundle_xcframeworks"):
@@ -236,13 +224,25 @@ def is_mobile_platform():
     return True
   return False
 
-def get_custom_sysroot_bin():
-  return option("sysroot") + "/usr/bin"
+def get_custom_sysroot_bin(platform):
+  use_platform = platform
+  if "linux_arm64" == platform and not base.is_os_arm():
+    # use cross compiler
+    use_platform = "linux_64"
 
-# todo 32bit support?
-def get_custom_sysroot_lib():
-  if base.is_os_64bit():
-    return option("sysroot") + "/usr/lib/x86_64-linux-gnu"
+  return option("sysroot_" + use_platform) + "/usr/bin"
+
+def get_custom_sysroot_lib(platform, isNatural=False):
+  use_platform = platform
+  if "linux_arm64" == platform and not base.is_os_arm() and not isNatural:
+    # use cross compiler
+    use_platform = "linux_64"
+
+  if ("linux_64" == use_platform):
+    return option("sysroot_linux_64") + "/usr/lib/x86_64-linux-gnu"
+  if ("linux_arm64" == use_platform):
+    return option("sysroot_linux_arm64") + "/usr/lib/aarch64-linux-gnu"
+  return ""
 
 def parse_defaults():
   defaults_path = base.get_script_dir() + "/../defaults"

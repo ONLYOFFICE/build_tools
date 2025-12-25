@@ -168,12 +168,12 @@ def make():
   if not base.is_dir(base_dir):
     base.create_dir(base_dir)
 
-  base.common_check_version("v8", "1", clean)
-
   if ("mac" == base.host_platform()):
     base.cmd("git", ["config", "--global", "http.postBuffer", "157286400"], True)
 
   os.chdir(base_dir)
+  base.common_check_version("v8", "1", clean)
+    
   if not base.is_dir("depot_tools"):
     base.cmd("git", ["clone", "https://chromium.googlesource.com/chromium/tools/depot_tools.git"])
     change_bootstrap()
@@ -235,16 +235,18 @@ def make():
 
   if config.check_option("platform", "linux_64"):
     if config.option("sysroot") != "":
+      sysroot_path = config.option("sysroot_linux_64")
+      sysroot_path_bin = config.get_custom_sysroot_bin("linux_64")
       src_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = []\n  cflags_c = []\n  cflags_cc = []\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = []"
-      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + config.option("sysroot") + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + config.option("sysroot") + "\"]"
+      dst_replace = "config(\"compiler\") {\n  asmflags = []\n  cflags = [\"--sysroot=" + sysroot_path + "\"]" + "\n  cflags_c = []\n  cflags_cc = [\"--sysroot=" + sysroot_path + "\"]" + "\n  cflags_objc = []\n  cflags_objcc = []\n  ldflags = [\"--sysroot=" + sysroot_path + "\"]"
       base.replaceInFile("build/config/compiler/BUILD.gn", src_replace, dst_replace)
 
       src_replace = "gcc_toolchain(\"x64\") {\n  cc = \"gcc\"\n  cxx = \"g++\""
-      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ config.get_custom_sysroot_bin() + "/gcc\"\n  cxx = \"" + config.get_custom_sysroot_bin() + "/g++\""
+      dst_replace = "gcc_toolchain(\"x64\") {\n  cc = \""+ sysroot_path_bin + "/gcc\"\n  cxx = \"" + sysroot_path_bin + "/g++\""
       base.replaceInFile("build/toolchain/linux/BUILD.gn", src_replace, dst_replace)
       
       old_env = dict(os.environ)
-      base.set_sysroot_env()
+      base.set_sysroot_env("linux_64")
       base.cmd2("gn", ["gen", "out.gn/linux_64", make_args(gn_args, "linux")], False)
       base.cmd2("ninja", ["-C", "out.gn/linux_64"], False)
       base.restore_sysroot_env()

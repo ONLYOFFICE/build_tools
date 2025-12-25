@@ -111,14 +111,15 @@ def get_args(platform, build_type, build_dir):
         
         xcode_sdk = get_xcode_sdk(platform)
         version_min = get_ios_min_version(platform)
-        cflags = "-O3 -DNDEBUG -arch " + short_arch + " -isysroot " + xcode_sdk + version_min + " -fPIC"
+        cflags = "-O3 -DNDEBUG -arch " + short_arch + version_min + " -fembed-bitcode"
         if build_type == "debug":
-            cflags = "-O0 -g -arch " + short_arch + " -isysroot " + xcode_sdk + version_min + " -fPIC"
+            cflags = "-O0 -g -arch " + short_arch + version_min + " -fembed-bitcode"
 
         return ["--host=" + arch, "--enable-static", "--disable-shared",
                 "--disable-libwebpdecoder", "--disable-libwebpdemux",
                 "--disable-libwebpmux", "--disable-libwebpextras", 
-                "CFLAGS=" + cflags, "LDFLAGS=-arch " + short_arch + " -isysroot " + xcode_sdk]
+                "CC=clang -arch " + short_arch + " -isysroot $(xcrun --sdk " + xcode_sdk + " --show-sdk-path)",
+                "CFLAGS=" + cflags]
 
 def make():
     print("[fetch & build]: webp")

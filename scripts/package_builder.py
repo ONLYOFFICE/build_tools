@@ -205,6 +205,13 @@ def make_wheel():
     utils.delete_file("docbuilder.jni.dll")
   elif utils.is_macos():
     utils.delete_file("libdocbuilder.jni.dylib")
+    utils.delete_file("libdocbuilder.jni.framework")
+    # delete all symlinks
+    for root, dirs, files in os.walk('.'):
+      for name in dirs + files:
+        path = os.path.join(root, name)
+        if os.path.islink(path):
+          os.unlink(path)
   elif utils.is_linux():
     utils.delete_file("libdocbuilder.jni.so")
 

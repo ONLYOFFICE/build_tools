@@ -4,7 +4,6 @@
 import package_utils as utils
 import package_common as common
 import package_branding as branding
-import os
 
 def make():
   utils.log_h1("BUILDER")
@@ -205,14 +204,11 @@ def make_wheel():
     utils.delete_file("docbuilder.net.dll")
     utils.delete_file("docbuilder.jni.dll")
   elif utils.is_macos():
-    utils.delete_file("libdocbuilder.jni.dylib")
-    utils.delete_file("libdocbuilder.jni.framework")
-    # delete all symlinks
-    for root, dirs, files in os.walk('.'):
-      for name in dirs + files:
-        path = os.path.join(root, name)
-        if os.path.islink(path):
-          os.unlink(path)
+    if (utils.is_file("libdocbuilder.jni.dylib")):
+      utils.delete_file("libdocbuilder.jni.dylib")
+    if (utils.is_dir("libdocbuilder.jni.framework")):
+      utils.delete_file("libdocbuilder.jni.framework")
+    utils.remove_all_symlinks(".")
   elif utils.is_linux():
     utils.delete_file("libdocbuilder.jni.so")
 

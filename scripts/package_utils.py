@@ -262,6 +262,20 @@ def delete_files(src, verbose=True):
       shutil.rmtree(path, ignore_errors=True)
   return
 
+def remove_all_symlinks(dir):
+  for root, dirs, files in os.walk(dir, topdown=True, followlinks=False):
+    for name in files:
+      path = os.path.join(root, name)
+      if os.path.islink(path):
+        os.unlink(path)
+    
+    for name in list(dirs):
+      path = os.path.join(root, name)
+      if os.path.islink(path):
+        os.unlink(path)
+        dirs.remove(name)
+  return
+
 def set_summary(target, status):
   common.summary.append({target: status})
   return

@@ -41,7 +41,7 @@ if not base.is_dir(current_dir + "/mac_cross_64"):
   old_env = change_icu_defs("x86_64")
 
   base.cmd("../icu/source/runConfigureICU", ["MacOSX",
-    "--prefix=" + current_dir + "/mac_cross_64", "--enable-static"])
+    "--prefix=" + current_dir + "/mac_64_install", "--enable-static"])
 
   base.cmd("make", ["-j4"])
   base.cmd("make", ["install"], True)
@@ -58,7 +58,7 @@ addon = []
 if not base.is_os_arm():
   addon = ["--host=aarch64-apple-darwin"]
 
-base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm_64",
+base.cmd("./configure", ["--prefix=" + current_dir + "/mac_arm64_install",
   "--with-cross-build=" + current_dir + "/mac_cross_64", "--enable-static", "VERBOSE=1"] + addon)
 
 base.cmd("make", ["-j4"])
@@ -80,25 +80,26 @@ base.create_dir(current_dir + "/mac_64/build")
 base.create_dir(current_dir + "/mac_arm64")
 base.create_dir(current_dir + "/mac_arm64/build")
 
-base.copy_dir(current_dir + "/mac_cross_64/include", current_dir + "/mac_64/build/include")
+base.copy_dir(current_dir + "/mac_64_install/include", current_dir + "/mac_64/build/include")
 # copy shared libs
-base.copy_file(current_dir + "/mac_cross_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicudata." + icu_major + ".dylib")
-base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicuuc." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_64_install/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicudata." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_64_install/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_64/build/libicuuc." + icu_major + ".dylib")
 # copy static libs
-base.copy_file(current_dir + "/mac_cross_64/lib/libicudata.a", current_dir + "/mac_64/build")
-base.copy_file(current_dir + "/mac_cross_64/lib/libicui18n.a", current_dir + "/mac_64/build")
-base.copy_file(current_dir + "/mac_cross_64/lib/libicuuc.a", current_dir + "/mac_64/build")
+base.copy_file(current_dir + "/mac_64_install/lib/libicudata.a", current_dir + "/mac_64/build")
+base.copy_file(current_dir + "/mac_64_install/lib/libicui18n.a", current_dir + "/mac_64/build")
+base.copy_file(current_dir + "/mac_64_install/lib/libicuuc.a", current_dir + "/mac_64/build")
 
-base.copy_dir(current_dir + "/mac_arm_64/include", current_dir + "/mac_arm64/build/include")
+base.copy_dir(current_dir + "/mac_arm64_install/include", current_dir + "/mac_arm64/build/include")
 # copy shared libs
-base.copy_file(current_dir + "/mac_arm_64/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicudata." + icu_major + ".dylib")
-base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicuuc." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_arm64_install/lib/libicudata." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicudata." + icu_major + ".dylib")
+base.copy_file(current_dir + "/mac_arm64_install/lib/libicuuc." + icu_major + "." + icu_minor + ".dylib", current_dir + "/mac_arm64/build/libicuuc." + icu_major + ".dylib")
 # copy static libs
-base.copy_file(current_dir + "/mac_arm_64/lib/libicudata.a", current_dir + "/mac_arm64/build")
-base.copy_file(current_dir + "/mac_arm_64/lib/libicui18n.a", current_dir + "/mac_arm64/build")
-base.copy_file(current_dir + "/mac_arm_64/lib/libicuuc.a", current_dir + "/mac_arm64/build")
+base.copy_file(current_dir + "/mac_arm64_install/lib/libicudata.a", current_dir + "/mac_arm64/build")
+base.copy_file(current_dir + "/mac_arm64_install/lib/libicui18n.a", current_dir + "/mac_arm64/build")
+base.copy_file(current_dir + "/mac_arm64_install/lib/libicuuc.a", current_dir + "/mac_arm64/build")
 
 base.delete_dir(current_dir + "/mac_cross_64")
-base.delete_dir(current_dir + "/mac_arm_64")
+base.delete_dir(current_dir + "/mac_64_install")
+base.delete_dir(current_dir + "/mac_arm64_install")
 
 os.chdir(current_dir_old)

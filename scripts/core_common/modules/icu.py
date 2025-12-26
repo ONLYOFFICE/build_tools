@@ -35,7 +35,7 @@ def make():
   old_cur = os.getcwd()
   os.chdir(base_dir)
 
-  base.check_module_version("7", clear_module)
+  base.check_module_version("8", clear_module)
 
   if (-1 != config.option("platform").find("android")):
     icu_android.make()

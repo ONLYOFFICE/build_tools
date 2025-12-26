@@ -201,12 +201,12 @@ def copy_files(src, dst, override=True, verbose=True):
       copy_files(file + "/*", dst + "/" + file_name, override)
   return
 
-def copy_dir(src, dst, verbose=True):
+def copy_dir(src, dst, verbose=True, symlinks=False):
   if verbose:
     log("- copy_dir:")
     log("    src: " + src)
     log("    dst: " + dst)
-  shutil.copytree(src, dst)
+  shutil.copytree(src, dst, symlinks=symlinks)
   return
 
 def copy_dir_content(src, dst, filter_include = "", filter_exclude = "", verbose=True):
@@ -260,6 +260,20 @@ def delete_files(src, verbose=True):
       os.remove(path)
     elif is_dir(path):
       shutil.rmtree(path, ignore_errors=True)
+  return
+
+def remove_all_symlinks(dir):
+  for root, dirs, files in os.walk(dir, topdown=True, followlinks=False):
+    for name in files:
+      path = os.path.join(root, name)
+      if os.path.islink(path):
+        os.unlink(path)
+    
+    for name in list(dirs):
+      path = os.path.join(root, name)
+      if os.path.islink(path):
+        os.unlink(path)
+        dirs.remove(name)
   return
 
 def set_summary(target, status):

@@ -170,7 +170,7 @@ def make_wheel():
 
   utils.delete_dir("python")
   utils.copy_dir("../onlyoffice/build_tools/packaging/docbuilder/resources", "python")
-  utils.copy_dir(builder_dir, "python/docbuilder/lib")
+  utils.copy_dir(builder_dir, "python/docbuilder/lib", True, True)
 
   desktop_dir = "../desktop-apps/macos/build/ONLYOFFICE.app/Contents/Resources/converter"
   if utils.is_macos() and "desktop" in common.targets and utils.is_exist(desktop_dir):
@@ -204,7 +204,11 @@ def make_wheel():
     utils.delete_file("docbuilder.net.dll")
     utils.delete_file("docbuilder.jni.dll")
   elif utils.is_macos():
-    utils.delete_file("libdocbuilder.jni.dylib")
+    if (utils.is_file("libdocbuilder.jni.dylib")):
+      utils.delete_file("libdocbuilder.jni.dylib")
+    if (utils.is_dir("docbuilder.jni.framework")):
+      utils.delete_file("docbuilder.jni.framework")
+    utils.remove_all_symlinks(".")
   elif utils.is_linux():
     utils.delete_file("libdocbuilder.jni.so")
 

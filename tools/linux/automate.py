@@ -6,6 +6,7 @@ import base
 import os
 import subprocess
 import deps
+import qt_binary_build
 
 def get_branch_name(directory):
   cur_dir = os.getcwd()
@@ -57,12 +58,7 @@ def install_qt():
   return
   
 def install_qt_prebuild():
-  url_amd64 = "https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/qt/qt_binary_linux_amd64.7z"
-  base.download(url_amd64, "./qt_amd64.7z")
-  base.extract("./qt_amd64.7z", "./qt_build")
-  base.create_dir("./qt_build/Qt-5.9.9")
-  base.cmd("mv", ["./qt_build/qt_amd64", "./qt_build/Qt-5.9.9/gcc_64"])
-  base.setup_local_qmake("./qt_build/Qt-5.9.9/gcc_64/bin")
+  base.cmd("python3", ["qt_binary_fetch.py", "all"])
   return
 
 if not base.is_file("./node_js_setup_14.x"):
@@ -72,7 +68,7 @@ if not base.is_file("./node_js_setup_14.x"):
 if not base.is_dir("./qt_build"):
   print("install qt...")
   if base.get_env("DO_NOT_USE_PREBUILD_QT") == "1":
-    install_qt()
+    qt_binary_build.install_qt()
   else:
     install_qt_prebuild()
 

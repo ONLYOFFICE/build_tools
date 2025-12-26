@@ -37,9 +37,11 @@ def is_os_64bit():
   return platform.machine().endswith('64')
 
 def is_os_arm():
-  if -1 == platform.machine().lower().find('arm'):
-    return False
-  return True
+  if -1 != platform.machine().lower().find('arm'):
+    return True
+  if -1 != platform.machine().lower().find('aarch64'):
+    return True
+  return False
 
 def get_platform():
   return platform.machine().lower()
@@ -431,11 +433,46 @@ def cmd_in_dir(directory, prog, args=[], is_no_errors=False):
   return ret
 
 def cmd_in_dir_qemu(platform, directory, prog, args=[], is_no_errors=False):
-  if (platform == "linux_arm64"):
-    return cmd_in_dir(directory, "qemu-aarch64", ["-L", "/usr/aarch64-linux-gnu", prog] + args, is_no_errors)
-  if (platform == "linux_arm32"):
-    return cmd_in_dir(directory, "qemu-arm", ["-L", "/usr/arm-linux-gnueabi", prog] + args, is_no_errors)
-  return 0
+  platform_config = {
+    "linux_arm64": {
+      "qemu": "qemu-aarch64",
+      "default_libs": "/usr/aarch64-linux-gnu"
+    },
+    "linux_arm32": {
+      "qemu": "qemu-arm",
+      "default_libs": "/usr/arm-linux-gnueabi"
+    }
+  }
+  
+  if platform not in platform_config:
+    return 0
+
+  libs_path = platform_config[platform]["default_libs"]
+  if config.option("sysroot") != "":
+    libs_path = config.option("sysroot_" + platform)
+  
+  return cmd_in_dir(directory, platform_config[platform]["qemu"], ["-L", libs_path, prog] + args, is_no_errors)
+
+def create_qemu_wrapper(binary_path, platform):
+  binary_dir = os.path.dirname(binary_path)
+  binary_name = os.path.basename(binary_path)
+  binary_bin = binary_path + '.bin'
+  sysroot = config.option("sysroot_" + platform)
+  
+  if os.path.exists(binary_path):
+    os.rename(binary_path, binary_bin)
+  
+  wrapper_content = f'''#!/bin/bash
+DIR="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" && pwd)"
+export QEMU_LD_PREFIX={sysroot}
+exec qemu-aarch64 -L {sysroot} "$DIR/{binary_name}.bin" "$@"
+'''
+  
+  with open(binary_path, 'w') as f:
+    f.write(wrapper_content)
+  
+  os.chmod(binary_path, 0o755)
+  return binary_bin
 
 def cmd_and_return_cwd(prog, args=[], is_no_errors=False):
   cur_dir = os.getcwd()
@@ -689,18 +726,25 @@ def git_dir():
   if ("windows" == host_platform()):
     return run_command("git --info-path")['stdout'] + "/../../.."
 
-def get_prefix_cross_compiler_arm64():
-  cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-  if is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-linux-gnu-gcc"):
-    return "aarch64-linux-gnu-"
-  if is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-g++") and is_file(cross_compiler_arm64 + "/aarch64-unknown-linux-gnu-gcc"):
-    return "aarch64-unknown-linux-gnu-"
-  return ""
+def get_compiler_gcc_prefix(platform):
+  directory = "/usr/bin"
+
+  if config.option("sysroot") != "":
+    use_platform = platform
+    if ("linux_arm64" == platform and not is_os_arm()):
+      use_platform = "linux_64"
+    directory = config.option("sysroot_" + use_platform) + "/usr/bin"
+
+  if ("linux_arm64" == platform and not is_os_arm()):
+    return directory + "/aarch64-linux-gnu-"
+
+  return directory + "/"
 
 def get_gcc_version():
-  gcc_path = "gcc"
+  # if use sysroot - fix gcc version
   if config.option("sysroot") != "":
-    gcc_path = config.option("sysroot") + "/usr/bin/gcc"
+    return 5004
+  gcc_path = "gcc"
   gcc_version_major = 4
   gcc_version_minor = 0
   gcc_version_str = run_command(gcc_path + " -dumpfullversion -dumpversion")['stdout']
@@ -750,13 +794,6 @@ def qt_setup(platform):
       set_env("QT_QMAKE_ADDON", "-spec win32-arm64-msvc2017")
 
   set_env("QT_DEPLOY", qt_dir + "/bin")
-
-  if ("linux_arm64" == platform):
-    cross_compiler_arm64 = config.option("arm64-toolchain-bin")
-    if ("" != cross_compiler_arm64):
-      set_env("ARM64_TOOLCHAIN_BIN", cross_compiler_arm64)
-      set_env("ARM64_TOOLCHAIN_BIN_PREFIX", get_prefix_cross_compiler_arm64())
-
   return qt_dir
 
 def qt_version():
@@ -897,30 +934,35 @@ def qt_copy_lib(lib, dir):
 def _check_icu_common(dir, out):
   isExist = False
   for file in glob.glob(dir + "/libicu*"):
-    isExist = True
-    break
-
+    # Skip static libraries
+    if not file.endswith('.a'):
+      isExist = True
+      break
   if isExist:
-    copy_files(dir + "/libicui18n*", out)
-    copy_files(dir + "/libicuuc*", out)
-    copy_files(dir + "/libicudata*", out)
-
+    # Copy only shared libraries (skip .a files)
+    for pattern in ["/libicui18n*", "/libicuuc*", "/libicudata*"]:
+      for file in glob.glob(dir + pattern):
+        if not file.endswith('.a'):
+          copy_file(file, out)
   return isExist
 
-def qt_copy_icu(out):
+def qt_copy_icu(out, platform):
   tests = [get_env("QT_DEPLOY") + "/../lib"]
   prefix = ""
   postfixes = [""]
 
-  # TODO add for linux arm desktop build
-  if config.option("sysroot") != "":
-    prefix = config.option("sysroot")
+  if config.option("sysroot_" + platform) != "":
+    prefix = config.option("sysroot_" + platform)
   else:
     prefix = ""
-    
-  postfixes += ["/x86_64-linux-gnu"]
-  postfixes += ["/i386-linux-gnu"]
 
+  if ("linux_64" == platform):
+    postfixes += ["/x86_64-linux-gnu"]
+  elif ("linux_arm64" == platform):
+    postfixes += ["/aarch64-linux-gnu"]
+  elif ("linux_32" == platform):
+    postfixes += ["/i386-linux-gnu"]
+    
   for postfix in postfixes:
     tests += [prefix + "/lib" + postfix]
     tests += [prefix + "/lib64" + postfix]
@@ -1664,6 +1706,9 @@ def replaceFileLicence(path, license):
 def copy_v8_files(core_dir, deploy_dir, platform, is_xp=False):
   if (-1 != config.option("config").find("use_javascript_core")):
     return
+  if (0 == platform.find("mac")) and not (config.check_option("config", "use_v8")):
+    return
+
   directory_v8 = core_dir + "/Common/3dParty"
 
   if is_xp:
@@ -1887,18 +1932,31 @@ def check_module_version(actual_version, clear_func):
   clear_func()
   return
 
-
-def set_sysroot_env():
+def set_sysroot_env(platform):
   global ENV_BEFORE_SYSROOT
   ENV_BEFORE_SYSROOT = dict(os.environ)
-  if "linux" == host_platform() and config.option("sysroot") != "":
-    os.environ['PATH'] = config.option("sysroot") + "/usr/bin:" + get_env("PATH")
-    os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib()
-    os.environ['CC'] = config.get_custom_sysroot_bin() + "/gcc"
-    os.environ['CXX'] = config.get_custom_sysroot_bin() + "/g++"
-    os.environ['CFLAGS'] = "--sysroot=" + config.option("sysroot")
-    os.environ['CXXFLAGS'] = "--sysroot=" + config.option("sysroot")
-    check_python()
+  if "linux" != host_platform():
+    return
+  if config.option("sysroot") == "":
+    return
+
+  path = config.option("sysroot_" + platform)
+  sysroot_path_bin = config.get_custom_sysroot_bin(platform)
+  compiler_gcc_prefix = get_compiler_gcc_prefix(platform)
+  
+  os.environ['PATH'] = sysroot_path_bin + ":" + get_env("PATH")
+  os.environ['LD_LIBRARY_PATH'] = config.get_custom_sysroot_lib(platform)
+
+  os.environ['CC'] = compiler_gcc_prefix + "gcc"
+  os.environ['CXX'] = compiler_gcc_prefix + "g++"
+  os.environ['AR'] = compiler_gcc_prefix + "ar"
+  os.environ['RANLIB'] = compiler_gcc_prefix + "ranlib"
+  
+  os.environ['CFLAGS'] = "--sysroot=" + path
+  os.environ['CXXFLAGS'] = "--sysroot=" + path
+  os.environ['LDFLAGS'] = "--sysroot=" + path
+
+  check_python()
     
 def restore_sysroot_env():
   os.environ.clear()
@@ -1912,8 +1970,9 @@ def check_python():
 
   if not is_dir(directory + "/python3"):
     download('https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/python3.tar.gz', directory + "/python3.tar.gz")
-    cmd("tar", ["xfz", directory + "/python3.tar.gz", "-C", directory])
-    cmd("ln", ["-s", directory_bin + "/python3", directory_bin + "/python"])
+    download('https://github.com/ONLYOFFICE-data/build_tools_data/raw/refs/heads/master/python/extract.sh', directory + "/extract.sh")
+    cmd_in_dir(directory, "chmod", ["+x", "./extract.sh"])
+    cmd_in_dir(directory, "./extract.sh")    
   directory_bin = directory_bin.replace(" ", "\\ ")
   os.environ["PATH"] = directory_bin + os.pathsep + os.environ["PATH"]
   return

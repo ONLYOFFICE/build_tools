@@ -178,7 +178,7 @@ def make():
         base.qt_copy_lib("Qt5DBus", root_dir)
         base.qt_copy_lib("Qt5X11Extras", root_dir)
         base.qt_copy_lib("Qt5XcbQpa", root_dir)
-        base.qt_copy_icu(root_dir)
+        base.qt_copy_icu(root_dir, platform)
         if not base.check_congig_option_with_platfom(platform, "libvlc"):
           base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)
 
@@ -315,8 +315,24 @@ def make():
       themes_params = []
       if ("" != config.option("themesparams")):
         themes_params = ["--params=\"" + config.option("themesparams") + "\""]
-      base.cmd_exe(root_dir + "/converter/allfontsgen", ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""], True)
-      base.cmd_exe(root_dir + "/converter/allthemesgen", ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params, True)
+
+      params_allfontsgen = ["--use-system=\"1\"", "--input=\"" + root_dir + "/fonts\"", "--input=\"" + git_dir + "/core-fonts\"", "--allfonts=\"" + root_dir + "/converter/AllFonts.js\"", "--selection=\"" + root_dir + "/converter/font_selection.bin\""]
+      params_allthemesgen = ["--converter-dir=\"" + root_dir + "/converter\"", "--src=\"" + root_dir + "/editors/sdkjs/slide/themes\"", "--allfonts=\"AllFonts.js\"", "--output=\"" + root_dir + "/editors/sdkjs/common/Images\""] + themes_params
+      if (0 == platform.find("linux_arm") and not base.is_os_arm()):
+        x2t_origin = ""
+        if (config.option("sysroot") != ""):
+          x2t_origin = base.create_qemu_wrapper(root_dir + "/converter/x2t", platform)
+ 
+        base.cmd_in_dir_qemu(platform, root_dir + "/converter", "./allfontsgen", params_allfontsgen, True)
+        base.cmd_in_dir_qemu(platform, root_dir + "/converter", "./allthemesgen", params_allthemesgen, True)
+
+        if "" != x2t_origin:
+          base.delete_file(root_dir + "/converter/x2t")
+          base.move_file(x2t_origin, root_dir + "/converter/x2t")
+      else:        
+        base.cmd_exe(root_dir + "/converter/allfontsgen", params_allfontsgen, True)
+        base.cmd_exe(root_dir + "/converter/allthemesgen", params_allthemesgen, True)
+
       base.delete_file(root_dir + "/converter/AllFonts.js")
       base.delete_file(root_dir + "/converter/font_selection.bin")
       base.delete_file(root_dir + "/converter/fonts.log")
@@ -329,3 +345,4 @@ def make():
       base.delete_file(root_dir + "/editors/sdkjs/slide/sdk-all.cache")
 
   return
+

@@ -14,18 +14,8 @@ def make(src_dir, modules, build_platform="android", qmake_addon=""):
 
   print("boost-headers...")
   
-  # for b2 checks
-  if config.option("sysroot") != "":
-    base.set_sysroot_env()
-    b2_addon = "cflags=\"--sysroot=" + config.option("sysroot") + "\""
-    b2_addon = "cxxflags=\"--sysroot=" + config.option("sysroot") + "\""
-    b2_addon = "linkflags=\"--sysroot=" + config.option("sysroot") + "\""
-    
-  base.cmd("./bootstrap.sh", ["--with-libraries=system"])   
-  base.cmd("./b2", ["--prefix=./../build/" + build_platform, "headers", "install", b2_addon])
-  
-  if config.option("sysroot") != "":
-    base.restore_sysroot_env()
+  base.cmd("./bootstrap.sh", ["--with-libraries=system"]) 
+  base.cmd("./b2", ["--prefix=./../build/" + build_platform, "headers", "install"])
   
   for module in modules:
     print("boost-module: " + module + " ...")

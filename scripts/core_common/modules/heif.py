@@ -21,30 +21,10 @@ IOS_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../../core/Common/3dParty/h
 ANDROID_CMAKE_TOOLCHAIN_FILE = base.get_env("ANDROID_NDK_ROOT") + "/build/cmake/android.toolchain.cmake"
 
 # linux arm64 cmake toolchain
-LINUX_ARM64_CMAKE_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/arm/cross_arm64/linux-arm64.toolchain.cmake"
-
+LINUX_SYSTEM_AARCH64_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/sysroot/system-aarch64.toolchain.cmake"
 LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE = base.get_script_dir() + "/../tools/linux/sysroot/custom-sysroot.toolchain.cmake"
 
 OLD_ENV = dict()
-
-# get custom sysroot vars as str
-def setup_custom_sysroot_env() -> str:
-  env_vars = []
-  env_vars += ['LD_LIBRARY_PATH=\"' + config.get_custom_sysroot_lib() + "\""]
-  env_vars += ['PATH=\"' + config.option("sysroot") + "/usr/bin:" + base.get_env("PATH") + "\""]
-  env_vars += ['CC=\"' + config.get_custom_sysroot_bin() + "/gcc\""]
-  env_vars += ['CXX=\"' + config.get_custom_sysroot_bin() + "/g++\""]
-  env_vars += ['AR=\"' + config.get_custom_sysroot_bin() + "/ar\""]
-  env_vars += ['RABLIB=\"' + config.get_custom_sysroot_bin() + "/ranlib\""]
-  env_vars += ['CFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
-  env_vars += ['CXXFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
-  env_vars += ['LDFLAGS=\"' + "--sysroot=" + config.option("sysroot") + "\""]
-
-  env_str = ""
-  for env_var in env_vars:
-    env_str += env_var + " "
-
-  return env_str
 
 def get_vs_version():
   vs_version = "14 2015"
@@ -90,10 +70,11 @@ def build_with_cmake(platform, cmake_args, build_type):
       cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11", "-DCMAKE_OSX_ARCHITECTURES=x86_64"]
     elif platform == "mac_arm64":
       cmake_args_ext += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0", "-DCMAKE_OSX_ARCHITECTURES=arm64"]
-    elif platform == "linux_arm64":
-      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_ARM64_CMAKE_TOOLCHAIN_FILE]
     elif config.option("sysroot") != "":
-      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE] # force use custom CXXFLAGS with Release/Debug build
+      # force use custom CXXFLAGS with Release/Debug build
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_CUSTOM_SYSROOT_TOOLCHAIN_FILE]
+    elif platform == "linux_arm64" and not base.is_os_arm():
+      cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=" + LINUX_SYSTEM_AARCH64_TOOLCHAIN_FILE]
   # IOS
   elif "ios" in platform:
     cmake_args_ext = [
@@ -127,16 +108,20 @@ def build_with_cmake(platform, cmake_args, build_type):
       cmake_args_ext += get_cmake_args_android("x86_64", "21")
 
   # env setup for custom sysroot
-  env_str = setup_custom_sysroot_env() if config.option("sysroot") != "" else ""
+  if config.option("sysroot") != "":
+    base.set_sysroot_env("linux_arm64")
 
   # run cmake
-  base.cmd(env_str + "cmake", cmake_args + cmake_args_ext)
+  base.cmd("cmake", cmake_args + cmake_args_ext)
 
   # build
   if "Unix Makefiles" in cmake_args_ext:
-    base.cmd(env_str + "make", ["-j4"])
+    base.cmd("make", ["-j4"])
   else:
     base.cmd("cmake", ["--build", ".", "--config", build_type])
+
+  if config.option("sysroot") != "":
+    base.restore_sysroot_env()
   return
 
 # general make function that calls `build_func` callback for configured platform(s) with specified cmake arguments

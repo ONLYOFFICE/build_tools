@@ -72,6 +72,7 @@ def make():
     base.copy_lib(build_libraries_path, root_dir + "/converter", "IWorkFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "HWPFile")
     base.copy_lib(build_libraries_path, root_dir + "/converter", "DocxRenderer")
+    base.copy_lib(build_libraries_path, root_dir + "/converter", "StarMathConverter")
 
     if ("ios" == platform):
       base.copy_lib(build_libraries_path, root_dir + "/converter", "x2t")

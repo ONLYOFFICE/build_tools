@@ -65,6 +65,7 @@ def make():
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "IWorkFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "HWPFile")
     base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "DocxRenderer")
+    base.copy_lib(core_build_dir + "/lib/" + platform_postfix, root_dir, "StarMathConverter")
     base.copy_file(git_dir + "/sdkjs/pdf/src/engine/cmap.bin", root_dir + "/cmap.bin")
 
     if (0 == platform.find("win") or 0 == platform.find("linux") or 0 == platform.find("mac")):

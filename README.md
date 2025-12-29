@@ -108,10 +108,16 @@ LD_LIBRARY_PATH=./ ./DesktopEditors
 
 #### Document Server
 
-##### Building Document Server
+##### Building Document Server (Latest)
 
 ```bash
 ./automate.py server
+```
+
+##### Building Document Server (Specific tag)
+
+```bash
+./automate.py --branch=tags/v9.0.4.52 server
 ```
 
 ##### Installing and configuring Document Server dependencies

@@ -1,0 +1,106 @@
+name: 'Copyright Year Bump'
+description: 'Update copyright year in Ascensio System SIA files and optionally create a PR'
+
+inputs:
+  repo-path:
+    description: 'Path to the target repository relative to the workspace.'
+    required: false
+    default: '.'
+  target-year:
+    description: 'Target year (default: current year)'
+    required: false
+    default: ''
+  mode:
+    description: 'fix = update + push, dry-run = report only, check = exit 1 if outdated'
+    required: false
+    default: 'fix'
+  since:
+    description: 'Only files changed since (YYYY-MM-DD). Empty = all files.'
+    required: false
+    default: ''
+  gitea-token:
+    description: 'Optional Gitea token for PR creation. Pass the same secret to actions/checkout.token if push should use it too.'
+    required: false
+    default: ''
+
+outputs:
+  updated-count:
+    description: 'Number of files updated'
+    value: ${{ steps.bump.outputs.updated }}
+  changed:
+    description: 'true/false'
+    value: ${{ steps.bump.outputs.changed }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Determine year
+      id: year
+      shell: bash
+      run: |
+        YEAR="${{ inputs.target-year }}"
+        [ -z "$YEAR" ] && YEAR="$(date +%Y)"
+        echo "value=$YEAR" >> "$GITHUB_OUTPUT"
+
+    - name: Run copyright year bump
+      id: bump
+      shell: bash
+      run: |
+        cd "${{ inputs.repo-path }}"
+
+        ARGS="--year ${{ steps.year.outputs.value }} --mode ${{ inputs.mode }}"
+        [ -n "${{ inputs.since }}" ] && ARGS="$ARGS --since ${{ inputs.since }}"
+        python3 "${{ github.action_path }}/copyright_year_bump.py" $ARGS
+
+        if git diff --quiet; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "updated=0" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "updated=$(git diff --name-only | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Push changes
+      if: steps.bump.outputs.changed == 'true' && inputs.mode == 'fix'
+      shell: bash
+      env:
+        YEAR: ${{ steps.year.outputs.value }}
+      run: |
+        cd "${{ inputs.repo-path }}"
+
+        BRANCH="auto/copyright-year-$YEAR"
+
+        git config user.name "copyright-bot"
+        git config user.email "copyright-bot@onlyoffice.com"
+        git checkout -B "$BRANCH"
+        git add -A
+        git commit -m "chore(legal): update copyright year to $YEAR"
+        git push origin "$BRANCH" --force-with-lease
+
+    - name: Create PR
+      if: steps.bump.outputs.changed == 'true' && inputs.mode == 'fix' && inputs['gitea-token'] != ''
+      shell: bash
+      env:
+        GITEA_TOKEN: ${{ inputs.gitea-token }}
+        YEAR: ${{ steps.year.outputs.value }}
+        UPDATED: ${{ steps.bump.outputs.updated }}
+      run: |
+        BRANCH="auto/copyright-year-$YEAR"
+
+        curl -sf -X POST \
+          "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/pulls" \
+          -H "Authorization: token $GITEA_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d @- <<EOF
+        {
+          "title": "chore(legal): update copyright year to $YEAR",
+          "head": "$BRANCH",
+          "base": "${{ github.event.repository.default_branch }}",
+          "body": "Automated copyright year update.\n\nUpdated **$UPDATED** files.\nOnly Ascensio System SIA copyright lines modified."
+        }
+        EOF

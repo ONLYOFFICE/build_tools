@@ -63,3 +63,18 @@ runs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
           echo "updated=$(git diff --name-only | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
         fi
+
+    - name: Push changes
+      if: ${{ steps.bump.outputs.changed == 'true' && inputs.mode == 'fix' }}
+      shell: bash
+      env:
+        YEAR: ${{ steps.year.outputs.value }}
+      run: |
+        cd "${{ inputs.repo-path }}"
+        BRANCH="feature/copyright-year-$YEAR"
+        git config user.name "copyright-bot"
+        git config user.email "copyright-bot@onlyoffice.com"
+        git checkout -B "$BRANCH"
+        git add -u
+        git commit -m "chore(legal): update copyright year to $YEAR"
+        git push origin "$BRANCH" --force-with-lease

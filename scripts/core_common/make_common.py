@@ -9,6 +9,7 @@ import base
 import glob
 
 import boost
+import libxml2
 import cef
 import icu
 import openssl
@@ -41,6 +42,7 @@ def make():
         check_android_ndk_macos_arm(toolchain + "/prebuilt")
 
   boost.make()
+  libxml2.make()
   cef.make()
   icu.make()
   openssl.make()

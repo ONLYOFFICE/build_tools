@@ -179,6 +179,9 @@ def make():
         base.qt_copy_lib("Qt5DBus", root_dir)
         base.qt_copy_lib("Qt5X11Extras", root_dir)
         base.qt_copy_lib("Qt5XcbQpa", root_dir)
+        base.qt_copy_lib("Qt5Quick", root_dir)
+        base.qt_copy_lib("Qt5Qml", root_dir)
+        base.qt_copy_lib("Qt5QmlModels", root_dir)
         base.qt_copy_icu(root_dir, platform)
         if not base.check_congig_option_with_platfom(platform, "libvlc"):
           base.copy_files(base.get_env("QT_DEPLOY") + "/../lib/libqgsttools_p.so*", root_dir)

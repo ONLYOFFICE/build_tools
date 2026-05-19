@@ -310,30 +310,27 @@ def cmd_output(*args, **kwargs):
   ).decode("utf-8")
 
 def powershell(*args, **kwargs):
+  command = ["powershell", "-Command"] + [i for i in args]
   if kwargs.get("verbose"):
     log("- powershell:")
-    log("    command: " + " ".join(args))
+    log("    command: " + " ".join(command))
     if kwargs.get("chdir"):
       log("    chdir: " + kwargs["chdir"])
     if kwargs.get("creates"):
       log("    creates: " + kwargs["creates"])
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return False
-  args = ["powershell", "-Command"] + [i for i in args]
-  ret = subprocess.call(
-      args, stderr=subprocess.STDOUT, shell=True
-  ) == 0
+  ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True) == 0
   return ret
 
 def ps1(file, args=[], **kwargs):
+  command = ["powershell", "-ExecutionPolicy", "ByPass", "-File", file] + args
   if kwargs.get("verbose"):
-    log("- ps1: " + file + " " + " ".join(args))
+    log("- ps1:")
+    log("    command: " + " ".join(command))
   if kwargs.get("creates") and is_exist(kwargs["creates"]):
     return True
-  ret = subprocess.call(
-    ["powershell", "-ExecutionPolicy", "ByPass", "-File", file] + args,
-    stderr=subprocess.STDOUT, shell=True
-  ) == 0
+  ret = subprocess.call(command, stderr=subprocess.STDOUT, shell=True) == 0
   return ret
 
 def sh(command, **kwargs):

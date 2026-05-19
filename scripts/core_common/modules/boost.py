@@ -43,6 +43,21 @@ def clang_correct():
   base.replaceInFile("./tools/build/src/tools/darwin.py", "toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])", "#toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])")
   return
 
+def apply_patches(base_dir):
+  patches_dir = base_dir + "/patches"
+  # mpl/integral_wrapper.hpp: Xcode 26+ Clang treats enum-constexpr-conversion as hard error
+  mpl_patch = patches_dir + "/mpl_integral_wrapper.patch"
+  mpl_targets = [
+    base_dir + "/boost_1_72_0/libs/mpl/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios_xcframework/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios_xcframework/ios_simulator/include/boost/mpl/aux_/integral_wrapper.hpp",
+  ]
+  for target in mpl_targets:
+    if base.is_file(target):
+      base.apply_patch(target, mpl_patch)
+  return
+
 def make():
   print("[fetch & build]: boost")
 
@@ -151,6 +166,9 @@ def make():
     base.delete_file(directory_build + "/libboost_system.a")
     base.delete_file(directory_build + "/libboost_system.dylib")
     base.copy_files(directory_build + "/mac_arm64/*.a", directory_build)
+
+  # patches
+  apply_patches(base_dir)
 
   os.chdir(old_cur)
   return

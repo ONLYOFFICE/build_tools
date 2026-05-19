@@ -44,11 +44,19 @@ show how to use docker without sudo.
 
 ```bash
 cd build_tools/develop
-docker pull onlyoffice/documentserver
-docker build --no-cache -t documentserver-develop .
+docker build --no-cache --build-arg DOCUMENTSERVER_IMAGE=onlyoffice/documentserver:latest --build-arg BUILDTOOLS_BRANCH=master -t documentserver-develop .
 ```
 
 **Note**: The dot at the end is required.
+
+**Note**: For a versioned development image, use the matching Document Server
+image and build_tools branch, for example
+`DOCUMENTSERVER_IMAGE=onlyoffice/documentserver:9.4.0` and
+`BUILDTOOLS_BRANCH=release/v9.4.0`.
+
+**Note**: On container startup, the build_tools branch is detected from the
+copy used inside the container. The branch selects the matching core archive,
+including FileConverter binaries.
 
 **Note**: Sometimes the build may fail due to network errors. Just restart it.
 
@@ -138,7 +146,7 @@ They may block some scripts (like Analytics.js).
 
 ### To change something in `sdkjs`, do the following steps
 
-1) Edit the source file. Let's insert an image URL into each open document.
+**Step 1.** Edit the source file. Let's insert an image URL into each open document.
 The following command inserts (in case of problems, you can replace the URL)
 `this.AddImageUrl(['http://localhost/example/images/logo.png']);`  
 after event  
@@ -147,27 +155,31 @@ in file
 `sdkjs/common/apiBase.js`
 
 **Windows (PowerShell):**
+
 ```powershell
 (Get-Content sdkjs/common/apiBase.js) -replace "this\.sendEvent\('asc_onDocumentContentReady'\);", "this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);" | Set-Content sdkjs/common/apiBase.js
 ```
 
 **Linux:**
+
 ```bash
 sed -i "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs/common/apiBase.js
 ```
 
 **macOS:**
+
 ```bash
 sed -i '' "s,this.sendEvent('asc_onDocumentContentReady');,this.sendEvent('asc_onDocumentContentReady');this.AddImageUrl(['http://localhost/example/images/logo.png']);," sdkjs/common/apiBase.js
 ```
 
-2) Clear the browser cache or hard reload the page (`Ctrl + Shift + R` or `Cmd + Shift + R` on macOS)
+**Step 2.** Clear the browser cache or hard reload the page
+(`Ctrl + Shift + R` or `Cmd + Shift + R` on macOS)
 
-3) Open a new file in the browser
+**Step 3.** Open a new file in the browser
 
 ### To change something in `server`, do the following steps
 
-1) Edit the source file. Let's send a `"Hello World!"`
+**Step 1.** Edit the source file. Let's send a `"Hello World!"`
 chat message every time a document is opened.
 The following command inserts  
 `yield* onMessage(ctx, conn, {"message": "Hello World!"});`  
@@ -177,21 +189,24 @@ in file
 `server/DocService/sources/DocsCoServer.js`
 
 **Windows (PowerShell):**
+
 ```powershell
 (Get-Content server/DocService/sources/DocsCoServer.js) -replace 'opt_hasForgotten, opt_openedAt\) \{', 'opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});' | Set-Content server/DocService/sources/DocsCoServer.js
 ```
 
 **Linux:**
+
 ```bash
 sed -i 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});#' server/DocService/sources/DocsCoServer.js
 ```
 
 **macOS:**
+
 ```bash
 sed -i '' 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {yield* onMessage(ctx, conn, {"message": "Hello World!"});#' server/DocService/sources/DocsCoServer.js
 ```
 
-2) Restart the document server process
+**Step 2.** Restart the document server process
 
 **Note**: Look for `CONTAINER_ID` in the result of `docker ps`.
 
@@ -199,7 +214,7 @@ sed -i '' 's#opt_hasForgotten, opt_openedAt) {#opt_hasForgotten, opt_openedAt) {
 docker exec -it CONTAINER_ID supervisorctl restart all
 ```
 
-3) Open a new file in the browser
+**Step 3.** Open a new file in the browser
 
 ## Start server with additional functionality (addons)
 

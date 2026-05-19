@@ -44,6 +44,13 @@ def make():
   else:
     print("-----------------------------------------------------------")
     print("Core is up to date. ---------------------------------------")
+    print("Core requested branch: " + config.option("branch"))
+    print("Core archive url: " + url)
+    print("Core archive Last-Modified: " + (data_url if data_url != "" else "<empty>"))
+    print("Core cache marker exists: " + ("yes" if base.is_file("./core.7z.data") else "no"))
+    print("Core cached Last-Modified: " + (old_data_url if old_data_url != "" else "<empty>"))
+    if (data_url == ""):
+      print("Core warning: Last-Modified is empty, archive availability was not confirmed")
     print("-----------------------------------------------------------")
 
   base.generate_doctrenderer_config("./DoctRenderer.config", "../../../sdkjs/deploy/", "server", "../../../web-apps/vendor/", "../../../dictionaries")

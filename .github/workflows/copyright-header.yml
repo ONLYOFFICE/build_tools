@@ -1,0 +1,299 @@
+name: Copyright header replacement
+
+on:
+  workflow_dispatch:
+    inputs:
+      repositories:
+        description: 'Target repositories, one per line. Accepts owner/repo or repo (owner defaults to ONLYOFFICE).'
+        required: true
+        type: string
+      base_branch:
+        description: 'Base branch name to apply the replacement to (e.g. master, release/v9.4.0). Branch names only -- tags, arbitrary refs, and commit SHAs are not supported. Leave empty to use each repo''s default branch. This is NOT the generated output branch name.'
+        required: false
+        type: string
+        default: ''
+  push:
+    branches: [feature/copyright]
+    paths:
+      - 'scripts/copyright-update/config.json'
+
+# Single-job + bash-loop shape is a Gitea act-runner workaround:
+# `matrix.<key>: ${{ fromJSON(needs.X.outputs.Y) }}` arrives as empty
+# strings on act regardless of `matrix.<key>:` vs `matrix.include:`.
+# We loop in bash instead, trading parallelism for reliability.
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      # Token split: READ_PAT for read paths (clone, REST API), and
+      # USERNAME+TOKEN bot credentials only for the actual push. Reduces
+      # the surface where the write-scoped credentials are passed.
+      READ_PAT:     ${{ secrets.READ_PAT }}
+      GIT_USERNAME: ${{ secrets.USERNAME }}
+      GIT_TOKEN:    ${{ secrets.TOKEN }}
+      # Gitea auto-populates github.server_url with the instance URL
+      # (e.g. https://git.onlyoffice.com). vars.GITEA_URL is honored as an
+      # override if a deployment wants to point at a different host.
+      GITEA_URL:    ${{ vars.GITEA_URL || github.server_url }}
+    steps:
+      - name: Checkout action repo
+        uses: actions/checkout@v4
+        with:
+          path: action
+
+      - name: Resolve targets and base branch
+        id: resolve
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORIES_INPUT: ${{ inputs.repositories }}
+          DISPATCH_BASE_BRANCH: ${{ inputs.base_branch }}
+        run: |
+          echo "date_slug=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "push" ]; then
+            # Push-driven run: targets come from the committed config.json.
+            # The Python script does the parsing so the YAML stays free of
+            # config-shape knowledge.
+            python3 action/scripts/copyright-update/replace_header.py \
+              --emit-targets action/scripts/copyright-update/config.json \
+              | tee targets.env >> "$GITHUB_OUTPUT"
+          else
+            # workflow_dispatch: parse the multiline `repositories` input.
+            python3 - > targets.env <<'PY'
+          import json, os
+          DEFAULT_OWNER = "ONLYOFFICE"
+          raw = os.environ.get("REPOSITORIES_INPUT", "")
+          repos = []
+          for line in raw.splitlines():
+              s = line.strip()
+              if not s:
+                  continue
+              if "/" not in s:
+                  s = f"{DEFAULT_OWNER}/{s}"
+              repos.append(s)
+          print("repos=" + json.dumps(repos))
+          print("base_branch=" + os.environ.get("DISPATCH_BASE_BRANCH", ""))
+          print("enabled=" + ("true" if repos else "false"))
+          PY
+            cat targets.env >> "$GITHUB_OUTPUT"
+          fi
+          # Echo for the run log so the resolved values are visible.
+          echo "--- resolved targets ---"
+          cat targets.env
+
+      - name: Replace header in each target repository
+        if: steps.resolve.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          # CRITICAL: act runs `bash -e -o pipefail`. With parent errexit on,
+          # any non-zero subshell exit aborts the whole step BEFORE we can
+          # capture $?. Turn parent errexit off; the subshell below runs
+          # `set -euo pipefail` itself for internal fail-fast.
+          set +e
+
+          DATE_SLUG="${{ steps.resolve.outputs.date_slug }}"
+          BASE_BRANCH="${{ steps.resolve.outputs.base_branch }}"
+          REPOS_JSON='${{ steps.resolve.outputs.repos }}'
+
+          mkdir -p "$GITHUB_WORKSPACE/reports"
+          {
+            echo "## Copyright header replacement"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Iterate over repos; one repo's failure must not kill the loop,
+          # but it MUST mark the job as failed at the end -- otherwise a
+          # silently-failed push would show as a green run.
+          #
+          # Each iteration is wrapped in `::group::` / `::endgroup::` so
+          # the run log renders each repository as its own collapsible
+          # block in the Actions UI. Both Gitea (act) and GitHub Actions
+          # honor these markers.
+          REPO_INDEX=0
+          FAILED=0
+          while IFS= read -r REPO; do
+            [ -z "$REPO" ] && continue
+            REPO_INDEX=$((REPO_INDEX + 1))
+
+            echo "::group::[${REPO_INDEX}] ${REPO}"
+
+            SLUG="${REPO//\//-}"
+            REPORT_DIR="$GITHUB_WORKSPACE/reports/$SLUG"
+            TARGET_DIR="$GITHUB_WORKSPACE/target-$SLUG"
+            SUMMARY_FILE="$REPORT_DIR/summary.md"
+            mkdir -p "$REPORT_DIR"
+
+            # Per-repo work runs in a SUBSHELL with strict mode. Critical bash
+            # gotcha: `( ... ) || handler` (or `{ ... } || handler`, or
+            # `func || handler`) DISABLES `set -e` inside the left-hand side
+            # because the compound command is part of an OR list. We therefore
+            # do NOT use `||`; we run the subshell, capture $? separately, and
+            # branch on the exit code. With `set +e` on the parent (above),
+            # the subshell's exit code reaches `rc=$?` cleanly.
+            (
+              set -euo pipefail
+              # Read URL: cross-repo CLONE uses the read-scoped READ_PAT.
+              # The push URL is set separately just before `git push` so
+              # the write credentials are exposed for the minimum scope.
+              READ_REMOTE="https://x-access-token:${READ_PAT}@${GITEA_URL#https://}/${REPO}.git"
+              PUSH_REMOTE="https://${GIT_USERNAME}:${GIT_TOKEN}@${GITEA_URL#https://}/${REPO}.git"
+
+              if [ -n "$BASE_BRANCH" ]; then
+                effective_base="$BASE_BRANCH"
+              else
+                effective_base=$(curl -fsSL -H "Authorization: token $READ_PAT" \
+                  "$GITEA_URL/api/v1/repos/$REPO" | jq -r .default_branch)
+              fi
+              echo "[$REPO] base_branch=$effective_base"
+
+              BASE_SLUG=$(printf '%s' "$effective_base" | sed 's#[^A-Za-z0-9._-]#-#g')
+              gen_branch="feature/copyright-${BASE_SLUG}-${DATE_SLUG}"
+              echo "[$REPO] generated_branch=$gen_branch"
+
+              # Probe whether the disposable branch already exists on the
+              # remote BEFORE cloning. If it does, somebody already ran the
+              # workflow today against the same base; skip this repo to avoid
+              # re-doing the work. Manually delete the branch in Gitea UI to
+              # force a fresh run.
+              # ls-remote on bare URL works without a local clone. We use
+              # READ_REMOTE here (it has read scope on the target). Exit
+              # code semantics: 0 = found, 2 = not found, other = error.
+              if git ls-remote --exit-code --heads "$READ_REMOTE" "$gen_branch" >/dev/null 2>&1; then
+                echo "[$REPO] generated branch '$gen_branch' already exists on remote -- skipping (delete the branch to re-run)"
+                {
+                  echo "### $REPO"
+                  echo "- base_branch: \`$effective_base\`"
+                  echo "- generated_branch: \`$gen_branch\`"
+                  echo "- branch_created: \`false\`"
+                  echo "- reason: \`already_generated\`"
+                  echo ""
+                } > "$SUMMARY_FILE"
+                exit 0
+              else
+                rc=$?
+                if [ "$rc" -ne 2 ]; then
+                  echo "[$REPO] ls-remote failed with exit code $rc" >&2
+                  exit "$rc"
+                fi
+              fi
+
+              git clone "$READ_REMOTE" "$TARGET_DIR"
+              cd "$TARGET_DIR"
+              git fetch origin "$effective_base"
+              git checkout -B "$gen_branch" "origin/$effective_base"
+              cd "$GITHUB_WORKSPACE"
+
+              python3 action/scripts/copyright-update/replace_header.py \
+                --repo-path "$TARGET_DIR" \
+                --old action/scripts/copyright-update/templates/old.license \
+                --new action/scripts/copyright-update/templates/new.license \
+                --report-dir "$REPORT_DIR"
+
+              # Pull individual stat lines out of report.txt (totals block at
+              # the end has shape `key=N`). Used both for the commit message
+              # body and for the summary highlight section below.
+              get_stat() {
+                local key="$1"
+                local val
+                val=$(grep "^${key}=" "$REPORT_DIR/report.txt" | tail -n1 | cut -d= -f2)
+                echo "${val:-0}"
+              }
+              stat_replaced=$(get_stat replaced)
+              stat_not_our=$(get_stat not_our_header)
+              stat_no_header=$(get_stat no_header)
+              stat_vendor=$(get_stat vendor)
+              stat_already_new=$(get_stat already_new)
+              stat_errors=$(get_stat errors)
+
+              cd "$TARGET_DIR"
+              if git diff --quiet; then
+                branch_created="false"
+                reason="no_changes"
+              else
+                git config user.name  "copyright-bot"
+                git config user.email "copyright-bot@onlyoffice.com"
+                git add -u
+                # Commit body is a single stats line, not_our_header first.
+                git commit \
+                  -m "[copyright] Update copyright header" \
+                  -m "not_our_header=${stat_not_our} replaced=${stat_replaced} no_header=${stat_no_header} vendor=${stat_vendor} already_new=${stat_already_new} errors=${stat_errors}"
+                # Swap origin's push URL to bot credentials only here, just
+                # before push. Clone/fetch above used READ_PAT; push is the
+                # only step that needs the write-scoped USERNAME+TOKEN.
+                git remote set-url --push origin "$PUSH_REMOTE"
+                # Lease taken from origin/$gen_branch (fetched above if it existed).
+                # A concurrent update triggers rejection; we let it fail loudly.
+                git push --force-with-lease origin "HEAD:$gen_branch"
+                branch_created="true"
+                reason="ok"
+              fi
+
+              # Build per-repo summary: stats line + highlight bullet for
+              # not_our_header (count only; the actual file paths live in
+              # the run log, where the script echoes them).
+              {
+                echo "### $REPO"
+                echo "- base_branch: \`$effective_base\`"
+                echo "- generated_branch: \`$gen_branch\`"
+                echo "- branch_created: \`$branch_created\`"
+                echo "- reason: \`$reason\`"
+                echo "- replaced: \`$stat_replaced\`"
+                echo "- not_our_header: \`$stat_not_our\`"
+                echo "- no_header: \`$stat_no_header\`  vendor: \`$stat_vendor\`  already_new: \`$stat_already_new\`  errors: \`$stat_errors\`"
+                echo ""
+                if [ "$stat_not_our" != "0" ]; then
+                  # Full file paths live in the run log (script echoes them)
+                  # and in the per-repo `report.txt` inside the `reports`
+                  # artifact (grep for `not_our_header:`).
+                  echo "**${stat_not_our} files have our holder but did not match the OLD template** -- review manually or lower \`--similarity-threshold\`. Full list in the run log and in \`reports\` artifact."
+                  echo ""
+                fi
+              } > "$SUMMARY_FILE"
+            )
+            rc=$?
+
+            if [ "$rc" -ne 0 ]; then
+              FAILED=1
+              {
+                echo "### $REPO"
+                echo "- error: subshell exited with code $rc (see job log for details)"
+                echo ""
+              } > "$SUMMARY_FILE"
+            fi
+
+            cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
+            echo "[${REPO_INDEX}] ${REPO} finished, subshell_rc=${rc}"
+            echo "::endgroup::"
+          done < <(echo "$REPOS_JSON" | jq -r '.[]')
+
+          echo ""
+          echo "============================================================"
+          echo "loop completed: processed ${REPO_INDEX} repositories, failed=${FAILED}"
+          echo "============================================================"
+
+          # Fail the job if any repo failed. Per-repo summaries already
+          # describe what went wrong; we just need the overall run to be
+          # red so it does not get ignored.
+          if [ "$FAILED" -ne 0 ]; then
+            echo ""
+            echo "One or more repositories failed -- see per-repo summaries above."
+            exit 1
+          fi
+
+      - name: Note empty target list
+        if: steps.resolve.outputs.enabled != 'true'
+        shell: bash
+        run: |
+          {
+            echo "## Copyright header replacement"
+            echo ""
+            echo "No target repositories were configured; nothing to do."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reports artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: reports/

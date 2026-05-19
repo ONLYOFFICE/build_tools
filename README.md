@@ -12,7 +12,16 @@ It automatically fetches all the required dependencies and source code to build 
 
 ## **How do I use it on Linux? 🐧**
 
->This guide has been tested and verified on **Ubuntu 16.04**.
+>This guide has been tested and verified on:
+
+| Component     | Specification     |
+|---------------|-------------------|
+| OS            | Ubuntu 24.04      |
+| Architecture  | amd64             |
+| CPU           | 4 cores           |
+| RAM           | 8 GB              |
+| Swap          | 4 GB              |
+| Storage       | 100 GB SSD        |
 
 ### **Step 1: Install dependencies**
 
@@ -42,12 +51,12 @@ Now, you're ready to build the ONLYOFFICE products.
    This is where the magic happens! Running the script without any options will build all three products: Document Server, Document Builder, and Desktop Editors.  
 
    ```bash
-   ./automate.py
+   python3 ./automate.py
    ```
 You can also build ONLYOFFICE products separately. Just run the script with the parameter corresponding to the necessary product. For example, to build *Desktop Editors* and *Document Server*
-  ```bash
-   ./automate.py desktop server
-   ```
+```bash
+python3 ./automate.py desktop server
+```
 
 **Perfect!** Once the script finishes, you will find the compiled products in the ```./out``` directory.
 
@@ -57,19 +66,31 @@ You can also build ONLYOFFICE products separately. Just run the script with the 
 
 If you prefer using Docker, you can build all products inside a container. This is a great way to keep your local system clean.
 
-1. **Create an output directory:**  
+1. **Install Docker** https://docs.docker.com/engine/install/
+
+2. **Clone the build_tools repository:**
+   ```bash
+   git clone https://github.com/ONLYOFFICE/build_tools.git
+    ```
+
+3. **Go to the build_tools:**
+   ```bash
+   cd build_tools
+    ```
+
+4. **Create an output directory:**  
 
    ```bash
    mkdir out
     ```
 
-2. **Build the Docker image:**  
+5. **Build the Docker image:**  
 
    ```bash
    docker build --tag onlyoffice-document-editors-builder .
    ```
 
-3. **Run the container to start the build:** 
+6. **Run the container to start the build:** 
    
    This command mounts your local out directory into the container, so the final build files will appear on your machine. 
 
@@ -87,7 +108,7 @@ Don't need everything? You can save time by building only the products you need.
 * How to build
 
   ```bash
-  ./automate.py builder
+  python3 ./automate.py builder
   ```
 * How to run
   ```bash
@@ -99,7 +120,7 @@ Don't need everything? You can save time by building only the products you need.
 
 * How to build
   ```bash
-  ./automate.py desktop
+  python3 ./automate.py desktop
   ```
 * How to run
   ```bash
@@ -110,23 +131,13 @@ Don't need everything? You can save time by building only the products you need.
 ### Need just the [Docs (Document Server)](https://github.com/ONLYOFFICE/DocumentServer)❓
 * How to build
   ```bash
-  ./automate.py server
+  python3 ./automate.py server
   ```
 * How to run
 
   Running the Document Server is a multi-step process because it relies on a few background services. Let's break it down step by step. 
 
-#### **Step 1. Set up dependencies**
-
-The Document Server needs a few things to run correctly:
-
-* **NGINX**: Acts as a web server to handle requests.  
-* **PostgreSQL**: Used as the database to store information.  
-* **RabbitMQ**: A message broker that helps different parts of the server communicate.
-
-Here are the commands to install and configure them.
-
-#### **Install and configure NGINX**
+#### **Step 1. Install and configure NGINX**
 
 1. Install NGINX  
 ```bash
@@ -180,34 +191,7 @@ sudo ln -s /etc/nginx/sites-available/onlyoffice-documentserver /etc/nginx/sites
 ```bash
 sudo nginx -s reload
 ```
-#### **Install and configure PostgreSQL**
 
-1. Install PostgreSQL  
-    ```bash
-    sudo apt-get install postgresql
-    ```
-
-2. Create a database and user. 
-
-    **Note**: The user and password must both be **'onlyoffice'.**  
-    ```bash
-    sudo -i -u postgres psql -c "CREATE USER onlyoffice WITH PASSWORD 'onlyoffice';"
-    sudo -i -u postgres psql -c "CREATE DATABASE onlyoffice OWNER onlyoffice;"
-    ```
-
-3. Configure the database:  
-    ```bash
-    psql -hlocalhost -Uonlyoffice -d onlyoffice -f ../../out/linux_64/onlyoffice/documentserver/server/schema/postgresql/createdb.sql
-    ```
-
-Upon that, you will be asked to provide a password for the onlyoffice PostgreSQL user. Please enter the **onlyoffice** password.
-
-#### **Install RabbitMQ**
-```bash
-sudo apt-get install rabbitmq-server
-```
-
-Now that you have all the dependencies installed, it's time to generate server files. 
 #### **Step 2. Generate server files**
 
 Before running the server, you need to generate font and theme data.

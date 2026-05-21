@@ -115,7 +115,6 @@ def make_run():
   run_module(base_dir + '/../../../server/DocService', ['sources/server.js'])
   #run_module(base_dir + '/../../../server/DocService', ['sources/gc.js'])
   run_module(base_dir + '/../../../server/FileConverter', ['sources/convertermaster.js'])
-  #run_module(base_dir + '/../../../server/SpellChecker', ['sources/server.js'])
 
 def run_docker_server(args = []):
   try:

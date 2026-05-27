@@ -1223,8 +1223,8 @@ def web_apps_addons_param():
   return params
 
 # common apps
-def download(url, dst):
-  return cmd_exe("curl", ["-L", "-o", dst, url])
+def download(url, dst, is_no_errors=False):
+  return cmd_exe("curl", ["-L", "-o", dst, url], is_no_errors)
 
 def extract(src, dst, is_no_errors=False):
   app = "7za" if ("mac" == host_platform()) else "7z"

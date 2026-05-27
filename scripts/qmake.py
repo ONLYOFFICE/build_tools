@@ -29,6 +29,39 @@ def check_support_platform(platform):
     return False
   return True
 
+def check_jom():
+  # return empty string for nmake use
+  # return ""
+  dst_path = os.path.normpath(__dir__name__ + "/../tools/win/jom")
+  
+  if not base.is_dir(dst_path):
+    base.create_dir(dst_path)
+
+    old_cur = os.getcwd()
+    os.chdir(dst_path)
+        
+    urls = [
+      "https://download.qt.io/official_releases/jom/jom.zip",
+      "https://qt.mirror.constant.com/official_releases/jom/jom.zip",
+      "https://www.mirrorservice.org/sites/download.qt-project.org/official_releases/jom/jom.zip"
+    ]
+    for url in urls:
+      base.download(url, "./jom.zip", True)
+      if base.is_file("./jom.zip"):
+        base.extract("./jom.zip", "./")
+        base.delete_file("./jom.zip")
+        if base.is_file("./jom.exe"):
+          ver = base.run_command("jom.exe /VERSION")["stdout"]
+          if -1 == ver.find("jom version"):
+            base.delete_file("./jom.exe")
+        break
+
+    os.chdir(old_cur)
+
+  if base.is_file(dst_path + "/jom.exe"):
+    return dst_path + "/jom.exe"
+  return ""
+
 def make(platform, project, qmake_config_addon="", is_no_errors=False):
   # check platform
   if not check_support_platform(platform):
@@ -153,6 +186,12 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
     if (qmake_env_addon != ""):
       qmake_env_addon += " "
 
+    nmake_exe = "nmake"
+    jom_exe = check_jom()
+
+    if "" != jom_exe:
+      nmake_exe = "\"" + jom_exe + "\""
+
     qmake_bat = []
     qmake_bat.append("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + vcvarsall_arch)
     qmake_addon_string = ""
@@ -160,12 +199,19 @@ def make(platform, project, qmake_config_addon="", is_no_errors=False):
       qmake_addon_string = " " + (" ").join(["\"" + addon + "\"" for addon in qmake_addon])
     qmake_bat.append("call \"" + qmake_app + "\" -nocache " + qmake_env_addon + file_pro + config_params_string + qmake_addon_string)
     if ("1" == config.option("clean")):
-      qmake_bat.append("call nmake " + " ".join(clean_params))
-      qmake_bat.append("call nmake " + " ".join(distclean_params))
+      qmake_bat.append("call " + nmake_exe + " " + " ".join(clean_params))
+      qmake_bat.append("call " + nmake_exe + " " + " ".join(distclean_params))
       qmake_bat.append("call \"" + qmake_app + "\" -nocache " + file_pro + config_params_string + qmake_addon_string)
-    if ("0" != config.option("multiprocess")):
-      qmake_bat.append("set CL=/MP")
-    qmake_bat.append("call nmake -f " + makefile)
+    if (nmake_exe == "nmake"):
+      if ("0" != config.option("multiprocess")):
+        qmake_bat.append("set CL=/MP")
+      qmake_bat.append("call " + nmake_exe + " -f " + makefile)
+    else:
+      j_param = get_j_num()
+      j_param_str = ""
+      if len(j_param) == 1:
+        j_param_str = " " + j_param[0]
+      qmake_bat.append("call " + nmake_exe + " -f " + makefile + j_param_str)
     base.run_as_bat(qmake_bat, is_no_errors)
 
   if (base.is_file(stash_file)):

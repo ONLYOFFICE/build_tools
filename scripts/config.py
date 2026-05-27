@@ -147,8 +147,9 @@ def parse():
     extend_option("config", "core_disable_all_warnings")
 
   # improve build time
-  if not check_option("config", "debug"):
-    extend_option("config", "build_monolith_objects")
+  if False:
+    if not check_option("config", "debug"):
+      extend_option("config", "build_monolith_objects")
 
   return
 

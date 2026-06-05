@@ -15,7 +15,7 @@ on:
         default: 'create'
 
       branch_name:
-        description: 'Branch name to create or remove'
+        description: 'Branch name for the selected operation'
         required: true
         type: string
 

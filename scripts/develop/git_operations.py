@@ -192,13 +192,86 @@ class GitOperations:
         logger.info(f"Results: {success} deleted, {skipped} skipped, {failed} failed")
         return failed == 0
 
+    def protect_branches(self, teams):
+        """Set branch protection in all repositories using Gitea API."""
+        repositories = self.get_configured_repositories()
+        success = 0
+        skipped = 0
+        failed = 0
+
+        data = {
+            "branch_name": self.branch_name,
+            "enable_push": True,
+            "enable_push_whitelist": True,
+            "push_whitelist_teams": teams,
+            "enable_deletions": False,
+            "enable_merge_whitelist": True,
+            "merge_whitelist_teams": teams,
+        }
+
+        for repo_name in repositories:
+            logger.info(f"--- {repo_name} ---")
+
+            result = self._api(
+                f"repos/{self.owner}/{repo_name}/branch_protections",
+                method="POST",
+                data=data
+            )
+
+            if result['ok']:
+                logger.info(f"Protected '{self.branch_name}' in {repo_name}")
+                success += 1
+            elif result['status'] == 404:
+                logger.warning(f"Repo not found: {repo_name}, skipping")
+                skipped += 1
+            elif result['status'] == 422:
+                logger.warning(f"Protection already exists in {repo_name}, skipping")
+                skipped += 1
+            else:
+                logger.warning(f"Failed in {repo_name} (status {result['status']}): {result['body']}")
+                failed += 1
+
+        logger.info(f"Results: {success} protected, {skipped} skipped, {failed} failed")
+        return failed == 0
+
+    def unprotect_branches(self):
+        """Remove branch protection from all repositories using Gitea API."""
+        repositories = self.get_configured_repositories()
+        encoded_branch = urllib.parse.quote(self.branch_name, safe='')
+        success = 0
+        skipped = 0
+        failed = 0
+
+        for repo_name in repositories:
+            logger.info(f"--- {repo_name} ---")
+
+            result = self._api(
+                f"repos/{self.owner}/{repo_name}/branch_protections/{encoded_branch}",
+                method="DELETE"
+            )
+
+            if result['ok']:
+                logger.info(f"Unprotected '{self.branch_name}' in {repo_name}")
+                success += 1
+            elif result['status'] == 404:
+                logger.warning(f"Protection not found in {repo_name}, skipping")
+                skipped += 1
+            else:
+                logger.warning(f"Failed in {repo_name} (status {result['status']}): {result['body']}")
+                failed += 1
+
+        logger.info(f"Results: {success} unprotected, {skipped} skipped, {failed} failed")
+        return failed == 0
+
 
 def main():
     parser = argparse.ArgumentParser(description='Git Operations Tool - Create and Remove Branches')
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
     for cmd_name, cmd_help in [('create', 'Create branch in all repositories'),
-                                ('remove', 'Remove branch from all repositories')]:
+                                ('remove', 'Remove branch from all repositories'),
+                                ('protect', 'Set branch protection in all repositories'),
+                                ('unprotect', 'Remove branch protection from all repositories')]:
         sub = subparsers.add_parser(cmd_name, help=cmd_help)
         sub.add_argument('branch_name', help='Branch name')
         sub.add_argument('--base-branch', default='develop', help='Base branch (default: develop)')
@@ -206,6 +279,8 @@ def main():
         sub.add_argument('--branding-url', default='ONLYOFFICE/onlyoffice.git',
                          help='Relative path from git host base')
         sub.add_argument('--modules', default='core desktop builder server mobile', help='Modules to include')
+        if cmd_name == 'protect':
+            sub.add_argument('--teams', required=True, help='Comma-separated list of teams for push/merge whitelist')
 
     args = parser.parse_args()
 
@@ -221,6 +296,11 @@ def main():
         success = git_ops.create_branches()
     elif args.command == 'remove':
         success = git_ops.remove_branches()
+    elif args.command == 'protect':
+        teams = [t.strip() for t in args.teams.split(',')]
+        success = git_ops.protect_branches(teams)
+    elif args.command == 'unprotect':
+        success = git_ops.unprotect_branches()
 
     sys.exit(0 if success else 1)
 

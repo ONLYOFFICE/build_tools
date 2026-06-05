@@ -10,6 +10,8 @@ on:
         options:
           - create
           - remove
+          - protect
+          - unprotect
         default: 'create'
 
       branch_name:
@@ -41,6 +43,11 @@ on:
         type: string
         default: 'core desktop builder server mobile'
 
+      teams:
+        description: 'Comma-separated teams for branch protection whitelist (for protect operation)'
+        required: false
+        type: string
+
 jobs:
   git-operations:
     runs-on: ubuntu-latest
@@ -68,13 +75,19 @@ jobs:
           BRANDING:    ${{ inputs.branding }}
           BRANDING_URL: ${{ inputs.branding_url }}
           MODULES:     ${{ inputs.modules }}
+          TEAMS:       ${{ inputs.teams }}
         run: |
           cd ONLYOFFICE/build_tools/scripts/develop
+          EXTRA_ARGS=""
+          if [ "$OPERATION" = "protect" ] && [ -n "$TEAMS" ]; then
+            EXTRA_ARGS="--teams=$TEAMS"
+          fi
           python git_operations.py "$OPERATION" "$BRANCH_NAME" \
             --base-branch="$BASE_BRANCH" \
             --branding="$BRANDING" \
             --branding-url="$BRANDING_URL" \
-            --modules="$MODULES"
+            --modules="$MODULES" \
+            $EXTRA_ARGS
 
       - name: Operation Summary
         run: |

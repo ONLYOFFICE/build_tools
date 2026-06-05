@@ -126,6 +126,11 @@ class GitOperations:
         repositories['core-ext'] = [True, False]
         repositories['build_tools'] = [True, False]
         repositories[self.branding] = [True, False]
+        repositories['Docker-DocumentServer'] = [True, False]
+        repositories['DocumentBuilder'] = [True, False]
+        repositories['document-builder-package'] = [True, False]
+        repositories['document-server-package'] = [True, False]
+        repositories['documents-pipeline'] = [True, False]
         return repositories
 
     def create_branches(self):

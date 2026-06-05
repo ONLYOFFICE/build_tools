@@ -123,6 +123,7 @@ class GitOperations:
     def get_configured_repositories(self):
         """Get repo list dynamically from config system (same as release.py)."""
         repositories = base.get_repositories()
+        repositories.pop('onlyoffice.github.io', None)
         repositories['core-ext'] = [True, False]
         repositories['build_tools'] = [True, False]
         repositories[self.branding] = [True, False]

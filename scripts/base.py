@@ -1563,6 +1563,8 @@ def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=Fal
     copy_dir(git_dir + "/onlyoffice.github.io/store", dst_dir_path + "/store")
     delete_dir(dst_dir_path + "/store/plugin")
     delete_dir(dst_dir_path + "/store/plugin-dev")
+    for file in glob.glob(dst_dir_path + "/store/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, isXp=False):

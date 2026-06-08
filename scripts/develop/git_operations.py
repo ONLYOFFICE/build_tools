@@ -269,6 +269,89 @@ class GitOperations:
         logger.info(f"Results: {success} unprotected, {skipped} skipped, {failed} failed")
         return failed == 0
 
+    def merge_branches(self):
+        """Create PR and merge branch into base branch across all repositories using Gitea API."""
+        repositories = self.get_configured_repositories()
+        success = 0
+        skipped = 0
+        conflict = 0
+        failed = 0
+
+        pr_title = f"Merge branch {self.branch_name} into {self.base_branch}"
+
+        for repo_name in repositories:
+            logger.info(f"--- {repo_name} ---")
+
+            # Step 1: Create PR
+            result = self._api(
+                f"repos/{self.owner}/{repo_name}/pulls",
+                method="POST",
+                data={
+                    "head": self.branch_name,
+                    "base": self.base_branch,
+                    "title": pr_title
+                }
+            )
+
+            pr_number = None
+
+            if result['ok']:
+                body = json.loads(result['body'])
+                pr_number = body['number']
+                logger.info(f"Created PR #{pr_number} in {repo_name}")
+            elif result['status'] == 404:
+                logger.warning(f"Repo or branch not found in {repo_name}, skipping")
+                skipped += 1
+                continue
+            elif result['status'] == 409:
+                # PR already exists, find it
+                search = self._api(
+                    f"repos/{self.owner}/{repo_name}/pulls"
+                    f"?state=open&head={self.owner}:{self.branch_name}"
+                    f"&base={self.base_branch}"
+                )
+                if search['ok']:
+                    prs = json.loads(search['body'])
+                    if prs:
+                        pr_number = prs[0]['number']
+                        logger.info(f"Found existing PR #{pr_number} in {repo_name}")
+                    else:
+                        logger.warning(f"PR conflict but no open PR found in {repo_name}, skipping")
+                        skipped += 1
+                        continue
+                else:
+                    logger.warning(f"Failed to search PRs in {repo_name} (status {search['status']})")
+                    failed += 1
+                    continue
+            elif result['status'] == 422:
+                logger.info(f"No diff between branches in {repo_name}, skipping")
+                skipped += 1
+                continue
+            else:
+                logger.warning(f"Failed to create PR in {repo_name} (status {result['status']}): {result['body']}")
+                failed += 1
+                continue
+
+            # Step 2: Merge the PR (Gitea generates the commit message with PR reference)
+            merge_result = self._api(
+                f"repos/{self.owner}/{repo_name}/pulls/{pr_number}/merge",
+                method="POST",
+                data={"Do": "merge"}
+            )
+
+            if merge_result['ok']:
+                logger.info(f"Merged PR #{pr_number} in {repo_name}")
+                success += 1
+            elif merge_result['status'] in (405, 409):
+                logger.warning(f"Conflicts merging {self.branch_name} into {self.base_branch} in {repo_name} (PR #{pr_number})")
+                conflict += 1
+            else:
+                logger.warning(f"Failed to merge PR #{pr_number} in {repo_name} (status {merge_result['status']}): {merge_result['body']}")
+                failed += 1
+
+        logger.info(f"Results: {success} merged, {skipped} skipped, {conflict} conflicts, {failed} failed")
+        return failed == 0
+
 
 def main():
     parser = argparse.ArgumentParser(description='Git Operations Tool - Create and Remove Branches')
@@ -276,6 +359,7 @@ def main():
 
     for cmd_name, cmd_help in [('create', 'Create branch in all repositories'),
                                 ('remove', 'Remove branch from all repositories'),
+                                ('merge', 'Merge branch into base branch in all repositories'),
                                 ('protect', 'Set branch protection in all repositories'),
                                 ('unprotect', 'Remove branch protection from all repositories')]:
         sub = subparsers.add_parser(cmd_name, help=cmd_help)
@@ -302,6 +386,8 @@ def main():
         success = git_ops.create_branches()
     elif args.command == 'remove':
         success = git_ops.remove_branches()
+    elif args.command == 'merge':
+        success = git_ops.merge_branches()
     elif args.command == 'protect':
         teams = [t.strip() for t in args.teams.split(',')]
         success = git_ops.protect_branches(teams)

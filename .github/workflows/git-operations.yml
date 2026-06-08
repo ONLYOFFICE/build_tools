@@ -10,17 +10,18 @@ on:
         options:
           - create
           - remove
+          - merge
           - protect
           - unprotect
         default: 'create'
 
       branch_name:
-        description: 'Branch name to create or remove'
+        description: 'Branch name to create, remove, or merge from'
         required: true
         type: string
 
       base_branch:
-        description: 'Base branch to create from (for create operation)'
+        description: 'Base branch to create from or merge into'
         required: false
         type: string
         default: 'develop'

@@ -282,7 +282,24 @@ class GitOperations:
         for repo_name in repositories:
             logger.info(f"--- {repo_name} ---")
 
-            # Step 1: Create PR
+            # Step 1: Check if there are changes to merge
+            encoded_base = urllib.parse.quote(self.base_branch, safe='')
+            encoded_head = urllib.parse.quote(self.branch_name, safe='')
+            compare = self._api(
+                f"repos/{self.owner}/{repo_name}/compare/{encoded_base}...{encoded_head}"
+            )
+            if compare['ok']:
+                compare_data = json.loads(compare['body'])
+                if compare_data.get('total_commits', 0) == 0:
+                    logger.info(f"No changes to merge in {repo_name}, skipping")
+                    skipped += 1
+                    continue
+            elif compare['status'] == 404:
+                logger.warning(f"Repo or branch not found in {repo_name}, skipping")
+                skipped += 1
+                continue
+
+            # Step 2: Create PR
             result = self._api(
                 f"repos/{self.owner}/{repo_name}/pulls",
                 method="POST",
@@ -335,7 +352,7 @@ class GitOperations:
                 failed += 1
                 continue
 
-            # Step 2: Merge the PR (Gitea generates the commit message with PR reference)
+            # Step 3: Merge the PR (Gitea generates the commit message with PR reference)
             merge_result = self._api(
                 f"repos/{self.owner}/{repo_name}/pulls/{pr_number}/merge",
                 method="POST",

@@ -294,11 +294,13 @@ class GitOperations:
             )
 
             pr_number = None
+            pr_url = None
 
             if result['ok']:
                 body = json.loads(result['body'])
                 pr_number = body['number']
-                logger.info(f"Created PR #{pr_number} in {repo_name}")
+                pr_url = body.get('html_url', '')
+                logger.info(f"Created PR #{pr_number} in {repo_name}: {pr_url}")
             elif result['status'] == 404:
                 logger.warning(f"Repo or branch not found in {repo_name}, skipping")
                 skipped += 1
@@ -314,7 +316,8 @@ class GitOperations:
                     prs = json.loads(search['body'])
                     if prs:
                         pr_number = prs[0]['number']
-                        logger.info(f"Found existing PR #{pr_number} in {repo_name}")
+                        pr_url = prs[0].get('html_url', '')
+                        logger.info(f"Found existing PR #{pr_number} in {repo_name}: {pr_url}")
                     else:
                         logger.warning(f"PR conflict but no open PR found in {repo_name}, skipping")
                         skipped += 1
@@ -340,10 +343,11 @@ class GitOperations:
             )
 
             if merge_result['ok']:
-                logger.info(f"Merged PR #{pr_number} in {repo_name}")
+                logger.info(f"Merged PR #{pr_number} in {repo_name}: {pr_url}")
                 success += 1
             elif merge_result['status'] in (405, 409):
-                logger.warning(f"Conflicts merging {self.branch_name} into {self.base_branch} in {repo_name} (PR #{pr_number})")
+                # NOTE: .github/workflows/git-operations.yml parses this log line format
+                logger.warning(f"Conflicts merging {self.branch_name} into {self.base_branch} in {repo_name} (PR #{pr_number}): {pr_url}")
                 conflict += 1
             else:
                 logger.warning(f"Failed to merge PR #{pr_number} in {repo_name} (status {merge_result['status']}): {merge_result['body']}")

@@ -75,8 +75,6 @@ import package_mobile
 utils.set_cwd(common.workspace_dir, verbose=True)
 if "core" in common.targets:
   package_core.make()
-if "closuremaps_sdkjs_opensource" in common.targets:
-  package_core.deploy_closuremaps_sdkjs("opensource")
 if "closuremaps_sdkjs_commercial" in common.targets:
   package_core.deploy_closuremaps_sdkjs("commercial")
 if "closuremaps_webapps" in common.targets:

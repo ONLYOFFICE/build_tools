@@ -52,6 +52,8 @@ def apply_patches(base_dir):
     base_dir + "/build/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
     base_dir + "/build/ios_xcframework/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
     base_dir + "/build/ios_xcframework/ios_simulator/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/mac_64/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/mac_arm64/include/boost/mpl/aux_/integral_wrapper.hpp"
   ]
   for target in mpl_targets:
     if base.is_file(target):

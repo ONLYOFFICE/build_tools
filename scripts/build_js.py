@@ -67,7 +67,9 @@ def make():
 
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
-    build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
+    # build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
+    _run_npm(base_dir + "/../desktop-apps/common/loginpage")
+    base.cmd_in_dir(base_dir + "/../desktop-apps/common/loginpage", "npm", ["run", "build:all"])
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/noconnect.html", out_dir + "/desktop/noconnect.html")
 

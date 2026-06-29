@@ -165,6 +165,23 @@ def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
       copy_dir(file, dst + "/" + basename)
   return
 
+def copy_dir_content_no_dot(src, dst):
+  if not is_dir(dst):
+    create_dir(dst)
+  src_folder = src
+  if "/" != src[-1:]:
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    basename = os.path.basename(file)
+    if basename.startswith("."):
+      continue
+    if is_file(file):
+      copy_file(file, dst)
+    elif is_dir(file):
+      copy_dir(file, dst + "/" + basename)
+  return
+
 def delete_file(path):
   if not is_file(path):
     print("delete warning [file not exist]: " + path)

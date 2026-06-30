@@ -3,12 +3,14 @@
 
 import os
 import re
+import zipfile
 import package_utils as utils
 import package_common as common
 import package_branding as branding
 
 def make():
   utils.log_h1("DESKTOP")
+  make_sdkjs_plugin()
   if utils.is_windows():
     make_windows()
   elif utils.is_macos():
@@ -29,6 +31,72 @@ def s3_upload(files, dst):
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
+
+def make_sdkjs_plugin():
+  company_name_l = branding.company_name_l \
+    if hasattr(branding, "company_name_l") else branding.company_name.lower()
+  os_name, arch = get_sdkjs_plugin_platform_info()
+  source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
+    % (common.workspace_dir, common.prefix, company_name_l))
+  zip_file = utils.get_path("%s/build_tools/out/%s/%s/sdkjs-plugin-%s-%s.zip" \
+    % (common.workspace_dir, common.prefix, company_name_l, os_name, arch))
+
+  utils.log_h2("desktop sdkjs-plugin build")
+  utils.log("source: " + source_dir)
+  utils.log("output: " + zip_file)
+
+  if not utils.is_dir(source_dir):
+    utils.log_err("dir not exist: " + source_dir)
+    utils.set_summary("desktop sdkjs-plugin build", False)
+    return False
+
+  if utils.is_file(zip_file):
+    utils.delete_file(zip_file)
+
+  files = []
+  for root, dirs, names in os.walk(source_dir):
+    dirs.sort()
+    for name in sorted(names):
+      files.append(os.path.join(root, name))
+
+  if not files:
+    utils.log_err("dir is empty: " + source_dir)
+    utils.set_summary("desktop sdkjs-plugin build", False)
+    return False
+
+  with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
+    for f in files:
+      archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
+
+  ret = utils.is_file(zip_file)
+  utils.set_summary("desktop sdkjs-plugin build", ret)
+
+  if common.deploy and ret:
+    utils.log_h2("desktop sdkjs-plugin deploy")
+    ret = s3_upload([zip_file], get_sdkjs_plugin_dst())
+    utils.set_summary("desktop sdkjs-plugin deploy", ret)
+
+  return ret
+
+def get_sdkjs_plugin_dst():
+  os_name, _ = get_sdkjs_plugin_platform_info()
+  return "desktop/%s/sdkjs-plugin/%s/%s/" \
+    % (os_name, common.version, common.build)
+
+def get_sdkjs_plugin_platform_info():
+  platform_map = {
+    "windows_x64":      ["win",   "x64"],
+    "windows_x86":      ["win",   "x86"],
+    "windows_arm64":    ["win",   "arm64"],
+    "windows_x64_xp":   ["win",   "x64_xp"],
+    "windows_x86_xp":   ["win",   "x86_xp"],
+    "darwin_arm64":     ["mac",   "arm"],
+    "darwin_x86_64":    ["mac",   "x86_64"],
+    "darwin_x86_64_v8": ["mac",   "v8"],
+    "linux_x86_64":     ["linux", "x86_64"],
+    "linux_aarch64":    ["linux", "aarch64"],
+  }
+  return platform_map[common.platform]
 
 #
 # Windows

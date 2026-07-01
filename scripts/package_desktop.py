@@ -10,7 +10,7 @@ import package_branding as branding
 
 def make():
   utils.log_h1("DESKTOP")
-  make_sdkjs_plugin()
+  make_desktop_addon()
   if utils.is_windows():
     make_windows()
   elif utils.is_macos():
@@ -32,22 +32,22 @@ def s3_upload(files, dst):
     ret &= upload
   return ret
 
-def make_sdkjs_plugin():
+def make_desktop_addon():
   company_name_l = branding.company_name_l \
     if hasattr(branding, "company_name_l") else branding.company_name.lower()
-  os_name, arch = get_sdkjs_plugin_platform_info()
+  os_name, arch = get_desktop_addon_platform_info()
   source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
     % (common.workspace_dir, common.prefix, company_name_l))
-  zip_file = utils.get_path("%s/build_tools/out/%s/%s/sdkjs-plugin-%s-%s.zip" \
+  zip_file = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon-%s-%s.zip" \
     % (common.workspace_dir, common.prefix, company_name_l, os_name, arch))
 
-  utils.log_h2("desktop sdkjs-plugin build")
+  utils.log_h2("desktop addon build")
   utils.log("source: " + source_dir)
   utils.log("output: " + zip_file)
 
   if not utils.is_dir(source_dir):
     utils.log_err("dir not exist: " + source_dir)
-    utils.set_summary("desktop sdkjs-plugin build", False)
+    utils.set_summary("desktop addon build", False)
     return False
 
   if utils.is_file(zip_file):
@@ -61,7 +61,7 @@ def make_sdkjs_plugin():
 
   if not files:
     utils.log_err("dir is empty: " + source_dir)
-    utils.set_summary("desktop sdkjs-plugin build", False)
+    utils.set_summary("desktop addon build", False)
     return False
 
   with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -69,21 +69,21 @@ def make_sdkjs_plugin():
       archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
 
   ret = utils.is_file(zip_file)
-  utils.set_summary("desktop sdkjs-plugin build", ret)
+  utils.set_summary("desktop addon build", ret)
 
   if common.deploy and ret:
-    utils.log_h2("desktop sdkjs-plugin deploy")
-    ret = s3_upload([zip_file], get_sdkjs_plugin_dst())
-    utils.set_summary("desktop sdkjs-plugin deploy", ret)
+    utils.log_h2("desktop addon deploy")
+    ret = s3_upload([zip_file], get_desktop_addon_dst())
+    utils.set_summary("desktop addon deploy", ret)
 
   return ret
 
-def get_sdkjs_plugin_dst():
-  os_name, _ = get_sdkjs_plugin_platform_info()
-  return "desktop/%s/sdkjs-plugin/%s/%s/" \
+def get_desktop_addon_dst():
+  os_name, _ = get_desktop_addon_platform_info()
+  return "desktop/%s/desktop-addon/%s/%s/" \
     % (os_name, common.version, common.build)
 
-def get_sdkjs_plugin_platform_info():
+def get_desktop_addon_platform_info():
   platform_map = {
     "windows_x64":      ["win",   "x64"],
     "windows_x86":      ["win",   "x86"],

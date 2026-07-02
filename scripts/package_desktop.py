@@ -35,11 +35,11 @@ def s3_upload(files, dst):
 def make_desktop_addon():
   company_name_l = branding.company_name_l \
     if hasattr(branding, "company_name_l") else branding.company_name.lower()
-  os_name, arch = get_desktop_addon_platform_info()
   source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
     % (common.workspace_dir, common.prefix, company_name_l))
-  zip_file = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon-%s-%s.zip" \
-    % (common.workspace_dir, common.prefix, company_name_l, os_name, arch))
+  zip_file = utils.get_path("%s/build_tools/out/%s/%s/%s" \
+    % (common.workspace_dir, common.prefix, company_name_l,
+       get_desktop_addon_filename()))
 
   utils.log_h2("desktop addon build")
   utils.log("source: " + source_dir)
@@ -80,8 +80,11 @@ def make_desktop_addon():
 
 def get_desktop_addon_dst():
   os_name, _ = get_desktop_addon_platform_info()
-  return "desktop/%s/desktop-addon/%s/%s/" \
-    % (os_name, common.version, common.build)
+  return "desktop/%s/" % os_name
+
+def get_desktop_addon_filename():
+  _, arch = get_desktop_addon_platform_info()
+  return "addon-%s.%s-%s.zip" % (common.version, common.build, arch)
 
 def get_desktop_addon_platform_info():
   platform_map = {

@@ -55,6 +55,7 @@ def make():
   googletest.make()
   oo_brotli.make()
   heif.make()
+  websocket_all.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()
@@ -62,5 +63,4 @@ def make():
   if config.check_option("module", "mobile"):
     if (config.check_option("platform", "android")):
       curl.make()
-    websocket_all.make()
   return

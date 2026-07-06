@@ -10,7 +10,8 @@ import package_branding as branding
 
 def make():
   utils.log_h1("DESKTOP")
-  make_desktop_addon()
+  if get_desktop_package_editions() == ["commercial"]:
+    make_desktop_addon()
   if utils.is_windows():
     make_windows()
   elif utils.is_macos():
@@ -20,6 +21,12 @@ def make():
   else:
     utils.log("Unsupported host OS")
   return
+
+def get_desktop_package_editions():
+  edition = getattr(common, "package_edition", "all")
+  if edition in ["opensource", "commercial"]:
+    return [edition]
+  return ["opensource", "commercial"]
 
 def s3_upload(files, dst):
   if not files: return False
@@ -128,26 +135,29 @@ def make_windows():
     utils.delete_files("advinst\\*.aic")
     utils.delete_dir("zip")
 
-  if make_prepare():
-    make_zip()
-    if branding.onlyoffice:
-      make_inno()
-      make_inno("standalone")
-      make_advinst()
-  else:
-    utils.set_summary("desktop zip opensource build", False)
-    utils.set_summary("desktop inno opensource build", False)
-    utils.set_summary("desktop inno standalone build", False)
-    utils.set_summary("desktop advinst opensource build", False)
+  editions = get_desktop_package_editions()
 
-  if branding.onlyoffice and make_prepare("commercial"):
-    make_zip("commercial")
-    make_inno("commercial")
-    make_advinst("commercial")
-  else:
-    utils.set_summary("desktop zip commercial build", False)
-    utils.set_summary("desktop inno commercial build", False)
-    utils.set_summary("desktop advinst commercial build", False)
+  if "opensource" in editions:
+    if make_prepare():
+      make_zip()
+      make_inno()
+      make_advinst()
+    else:
+      utils.set_summary("desktop zip opensource build", False)
+      utils.set_summary("desktop inno opensource build", False)
+      utils.set_summary("desktop advinst opensource build", False)
+
+  if "commercial" in editions:
+    if make_prepare("commercial"):
+      make_zip("commercial")
+      make_inno("commercial")
+      make_inno("standalone")
+      make_advinst("commercial")
+    else:
+      utils.set_summary("desktop zip commercial build", False)
+      utils.set_summary("desktop inno commercial build", False)
+      utils.set_summary("desktop inno standalone build", False)
+      utils.set_summary("desktop advinst commercial build", False)
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -301,10 +311,13 @@ def make_macos():
     utils.log("RELEASE=" + release_version_string + "(" + release_version + ")" \
           + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
-  dmg = make_dmg()
-  if dmg and sparkle_updates:
-    make_sparkle_updates()
-  if common.platform != "darwin_x86_64_v8":
+  editions = get_desktop_package_editions()
+
+  if "opensource" in editions:
+    dmg = make_dmg()
+    if dmg and sparkle_updates:
+      make_sparkle_updates()
+  if "commercial" in editions and common.platform != "darwin_x86_64_v8":
     make_dmg("commercial")
 
   utils.set_cwd(common.workspace_dir)
@@ -381,7 +394,7 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/package")
 
-  for edition in ["opensource", "commercial"]:
+  for edition in get_desktop_package_editions():
     utils.log_h2("desktop " + edition + " build")
     make_args = [t["make"] for t in branding.desktop_make_targets]
     if edition == "commercial":

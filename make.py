@@ -83,16 +83,15 @@ if ("1" == base.get_env("OO_ONLY_BUILD_JS")):
 # core 3rdParty
 make_common.make()
 
-# build updmodule for desktop (only for windows version)
+# desktop urls and update module
 if config.check_option("module", "desktop"):
   config.extend_option("qmake_addon", "URL_WEBAPPS_HELP=https://download.onlyoffice.com/install/desktop/editors/help/v" + base.get_env('PRODUCT_VERSION') + "/apps")
 
+  if "windows" == base.host_platform():
+    config.extend_option("config", "updmodule")
   if base.host_platform() in ["windows", "linux"]:
-    if "windows" == base.host_platform():
-      config.extend_option("config", "updmodule")
-    appcast_base = "https://download.onlyoffice.com/install/desktop/editors/" + base.host_platform() + "/onlyoffice/appcast"
-    base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", appcast_base + ".json")
-    base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", appcast_base + "dev.json")
+    base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
+    base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
 # build
 build_sln.make()

@@ -417,7 +417,8 @@ def check_npm():
 def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
-  if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0):
+  if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0 and
+      len(get_programUninstalls('Microsoft Visual C++ v14')) == 0):
     print('Microsoft Visual C++ 2015-20** Redistributable (x64) not found')
     result = installProgram('VC2019x64') and result
 

@@ -4,6 +4,7 @@
 import os
 import re
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 import package_utils as utils
 import package_common as common
 import package_branding as branding
@@ -139,9 +140,7 @@ def make_windows():
 
   if "opensource" in editions:
     if make_prepare():
-      make_zip()
-      make_inno()
-      make_advinst()
+      make_windows_packages("opensource")
     else:
       utils.set_summary("desktop zip opensource build", False)
       utils.set_summary("desktop inno opensource build", False)
@@ -149,10 +148,7 @@ def make_windows():
 
   if "commercial" in editions:
     if make_prepare("commercial"):
-      make_zip("commercial")
-      make_inno("commercial")
-      make_inno("standalone")
-      make_advinst("commercial")
+      make_windows_packages("commercial")
     else:
       utils.set_summary("desktop zip commercial build", False)
       utils.set_summary("desktop inno commercial build", False)
@@ -161,6 +157,21 @@ def make_windows():
 
   utils.set_cwd(common.workspace_dir)
   return
+
+def make_windows_packages(edition):
+  def make_inno_packages():
+    make_inno(edition)
+    if edition == "commercial":
+      make_inno("standalone")
+
+  with ThreadPoolExecutor(max_workers=3) as executor:
+    futures = [
+      executor.submit(make_zip, edition),
+      executor.submit(make_inno_packages),
+      executor.submit(make_advinst, edition),
+    ]
+    for future in futures:
+      future.result()
 
 def make_prepare(edition = "opensource"):
   args = [

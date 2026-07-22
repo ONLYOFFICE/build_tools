@@ -71,6 +71,7 @@ def make():
     base.cmd_in_dir(base_dir + "/../desktop-apps/common/loginpage/build", "python", ["build_all.py"])
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/noconnect.html", out_dir + "/desktop/noconnect.html")
+    base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/addon.html", out_dir + "/desktop/addon.html")
 
 
   # mobile

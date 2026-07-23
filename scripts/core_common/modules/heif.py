@@ -186,7 +186,7 @@ def make_common(build_func, cmake_args):
 def make_x265(base_dir, build_type):
   # fetch lib repo
   if not base.is_dir("x265_git"):
-    fetch_repo("https://bitbucket.org/multicoreware/x265_git.git", f"Release_{X265_VERSION}")
+    fetch_repo("https://github.com/Multicorewareinc/x265.git", f"Release_{X265_VERSION}")
     # fix x265 version detection so it reads version from x265Version.txt instead of parsing it from .git
     base.replaceInFile(
       base_dir + "/x265_git/source/cmake/Version.cmake",

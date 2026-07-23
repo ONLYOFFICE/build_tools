@@ -128,7 +128,8 @@ def make_windows():
   if common.clean:
     utils.log_h2("desktop clean")
     utils.delete_dir("build")
-    utils.delete_files("inno\\package.config")
+    utils.delete_files("inno\\package*.config")
+    utils.delete_files("inno\\*\\package.config")
     utils.delete_files("inno\\*.exe")
     utils.delete_dir("advinst\\DesktopEditors-cache")
     utils.delete_files("advinst\\package.config")
@@ -159,17 +160,14 @@ def make_windows():
   return
 
 def make_windows_packages(edition):
-  def make_inno_packages():
-    make_inno(edition)
-    if edition == "commercial":
-      make_inno("standalone")
-
-  with ThreadPoolExecutor(max_workers=3) as executor:
+  with ThreadPoolExecutor(max_workers=4) as executor:
     futures = [
       executor.submit(make_zip, edition),
-      executor.submit(make_inno_packages),
+      executor.submit(make_inno, edition),
       executor.submit(make_advinst, edition),
     ]
+    if edition == "commercial":
+      futures.append(executor.submit(make_inno, "standalone"))
     for future in futures:
       future.result()
 

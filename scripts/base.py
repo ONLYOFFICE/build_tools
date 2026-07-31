@@ -61,6 +61,10 @@ def set_env(name, value):
   os.environ[name] = value
   return
 
+def set_env_default(name, value):
+  if not get_env(name):
+    set_env(name, value)
+
 def configure_common_apps(file=""):
   if ("windows" == host_platform()):
     os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]

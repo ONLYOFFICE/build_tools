@@ -26,6 +26,8 @@ if utils.is_macos():
   desktop_updates_dir = "build/update"
   desktop_changes_dir = "ONLYOFFICE/update/updates/ONLYOFFICE/changes"
   sparkle_base_url = "https://download.onlyoffice.com/install/desktop/editors/mac"
+  desktop_appcast_main_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json"
+  desktop_appcast_dev_url = "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json"
 
 builder_product_name = "Document Builder"
 

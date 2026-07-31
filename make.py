@@ -89,9 +89,10 @@ if config.check_option("module", "desktop"):
 
   if "windows" == base.host_platform():
     config.extend_option("config", "updmodule")
+  # defaults, can be overridden via the environment
   if base.host_platform() in ["windows", "linux", "mac"]:
-    base.set_env("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
-    base.set_env("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
+    base.set_env_default("DESKTOP_URL_UPDATES_MAIN_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcast.json")
+    base.set_env_default("DESKTOP_URL_UPDATES_DEV_CHANNEL", "https://download.onlyoffice.com/install/desktop/editors/windows/onlyoffice/appcastdev.json")
 
 # build
 build_sln.make()

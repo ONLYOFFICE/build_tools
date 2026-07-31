@@ -320,6 +320,10 @@ def make_macos():
     utils.log("RELEASE=" + release_version_string + "(" + release_version + ")" \
           + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
+  # defaults, can be overridden via the environment
+  utils.set_env_default("DESKTOP_URL_UPDATES_MAIN_CHANNEL", branding.desktop_appcast_main_url)
+  utils.set_env_default("DESKTOP_URL_UPDATES_DEV_CHANNEL", branding.desktop_appcast_dev_url)
+
   editions = get_desktop_package_editions()
 
   if "opensource" in editions:

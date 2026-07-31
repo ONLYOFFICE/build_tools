@@ -57,6 +57,11 @@ def set_env(key, value):
   os.environ[key] = value
   return
 
+# keeps the value provided by the caller environment, if any
+def set_env_default(key, value):
+  if not get_env(key):
+    set_env(key, value)
+
 def get_cwd():
   return os.getcwd()
 

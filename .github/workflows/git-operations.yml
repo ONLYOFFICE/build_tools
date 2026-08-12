@@ -116,12 +116,12 @@ jobs:
             echo "- **Branding**: ${{ inputs.branding }}"
             echo "- **Modules**: ${{ inputs.modules }}"
             if [ -f /tmp/git-ops.log ]; then
-              RESULTS=$(grep "Results:" /tmp/git-ops.log | tail -1 | sed 's/.*Results: //')
+              RESULTS=$(grep "Results:" /tmp/git-ops.log | tail -1 | sed 's/.*Results: //') || true
               if [ -n "$RESULTS" ]; then
                 echo ""
                 echo "**Results**: $RESULTS"
               fi
-              CONFLICTS=$(grep "Conflicts" /tmp/git-ops.log | sed 's|.*in \([^ ]*\) (PR #\([0-9]*\)): \(.*\)|- [\1 (PR #\2)](\3)|')
+              CONFLICTS=$(grep "Conflicts" /tmp/git-ops.log | sed 's|.*in \([^ ]*\) (PR #\([0-9]*\)): \(.*\)|- [\1 (PR #\2)](\3)|') || true
               if [ -n "$CONFLICTS" ]; then
                 echo ""
                 echo "### Conflicts"

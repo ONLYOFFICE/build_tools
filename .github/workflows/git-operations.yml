@@ -17,7 +17,7 @@ on:
         default: 'create'
 
       branch_name:
-        description: 'Branch name to create, remove, merge from, or rename'
+        description: 'Branch name to create, remove, merge from, rename, protect or unprotect'
         required: true
         type: string
 

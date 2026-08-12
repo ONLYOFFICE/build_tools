@@ -11,17 +11,18 @@ on:
           - create
           - remove
           - merge
+          - rename
           - protect
           - unprotect
         default: 'create'
 
       branch_name:
-        description: 'Branch name to create, remove, or merge from'
+        description: 'Branch name to create, remove, merge from, or rename'
         required: true
         type: string
 
       base_branch:
-        description: 'Base branch to create from or merge into'
+        description: 'Base branch to create from, merge into, or rename to'
         required: false
         type: string
         default: 'develop'
@@ -83,6 +84,16 @@ jobs:
           if [ "$OPERATION" = "protect" ] && [ -n "$TEAMS" ]; then
             EXTRA_ARGS="--teams=$TEAMS"
           fi
+          if [ "$OPERATION" = "rename" ]; then
+            if [ -z "$BASE_BRANCH" ] || [ "$BASE_BRANCH" = "$BRANCH_NAME" ]; then
+              echo "::error::For 'rename', 'base_branch' holds the new branch name and must differ from 'branch_name'"
+              exit 1
+            fi
+            # 'base_branch' is the new name; configure against the existing branch,
+            # since the new one does not exist yet.
+            EXTRA_ARGS="--new-branch-name=$BASE_BRANCH"
+            BASE_BRANCH="$BRANCH_NAME"
+          fi
           python git_operations.py "$OPERATION" "$BRANCH_NAME" \
             --base-branch="$BASE_BRANCH" \
             --branding="$BRANDING" \
@@ -97,7 +108,11 @@ jobs:
             echo "## Git Operations Summary"
             echo "- **Operation**: ${{ inputs.operation }}"
             echo "- **Branch Name**: ${{ inputs.branch_name }}"
-            echo "- **Base Branch**: ${{ inputs.base_branch }}"
+            if [ "${{ inputs.operation }}" = "rename" ]; then
+              echo "- **New Branch Name**: ${{ inputs.base_branch }}"
+            else
+              echo "- **Base Branch**: ${{ inputs.base_branch }}"
+            fi
             echo "- **Branding**: ${{ inputs.branding }}"
             echo "- **Modules**: ${{ inputs.modules }}"
             if [ -f /tmp/git-ops.log ]; then

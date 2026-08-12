@@ -202,6 +202,88 @@ class GitOperations:
         logger.info(f"Results: {success} deleted, {skipped} skipped, {failed} failed")
         return failed == 0
 
+    def rename_branches(self, new_branch_name):
+        """Rename branch in all repositories using Gitea API.
+
+        Gitea has no branch rename endpoint, so this creates the new branch from
+        the old one and deletes the old one afterwards.
+        """
+        repositories = self.get_configured_repositories()
+        encoded_old = urllib.parse.quote(self.branch_name, safe='')
+        encoded_new = urllib.parse.quote(new_branch_name, safe='')
+        success = 0
+        skipped = 0
+        failed = 0
+
+        for repo_name in repositories:
+            logger.info(f"--- {repo_name} ---")
+
+            old_branch = self._api(f"repos/{self.owner}/{repo_name}/branches/{encoded_old}")
+            if old_branch['status'] == 404:
+                logger.warning(f"Branch '{self.branch_name}' not found in {repo_name}, skipping")
+                skipped += 1
+                continue
+            if not old_branch['ok']:
+                logger.warning(f"Failed to read '{self.branch_name}' in {repo_name} "
+                               f"(status {old_branch['status']}): {old_branch['body']}")
+                failed += 1
+                continue
+
+            old_commit = json.loads(old_branch['body'])['commit']['id']
+
+            result = self._api(
+                f"repos/{self.owner}/{repo_name}/branches",
+                method="POST",
+                data={
+                    "new_branch_name": new_branch_name,
+                    "old_branch_name": self.branch_name
+                }
+            )
+
+            if result['ok']:
+                logger.info(f"Created '{new_branch_name}' in {repo_name}")
+            elif result['status'] == 409:
+                # Target exists: only safe to continue if it already points at the
+                # same commit (e.g. a previous run failed before deleting the old one).
+                new_branch = self._api(f"repos/{self.owner}/{repo_name}/branches/{encoded_new}")
+                if not new_branch['ok']:
+                    logger.warning(f"Failed to read '{new_branch_name}' in {repo_name} "
+                                   f"(status {new_branch['status']}): {new_branch['body']}")
+                    failed += 1
+                    continue
+                if json.loads(new_branch['body'])['commit']['id'] != old_commit:
+                    logger.warning(f"Branch '{new_branch_name}' already exists in {repo_name} "
+                                   f"and points at a different commit, skipping")
+                    failed += 1
+                    continue
+                logger.info(f"Branch '{new_branch_name}' already up to date in {repo_name}")
+            else:
+                logger.warning(f"Failed to create '{new_branch_name}' in {repo_name} "
+                               f"(status {result['status']}): {result['body']}")
+                failed += 1
+                continue
+
+            delete = self._api(
+                f"repos/{self.owner}/{repo_name}/branches/{encoded_old}",
+                method="DELETE"
+            )
+
+            if delete['ok']:
+                logger.info(f"Renamed '{self.branch_name}' to '{new_branch_name}' in {repo_name}")
+                success += 1
+            elif delete['status'] in (403, 405):
+                logger.warning(f"Cannot delete '{self.branch_name}' in {repo_name} "
+                               f"(status {delete['status']}): branch is protected or is the default "
+                               f"branch, '{new_branch_name}' was created but the old branch remains")
+                failed += 1
+            else:
+                logger.warning(f"Failed to delete '{self.branch_name}' in {repo_name} "
+                               f"(status {delete['status']}): {delete['body']}")
+                failed += 1
+
+        logger.info(f"Results: {success} renamed, {skipped} skipped, {failed} failed")
+        return failed == 0
+
     def protect_branches(self, teams):
         """Set branch protection in all repositories using Gitea API."""
         repositories = self.get_configured_repositories()
@@ -385,6 +467,7 @@ def main():
     for cmd_name, cmd_help in [('create', 'Create branch in all repositories'),
                                 ('remove', 'Remove branch from all repositories'),
                                 ('merge', 'Merge branch into base branch in all repositories'),
+                                ('rename', 'Rename branch in all repositories'),
                                 ('protect', 'Set branch protection in all repositories'),
                                 ('unprotect', 'Remove branch protection from all repositories')]:
         sub = subparsers.add_parser(cmd_name, help=cmd_help)
@@ -396,6 +479,8 @@ def main():
         sub.add_argument('--modules', default='core desktop builder server mobile', help='Modules to include')
         if cmd_name == 'protect':
             sub.add_argument('--teams', required=True, help='Comma-separated list of teams for push/merge whitelist')
+        if cmd_name == 'rename':
+            sub.add_argument('--new-branch-name', required=True, help='New branch name')
 
     args = parser.parse_args()
 
@@ -413,6 +498,8 @@ def main():
         success = git_ops.remove_branches()
     elif args.command == 'merge':
         success = git_ops.merge_branches()
+    elif args.command == 'rename':
+        success = git_ops.rename_branches(args.new_branch_name)
     elif args.command == 'protect':
         teams = [t.strip() for t in args.teams.split(',')]
         success = git_ops.protect_branches(teams)

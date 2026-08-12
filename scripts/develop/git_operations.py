@@ -26,12 +26,17 @@ logger = logging.getLogger(__name__)
 class GitOperations:
     def __init__(self, branding="onlyoffice", base_branch="develop",
                  branding_url="ONLYOFFICE/onlyoffice.git", branch_name=None,
-                 modules="core desktop builder server mobile"):
+                 modules="core desktop builder server mobile", config_branch=None):
         self.branding = branding
         self.base_branch = base_branch
         self.branding_url = branding_url
         self.branch_name = branch_name
         self.modules = modules
+        # Branch whose branding defaults decide which repositories are processed.
+        # Defaults differ between branches (repositories_desktop and
+        # repositories_server list the AI plugin repos on release branches only),
+        # so operations on an existing branch resolve it from that branch.
+        self.config_branch = config_branch or base_branch
 
         # Derive owner and API URL from git origin or environment
         self.owner = "ONLYOFFICE"
@@ -75,7 +80,7 @@ class GitOperations:
 
     def _configure(self):
         """Configure repo list using existing config system. Fetches branding defaults via API."""
-        logger.info(f"Configuring repositories for branch: {self.base_branch}")
+        logger.info(f"Configuring repositories for branch: {self.config_branch}")
 
         if '://' in self.origin:
             host_base = self.origin.split('/', 3)[0] + '//' + self.origin.split('/', 3)[2] + '/'
@@ -93,7 +98,7 @@ class GitOperations:
             'configure.py',
             '--branding', self.branding,
             '--branding-url', branding_url,
-            '--branch', self.base_branch,
+            '--branch', self.config_branch,
             '--module', self.modules,
             '--update', '0',
             '--clean', '0'
@@ -104,18 +109,27 @@ class GitOperations:
 
         # Fetch branding defaults file via API (no clone needed)
         branding_repo = self.branding_url.replace('.git', '').split('/')[-1]
-        encoded_ref = urllib.parse.quote(self.base_branch, safe='')
-        result = self._api(
-            f"repos/{self.owner}/{branding_repo}/raw/build_tools/defaults?ref={encoded_ref}"
-        )
-        if result['ok']:
-            defaults_dir = base.get_script_dir() + "/../../" + self.branding + "/build_tools"
-            os.makedirs(defaults_dir, exist_ok=True)
-            with open(defaults_dir + "/defaults", 'w') as f:
-                f.write(result['body'])
-            logger.info(f"Fetched branding defaults for '{self.branding}'")
-        else:
-            logger.warning(f"Could not fetch branding defaults (status {result['status']}), using local defaults")
+        refs = [self.config_branch]
+        if self.base_branch not in refs:
+            refs.append(self.base_branch)
+
+        result = None
+        for ref in refs:
+            encoded_ref = urllib.parse.quote(ref, safe='')
+            result = self._api(
+                f"repos/{self.owner}/{branding_repo}/raw/build_tools/defaults?ref={encoded_ref}"
+            )
+            if result['ok']:
+                defaults_dir = base.get_script_dir() + "/../../" + self.branding + "/build_tools"
+                os.makedirs(defaults_dir, exist_ok=True)
+                with open(defaults_dir + "/defaults", 'w') as f:
+                    f.write(result['body'])
+                logger.info(f"Fetched branding defaults for '{self.branding}' from '{ref}'")
+                break
+            logger.warning(f"Could not fetch branding defaults from '{ref}' (status {result['status']})")
+
+        if not result['ok']:
+            logger.warning("Using local branding defaults")
 
         config.parse_defaults()
         logger.info("Configuration complete")
@@ -488,8 +502,14 @@ def main():
         parser.print_help()
         return
 
+    # Operations on an existing branch take the repository list from that branch,
+    # not from --base-branch, which for them is otherwise unused.
+    config_branch = None
+    if args.command in ('remove', 'rename', 'protect', 'unprotect'):
+        config_branch = args.branch_name
+
     git_ops = GitOperations(args.branding, args.base_branch, args.branding_url,
-                            args.branch_name, args.modules)
+                            args.branch_name, args.modules, config_branch)
 
     success = False
     if args.command == 'create':

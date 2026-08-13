@@ -150,6 +150,8 @@ class GitOperations:
         repositories['document-android-editors'] = [True, False]
         repositories['documents-app-ios'] = [True, False]
         repositories['editors-ios'] = [True, False]
+        repositories['sdkjs-tests'] = [True, False]
+        repositories['office-js-api'] = [True, False]
         return repositories
 
     def create_branches(self):

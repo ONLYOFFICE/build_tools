@@ -64,7 +64,9 @@ def make():
   pkg_target = "node20"
 
   if ("linux" == base.host_platform()):
-    pkg_target += "-linuxstatic"
+    pkg_target += "-linux"
+    if ("1" == config.option("server-pkg-linux-static")):
+      pkg_target += "static"
     if (-1 != config.option("platform").find("linux_arm64")):
       pkg_target += "-arm64"
     else:

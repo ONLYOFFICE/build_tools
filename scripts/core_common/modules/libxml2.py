@@ -8,7 +8,7 @@ import subprocess
 
 def clear_module():
   if base.is_dir("libxml2"):
-    base.delete_dir_with_access_error(dir)
+    base.delete_dir_with_access_error("libxml2")
 
 def make():
   old_cur_dir = os.getcwd()
@@ -18,7 +18,7 @@ def make():
   base_dir = base.get_script_dir() + "/../../core/Common/3dParty/libxml/"
   
   os.chdir(base_dir)
-  base.check_module_version("1", clear_module)
+  base.check_module_version("2", clear_module)
   os.chdir(old_cur_dir)
 
   base.cmd_in_dir(base_dir, "python", ["fetch.py"])

@@ -1,4 +1,4 @@
-sdkjs-plugin="ai, photoeditor, ocr, translator, thesaurus, youtube, highlightcode"
+sdkjs-plugin="photoeditor, ocr, translator, thesaurus, youtube, highlightcode"
 sdkjs-plugin-server="speech, zotero, mendeley, speechrecognition"
 sdkjs-addons="sdkjs-forms"
 config_addon_windows="libvlc"

@@ -329,9 +329,19 @@ def make_macos():
   if "opensource" in editions:
     dmg = make_dmg()
     if dmg and sparkle_updates:
-      make_sparkle_updates()
-  if "commercial" in editions and common.platform != "darwin_x86_64_v8":
-    make_dmg("commercial")
+      make_sparkle_updates(
+        scheme,
+        branding.sparkle_base_url,
+        "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+  if "commercial" in editions \
+      and (common.platform != "darwin_x86_64_v8" or branding.onlyoffice):
+    dmg = make_dmg("commercial")
+    if dmg and sparkle_updates and branding.onlyoffice:
+      make_sparkle_updates(
+        package_name + "-Enterprise-" + suffix,
+        branding.sparkle_enterprise_base_url,
+        "desktop-enterprise/mac/%s/%s/%s/" \
+          % (suffix, common.version, common.build))
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -352,26 +362,36 @@ def make_dmg(target = "opensource"):
       "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
     utils.set_summary("desktop dmg deploy", ret)
 
-  if common.deploy and dmg and target != "commercial":
+  if common.deploy and dmg:
+    zip_scheme = scheme
+    zip_deploy_dir = "desktop/mac/%s/%s/%s/" \
+      % (suffix, common.version, common.build)
+    if target == "commercial":
+      zip_scheme = package_name + "-Enterprise-" + suffix
+      zip_deploy_dir = "desktop-enterprise/mac/%s/%s/%s/" \
+        % (suffix, common.version, common.build)
     utils.log_h2("desktop zip " + target + " deploy")
     ret = s3_upload(
-      ["build/%s-%s.zip" % (scheme, common.version)],
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      ["build/%s-%s.zip" % (zip_scheme, common.version)],
+      zip_deploy_dir)
     utils.set_summary("desktop zip " + target + " deploy", ret)
   return dmg
 
-def make_sparkle_updates():
+def make_sparkle_updates(archive_scheme, sparkle_base_url, deploy_dir):
   utils.log_h2("desktop sparkle files build")
 
-  zip_filename = scheme + '-' + common.version
+  zip_filename = archive_scheme + '-' + common.version
   macos_zip = "build/" + zip_filename + ".zip"
+  released_updates_dir = "%s/%s/_updates" \
+    % (utils.get_env("ARCHIVES_DIR"), archive_scheme)
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
-  utils.sh(
-    "ls -1t " + released_updates_dir + "/*.zip" \
-      + " | head -n 3" \
-      + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
-    verbose=True)
+  if utils.is_dir(released_updates_dir):
+    utils.sh(
+      "ls -1t " + released_updates_dir + "/*.zip" \
+        + " | head -n 3" \
+        + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
+      verbose=True)
 
   for ext in [".html", ".ru.html"]:
     changes_src = changes_dir + "/" + common.version + "/changes" + ext
@@ -379,7 +399,7 @@ def make_sparkle_updates():
     if not utils.copy_file(changes_src, changes_dst):
       utils.write_file(changes_dst, "<!DOCTYPE html>placeholder")
 
-  sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
+  sparkle_base_url = "%s/%s/updates/" % (sparkle_base_url, suffix)
   ret = utils.sh(
       common.workspace_dir \
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
@@ -392,11 +412,10 @@ def make_sparkle_updates():
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")
-    ret = s3_upload(
-      utils.glob_path("build/update/*.delta") \
+    files = utils.glob_path("build/update/*.delta") \
       + utils.glob_path("build/update/*.xml") \
-      + utils.glob_path("build/update/*.html"),
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      + utils.glob_path("build/update/*.html")
+    ret = s3_upload(files, deploy_dir)
     utils.set_summary("desktop sparkle files deploy", ret)
   return
 

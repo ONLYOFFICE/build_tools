@@ -340,7 +340,7 @@ def make_macos():
       make_sparkle_updates(
         package_name + "-Enterprise-" + suffix,
         branding.sparkle_enterprise_base_url,
-        "desktop-enterprise/mac/%s/%s/%s/" \
+        "desktop/mac/enterprise/%s/%s/%s/" \
           % (suffix, common.version, common.build))
 
   utils.set_cwd(common.workspace_dir)
@@ -355,25 +355,27 @@ def make_dmg(target = "opensource"):
   dmg = utils.sh(" ".join(args), verbose=True)
   utils.set_summary("desktop dmg " + target + " build", dmg)
 
+  deploy_dir = "desktop/mac/%s/%s/%s/" \
+    % (suffix, common.version, common.build)
+  if target == "commercial":
+    deploy_dir = "desktop/mac/enterprise/%s/%s/%s/" \
+      % (suffix, common.version, common.build)
+
   if common.deploy and dmg:
     utils.log_h2("desktop dmg " + target + " deploy")
     ret = s3_upload(
       utils.glob_path("build/*.dmg"),
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      deploy_dir)
     utils.set_summary("desktop dmg deploy", ret)
 
   if common.deploy and dmg:
     zip_scheme = scheme
-    zip_deploy_dir = "desktop/mac/%s/%s/%s/" \
-      % (suffix, common.version, common.build)
     if target == "commercial":
       zip_scheme = package_name + "-Enterprise-" + suffix
-      zip_deploy_dir = "desktop-enterprise/mac/%s/%s/%s/" \
-        % (suffix, common.version, common.build)
     utils.log_h2("desktop zip " + target + " deploy")
     ret = s3_upload(
       ["build/%s-%s.zip" % (zip_scheme, common.version)],
-      zip_deploy_dir)
+      deploy_dir)
     utils.set_summary("desktop zip " + target + " deploy", ret)
   return dmg
 

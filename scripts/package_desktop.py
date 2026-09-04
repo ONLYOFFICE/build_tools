@@ -3,6 +3,7 @@
 
 import os
 import re
+import subprocess
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 import package_utils as utils
@@ -72,6 +73,10 @@ def make_desktop_addon():
     utils.set_summary("desktop addon build", False)
     return False
 
+  if not sign_desktop_addon(files):
+    utils.set_summary("desktop addon build", False)
+    return False
+
   with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
     for f in files:
       archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
@@ -85,6 +90,60 @@ def make_desktop_addon():
     utils.set_summary("desktop addon deploy", ret)
 
   return ret
+
+def sign_desktop_addon(files):
+  if not common.sign:
+    return True
+
+  if utils.is_macos():
+    return sign_macos_desktop_addon(files)
+  if utils.is_windows():
+    return sign_windows_desktop_addon(files)
+
+  return True
+
+def sign_windows_desktop_addon(files):
+  sign_script = utils.get_path(
+    "%s/documents-pipeline/scripts/Sign.ps1" % common.workspace_dir)
+  binaries = [f for f in files
+    if os.path.splitext(f)[1].lower() in (".dll", ".exe")]
+
+  utils.log_h2("desktop addon sign")
+  for f in binaries:
+    if not utils.ps1(sign_script, ["-File", f], verbose=True):
+      utils.log_err("failed to sign: " + f)
+      return False
+
+  return True
+
+def sign_macos_desktop_addon(files):
+  identity = utils.get_env("CODESIGNING_IDENTITY")
+  if not identity:
+    utils.log_err("CODESIGNING_IDENTITY is not set")
+    return False
+
+  utils.log_h2("desktop addon sign")
+  for f in files:
+    try:
+      result = subprocess.run(
+        ["file", "-b", f], stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, check=True)
+      if b"Mach-O" not in result.stdout:
+        continue
+
+      utils.log("codesign: " + f)
+      subprocess.run([
+        "codesign", "--force", "--options", "runtime", "--timestamp",
+        "--sign", identity, f
+      ], check=True)
+      subprocess.run([
+        "codesign", "--verify", "--strict", "--verbose=2", f
+      ], check=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+      utils.log_err("failed to process %s: %s" % (f, err))
+      return False
+
+  return True
 
 def get_desktop_addon_dst():
   os_name, _ = get_desktop_addon_platform_info()

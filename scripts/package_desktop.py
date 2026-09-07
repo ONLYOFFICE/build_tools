@@ -411,8 +411,7 @@ def make_macos():
         scheme,
         branding.sparkle_base_url,
         "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
-  if "commercial" in editions \
-      and (common.platform != "darwin_x86_64_v8" or branding.onlyoffice):
+  if "commercial" in editions and common.platform != "darwin_x86_64_v8":
     dmg = make_dmg("commercial")
     if dmg and sparkle_updates and branding.onlyoffice:
       make_sparkle_updates(

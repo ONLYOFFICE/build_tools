@@ -77,9 +77,19 @@ def make_desktop_addon():
     utils.set_summary("desktop addon build", False)
     return False
 
-  with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
-    for f in files:
-      archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
+  if utils.is_macos():
+    try:
+      subprocess.run([
+        "ditto", "-c", "-k", "--sequesterRsrc", source_dir, zip_file
+      ], check=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+      utils.log_err("failed to create desktop addon zip: %s" % err)
+      utils.set_summary("desktop addon build", False)
+      return False
+  else:
+    with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
+      for f in files:
+        archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
 
   ret = utils.is_file(zip_file)
   utils.set_summary("desktop addon build", ret)
@@ -123,22 +133,31 @@ def sign_macos_desktop_addon(files):
     return False
 
   utils.log_h2("desktop addon sign")
+  frameworks = set()
   for f in files:
+    for match in re.finditer(r"\.framework(?=[\\/])", f, re.IGNORECASE):
+      frameworks.add(f[:match.end()])
+
+  for f in files + sorted(frameworks, key=lambda f: f.count(os.sep), reverse=True):
     try:
-      result = subprocess.run(
-        ["file", "-b", f], stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT, check=True)
-      if b"Mach-O" not in result.stdout:
-        continue
+      framework = f.lower().endswith(".framework")
+      if not framework:
+        result = subprocess.run(
+          ["file", "-b", f], stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT, check=True)
+        if b"Mach-O" not in result.stdout:
+          continue
 
       utils.log("codesign: " + f)
       subprocess.run([
         "codesign", "--force", "--options", "runtime", "--timestamp",
         "--sign", identity, f
       ], check=True)
-      subprocess.run([
-        "codesign", "--verify", "--strict", "--verbose=2", f
-      ], check=True)
+
+      verify_args = ["codesign", "--verify", "--strict", "--verbose=2"]
+      if framework:
+        verify_args.append("--deep")
+      subprocess.run(verify_args + [f], check=True)
     except (OSError, subprocess.CalledProcessError) as err:
       utils.log_err("failed to process %s: %s" % (f, err))
       return False

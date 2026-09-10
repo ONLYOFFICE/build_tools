@@ -21,6 +21,9 @@ parser.add_argument("-H", "--branch",   dest="branch",   type=str,
   action="store", help="Defines branch")
 parser.add_argument("-R", "--branding", dest="branding", type=str,
   action="store", help="Provides branding path")
+parser.add_argument("--package-edition", dest="package_edition", type=str,
+  choices=["all", "opensource", "commercial"], default="all",
+  action="store", help="Defines package edition")
 args = parser.parse_args()
 
 # vars
@@ -31,6 +34,7 @@ common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
+common.package_edition = args.package_edition
 if args.version: common.version = args.version
 else:            common.version = utils.get_env("PRODUCT_VERSION", "0.0.0")
 utils.set_env("PRODUCT_VERSION", common.version)
@@ -53,6 +57,7 @@ utils.log("targets:       " + str(common.targets))
 utils.log("clean:         " + str(common.clean))
 utils.log("sign:          " + str(common.sign))
 utils.log("deploy:        " + str(common.deploy))
+utils.log("package_edition: " + common.package_edition)
 utils.log("version:       " + common.version)
 utils.log("build:         " + common.build)
 utils.log("branding:      " + str(common.branding))
@@ -75,8 +80,6 @@ import package_mobile
 utils.set_cwd(common.workspace_dir, verbose=True)
 if "core" in common.targets:
   package_core.make()
-if "closuremaps_sdkjs_opensource" in common.targets:
-  package_core.deploy_closuremaps_sdkjs("opensource")
 if "closuremaps_sdkjs_commercial" in common.targets:
   package_core.deploy_closuremaps_sdkjs("commercial")
 if "closuremaps_webapps" in common.targets:

@@ -104,23 +104,25 @@ def check_dependencies():
     checksResult.append(check_7z())
 
   checksResult.append(check_java())
-  checksResult.append(check_erlang())
-  checksResult.append(check_rabbitmq())
   checksResult.append(check_gruntcli())
 
   if (host_platform == 'windows'):
     checksResult.append(check_nodejs())
 
-  sql_type = config.option("sql-type")
-  if (sql_type == 'mysql' and host_platform == 'windows'):
-    checksResult.append(check_mysqlServer())
-  else:
-    checksResult.append(check_postgreSQL())
-
   server_addons = []
   if (config.option("server-addons") != ""):
     server_addons = config.option("server-addons").rsplit(", ")
-  if ("server-lockstorage" in server_addons):
+  lockstorage_dir = base.get_script_dir() + "/../../server-lockstorage"
+  has_lockstorage = ("server-lockstorage" in server_addons and base.is_exist(lockstorage_dir + "/package.json"))
+
+  if (has_lockstorage):
+    checksResult.append(check_erlang())
+    checksResult.append(check_rabbitmq())
+    sql_type = config.option("sql-type")
+    if (sql_type == 'mysql' and host_platform == 'windows'):
+      checksResult.append(check_mysqlServer())
+    else:
+      checksResult.append(check_postgreSQL())
     checksResult.append(check_redis())
 
   if (len(checksResult.install) > 0):
@@ -136,6 +138,9 @@ def check_dependencies():
       base.cmd('python', install_args, False)
 
   check_npmPath()
+  if (not has_lockstorage):
+    return True
+
   if (config.option("sql-type") == 'mysql' and host_platform == 'windows'):
     return check_MySQLConfig(checksResult.sqlPath)
   return check_postgreConfig(checksResult.sqlPath)
@@ -191,7 +196,7 @@ def check_nodejs():
   nodejs_cur_version_major = int(nodejs_version.split('.')[0][1:])
   nodejs_cur_version_minor = int(nodejs_version.split('.')[1])
   print('Installed Node.js version: ' + nodejs_version[1:])
-  nodejs_min_version = '18'
+  nodejs_min_version = '20'
   nodejs_min_version_minor  = 0
   major_minor_min_version = nodejs_min_version.split('.')
   nodejs_min_version_major = int(major_minor_min_version[0])
@@ -215,7 +220,7 @@ def check_nodejs():
       isNeedReinstall = True
 
   if (True == isNeedReinstall):
-    print('Installed Node.js version must be 18 or higher.')
+    print('Installed Node.js version must be 20 or higher.')
     if (host_platform == 'windows'):
       dependence.append_uninstall('Node.js')
       dependence.append_install('Node.js')
@@ -412,7 +417,8 @@ def check_npm():
 def check_vc_components():
   base.print_info('Check Visual C++ components')
   result = True
-  if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0):
+  if (len(get_programUninstalls('Microsoft Visual C++ 2015-')) == 0 and
+      len(get_programUninstalls('Microsoft Visual C++ v14')) == 0):
     print('Microsoft Visual C++ 2015-20** Redistributable (x64) not found')
     result = installProgram('VC2019x64') and result
 
@@ -1007,7 +1013,7 @@ def install_postgresql():
   return code
 
 def install_nodejs():
-  os.system('curl -sSL https://deb.nodesource.com/setup_18.x | sudo -E bash -')
+  os.system('curl -sSL https://deb.nodesource.com/setup_20.x | sudo -E bash -')
   base.print_info("Install node.js...")
   install_command = 'yes | sudo apt install nodejs'
   print(install_command)
@@ -1016,7 +1022,7 @@ def install_nodejs():
 downloads_list = {
   'Windows': {
     'Git': 'https://github.com/git-for-windows/git/releases/download/v2.29.0.windows.1/Git-2.29.0-64-bit.exe',
-    'Node.js': 'https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi',
+    'Node.js': 'https://nodejs.org/dist/v20.20.2/node-v20.20.2-x64.msi',
     'Java': 'https://aka.ms/download-jdk/microsoft-jdk-11.0.18-windows-x64.msi',
     'RabbitMQ': 'https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.8.9/rabbitmq-server-3.8.9.exe',
     'Erlang': 'http://erlang.org/download/otp_win64_23.1.exe',

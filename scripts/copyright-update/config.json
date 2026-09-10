@@ -1,0 +1,32 @@
+{
+  "base_branch": "release/v9.4.0",
+  "repositories": [
+    "build_tools",
+    "core",
+    "core-ext",
+    "desktop-apps",
+    "desktop-sdk",
+    "native-sdk",
+    "office-js-api",
+    "sdkjs",
+    "sdkjs-ext",
+    "sdkjs-forms",
+    "sdkjs-native",
+    "sdkjs-ooxml",
+    "server",
+    "server-admin-panel",
+    "server-license",
+    "server-license-key",
+    "server-lockstorage",
+    "web-apps",
+    "web-apps-mobile",
+    "documents-app-android",
+    "documents-app-ios",
+    "editors-ios",
+    "editors-android-packages",
+    "editors-ios-sp",
+    "editors-webview-android",
+    "editors-webview-ios",
+    "desktop-onlineinstaller"
+  ]
+}

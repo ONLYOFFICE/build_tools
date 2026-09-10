@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import subprocess
 sys.path.append(sys.argv[1] + '/build_tools/scripts')
 sys.path.append(sys.argv[1] + '/build_tools/scripts/develop')
 import build_js
@@ -11,7 +12,18 @@ import base
 git_dir = sys.argv[1]
 
 base.print_info('argv :'+' '.join(sys.argv))
-base.cmd_in_dir(git_dir + '/build_tools/', 'python3', ['configure.py', '--develop', '1'] + sys.argv[2:])
+configure_args = ['configure.py', '--develop', '1'] + sys.argv[2:]
+if not any(arg == '--branch' or arg.startswith('--branch=') for arg in sys.argv[2:]):
+  branch_info = subprocess.run(
+    ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+    cwd=git_dir + '/build_tools',
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+  )
+  branch = branch_info.stdout.strip()
+  base.print_info('detected build_tools branch: ' + (branch or branch_info.stderr.strip()))
+  if branch != '' and branch != 'HEAD':
+    configure_args = ['configure.py', '--develop', '1', '--branch', branch] + sys.argv[2:]
+base.cmd_in_dir(git_dir + '/build_tools/', 'python3', configure_args)
 
 config.parse()
 config.parse_defaults()
@@ -54,4 +66,3 @@ else:
   base.replaceInFileRE("/app/ds/setup/config/supervisor/ds/ds-converter.conf", "command=node .*", "command=/var/www/onlyoffice/documentserver/server/FileConverter/converter")
   base.print_info('run_server.run_docker_sdk_web_apps: ' + git_dir)
   run_server.run_docker_sdk_web_apps(git_dir)
-  

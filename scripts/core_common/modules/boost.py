@@ -43,6 +43,23 @@ def clang_correct():
   base.replaceInFile("./tools/build/src/tools/darwin.py", "toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])", "#toolset.flags ('darwin.compile.c++', 'OPTIONS', None, ['-fcoalesce-templates'])")
   return
 
+def apply_patches(base_dir):
+  patches_dir = base_dir + "/patches"
+  # mpl/integral_wrapper.hpp: Xcode 26+ Clang treats enum-constexpr-conversion as hard error
+  mpl_patch = patches_dir + "/mpl_integral_wrapper.patch"
+  mpl_targets = [
+    base_dir + "/boost_1_72_0/libs/mpl/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios_xcframework/ios/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/ios_xcframework/ios_simulator/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/mac_64/include/boost/mpl/aux_/integral_wrapper.hpp",
+    base_dir + "/build/mac_arm64/include/boost/mpl/aux_/integral_wrapper.hpp"
+  ]
+  for target in mpl_targets:
+    if base.is_file(target):
+      base.apply_patch(target, mpl_patch)
+  return
+
 def make():
   print("[fetch & build]: boost")
 
@@ -62,6 +79,7 @@ def make():
   if not base.is_dir("boost_1_72_0"):
     base.cmd("git", ["clone", "--recursive", "--depth=1", "https://github.com/boostorg/boost.git", "boost_1_72_0", "-b" "boost-1.72.0"])
 
+  is_need_patch = False
   os.chdir("boost_1_72_0")
 
   # build
@@ -76,16 +94,19 @@ def make():
 
     # add "define=_ITERATOR_DEBUG_LEVEL=0" to b2 args before install for disable _ITERATOR_DEBUG_LEVEL
     if (-1 != config.option("platform").find("win_64")) and not base.is_file("../build/win_64/lib/libboost_system-" + win_vs_version + "-mt-x64-1_72.lib"):
+      is_need_patch = True
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_64", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=64", "install"])
     if (-1 != config.option("platform").find("win_32")) and not base.is_file("../build/win_32/lib/libboost_system-" + win_vs_version + "-mt-x32-1_72.lib"):
+      is_need_patch = True
       base.cmd("bootstrap.bat", [win_boot_arg])
       base.cmd("b2.exe", ["headers"])
       base.cmd("b2.exe", ["--clean"])
       base.cmd("b2.exe", ["--prefix=./../build/win_32", "link=static", "--with-filesystem", "--with-system", "--with-date_time", "--with-regex", "--toolset=" + win_toolset, "address-model=32", "install"])
     if (-1 != config.option("platform").find("win_arm64") and not base.is_file("../build/win_arm64/lib/libboost_system-" + win_vs_version + "-mt-a64-1_72.lib")):
+      is_need_patch = True
       boost_bat = []
       boost_bat.append("call bootstrap.bat " + win_boot_arg) # first build b2 for win64, so vcvarsall_call with arm64 later
       vcvarsall_call = ("call \"" + config.option("vs-path") + "/vcvarsall.bat\" " + "x64_arm64")
@@ -99,6 +120,7 @@ def make():
     correct_install_includes_win(base_dir, "win_arm64")
 
   if config.check_option("platform", "linux_64") and not base.is_dir("../build/linux_64"):
+    is_need_patch = True
     if config.option("sysroot") == "":
       addon_config = []
       addon_compile = []
@@ -118,6 +140,7 @@ def make():
     # TODO: support x86
 
   if config.check_option("platform", "linux_arm64") and not base.is_dir("../build/linux_arm64"):
+    is_need_patch = True
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "linux_arm64")
     directory_build = base_dir + "/build/linux_arm64/lib"
     base.delete_file(directory_build + "/libboost_system.a")
@@ -125,6 +148,7 @@ def make():
     base.copy_files(directory_build + "/linux_arm64/*.a", directory_build)
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios"):
+    is_need_patch = True
     old_cur2 = os.getcwd()
     clang_correct()
     os.chdir("../")
@@ -132,13 +156,16 @@ def make():
     os.chdir(old_cur2)
 
   if (-1 != config.option("platform").find("ios")) and not base.is_dir("../build/ios_xcframework"):
+    is_need_patch = True
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios_simulator", "xcframework_platform_ios_simulator")
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "ios_xcframework/ios")
 
   if (-1 != config.option("platform").find("android")) and not base.is_dir("../build/android"):
+    is_need_patch = True
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"])
 
   if config.check_option("platform", "mac_64") and not base.is_dir("../build/mac_64"):
+    is_need_patch = True
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "mac_64")
     directory_build = base_dir + "/build/mac_64/lib"
     base.delete_file(directory_build + "/libboost_system.a")
@@ -146,11 +173,15 @@ def make():
     base.copy_files(directory_build + "/mac_64/*.a", directory_build)
 
   if config.check_option("platform", "mac_arm64") and not base.is_dir("../build/mac_arm64"):
+    is_need_patch = True
     boost_qt.make(os.getcwd(), ["filesystem", "system", "date_time", "regex"], "mac_arm64")
     directory_build = base_dir + "/build/mac_arm64/lib"
     base.delete_file(directory_build + "/libboost_system.a")
     base.delete_file(directory_build + "/libboost_system.dylib")
     base.copy_files(directory_build + "/mac_arm64/*.a", directory_build)
+
+  if is_need_patch:
+     apply_patches(base_dir)
 
   os.chdir(old_cur)
   return

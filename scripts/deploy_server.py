@@ -8,6 +8,15 @@ import shutil
 import glob
 from tempfile import mkstemp
 
+WELCOME_FONTS = ['OpenSans-Regular.ttf', 'OpenSans-Semibold.ttf', 'OpenSans-Bold.ttf']
+
+# Rejected: /core-fonts (dev and package URLs differ by one level), documentserver-generate-allfonts (per-channel, cross-package, no dev).
+def copy_welcome_fonts(open_sans_dir, welcome_css_dir):
+  if not base.is_dir(welcome_css_dir):
+    return
+  for font_file in WELCOME_FONTS:
+    base.copy_file(open_sans_dir + '/' + font_file, welcome_css_dir + '/' + font_file)
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -130,6 +139,8 @@ def make():
 
     # add embed worker code
     base.cmd_in_dir(git_dir + "/sdkjs/common/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
+    # replace supported formats list
+    base.cmd_in_dir(git_dir + "/web-apps/build/embed", "python", ["make.py", js_dir + "/web-apps/apps/api/documents/api.js"])
 
     # plugins
     base.create_dir(js_dir + "/sdkjs-plugins")
@@ -204,6 +215,8 @@ def make():
     welcome = build_server_dir + '/welcome'
     base.create_dir(welcome)
     base.copy_dir(welcome_files, welcome)
+
+    copy_welcome_fonts(core_fonts_files + '/opensans', welcome + '/example/css')
 
     info_files = branding_dir + '/info'
     info = build_server_dir + '/info'

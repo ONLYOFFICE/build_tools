@@ -10,17 +10,19 @@ on:
         options:
           - create
           - remove
+          - merge
+          - rename
           - protect
           - unprotect
         default: 'create'
 
       branch_name:
-        description: 'Branch name for the selected operation'
+        description: 'Branch name to create, remove, merge from, rename, protect or unprotect'
         required: true
         type: string
 
       base_branch:
-        description: 'Base branch to create from (for create operation)'
+        description: 'Base branch to create from, merge into, or rename to'
         required: false
         type: string
         default: 'develop'
@@ -82,18 +84,48 @@ jobs:
           if [ "$OPERATION" = "protect" ] && [ -n "$TEAMS" ]; then
             EXTRA_ARGS="--teams=$TEAMS"
           fi
+          if [ "$OPERATION" = "rename" ]; then
+            if [ -z "$BASE_BRANCH" ] || [ "$BASE_BRANCH" = "$BRANCH_NAME" ]; then
+              echo "::error::For 'rename', 'base_branch' holds the new branch name and must differ from 'branch_name'"
+              exit 1
+            fi
+            # 'base_branch' is the new name; configure against the existing branch,
+            # since the new one does not exist yet.
+            EXTRA_ARGS="--new-branch-name=$BASE_BRANCH"
+            BASE_BRANCH="$BRANCH_NAME"
+          fi
           python git_operations.py "$OPERATION" "$BRANCH_NAME" \
             --base-branch="$BASE_BRANCH" \
             --branding="$BRANDING" \
             --branding-url="$BRANDING_URL" \
             --modules="$MODULES" \
-            $EXTRA_ARGS
+            $EXTRA_ARGS 2>&1 | tee /tmp/git-ops.log
 
       - name: Operation Summary
+        if: always()
         run: |
-          echo "## Git Operations Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Operation**: ${{ inputs.operation }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch Name**: ${{ inputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Base Branch**: ${{ inputs.base_branch }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branding**: ${{ inputs.branding }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Modules**: ${{ inputs.modules }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Git Operations Summary"
+            echo "- **Operation**: ${{ inputs.operation }}"
+            echo "- **Branch Name**: ${{ inputs.branch_name }}"
+            if [ "${{ inputs.operation }}" = "rename" ]; then
+              echo "- **New Branch Name**: ${{ inputs.base_branch }}"
+            else
+              echo "- **Base Branch**: ${{ inputs.base_branch }}"
+            fi
+            echo "- **Branding**: ${{ inputs.branding }}"
+            echo "- **Modules**: ${{ inputs.modules }}"
+            if [ -f /tmp/git-ops.log ]; then
+              RESULTS=$(grep "Results:" /tmp/git-ops.log | tail -1 | sed 's/.*Results: //') || true
+              if [ -n "$RESULTS" ]; then
+                echo ""
+                echo "**Results**: $RESULTS"
+              fi
+              CONFLICTS=$(grep "Conflicts" /tmp/git-ops.log | sed 's|.*in \([^ ]*\) (PR #\([0-9]*\)): \(.*\)|- [\1 (PR #\2)](\3)|') || true
+              if [ -n "$CONFLICTS" ]; then
+                echo ""
+                echo "### Conflicts"
+                echo "$CONFLICTS"
+              fi
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"

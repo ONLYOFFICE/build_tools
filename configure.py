@@ -34,6 +34,7 @@ parser.add_option("--branding-url", action="store", type="string", dest="brandin
 parser.add_option("--sdkjs-addon", action="append", type="string", dest="sdkjs-addons", default=[], help="provides sdkjs addons")
 parser.add_option("--sdkjs-addon-desktop", action="append", type="string", dest="sdkjs-addons-desktop", default=[], help="provides sdkjs addons for desktop")
 parser.add_option("--server-addon", action="append", type="string", dest="server-addons", default=[], help="provides server addons")
+parser.add_option("--server-pkg-linux-static", action="store", type="choice", choices=["0", "1"], dest="server-pkg-linux-static", default="0", help="uses the static pkg target for Linux server executables (0 - dynamic, 1 - static)")
 parser.add_option("--web-apps-addon", action="append", type="string", dest="web-apps-addons", default=[], help="provides web-apps addons")
 parser.add_option("--sdkjs-plugin", action="append", type="string", dest="sdkjs-plugin", default=["default"], help="provides plugins for server-based and desktop versions of the editors")
 parser.add_option("--sdkjs-plugin-server", action="append", type="string", dest="sdkjs-plugin-server", default=["default"], help="provides plugins for server-based version of the editors")

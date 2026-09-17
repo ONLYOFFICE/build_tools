@@ -95,7 +95,7 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
-    base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
+    # base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
@@ -243,22 +243,8 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
-    isUseAgent = True
-    if isWindowsXP:
-      isUseAgent = False
-    if (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
-      isUseAgent = False
-
-    if (isUseAgent):
-      agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
-      if (False):
-        base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)
-        base.cmd_in_dir(agent_plugin_dir, "npm", ["run", "build"], True)
-        base.copy_dir(agent_plugin_dir + "/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
-      else:
-        base.copy_dir(agent_plugin_dir + "/deploy/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
-
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
+    base.copy_file(base_dir + "/js/" + branding + "/desktop/addon.html", root_dir + "/addon.html")
     base.create_dir(root_dir + "/editors/webext")
     base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
 

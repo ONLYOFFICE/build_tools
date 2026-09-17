@@ -3,12 +3,17 @@
 
 import os
 import re
+import subprocess
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
 import package_utils as utils
 import package_common as common
 import package_branding as branding
 
 def make():
   utils.log_h1("DESKTOP")
+  if get_desktop_package_editions() == ["commercial"]:
+    make_desktop_addon()
   if utils.is_windows():
     make_windows()
   elif utils.is_macos():
@@ -18,6 +23,12 @@ def make():
   else:
     utils.log("Unsupported host OS")
   return
+
+def get_desktop_package_editions():
+  edition = getattr(common, "package_edition", "all")
+  if edition in ["opensource", "commercial"]:
+    return [edition]
+  return ["opensource", "commercial"]
 
 def s3_upload(files, dst):
   if not files: return False
@@ -29,6 +40,152 @@ def s3_upload(files, dst):
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
+
+def make_desktop_addon():
+  company_name_l = branding.company_name_l \
+    if hasattr(branding, "company_name_l") else branding.company_name.lower()
+  source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
+    % (common.workspace_dir, common.prefix, company_name_l))
+  zip_file = utils.get_path("%s/build_tools/out/%s/%s/%s" \
+    % (common.workspace_dir, common.prefix, company_name_l,
+       get_desktop_addon_filename()))
+
+  utils.log_h2("desktop addon build")
+  utils.log("source: " + source_dir)
+  utils.log("output: " + zip_file)
+
+  if not utils.is_dir(source_dir):
+    utils.log_err("dir not exist: " + source_dir)
+    utils.set_summary("desktop addon build", False)
+    return False
+
+  if utils.is_file(zip_file):
+    utils.delete_file(zip_file)
+
+  files = []
+  for root, dirs, names in os.walk(source_dir):
+    dirs.sort()
+    for name in sorted(names):
+      files.append(os.path.join(root, name))
+
+  if not files:
+    utils.log_err("dir is empty: " + source_dir)
+    utils.set_summary("desktop addon build", False)
+    return False
+
+  if not sign_desktop_addon(files):
+    utils.set_summary("desktop addon build", False)
+    return False
+
+  if utils.is_macos():
+    try:
+      subprocess.run([
+        "ditto", "-c", "-k", "--sequesterRsrc", source_dir, zip_file
+      ], check=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+      utils.log_err("failed to create desktop addon zip: %s" % err)
+      utils.set_summary("desktop addon build", False)
+      return False
+  else:
+    with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
+      for f in files:
+        archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
+
+  ret = utils.is_file(zip_file)
+  utils.set_summary("desktop addon build", ret)
+
+  if common.deploy and ret:
+    utils.log_h2("desktop addon deploy")
+    ret = s3_upload([zip_file], get_desktop_addon_dst())
+    utils.set_summary("desktop addon deploy", ret)
+
+  return ret
+
+def sign_desktop_addon(files):
+  if not common.sign:
+    return True
+
+  if utils.is_macos():
+    return sign_macos_desktop_addon(files)
+  if utils.is_windows():
+    return sign_windows_desktop_addon(files)
+
+  return True
+
+def sign_windows_desktop_addon(files):
+  sign_script = utils.get_path(
+    "%s/documents-pipeline/scripts/Sign.ps1" % common.workspace_dir)
+  binaries = [f for f in files
+    if os.path.splitext(f)[1].lower() in (".dll", ".exe")]
+
+  utils.log_h2("desktop addon sign")
+  for f in binaries:
+    if not utils.ps1(sign_script, ["-File", f], verbose=True):
+      utils.log_err("failed to sign: " + f)
+      return False
+
+  return True
+
+def sign_macos_desktop_addon(files):
+  identity = utils.get_env("CODESIGNING_IDENTITY")
+  if not identity:
+    utils.log_err("CODESIGNING_IDENTITY is not set")
+    return False
+
+  utils.log_h2("desktop addon sign")
+  frameworks = set()
+  for f in files:
+    for match in re.finditer(r"\.framework(?=[\\/])", f, re.IGNORECASE):
+      frameworks.add(f[:match.end()])
+
+  for f in files + sorted(frameworks, key=lambda f: f.count(os.sep), reverse=True):
+    try:
+      framework = f.lower().endswith(".framework")
+      if not framework:
+        result = subprocess.run(
+          ["file", "-b", f], stdout=subprocess.PIPE,
+          stderr=subprocess.STDOUT, check=True)
+        if b"Mach-O" not in result.stdout:
+          continue
+
+      utils.log("codesign: " + f)
+      subprocess.run([
+        "codesign", "--force", "--options", "runtime", "--timestamp",
+        "--sign", identity, f
+      ], check=True)
+
+      verify_args = ["codesign", "--verify", "--strict", "--verbose=2"]
+      if framework:
+        verify_args.append("--deep")
+      subprocess.run(verify_args + [f], check=True)
+    except (OSError, subprocess.CalledProcessError) as err:
+      utils.log_err("failed to process %s: %s" % (f, err))
+      return False
+
+  return True
+
+def get_desktop_addon_dst():
+  os_name, _ = get_desktop_addon_platform_info()
+  return "desktop/%s/" % os_name
+
+def get_desktop_addon_filename():
+  _, arch = get_desktop_addon_platform_info()
+  return "addon-%s.%s-%s.zip" % (common.version, common.build, arch)
+
+def get_desktop_addon_platform_info():
+  platform_map = {
+    "windows_x64":      ["win",   "x64"],
+    "windows_x86":      ["win",   "x86"],
+    "windows_arm64":    ["win",   "arm64"],
+    "windows_x64_xp":   ["win",   "x64_xp"],
+    "windows_x86_xp":   ["win",   "x86_xp"],
+    "darwin_arm64":     ["mac",   "arm"],
+    "darwin_x86_64":    ["mac",   "x86_64"],
+    "darwin_x86_64_v8": ["mac",   "v8"],
+    "linux_x86_64":     ["linux", "x86_64"],
+    "linux_aarch64":    ["linux", "aarch64"],
+  }
+  return platform_map[common.platform]
 
 #
 # Windows
@@ -49,7 +206,8 @@ def make_windows():
   if common.clean:
     utils.log_h2("desktop clean")
     utils.delete_dir("build")
-    utils.delete_files("inno\\package.config")
+    utils.delete_files("inno\\package*.config")
+    utils.delete_files("inno\\*\\package.config")
     utils.delete_files("inno\\*.exe")
     utils.delete_dir("advinst\\DesktopEditors-cache")
     utils.delete_files("advinst\\package.config")
@@ -57,29 +215,39 @@ def make_windows():
     utils.delete_files("advinst\\*.aic")
     utils.delete_dir("zip")
 
-  if make_prepare():
-    make_zip()
-    if branding.onlyoffice:
-      make_inno()
-      make_inno("standalone")
-      make_advinst()
-  else:
-    utils.set_summary("desktop zip opensource build", False)
-    utils.set_summary("desktop inno opensource build", False)
-    utils.set_summary("desktop inno standalone build", False)
-    utils.set_summary("desktop advinst opensource build", False)
+  editions = get_desktop_package_editions()
 
-  if branding.onlyoffice and make_prepare("commercial"):
-    make_zip("commercial")
-    make_inno("commercial")
-    make_advinst("commercial")
-  else:
-    utils.set_summary("desktop zip commercial build", False)
-    utils.set_summary("desktop inno commercial build", False)
-    utils.set_summary("desktop advinst commercial build", False)
+  if "opensource" in editions:
+    if make_prepare():
+      make_windows_packages("opensource")
+    else:
+      utils.set_summary("desktop zip opensource build", False)
+      utils.set_summary("desktop inno opensource build", False)
+      utils.set_summary("desktop advinst opensource build", False)
+
+  if "commercial" in editions:
+    if make_prepare("commercial"):
+      make_windows_packages("commercial")
+    else:
+      utils.set_summary("desktop zip commercial build", False)
+      utils.set_summary("desktop inno commercial build", False)
+      utils.set_summary("desktop inno standalone build", False)
+      utils.set_summary("desktop advinst commercial build", False)
 
   utils.set_cwd(common.workspace_dir)
   return
+
+def make_windows_packages(edition):
+  with ThreadPoolExecutor(max_workers=4) as executor:
+    futures = [
+      executor.submit(make_zip, edition),
+      executor.submit(make_inno, edition),
+      executor.submit(make_advinst, edition),
+    ]
+    if edition == "commercial":
+      futures.append(executor.submit(make_inno, "standalone"))
+    for future in futures:
+      future.result()
 
 def make_prepare(edition = "opensource"):
   args = [
@@ -230,11 +398,27 @@ def make_macos():
     utils.log("RELEASE=" + release_version_string + "(" + release_version + ")" \
           + "\nCURRENT=" + common.version + "(" + bundle_version + ")")
 
-  dmg = make_dmg()
-  if dmg and sparkle_updates:
-    make_sparkle_updates()
-  if common.platform != "darwin_x86_64_v8":
-    make_dmg("commercial")
+  # defaults, can be overridden via the environment
+  utils.set_env_default("DESKTOP_URL_UPDATES_MAIN_CHANNEL", branding.desktop_appcast_main_url)
+  utils.set_env_default("DESKTOP_URL_UPDATES_DEV_CHANNEL", branding.desktop_appcast_dev_url)
+
+  editions = get_desktop_package_editions()
+
+  if "opensource" in editions:
+    dmg = make_dmg()
+    if dmg and sparkle_updates:
+      make_sparkle_updates(
+        scheme,
+        branding.sparkle_base_url,
+        "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+  if "commercial" in editions and common.platform != "darwin_x86_64_v8":
+    dmg = make_dmg("commercial")
+    if dmg and sparkle_updates and branding.onlyoffice:
+      make_sparkle_updates(
+        package_name + "-Enterprise-" + suffix,
+        branding.sparkle_enterprise_base_url,
+        "desktop/mac/enterprise/%s/%s/%s/" \
+          % (suffix, common.version, common.build))
 
   utils.set_cwd(common.workspace_dir)
   return
@@ -248,33 +432,45 @@ def make_dmg(target = "opensource"):
   dmg = utils.sh(" ".join(args), verbose=True)
   utils.set_summary("desktop dmg " + target + " build", dmg)
 
+  deploy_dir = "desktop/mac/%s/%s/%s/" \
+    % (suffix, common.version, common.build)
+  if target == "commercial":
+    deploy_dir = "desktop/mac/enterprise/%s/%s/%s/" \
+      % (suffix, common.version, common.build)
+
   if common.deploy and dmg:
     utils.log_h2("desktop dmg " + target + " deploy")
     ret = s3_upload(
       utils.glob_path("build/*.dmg"),
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      deploy_dir)
     utils.set_summary("desktop dmg deploy", ret)
 
-  if common.deploy and dmg and target != "commercial":
+  if common.deploy and dmg:
+    zip_scheme = scheme
+    if target == "commercial":
+      zip_scheme = package_name + "-Enterprise-" + suffix
     utils.log_h2("desktop zip " + target + " deploy")
     ret = s3_upload(
-      ["build/%s-%s.zip" % (scheme, common.version)],
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      ["build/%s-%s.zip" % (zip_scheme, common.version)],
+      deploy_dir)
     utils.set_summary("desktop zip " + target + " deploy", ret)
   return dmg
 
-def make_sparkle_updates():
+def make_sparkle_updates(archive_scheme, sparkle_base_url, deploy_dir):
   utils.log_h2("desktop sparkle files build")
 
-  zip_filename = scheme + '-' + common.version
+  zip_filename = archive_scheme + '-' + common.version
   macos_zip = "build/" + zip_filename + ".zip"
+  released_updates_dir = "%s/%s/_updates" \
+    % (utils.get_env("ARCHIVES_DIR"), archive_scheme)
   utils.create_dir(updates_dir)
   utils.copy_file(macos_zip, updates_dir)
-  utils.sh(
-    "ls -1t " + released_updates_dir + "/*.zip" \
-      + " | head -n 3" \
-      + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
-    verbose=True)
+  if utils.is_dir(released_updates_dir):
+    utils.sh(
+      "ls -1t " + released_updates_dir + "/*.zip" \
+        + " | head -n 3" \
+        + " | while read f; do cp -fv \"$f\" " + updates_dir + "/; done",
+      verbose=True)
 
   for ext in [".html", ".ru.html"]:
     changes_src = changes_dir + "/" + common.version + "/changes" + ext
@@ -282,7 +478,7 @@ def make_sparkle_updates():
     if not utils.copy_file(changes_src, changes_dst):
       utils.write_file(changes_dst, "<!DOCTYPE html>placeholder")
 
-  sparkle_base_url = "%s/%s/updates/" % (branding.sparkle_base_url, suffix)
+  sparkle_base_url = "%s/%s/updates/" % (sparkle_base_url, suffix)
   ret = utils.sh(
       common.workspace_dir \
       + "/desktop-apps/macos/Vendor/Sparkle/bin/generate_appcast " \
@@ -295,11 +491,10 @@ def make_sparkle_updates():
 
   if common.deploy:
     utils.log_h2("desktop sparkle files deploy")
-    ret = s3_upload(
-      utils.glob_path("build/update/*.delta") \
+    files = utils.glob_path("build/update/*.delta") \
       + utils.glob_path("build/update/*.xml") \
-      + utils.glob_path("build/update/*.html"),
-      "desktop/mac/%s/%s/%s/" % (suffix, common.version, common.build))
+      + utils.glob_path("build/update/*.html")
+    ret = s3_upload(files, deploy_dir)
     utils.set_summary("desktop sparkle files deploy", ret)
   return
 
@@ -310,7 +505,7 @@ def make_sparkle_updates():
 def make_linux():
   utils.set_cwd("desktop-apps/package")
 
-  for edition in ["opensource", "commercial"]:
+  for edition in get_desktop_package_editions():
     utils.log_h2("desktop " + edition + " build")
     make_args = [t["make"] for t in branding.desktop_make_targets]
     if edition == "commercial":

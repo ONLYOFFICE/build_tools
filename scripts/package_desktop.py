@@ -94,6 +94,12 @@ def make_desktop_addon():
   ret = utils.is_file(zip_file)
   utils.set_summary("desktop addon build", ret)
 
+  # notarization of the addon is disabled for now: it needs the notarize_addon
+  # lane in desktop-apps/macos/fastlane/Fastfile and will move to the branding
+  if False and ret and common.sign and utils.is_macos():
+    ret = notarize_macos_desktop_addon(zip_file)
+    utils.set_summary("desktop addon notarize", ret)
+
   if common.deploy and ret:
     utils.log_h2("desktop addon deploy")
     ret = s3_upload([zip_file], get_desktop_addon_dst())
@@ -132,6 +138,14 @@ def sign_macos_desktop_addon(files):
     utils.log_err("CODESIGNING_IDENTITY is not set")
     return False
 
+  # executables get the entitlements of the app, as the "Rename symbols" phase of
+  # ONLYOFFICE.xcodeproj does: under the hardened runtime docbuilder-tools needs
+  # allow-dyld-environment-variables to find the engine through DYLD_* from aitools-bridge
+  entitlements = get_macos_entitlements()
+  if not utils.is_file(entitlements):
+    utils.log_err("entitlements not found: " + entitlements)
+    return False
+
   utils.log_h2("desktop addon sign")
   frameworks = set()
   for f in files:
@@ -141,18 +155,20 @@ def sign_macos_desktop_addon(files):
   for f in files + sorted(frameworks, key=lambda f: f.count(os.sep), reverse=True):
     try:
       framework = f.lower().endswith(".framework")
+      executable = False
       if not framework:
         result = subprocess.run(
           ["file", "-b", f], stdout=subprocess.PIPE,
           stderr=subprocess.STDOUT, check=True)
         if b"Mach-O" not in result.stdout:
           continue
+        executable = b"executable" in result.stdout
 
       utils.log("codesign: " + f)
-      subprocess.run([
-        "codesign", "--force", "--options", "runtime", "--timestamp",
-        "--sign", identity, f
-      ], check=True)
+      sign_args = ["codesign", "--force", "--options", "runtime", "--timestamp"]
+      if executable:
+        sign_args += ["--entitlements", entitlements]
+      subprocess.run(sign_args + ["--sign", identity, f], check=True)
 
       verify_args = ["codesign", "--verify", "--strict", "--verbose=2"]
       if framework:
@@ -163,6 +179,25 @@ def sign_macos_desktop_addon(files):
       return False
 
   return True
+
+def get_macos_entitlements():
+  _, suffix = get_desktop_addon_platform_info()
+  return utils.get_path("%s/%s/ONLYOFFICE/Resources/%s-%s/ONLYOFFICE.entitlements" \
+    % (common.workspace_dir, branding.desktop_branding_dir,
+       branding.desktop_package_name, suffix))
+
+def notarize_macos_desktop_addon(zip_file):
+  # through fastlane: it already has the notarization credentials of the app
+  # (Appfile, .env.secret). A zip is not stapled, Gatekeeper checks it online.
+  utils.log_h2("desktop addon notarize")
+  ret = utils.sh(
+    "bundler exec fastlane notarize_addon package:\"%s\"" % zip_file,
+    chdir=utils.get_path("%s/%s" \
+      % (common.workspace_dir, branding.desktop_branding_dir)),
+    verbose=True)
+  if not ret:
+    utils.log_err("failed to notarize: " + zip_file)
+  return ret
 
 def get_desktop_addon_dst():
   os_name, _ = get_desktop_addon_platform_info()

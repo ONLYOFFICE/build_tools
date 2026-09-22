@@ -537,12 +537,25 @@ def make_sparkle_updates(archive_scheme, sparkle_base_url, deploy_dir):
 # Linux
 #
 
+def get_linux_media_player():
+  # the videoplayer backend is chosen at build time (CONFIG libvlc, see config_addon_linux),
+  # the deploy tells which one the packages carry, as vlc-cache-gen.exe does for make.ps1
+  source_dir = "%s/build_tools/out/%s/%s/desktopeditors" \
+    % (common.workspace_dir, common.prefix, branding.company_name_l)
+  if utils.is_file(source_dir + "/libvlc.so.5"):
+    return "libvlc"
+  return "qtmultimedia"
+
 def make_linux():
   utils.set_cwd("desktop-apps/package")
+
+  media_player = get_linux_media_player()
+  utils.log("media player: " + media_player)
 
   for edition in get_desktop_package_editions():
     utils.log_h2("desktop " + edition + " build")
     make_args = [t["make"] for t in branding.desktop_make_targets]
+    make_args.append("MEDIA_PLAYER=" + media_player)
     if edition == "commercial":
       make_args.append("PACKAGE_EDITION=commercial")
     if common.platform == "linux_aarch64":

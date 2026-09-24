@@ -290,6 +290,8 @@ def make_prepare(edition = "opensource"):
     "-Arch", arch,
     "-Target", edition
   ]
+  if not branding.onlyoffice:
+    args += ["-Branding", common.branding]
   if common.sign:
     args += ["-Sign"]
 
@@ -562,6 +564,7 @@ def make_linux():
       make_args.append("UNAME_M=aarch64")
     if not branding.onlyoffice:
       make_args.append("BRANDING_DIR=../../" + common.branding + "/desktop-apps/package")
+      make_args.append("BRANDING=" + common.branding)
     ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
     utils.set_summary("desktop " + edition + " build", ret)
 

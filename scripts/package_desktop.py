@@ -562,7 +562,7 @@ def make_linux():
       make_args.append("PACKAGE_EDITION=commercial")
     if common.platform == "linux_aarch64":
       make_args.append("UNAME_M=aarch64")
-    if not branding.onlyoffice:
+    if common.branding:
       make_args.append("BRANDING_DIR=../../" + common.branding + "/desktop-apps/package")
       make_args.append("BRANDING=" + common.branding)
     ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)

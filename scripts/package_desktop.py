@@ -290,7 +290,7 @@ def make_prepare(edition = "opensource"):
     "-Arch", arch,
     "-Target", edition
   ]
-  if not branding.onlyoffice:
+  if common.branding:
     args += ["-Branding", common.branding]
   if common.sign:
     args += ["-Sign"]

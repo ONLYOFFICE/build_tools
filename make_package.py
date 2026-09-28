@@ -49,6 +49,7 @@ common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.branding_dir = utils.get_abspath(common.workspace_dir + "/" + args.branding) if args.branding else common.workspace_dir
+utils.set_env_default("OO_BRANDING", utils.get_branding_name())
 common.summary = []
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -61,6 +62,7 @@ utils.log("package_edition: " + common.package_edition)
 utils.log("version:       " + common.version)
 utils.log("build:         " + common.build)
 utils.log("branding:      " + str(common.branding))
+utils.log("OO_BRANDING:   " + utils.get_env("OO_BRANDING"))
 utils.log("timestamp:     " + common.timestamp)
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("branding_dir:  " + common.branding_dir)

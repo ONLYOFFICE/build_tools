@@ -397,7 +397,7 @@ def make_macos():
 
   utils.log_h2("build")
   source_dir = "%s/build_tools/out/%s/%s" \
-    % (common.workspace_dir, common.prefix, branding.company_name)
+    % (common.workspace_dir, common.prefix, utils.get_branding_name())
   if branding.onlyoffice:
     for path in utils.glob_path(source_dir \
         + "/desktopeditors/editors/web-apps/apps/*/main/resources/help"):

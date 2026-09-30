@@ -82,7 +82,7 @@ def make_start():
   if ("windows" == platform):
     dependence.check_pythonPath()
     dependence.check_gitPath()
-    restart_win_rabbit()
+    #restart_win_rabbit()
   elif ("mac" == platform):
     start_mac_services()
   elif ("linux" == platform):

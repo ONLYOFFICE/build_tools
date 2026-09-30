@@ -42,7 +42,8 @@ def make_windows(edition):
     make_args = ["exe", "-e", "PRODUCT_NAME=" + product_name]
   if not branding.onlyoffice:
     make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-    make_args += ["-e", "BRANDING=" + common.branding]
+  # Always: the Makefile defaults to the commercial "onlyoffice" output, not the opensource one.
+  make_args += ["-e", "BRANDING=" + common.branding]
   ret &= utils.cmd("make", *make_args, verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 
@@ -70,7 +71,8 @@ def make_linux(edition):
     make_args += ["-e", "UNAME_M=aarch64"]
   if not branding.onlyoffice:
     make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
-    make_args += ["-e", "BRANDING=" + common.branding]
+  # Always: the Makefile defaults to the commercial "onlyoffice" output, not the opensource one.
+  make_args += ["-e", "BRANDING=" + common.branding]
   ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 

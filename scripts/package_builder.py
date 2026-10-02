@@ -33,7 +33,7 @@ def s3_upload(files, dst):
 
 def make_archive():
   utils.set_cwd(utils.get_path(
-    "build_tools/out/" + common.prefix + "/" + branding.company_name.lower()))
+    "build_tools/out/" + common.prefix + "/" + utils.get_branding_name()))
 
   utils.log_h2("builder archive build")
   utils.delete_file("builder.7z")
@@ -135,8 +135,9 @@ def make_tar():
     make_args += ["-e", "UNAME_M=x86_64"]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
-  if not branding.onlyoffice:
-    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-builder-package"]
+  package_dir = utils.get_branding_package_dir("document-builder-package")
+  if package_dir:
+    make_args += ["-e", "BRANDING_DIR=../" + package_dir]
   ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("builder tar build", ret)
 
@@ -162,20 +163,29 @@ def make_wheel():
 
   if not common.platform in platform_tags: return
 
+  # the python package of the wheel, relative to the workspace
+  resources_dir = getattr(branding, "builder_python_resources_dir", None)
+  if not resources_dir:
+    utils.log("builder python wheel: the branding has no resources, skipped")
+    return
+
   utils.log_h2("builder python wheel build")
 
   builder_dir = "build"
   if utils.is_linux():
-    builder_dir = "build/opt/onlyoffice/documentbuilder"
+    builder_dir = "build/opt/" + branding.company_name_l + "/documentbuilder"
 
   utils.delete_dir("python")
-  utils.copy_dir("../onlyoffice/build_tools/packaging/docbuilder/resources", "python")
+  utils.copy_dir("../" + resources_dir, "python")
   utils.copy_dir(builder_dir, "python/docbuilder/lib", True, True)
 
-  desktop_dir = "../desktop-apps/macos/build/ONLYOFFICE.app/Contents/Resources/converter"
-  if utils.is_macos() and "desktop" in common.targets and utils.is_exist(desktop_dir):
-    for f in utils.glob_path(desktop_dir + "/*.dylib") + [desktop_dir + "/x2t"]:
-      utils.copy_file(f, builder_dir + "/" + utils.get_basename(f))
+  if utils.is_macos() and "desktop" in common.targets:
+    # the converter of the desktop app built by the same run
+    desktop_dir = "../%s/build/%s.app/Contents/Resources/converter" \
+      % (branding.desktop_branding_dir, branding.desktop_package_name)
+    if utils.is_exist(desktop_dir):
+      for f in utils.glob_path(desktop_dir + "/*.dylib") + [desktop_dir + "/x2t"]:
+        utils.copy_file(f, builder_dir + "/" + utils.get_basename(f))
 
   old_cwd = utils.get_cwd()
   utils.set_cwd("python/docbuilder")

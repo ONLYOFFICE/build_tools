@@ -226,6 +226,12 @@ def make():
     base.set_env("DEPOT_TOOLS_WIN_TOOLCHAIN", "0")
     base.set_env("GYP_MSVS_VERSION", config.option("vs-version"))
 
+  # fetch runs on the hermetic python of depot_tools, which change_bootstrap pins
+  # to 3.8, too old for fetch.py; the system python3 is used instead, and the
+  # bootstrap of the hermetic one is skipped
+  if ("mac" == base.host_platform()):
+    base.set_env("DEPOT_TOOLS_BOOTSTRAP_PYTHON3", "0")
+
   if not base.is_dir("v8"):
     base.cmd("./depot_tools/fetch", ["v8"], True)
     base.copy_dir("./v8/third_party", "./v8/third_party_new")
@@ -262,6 +268,15 @@ def make():
     base.replaceInFile("depot_tools/gclient_paths.py", "@functools.lru_cache", "")
 
   if ("mac" == base.host_platform()):
+    # fetch brings the clang of the v8 tip, and the clang hook of the branch in
+    # gclient sync may not replace it (its errors are ignored above): the clang of
+    # the branch is installed explicitly, and the objects of another clang are dropped
+    clang_stamp = "v8/third_party/llvm-build/Release+Asserts/cr_build_revision"
+    clang_stamp_old = base.readFile(clang_stamp)
+    base.cmd_in_dir("v8", "python3", ["tools/clang/scripts/update.py"])
+    if (base.readFile(clang_stamp) != clang_stamp_old) and base.is_dir("v8/out.gn/mac_64"):
+      base.delete_dir("v8/out.gn/mac_64")
+
     if not base.is_file("v8/build/config/compiler/BUILD.gn.bak"):
       base.copy_file("v8/build/config/compiler/BUILD.gn", "v8/build/config/compiler/BUILD.gn.bak")
       base.replaceInFile("v8/build/config/compiler/BUILD.gn", "\"-Wloop-analysis\",", "\"-Wloop-analysis\", \"-D_Float16=short\",")

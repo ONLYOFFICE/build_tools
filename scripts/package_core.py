@@ -15,7 +15,7 @@ def make():
 
 def make_archive():
   utils.set_cwd(utils.get_path(
-    "build_tools/out/" + common.prefix + "/" + branding.company_name.lower()))
+    "build_tools/out/" + common.prefix + "/" + utils.get_branding_name()))
 
   utils.log_h2("core archive build")
   utils.delete_file("core.7z")

@@ -249,12 +249,7 @@ def get_custom_sysroot_lib(platform, isNatural=False):
     return option("sysroot_linux_arm64") + "/usr/lib/aarch64-linux-gnu"
   return ""
 
-def parse_defaults():
-  defaults_path = base.get_script_dir() + "/../defaults"
-  if ("" != option("branding")):
-    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/build_tools/defaults"
-    if base.is_file(defaults_path_branding):
-      defaults_path = defaults_path_branding
+def read_defaults(defaults_path):
   defaults_file = open(defaults_path, "r")
   defaults_options = {}
   for line in defaults_file:
@@ -266,6 +261,18 @@ def parse_defaults():
     if ("false" == v.lower()):
       v = "0"
     defaults_options[k] = v
+  return defaults_options
+
+def parse_defaults():
+  defaults_options = read_defaults(base.get_script_dir() + "/../defaults")
+  if ("" != option("branding")):
+    defaults_path_branding = base.get_script_dir() + "/../../" + option("branding") + "/build_tools/defaults"
+    if base.is_file(defaults_path_branding):
+      defaults_branding = read_defaults(defaults_path_branding)
+      # the branding defaults replace build_tools/defaults, with use_base_defaults="1" they are added to them
+      if ("1" != defaults_branding.get("use_base_defaults", "")):
+        defaults_options = {}
+      defaults_options.update(defaults_branding)
 
   for name in defaults_options:
     if name in options:

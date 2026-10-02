@@ -4,6 +4,7 @@ import package_utils as utils
 import package_common as common
 import package_branding as branding
 
+# the edition is a key of branding.server_editions, its make arguments per host os
 def make(edition):
   utils.log_h1("SERVER (" + edition.upper() + ")")
   if utils.is_windows():
@@ -25,23 +26,20 @@ def s3_upload(files, dst):
     ret &= upload
   return ret
 
+def get_branding_args():
+  package_dir = utils.get_branding_package_dir("document-server-package")
+  if not package_dir:
+    return []
+  return ["-e", "BRANDING_DIR=../" + package_dir,
+          "-e", "BRANDING=" + common.branding]
+
 def make_windows(edition):
-  if edition == "enterprise":
-    product_name = "DocumentServer-EE"
-  elif edition == "developer":
-    product_name = "DocumentServer-DE"
-  else:
-    product_name = "DocumentServer"
   utils.set_cwd("document-server-package")
 
   utils.log_h2("server " + edition + " build")
   ret = utils.cmd("make", "clean", verbose=True)
-  if edition == "prerequisites":
-    make_args = ["exe-pr"]
-  else:
-    make_args = ["exe", "-e", "PRODUCT_NAME=" + product_name]
-  if not branding.onlyoffice:
-    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
+  make_args = list(branding.server_editions[edition]["windows"])
+  make_args += get_branding_args()
   ret &= utils.cmd("make", *make_args, verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 
@@ -54,21 +52,14 @@ def make_windows(edition):
   return
 
 def make_linux(edition):
-  if edition == "enterprise":
-    product_name = "documentserver-ee"
-  elif edition == "developer":
-    product_name = "documentserver-de"
-  else:
-    product_name = "documentserver"
   utils.set_cwd("document-server-package")
 
   utils.log_h2("server " + edition + " build")
   make_args = [t["make"] for t in branding.server_make_targets]
-  make_args += ["-e", "PRODUCT_NAME=" + product_name]
+  make_args += branding.server_editions[edition]["linux"]
   if common.platform == "linux_aarch64":
     make_args += ["-e", "UNAME_M=aarch64"]
-  if not branding.onlyoffice:
-    make_args += ["-e", "BRANDING_DIR=../" + common.branding + "/document-server-package"]
+  make_args += get_branding_args()
   ret = utils.sh("make clean && make " + " ".join(make_args), verbose=True)
   utils.set_summary("server " + edition + " build", ret)
 

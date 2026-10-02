@@ -21,9 +21,6 @@ parser.add_argument("-H", "--branch",   dest="branch",   type=str,
   action="store", help="Defines branch")
 parser.add_argument("-R", "--branding", dest="branding", type=str,
   action="store", help="Provides branding path")
-parser.add_argument("--package-edition", dest="package_edition", type=str,
-  choices=["all", "opensource", "commercial"], default="all",
-  action="store", help="Defines package edition")
 args = parser.parse_args()
 
 # vars
@@ -34,7 +31,6 @@ common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
-common.package_edition = args.package_edition
 if args.version: common.version = args.version
 else:            common.version = utils.get_env("PRODUCT_VERSION", "0.0.0")
 utils.set_env("PRODUCT_VERSION", common.version)
@@ -49,6 +45,7 @@ common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.branding_dir = utils.get_abspath(common.workspace_dir + "/" + args.branding) if args.branding else common.workspace_dir
+utils.set_env_default("OO_BRANDING", utils.get_branding_name())
 common.summary = []
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -57,47 +54,61 @@ utils.log("targets:       " + str(common.targets))
 utils.log("clean:         " + str(common.clean))
 utils.log("sign:          " + str(common.sign))
 utils.log("deploy:        " + str(common.deploy))
-utils.log("package_edition: " + common.package_edition)
 utils.log("version:       " + common.version)
 utils.log("build:         " + common.build)
 utils.log("branding:      " + str(common.branding))
+utils.log("OO_BRANDING:   " + utils.get_env("OO_BRANDING"))
 utils.log("timestamp:     " + common.timestamp)
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("branding_dir:  " + common.branding_dir)
 
-# branding
+# branding: its package_branding.py replaces the one of build_tools/scripts
+branding_scripts_dir = None
 if common.branding is not None:
-  sys.path.insert(-1, \
-      utils.get_path("../" + common.branding + "/build_tools/scripts"))
+  branding_scripts_dir = common.branding_dir + "/build_tools/scripts"
+  sys.path.insert(-1, branding_scripts_dir)
 
+import package_branding as branding
 import package_core
 import package_desktop
 import package_server
 import package_builder
 import package_mobile
 
+if common.deploy and not getattr(branding, "s3_bucket", None):
+  utils.log_err("deploy: the branding does not define s3_bucket")
+  exit(1)
+
+# the targets in the order they are made; the closure maps and the server
+# editions are named by the branding
+closuremaps = {
+  "sdkjs":   package_core.deploy_closuremaps_sdkjs,
+  "webapps": package_core.deploy_closuremaps_webapps
+}
+targets = [["core", package_core.make]]
+for name, (component, label) in getattr(branding, "closuremaps_targets", {}).items():
+  targets.append([name, lambda f=closuremaps[component], l=label: f(l)])
+targets.append(["desktop", package_desktop.make])
+targets.append(["builder", package_builder.make])
+for edition in getattr(branding, "server_editions", {}):
+  targets.append(["server_" + edition, lambda e=edition: package_server.make(e)])
+targets.append(["mobile", package_mobile.make])
+
+names = [t[0] for t in targets] + ["clean", "sign", "deploy"]
+for name in common.targets:
+  if name not in names:
+    utils.log_err("unknown target: " + name)
+
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
-if "core" in common.targets:
-  package_core.make()
-if "closuremaps_sdkjs_commercial" in common.targets:
-  package_core.deploy_closuremaps_sdkjs("commercial")
-if "closuremaps_webapps" in common.targets:
-  package_core.deploy_closuremaps_webapps("opensource")
-if "desktop" in common.targets:
-  package_desktop.make()
-if "builder" in common.targets:
-  package_builder.make()
-if "server_community" in common.targets:
-  package_server.make("community")
-if "server_enterprise" in common.targets:
-  package_server.make("enterprise")
-if "server_developer" in common.targets:
-  package_server.make("developer")
-if "server_prerequisites" in common.targets:
-  package_server.make("prerequisites")
-if "mobile" in common.targets:
-  package_mobile.make()
+for name, make in targets:
+  if name in common.targets:
+    make()
+
+# the steps of the branding itself, as deploy_correct.py after the deploy of make.py
+if branding_scripts_dir and utils.is_file(branding_scripts_dir + "/package_correct.py"):
+  import package_correct
+  package_correct.make()
 
 # summary
 utils.log_h1("Build summary")

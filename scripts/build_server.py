@@ -16,7 +16,7 @@ def make():
   server_admin_panel_dir = base.get_script_dir() + "/../../server-admin-panel"
   branding_dir = server_dir + "/branding"
 
-  if("" != config.option("branding")):
+  if("" != config.option("branding") and "onlyoffice-opensource" != config.option("branding")):
     branding_dir = git_dir + '/' + config.option("branding") + '/server'
 
   build_server_with_addons()

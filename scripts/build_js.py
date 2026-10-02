@@ -6,7 +6,7 @@ import os
 
 def correct_sdkjs_licence(directory):
   branding = config.option("branding")
-  if "" == branding or "onlyoffice" == branding:
+  if "" == branding or "onlyoffice" == branding or "onlyoffice-opensource" == branding:
     return
   license = base.readFileLicence(directory + "/word/sdk-all-min.js")
   base.replaceFileLicence(directory + "/common/Charts/ChartStyles.js", license)
@@ -18,9 +18,6 @@ def correct_sdkjs_licence(directory):
   base.replaceFileLicence(directory + "/common/spell/spell/spell_ie.js", license)
   base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile.js", license)
   base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile_ie.js", license)
-  base.replaceInFile(directory + "/word/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
-  base.replaceInFile(directory + "/slide/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
-  base.replaceInFile(directory + "/cell/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
   return
 
 # make build.pro

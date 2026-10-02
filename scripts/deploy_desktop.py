@@ -18,6 +18,28 @@ def copy_lib_with_links(src_dir, dst_dir, lib, version):
 
   return
 
+def copy_libvlc_linux(vlc_dir, dst_dir):
+  # libvlccore loads plugins from <libvlccore dir>/vlc/plugins (config_GetLibDir, vlc/src/linux/dirs.c);
+  # plugins.dat is valid only while the plugin files keep their size
+  base.copy_dir(vlc_dir + "/vlc/plugins", dst_dir + "/vlc/plugins")
+
+  # shared libraries stay next to the executable: plugins find them there
+  # through RUNPATH $ORIGIN/../../.. (linux_64) or through the RPATH of DesktopEditors (linux_arm64)
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_pulse.so", "0.0.0")
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_vdpau.so", "0.0.0")
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_xcb_events.so", "0.0.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libvlc.so", "5.6.1")
+  copy_lib_with_links(vlc_dir, dst_dir, "libvlccore.so", "9.0.1")
+
+  # avcodec and avformat plugins are linked with the bundled libva 2
+  copy_lib_with_links(vlc_dir, dst_dir, "libva.so", "2.2100.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libva-drm.so", "2.2100.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libva-x11.so", "2.2100.0")
+
+  # libvlccore is linked with libidn.so.11, which is absent in recent distributions
+  base.copy_file(vlc_dir + "/libidn.so.11", dst_dir + "/libidn.so.11")
+  return
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -200,14 +222,7 @@ def make():
           base.copy_files(vlc_dir + "/*.dll", root_dir)
           base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
-          base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
-          base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_pulse.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_vdpau.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
-          copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
-          copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
-          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
+          copy_libvlc_linux(vlc_dir, root_dir)
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")

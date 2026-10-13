@@ -42,6 +42,9 @@ def s3_upload(files, dst):
   return ret
 
 def make_desktop_addon():
+  if common.platform == "darwin_x86_64_v8":
+    return
+
   company_name_l = branding.company_name_l \
     if hasattr(branding, "company_name_l") else branding.company_name.lower()
   source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
@@ -216,7 +219,6 @@ def get_desktop_addon_platform_info():
     "windows_x86_xp":   ["win",   "x86_xp"],
     "darwin_arm64":     ["mac",   "arm"],
     "darwin_x86_64":    ["mac",   "x86_64"],
-    "darwin_x86_64_v8": ["mac",   "v8"],
     "linux_x86_64":     ["linux", "x86_64"],
     "linux_aarch64":    ["linux", "aarch64"],
   }

@@ -20,7 +20,7 @@
 				"core/DesktopEditor/freetype-2.10.4",
 				"core/DesktopEditor/raster/JBig2",
 				"core/DesktopEditor/raster/Jp2",
-				"core/DesktopEditor/xml/libxml2",
+				"core/DesktopEditor/Common/3dParty/libxml/libxml2",
 				"core/DesktopEditor/xmlsec",
 				"core/DjVuFile/libdjvu",
 				"core/DjVuFile/wasm",

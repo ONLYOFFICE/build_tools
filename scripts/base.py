@@ -61,6 +61,10 @@ def set_env(name, value):
   os.environ[name] = value
   return
 
+def set_env_default(name, value):
+  if not get_env(name):
+    set_env(name, value)
+
 def configure_common_apps(file=""):
   if ("windows" == host_platform()):
     os.environ["PATH"] = get_script_dir(file) + "/../tools/win/7z" + os.pathsep + get_script_dir(file) + "/../tools/win/curl" + os.pathsep + get_script_dir(file) + "/../tools/win/vswhere" + os.pathsep + os.environ["PATH"]
@@ -158,6 +162,23 @@ def copy_dir_content(src, dst, filterInclude = "", filterExclude = ""):
     if ("" != filterInclude) and (-1 == basename.find(filterInclude)):
       continue
     if ("" != filterExclude) and (-1 != basename.find(filterExclude)):
+      continue
+    if is_file(file):
+      copy_file(file, dst)
+    elif is_dir(file):
+      copy_dir(file, dst + "/" + basename)
+  return
+
+def copy_dir_content_no_dot(src, dst):
+  if not is_dir(dst):
+    create_dir(dst)
+  src_folder = src
+  if "/" != src[-1:]:
+    src_folder += "/"
+  src_folder += "*"
+  for file in glob.glob(src_folder):
+    basename = os.path.basename(file)
+    if basename.startswith("."):
       continue
     if is_file(file):
       copy_file(file, dst)
@@ -653,6 +674,7 @@ def get_repositories():
     result["desktop-sdk"] = [False, False]
     result["desktop-apps"] = [False, False]
     result["document-templates"] = [False, False]
+    result["oforms.onlyoffice.com"] = [False, False]
 
   if (config.check_option("module", "server")):
     result["server"] = [False, False]
@@ -1223,8 +1245,8 @@ def web_apps_addons_param():
   return params
 
 # common apps
-def download(url, dst):
-  return cmd_exe("curl", ["-L", "-o", dst, url])
+def download(url, dst, is_no_errors=False):
+  return cmd_exe("curl", ["-L", "-o", dst, url], is_no_errors)
 
 def extract(src, dst, is_no_errors=False):
   app = "7za" if ("mac" == host_platform()) else "7z"
@@ -1563,6 +1585,8 @@ def copy_marketplace_plugin(dst_dir, is_name_as_guid=False, is_desktop_local=Fal
     copy_dir(git_dir + "/onlyoffice.github.io/store", dst_dir_path + "/store")
     delete_dir(dst_dir_path + "/store/plugin")
     delete_dir(dst_dir_path + "/store/plugin-dev")
+    for file in glob.glob(dst_dir_path + "/store/*.html"):
+      replaceInFile(file, "https://onlyoffice.github.io/sdkjs-plugins/", "../../")
   return
 
 def copy_sdkjs_plugins(dst_dir, is_name_as_guid=False, is_desktop_local=False, isXp=False):

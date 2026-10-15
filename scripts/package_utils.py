@@ -57,6 +57,28 @@ def set_env(key, value):
   os.environ[key] = value
   return
 
+# keeps the value provided by the caller environment, if any
+def set_env_default(key, value):
+  if not get_env(key):
+    set_env(key, value)
+
+# the name of the deploy directory in build_tools/out/<prefix>/, same as
+# config.branding(): build_tools/config, then the branding defaults
+def get_branding_name():
+  paths = [common.workspace_dir + "/build_tools/config"]
+  if common.branding:
+    paths.append(common.branding_dir + "/build_tools/defaults")
+  for path in paths:
+    if not os.path.isfile(path):
+      continue
+    with open(path, "r") as file:
+      for line in file:
+        name, value = line.partition("=")[::2]
+        value = value.strip(" '\"\r\n")
+        if name.strip() == "branding-name" and value:
+          return value
+  return "onlyoffice"
+
 def get_cwd():
   return os.getcwd()
 

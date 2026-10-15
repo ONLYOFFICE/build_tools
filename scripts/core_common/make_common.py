@@ -9,6 +9,7 @@ import base
 import glob
 
 import boost
+import libxml2
 import cef
 import icu
 import openssl
@@ -41,6 +42,7 @@ def make():
         check_android_ndk_macos_arm(toolchain + "/prebuilt")
 
   boost.make()
+  libxml2.make()
   cef.make()
   icu.make()
   openssl.make()
@@ -55,6 +57,7 @@ def make():
   googletest.make()
   oo_brotli.make()
   heif.make()
+  websocket_all.make()
 
   if config.check_option("build-libvlc", "1"):
     libvlc.make()
@@ -62,5 +65,4 @@ def make():
   if config.check_option("module", "mobile"):
     if (config.check_option("platform", "android")):
       curl.make()
-    websocket_all.make()
   return

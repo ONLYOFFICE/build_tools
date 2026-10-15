@@ -185,17 +185,17 @@ def make_common(build_func, cmake_args):
 
 def make_x265(base_dir, build_type):
   # fetch lib repo
-  if not base.is_dir("x265_git"):
-    fetch_repo("https://bitbucket.org/multicoreware/x265_git.git", f"Release_{X265_VERSION}")
+  if not base.is_dir("x265"):
+    fetch_repo("https://github.com/Multicorewareinc/x265.git", f"Release_{X265_VERSION}")
     # fix x265 version detection so it reads version from x265Version.txt instead of parsing it from .git
     base.replaceInFile(
-      base_dir + "/x265_git/source/cmake/Version.cmake",
+      base_dir + "/x265/source/cmake/Version.cmake",
       "elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../x265Version.txt)",
       "endif()\n    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../x265Version.txt)"
     )
 
   # prepare cmake args
-  cmake_dir = base_dir + "/x265_git/source"
+  cmake_dir = base_dir + "/x265/source"
   cmake_args = [
     cmake_dir,
     "-DCMAKE_BUILD_TYPE=" + build_type,
@@ -208,7 +208,7 @@ def make_x265(base_dir, build_type):
   # lib build function
   def build_x265(platform, cmake_args):
     # check if target lib has already been built
-    build_dir = get_build_dir(base_dir, "x265_git", platform, build_type)
+    build_dir = get_build_dir(base_dir, "x265", platform, build_type)
     if platform.find("win") != -1:
       target_lib = os.path.join(build_dir, build_type, "x265-static.lib")
     else:
@@ -230,7 +230,7 @@ def make_x265(base_dir, build_type):
         f"build/encoder.build/{build_type}-{xcode_sdk}/libencoder.a"
       ])
     # copy header
-    base.copy_file(base_dir + "/x265_git/source/x265.h", build_dir)
+    base.copy_file(base_dir + "/x265/source/x265.h", build_dir)
     # reset directory
     os.chdir(base_dir)
     return
@@ -333,7 +333,7 @@ def make_heif(base_dir, build_type):
     os.chdir(build_dir)
     # add paths to dependent libraries and includes to cmake args
     de265_build_dir = get_build_dir(base_dir, "libde265", platform, build_type)
-    x265_build_dir = get_build_dir(base_dir, "x265_git", platform, build_type)
+    x265_build_dir = get_build_dir(base_dir, "x265", platform, build_type)
     cmake_args_ext = [
       f"-DLIBDE265_INCLUDE_DIR={de265_build_dir}",
       f"-DX265_INCLUDE_DIR={x265_build_dir}"
@@ -364,8 +364,8 @@ def make_heif(base_dir, build_type):
 def clear_module():
   if base.is_dir("libde265"):
     base.delete_dir_with_access_error("libde265")
-  if base.is_dir("x265_git"):
-    base.delete_dir_with_access_error("x265_git")
+  if base.is_dir("x265"):
+    base.delete_dir_with_access_error("x265")
   if base.is_dir("libheif"):
     base.delete_dir_with_access_error("libheif")
   return

@@ -18,6 +18,28 @@ def copy_lib_with_links(src_dir, dst_dir, lib, version):
 
   return
 
+def copy_libvlc_linux(vlc_dir, dst_dir):
+  # libvlccore loads plugins from <libvlccore dir>/vlc/plugins (config_GetLibDir, vlc/src/linux/dirs.c);
+  # plugins.dat is valid only while the plugin files keep their size
+  base.copy_dir(vlc_dir + "/vlc/plugins", dst_dir + "/vlc/plugins")
+
+  # shared libraries stay next to the executable: plugins find them there
+  # through RUNPATH $ORIGIN/../../.. (linux_64) or through the RPATH of DesktopEditors (linux_arm64)
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_pulse.so", "0.0.0")
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_vdpau.so", "0.0.0")
+  copy_lib_with_links(vlc_dir + "/vlc", dst_dir, "libvlc_xcb_events.so", "0.0.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libvlc.so", "5.6.1")
+  copy_lib_with_links(vlc_dir, dst_dir, "libvlccore.so", "9.0.1")
+
+  # avcodec and avformat plugins are linked with the bundled libva 2
+  copy_lib_with_links(vlc_dir, dst_dir, "libva.so", "2.2100.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libva-drm.so", "2.2100.0")
+  copy_lib_with_links(vlc_dir, dst_dir, "libva-x11.so", "2.2100.0")
+
+  # libvlccore is linked with libidn.so.11, which is absent in recent distributions
+  base.copy_file(vlc_dir + "/libidn.so.11", dst_dir + "/libidn.so.11")
+  return
+
 def make():
   base_dir = base.get_script_dir() + "/../out"
   git_dir = base.get_script_dir() + "/../.."
@@ -95,7 +117,7 @@ def make():
 
     base.generate_doctrenderer_config(root_dir + "/converter/DoctRenderer.config", "../editors/", "desktop", "", "../dictionaries")
     base.copy_dir(git_dir + "/document-templates/new", root_dir + "/converter/empty")
-    base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
+    # base.copy_dir(git_dir + "/desktop-apps/common/templates", root_dir + "/converter/templates")
 
     # dictionaries
     base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries")
@@ -200,14 +222,7 @@ def make():
           base.copy_files(vlc_dir + "/*.dll", root_dir)
           base.copy_file(vlc_dir + "/vlc-cache-gen.exe", root_dir + "/vlc-cache-gen.exe")
         elif (0 == platform.find("linux")):
-          base.copy_dir(vlc_dir + "/vlc/plugins", root_dir + "/plugins")
-          base.copy_file(vlc_dir + "/vlc/libcompat.a", root_dir + "/libcompat.a")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_pulse.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_vdpau.so", "0.0.0")
-          copy_lib_with_links(vlc_dir + "/vlc", root_dir, "libvlc_xcb_events.so", "0.0.0")
-          copy_lib_with_links(vlc_dir, root_dir, "libvlc.so", "5.6.1")
-          copy_lib_with_links(vlc_dir, root_dir, "libvlccore.so", "9.0.1")
-          base.copy_file(vlc_dir + "/vlc/vlc-cache-gen", root_dir + "/vlc-cache-gen")
+          copy_libvlc_linux(vlc_dir, root_dir)
 
         if isWindowsXP:
           base.copy_lib(build_libraries_path + "/mediaplayer/xp", root_dir, "videoplayer")
@@ -243,22 +258,8 @@ def make():
     #base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/encrypt/ui/engine/database/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}", root_dir + "/editors/sdkjs-plugins/{9AB4BBA8-A7E5-48D5-B683-ECE76A020BB1}")
     base.copy_sdkjs_plugin(git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins", root_dir + "/editors/sdkjs-plugins", "sendto", True)
 
-    isUseAgent = True
-    if isWindowsXP:
-      isUseAgent = False
-    if (0 == platform.find("mac")) and (config.check_option("config", "use_v8")):
-      isUseAgent = False
-
-    if (isUseAgent):
-      agent_plugin_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/plugins/ai-agent"
-      if (False):
-        base.cmd_in_dir(agent_plugin_dir, "npm", ["install"], True)
-        base.cmd_in_dir(agent_plugin_dir, "npm", ["run", "build"], True)
-        base.copy_dir(agent_plugin_dir + "/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
-      else:
-        base.copy_dir(agent_plugin_dir + "/deploy/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}", root_dir + "/editors/sdkjs-plugins/{9DC93CDB-B576-4F0C-B55E-FCC9C48DD777}")
-
     base.copy_file(base_dir + "/js/" + branding + "/desktop/index.html", root_dir + "/index.html")
+    base.copy_file(base_dir + "/js/" + branding + "/desktop/addon.html", root_dir + "/addon.html")
     base.create_dir(root_dir + "/editors/webext")
     base.copy_file(base_dir + "/js/" + branding + "/desktop/noconnect.html", root_dir + "/editors/webext/noconnect.html")
 

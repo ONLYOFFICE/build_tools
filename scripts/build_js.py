@@ -6,7 +6,7 @@ import os
 
 def correct_sdkjs_licence(directory):
   branding = config.option("branding")
-  if "" == branding or "onlyoffice" == branding:
+  if "" == branding or "onlyoffice" == branding or "onlyoffice-opensource" == branding:
     return
   license = base.readFileLicence(directory + "/word/sdk-all-min.js")
   base.replaceFileLicence(directory + "/common/Charts/ChartStyles.js", license)
@@ -18,9 +18,6 @@ def correct_sdkjs_licence(directory):
   base.replaceFileLicence(directory + "/common/spell/spell/spell_ie.js", license)
   base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile.js", license)
   base.replaceFileLicence(directory + "/pdf/src/engine/drawingfile_ie.js", license)
-  base.replaceInFile(directory + "/word/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
-  base.replaceInFile(directory + "/slide/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
-  base.replaceInFile(directory + "/cell/sdk-all-min.js", "onlyoffice-spellchecker", "r7-spellchecker")
   return
 
 # make build.pro
@@ -67,9 +64,12 @@ def make():
 
     base.copy_file(base_dir + "/../web-apps/apps/api/documents/index.html.desktop", out_dir + "/desktop/web-apps/apps/api/documents/index.html")
     
-    build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
+    # build_interface(base_dir + "/../desktop-apps/common/loginpage/build")
+    base.cmd_in_dir(base_dir + "/../desktop-apps/common/loginpage/build", "python", ["build_all.py"])
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/index.html", out_dir + "/desktop/index.html")
     base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/noconnect.html", out_dir + "/desktop/noconnect.html")
+    base.copy_file(base_dir + "/../desktop-apps/common/loginpage/deploy/addon.html", out_dir + "/desktop/addon.html")
+
 
   # mobile
   if config.check_option("module", "mobile"):

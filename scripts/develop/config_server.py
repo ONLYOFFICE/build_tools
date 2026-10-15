@@ -2,6 +2,7 @@
 
 import config
 import base
+import deploy_server
 import os
 import json
 
@@ -89,6 +90,10 @@ def make():
   # android
   #print("- allthemesgen (android) ----------------------------------")
   #base.cmd_exe("./allthemesgen", ["--converter-dir=\"" + git_dir + "/server/FileConverter/bin\"", "--src=\"" + git_dir + "/sdkjs/slide/themes\"", "--output=\"" + git_dir + "/sdkjs/common/Images\"", "--postfix=android", "--params=280,224"])
+
+  print("Welcome page fonts... -------------------------------------")
+  print("-----------------------------------------------------------")
+  deploy_server.copy_welcome_fonts(git_dir + "/core-fonts/opensans", git_dir + "/server/branding/welcome/example/css")
 
   # add directories to open directories
   addon_base_path = "../../"

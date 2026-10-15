@@ -21,6 +21,9 @@ parser.add_argument("-H", "--branch",   dest="branch",   type=str,
   action="store", help="Defines branch")
 parser.add_argument("-R", "--branding", dest="branding", type=str,
   action="store", help="Provides branding path")
+parser.add_argument("--package-edition", dest="package_edition", type=str,
+  choices=["all", "opensource", "commercial"], default="all",
+  action="store", help="Defines package edition")
 args = parser.parse_args()
 
 # vars
@@ -31,6 +34,7 @@ common.targets = args.targets
 common.clean = "clean" in args.targets
 common.sign = "sign" in args.targets
 common.deploy = "deploy" in args.targets
+common.package_edition = args.package_edition
 if args.version: common.version = args.version
 else:            common.version = utils.get_env("PRODUCT_VERSION", "0.0.0")
 utils.set_env("PRODUCT_VERSION", common.version)
@@ -45,6 +49,7 @@ common.branding = args.branding
 common.timestamp = utils.get_timestamp()
 common.workspace_dir = utils.get_abspath(utils.get_script_dir(__file__) + "/..")
 common.branding_dir = utils.get_abspath(common.workspace_dir + "/" + args.branding) if args.branding else common.workspace_dir
+utils.set_env_default("OO_BRANDING", utils.get_branding_name())
 common.summary = []
 utils.log("os_family:     " + common.os_family)
 utils.log("platform:      " + str(common.platform))
@@ -53,9 +58,11 @@ utils.log("targets:       " + str(common.targets))
 utils.log("clean:         " + str(common.clean))
 utils.log("sign:          " + str(common.sign))
 utils.log("deploy:        " + str(common.deploy))
+utils.log("package_edition: " + common.package_edition)
 utils.log("version:       " + common.version)
 utils.log("build:         " + common.build)
 utils.log("branding:      " + str(common.branding))
+utils.log("OO_BRANDING:   " + utils.get_env("OO_BRANDING"))
 utils.log("timestamp:     " + common.timestamp)
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("branding_dir:  " + common.branding_dir)

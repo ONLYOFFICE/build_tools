@@ -674,7 +674,6 @@ def get_repositories():
     result["desktop-sdk"] = [False, False]
     result["desktop-apps"] = [False, False]
     result["document-templates"] = [False, False]
-    result["oforms.onlyoffice.com"] = [False, False]
 
   if (config.check_option("module", "server")):
     result["server"] = [False, False]

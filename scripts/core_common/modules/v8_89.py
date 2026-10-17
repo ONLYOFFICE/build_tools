@@ -229,7 +229,7 @@ def make():
   # fetch runs on the hermetic python of depot_tools, which change_bootstrap pins
   # to 3.8, too old for fetch.py; the system python3 is used instead, and the
   # bootstrap of the hermetic one is skipped
-  if ("mac" == base.host_platform()):
+  if ("windows" != base.host_platform()):
     base.set_env("DEPOT_TOOLS_BOOTSTRAP_PYTHON3", "0")
 
   if not base.is_dir("v8"):
@@ -245,9 +245,6 @@ def make():
     base.cmd("./depot_tools/gclient", ["sync", "-r", v8_branch_version], True)
     base.cmd("gclient", ["sync", "--force"], True)
     base.copy_dir("./v8/third_party_new/ninja", "./v8/third_party/ninja")
-    if ("linux" == base.host_platform()):
-      if not base.is_file("./depot_tools/python3_bin_reldir.txt"):
-        base.cmd_in_dir("./depot_tools", "./ensure_bootstrap", [], True)
 
   if ("windows" == base.host_platform()):
     base.replaceInFile("v8/build/config/win/BUILD.gn", ":static_crt", ":dynamic_crt")

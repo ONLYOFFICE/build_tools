@@ -141,6 +141,7 @@ class GitOperations:
         repositories['core-ext'] = [True, False]
         repositories['build_tools'] = [True, False]
         repositories[self.branding] = [True, False]
+        repositories['onlyoffice-opensource'] = [True, False]
         repositories['Docker-DocumentServer'] = [True, False]
         repositories['DocumentBuilder'] = [True, False]
         repositories['document-builder-package'] = [True, False]

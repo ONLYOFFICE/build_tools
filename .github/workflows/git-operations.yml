@@ -28,16 +28,16 @@ on:
         default: 'develop'
 
       branding:
-        description: 'Branding name'
+        description: 'Branding names, comma/space separated (first one is used for configure)'
         required: false
         type: string
-        default: 'onlyoffice'
+        default: 'onlyoffice onlyoffice-opensource'
 
       branding_url:
-        description: 'Branding repository URL (relative to git host)'
+        description: 'Branding repository URLs relative to git host, same order as branding'
         required: false
         type: string
-        default: 'ONLYOFFICE/onlyoffice.git'
+        default: 'ONLYOFFICE/onlyoffice.git ONLYOFFICE/onlyoffice-opensource.git'
 
       modules:
         description: 'Modules to include'

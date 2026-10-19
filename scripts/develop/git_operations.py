@@ -7,6 +7,7 @@ Uses existing config system from base module to discover repositories dynamicall
 
 import sys
 import os
+import re
 import json
 import argparse
 import logging
@@ -23,13 +24,27 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def split_list(value):
+    """Split a comma- and/or whitespace-separated string into a list."""
+    return [item for item in re.split(r'[\s,]+', value.strip()) if item]
+
+
 class GitOperations:
     def __init__(self, branding="onlyoffice", base_branch="develop",
                  branding_url="ONLYOFFICE/onlyoffice.git", branch_name=None,
                  modules="core desktop builder server mobile", config_branch=None):
-        self.branding = branding
+        # Several brandings may be given (comma/space separated, URLs in the same
+        # order). The first one drives configure and defaults; all of their
+        # repositories are processed.
+        brandings = split_list(branding)
+        branding_urls = split_list(branding_url)
+        if not brandings or len(brandings) != len(branding_urls):
+            raise ValueError(f"Got {len(brandings)} branding(s) but {len(branding_urls)} "
+                             f"branding URL(s); they must be non-empty and match in count")
+        self.branding = brandings[0]
+        self.branding_url = branding_urls[0]
+        self.branding_repos = [url.replace('.git', '').split('/')[-1] for url in branding_urls]
         self.base_branch = base_branch
-        self.branding_url = branding_url
         self.branch_name = branch_name
         self.modules = modules
         # Branch whose branding defaults decide which repositories are processed.
@@ -140,8 +155,8 @@ class GitOperations:
         repositories.pop('onlyoffice.github.io', None)
         repositories['core-ext'] = [True, False]
         repositories['build_tools'] = [True, False]
-        repositories[self.branding] = [True, False]
-        repositories['onlyoffice-opensource'] = [True, False]
+        for branding_repo in self.branding_repos:
+            repositories[branding_repo] = [True, False]
         repositories['Docker-DocumentServer'] = [True, False]
         repositories['DocumentBuilder'] = [True, False]
         repositories['document-builder-package'] = [True, False]
@@ -490,9 +505,10 @@ def main():
         sub = subparsers.add_parser(cmd_name, help=cmd_help)
         sub.add_argument('branch_name', help='Branch name')
         sub.add_argument('--base-branch', default='develop', help='Base branch (default: develop)')
-        sub.add_argument('--branding', default='onlyoffice', help='Branding name')
+        sub.add_argument('--branding', default='onlyoffice',
+                         help='Branding name(s), comma/space separated; the first one is used for configure')
         sub.add_argument('--branding-url', default='ONLYOFFICE/onlyoffice.git',
-                         help='Relative path from git host base')
+                         help='Branding repo path(s) relative to git host base, in the same order as --branding')
         sub.add_argument('--modules', default='core desktop builder server mobile', help='Modules to include')
         if cmd_name == 'protect':
             sub.add_argument('--teams', required=True, help='Comma-separated list of teams for push/merge whitelist')

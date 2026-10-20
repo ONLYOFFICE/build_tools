@@ -11,6 +11,7 @@ import re
 import json
 import argparse
 import logging
+import http.client
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -77,7 +78,7 @@ class GitOperations:
 
         self._configure()
 
-    def _api(self, endpoint, method="GET", data=None):
+    def _api(self, endpoint, method="GET", data=None, timeout=60):
         """Make Gitea REST API request."""
         url = self.api_url + '/api/v1/' + endpoint
         body = json.dumps(data).encode('utf-8') if data else None
@@ -86,12 +87,17 @@ class GitOperations:
         if data:
             req.add_header('Content-Type', 'application/json')
         try:
-            resp = urllib.request.urlopen(req, timeout=30)
-            return {'ok': True, 'status': resp.status, 'body': resp.read().decode('utf-8')}
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return {'ok': True, 'status': resp.status, 'body': resp.read().decode('utf-8')}
         except urllib.error.HTTPError as e:
-            return {'ok': False, 'status': e.code, 'body': e.read().decode('utf-8')}
-        except urllib.error.URLError as e:
-            return {'ok': False, 'status': 0, 'body': str(e.reason)}
+            try:
+                err_body = e.read().decode('utf-8')
+            except (OSError, http.client.HTTPException) as read_err:
+                err_body = str(read_err)
+            return {'ok': False, 'status': e.code, 'body': err_body}
+        except (OSError, http.client.HTTPException) as e:
+            # Not just URLError: a read timeout is raised as a bare TimeoutError
+            return {'ok': False, 'status': 0, 'body': str(getattr(e, 'reason', None) or repr(e))}
 
     def _configure(self):
         """Configure repo list using existing config system. Fetches branding defaults via API."""
@@ -400,11 +406,12 @@ class GitOperations:
         for repo_name in repositories:
             logger.info(f"--- {repo_name} ---")
 
-            # Step 1: Check if there are changes to merge
+            # Step 1: Check if there are changes to merge (files/verification off for speed)
             encoded_base = urllib.parse.quote(self.base_branch, safe='')
             encoded_head = urllib.parse.quote(self.branch_name, safe='')
             compare = self._api(
                 f"repos/{self.owner}/{repo_name}/compare/{encoded_base}...{encoded_head}"
+                f"?files=false&verification=false"
             )
             if compare['ok']:
                 compare_data = json.loads(compare['body'])
@@ -415,6 +422,10 @@ class GitOperations:
             elif compare['status'] == 404:
                 logger.warning(f"Repo or branch not found in {repo_name}, skipping")
                 skipped += 1
+                continue
+            else:
+                logger.warning(f"Failed to compare branches in {repo_name} (status {compare['status']}): {compare['body']}")
+                failed += 1
                 continue
 
             # Step 2: Create PR
@@ -462,7 +473,7 @@ class GitOperations:
                     failed += 1
                     continue
             elif result['status'] == 422:
-                logger.info(f"No diff between branches in {repo_name}, skipping")
+                logger.info(f"No diff between branches in {repo_name}, skipping: {result['body']}")
                 skipped += 1
                 continue
             else:

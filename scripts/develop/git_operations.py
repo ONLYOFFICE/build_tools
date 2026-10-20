@@ -452,26 +452,17 @@ class GitOperations:
                 skipped += 1
                 continue
             elif result['status'] == 409:
-                # PR already exists, find it
-                search = self._api(
-                    f"repos/{self.owner}/{repo_name}/pulls"
-                    f"?state=open&head={self.owner}:{self.branch_name}"
-                    f"&base={self.base_branch}"
-                )
-                if search['ok']:
-                    prs = json.loads(search['body'])
-                    if prs:
-                        pr_number = prs[0]['number']
-                        pr_url = prs[0].get('html_url', '')
-                        logger.info(f"Found existing PR #{pr_number} in {repo_name}: {pr_url}")
-                    else:
-                        logger.warning(f"PR conflict but no open PR found in {repo_name}, skipping")
-                        skipped += 1
-                        continue
+                # PR already exists: leave it alone, it has to be handled manually.
+                # Gitea reports it as "... [id: <db id>, issue_id: <PR number>, ...]"
+                match = re.search(r'issue_id: (\d+)', result['body'])
+                if match:
+                    existing = f"#{match.group(1)}: {self.api_url}/{self.owner}/{repo_name}/pulls/{match.group(1)}"
                 else:
-                    logger.warning(f"Failed to search PRs in {repo_name} (status {search['status']})")
-                    failed += 1
-                    continue
+                    existing = result['body']
+                logger.warning(f"PR from {self.branch_name} into {self.base_branch} already exists "
+                               f"in {repo_name}, skipping: {existing}")
+                skipped += 1
+                continue
             elif result['status'] == 422:
                 logger.info(f"No diff between branches in {repo_name}, skipping: {result['body']}")
                 skipped += 1

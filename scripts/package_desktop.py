@@ -6,20 +6,18 @@ import package_utils as utils
 import package_common as common
 import package_branding as branding
 
-# The branding lists the sets of packages in branding.desktop_variants. Every key
-# of a variant is optional, the empty variant builds the defaults of the
-# packaging repositories:
-#   name             - the name of the variant in the build summary
-#   target           - -Target of desktop-apps/package/make*.ps1
-#   file_suffix      - added to the package name in the file names
-#   inno_extra       - more inno installers of the variant, each with its own
-#                      name, target and file_suffix
-#   fastlane_args    - more arguments of the fastlane lane
-#   make_args        - more arguments of desktop-apps/package/Makefile
-#   mac_deploy_dir   - the s3 directory of the macOS packages, desktop/mac
-#   sparkle_base_url - the url of the macOS updates, no updates without it
-#   deploy_help      - uploads the help packages of Linux, True
-#   skip_platforms   - the platforms the variant is not built for
+# Package sets come from branding.desktop_variants. All keys are optional,
+# {} builds the defaults of desktop-apps/package:
+#   name             - variant name in the build summary
+#   target           - -Target of make*.ps1
+#   file_suffix      - appended to the package name in file names
+#   inno_extra       - extra inno installers: [{name, target, file_suffix}]
+#   fastlane_args    - extra arguments of the fastlane lane
+#   make_args        - extra arguments of package/Makefile
+#   mac_deploy_dir   - s3 directory of macOS packages, default desktop/mac
+#   sparkle_base_url - macOS updates url, no updates without it
+#   deploy_help      - upload Linux help packages, default True
+#   skip_platforms   - platforms the variant is not built for
 
 def make():
   utils.log_h1("DESKTOP")
@@ -51,189 +49,6 @@ def s3_upload(files, dst):
       utils.log("URL: " + branding.s3_base_url + "/" + key)
     ret &= upload
   return ret
-
-def make_desktop_addon():
-  if common.platform == "darwin_x86_64_v8":
-    return
-
-  company_name_l = branding.company_name_l \
-    if hasattr(branding, "company_name_l") else branding.company_name.lower()
-  source_dir = utils.get_path("%s/build_tools/out/%s/%s/desktop-addon" \
-    % (common.workspace_dir, common.prefix, company_name_l))
-  zip_file = utils.get_path("%s/build_tools/out/%s/%s/%s" \
-    % (common.workspace_dir, common.prefix, company_name_l,
-       get_desktop_addon_filename()))
-
-  utils.log_h2("desktop addon build")
-  utils.log("source: " + source_dir)
-  utils.log("output: " + zip_file)
-
-  if not utils.is_dir(source_dir):
-    utils.log_err("dir not exist: " + source_dir)
-    utils.set_summary("desktop addon build", False)
-    return False
-
-  if utils.is_file(zip_file):
-    utils.delete_file(zip_file)
-
-  files = []
-  for root, dirs, names in os.walk(source_dir):
-    dirs.sort()
-    for name in sorted(names):
-      files.append(os.path.join(root, name))
-
-  if not files:
-    utils.log_err("dir is empty: " + source_dir)
-    utils.set_summary("desktop addon build", False)
-    return False
-
-  if not sign_desktop_addon(files):
-    utils.set_summary("desktop addon build", False)
-    return False
-
-  if utils.is_macos():
-    try:
-      subprocess.run([
-        "ditto", "-c", "-k", "--sequesterRsrc", source_dir, zip_file
-      ], check=True)
-    except (OSError, subprocess.CalledProcessError) as err:
-      utils.log_err("failed to create desktop addon zip: %s" % err)
-      utils.set_summary("desktop addon build", False)
-      return False
-  else:
-    with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as archive:
-      for f in files:
-        archive.write(f, os.path.relpath(f, source_dir).replace(os.sep, "/"))
-
-  ret = utils.is_file(zip_file)
-  utils.set_summary("desktop addon build", ret)
-
-  # notarization of the addon is disabled for now: it needs the notarize_addon
-  # lane in desktop-apps/macos/fastlane/Fastfile and will move to the branding
-  if False and ret and common.sign and utils.is_macos():
-    ret = notarize_macos_desktop_addon(zip_file)
-    utils.set_summary("desktop addon notarize", ret)
-
-  if common.deploy and ret:
-    utils.log_h2("desktop addon deploy")
-    ret = s3_upload([zip_file], get_desktop_addon_dst())
-    utils.set_summary("desktop addon deploy", ret)
-
-  return ret
-
-def sign_desktop_addon(files):
-  if not common.sign:
-    return True
-
-  if utils.is_macos():
-    return sign_macos_desktop_addon(files)
-  if utils.is_windows():
-    return sign_windows_desktop_addon(files)
-
-  return True
-
-def sign_windows_desktop_addon(files):
-  sign_script = utils.get_path(
-    "%s/documents-pipeline/scripts/Sign.ps1" % common.workspace_dir)
-  binaries = [f for f in files
-    if os.path.splitext(f)[1].lower() in (".dll", ".exe")]
-
-  utils.log_h2("desktop addon sign")
-  for f in binaries:
-    if not utils.ps1(sign_script, ["-File", f], verbose=True):
-      utils.log_err("failed to sign: " + f)
-      return False
-
-  return True
-
-def sign_macos_desktop_addon(files):
-  identity = utils.get_env("CODESIGNING_IDENTITY")
-  if not identity:
-    utils.log_err("CODESIGNING_IDENTITY is not set")
-    return False
-
-  # executables get the entitlements of the app, as the "Rename symbols" phase of
-  # ONLYOFFICE.xcodeproj does: under the hardened runtime docbuilder-tools needs
-  # allow-dyld-environment-variables to find the engine through DYLD_* from aitools-bridge
-  entitlements = get_macos_entitlements()
-  if not utils.is_file(entitlements):
-    utils.log_err("entitlements not found: " + entitlements)
-    return False
-
-  utils.log_h2("desktop addon sign")
-  frameworks = set()
-  for f in files:
-    for match in re.finditer(r"\.framework(?=[\\/])", f, re.IGNORECASE):
-      frameworks.add(f[:match.end()])
-
-  for f in files + sorted(frameworks, key=lambda f: f.count(os.sep), reverse=True):
-    try:
-      framework = f.lower().endswith(".framework")
-      executable = False
-      if not framework:
-        result = subprocess.run(
-          ["file", "-b", f], stdout=subprocess.PIPE,
-          stderr=subprocess.STDOUT, check=True)
-        if b"Mach-O" not in result.stdout:
-          continue
-        executable = b"executable" in result.stdout
-
-      utils.log("codesign: " + f)
-      sign_args = ["codesign", "--force", "--options", "runtime", "--timestamp"]
-      if executable:
-        sign_args += ["--entitlements", entitlements]
-      subprocess.run(sign_args + ["--sign", identity, f], check=True)
-
-      verify_args = ["codesign", "--verify", "--strict", "--verbose=2"]
-      if framework:
-        verify_args.append("--deep")
-      subprocess.run(verify_args + [f], check=True)
-    except (OSError, subprocess.CalledProcessError) as err:
-      utils.log_err("failed to process %s: %s" % (f, err))
-      return False
-
-  return True
-
-def get_macos_entitlements():
-  _, suffix = get_desktop_addon_platform_info()
-  return utils.get_path("%s/%s/ONLYOFFICE/Resources/%s-%s/ONLYOFFICE.entitlements" \
-    % (common.workspace_dir, branding.desktop_branding_dir,
-       branding.desktop_package_name, suffix))
-
-def notarize_macos_desktop_addon(zip_file):
-  # through fastlane: it already has the notarization credentials of the app
-  # (Appfile, .env.secret). A zip is not stapled, Gatekeeper checks it online.
-  utils.log_h2("desktop addon notarize")
-  ret = utils.sh(
-    "bundler exec fastlane notarize_addon package:\"%s\"" % zip_file,
-    chdir=utils.get_path("%s/%s" \
-      % (common.workspace_dir, branding.desktop_branding_dir)),
-    verbose=True)
-  if not ret:
-    utils.log_err("failed to notarize: " + zip_file)
-  return ret
-
-def get_desktop_addon_dst():
-  os_name, _ = get_desktop_addon_platform_info()
-  return "desktop/%s/" % os_name
-
-def get_desktop_addon_filename():
-  _, arch = get_desktop_addon_platform_info()
-  return "addon-%s.%s-%s.zip" % (common.version, common.build, arch)
-
-def get_desktop_addon_platform_info():
-  platform_map = {
-    "windows_x64":      ["win",   "x64"],
-    "windows_x86":      ["win",   "x86"],
-    "windows_arm64":    ["win",   "arm64"],
-    "windows_x64_xp":   ["win",   "x64_xp"],
-    "windows_x86_xp":   ["win",   "x86_xp"],
-    "darwin_arm64":     ["mac",   "arm"],
-    "darwin_x86_64":    ["mac",   "x86_64"],
-    "linux_x86_64":     ["linux", "x86_64"],
-    "linux_aarch64":    ["linux", "aarch64"],
-  }
-  return platform_map[common.platform]
 
 #
 # Windows
@@ -394,7 +209,7 @@ def make_macos():
     utils.delete_dir(utils.get_env("HOME") + "/Library/Caches/Sparkle_generate_appcast")
 
   utils.log_h2("build")
-  # the branding serves the help online instead of the one in the bundle
+  # the branding serves the help online: drop it from the bundle
   if getattr(branding, "desktop_remove_help", False):
     source_dir = "%s/build_tools/out/%s/%s" \
       % (common.workspace_dir, common.prefix, utils.get_branding_name())
@@ -427,7 +242,7 @@ def make_macos():
         % (plistbuddy, bundle_version, plist_path), verbose=True)
     utils.sh('%s -c "Set :ASCBundleBuildNumber %s" %s' \
         % (plistbuddy, common.build, plist_path), verbose=True)
-    # a format with the version, as the help of every version is kept
+    # a format string, the help url contains the version
     help_url = getattr(branding, "desktop_help_url", None)
     if help_url:
       utils.sh('%s -c "Add :ASCWebappsHelpUrl string %s" %s' \
@@ -563,7 +378,7 @@ def make_linux():
     utils.set_summary(get_title("desktop", name, "build"), ret)
 
     if common.deploy:
-      # the help packages do not depend on the architecture, one upload is enough
+      # help packages do not depend on the architecture: upload once, from x86_64
       deploy_help = variant.get("deploy_help", True) \
         and "x86_64" in common.platform
       for t in branding.desktop_make_targets:

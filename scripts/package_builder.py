@@ -163,7 +163,7 @@ def make_wheel():
 
   if not common.platform in platform_tags: return
 
-  # the python package of the wheel, relative to the workspace
+  # wheel sources of the branding, relative to the workspace
   resources_dir = getattr(branding, "builder_python_resources_dir", None)
   if not resources_dir:
     utils.log("builder python wheel: the branding has no resources, skipped")
@@ -180,7 +180,7 @@ def make_wheel():
   utils.copy_dir(builder_dir, "python/docbuilder/lib", True, True)
 
   if utils.is_macos() and "desktop" in common.targets:
-    # the converter of the desktop app built by the same run
+    # take the converter of the desktop app built in this run
     desktop_dir = "../%s/build/%s.app/Contents/Resources/converter" \
       % (branding.desktop_branding_dir, branding.desktop_package_name)
     if utils.is_exist(desktop_dir):

@@ -4,7 +4,7 @@ import package_utils as utils
 import package_common as common
 import package_branding as branding
 
-# the edition is a key of branding.server_editions, its make arguments per host os
+# edition: a key of branding.server_editions
 def make(edition):
   utils.log_h1("SERVER (" + edition.upper() + ")")
   if utils.is_windows():
@@ -26,12 +26,14 @@ def s3_upload(files, dst):
     ret &= upload
   return ret
 
+# BRANDING is the directory to package, build_tools/out/<prefix>/<branding-name>;
+# always passed, the Makefile default is onlyoffice
 def get_branding_args():
+  args = []
   package_dir = utils.get_branding_package_dir("document-server-package")
-  if not package_dir:
-    return []
-  return ["-e", "BRANDING_DIR=../" + package_dir,
-          "-e", "BRANDING=" + common.branding]
+  if package_dir:
+    args += ["-e", "BRANDING_DIR=../" + package_dir]
+  return args + ["-e", "BRANDING=" + utils.get_branding_name()]
 
 def make_windows(edition):
   utils.set_cwd("document-server-package")

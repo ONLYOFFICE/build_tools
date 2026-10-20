@@ -79,8 +79,8 @@ def get_branding_name():
           return value
   return "onlyoffice"
 
-# the overlay of a packaging repository in the branding, <branding>/<repo_dir>
-# relative to the workspace, or None when the branding does not have it
+# <branding>/<repo_dir> relative to the workspace if the branding overrides that
+# packaging repository, else None
 def get_branding_package_dir(repo_dir):
   if not common.branding:
     return None

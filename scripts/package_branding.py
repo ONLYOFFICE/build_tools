@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Packaging data of a build without a branding. A branding replaces this module
-# with its <branding>/build_tools/scripts/package_branding.py: the names, the s3
-# bucket, the desktop variants, the server editions and the closure maps are all
-# its own. The values here are the defaults of the packaging repositories, and
-# there is nothing to deploy to.
+# Packaging data of a build without a branding: the defaults of the packaging
+# repositories, no s3, so no deploy. A branding replaces this module with
+# <branding>/build_tools/scripts/package_branding.py.
 
 import package_utils as utils
 
@@ -15,16 +13,13 @@ company_name_l = company_name.lower()
 s3_bucket = None
 s3_base_url = None
 
-# the sets of desktop packages, the keys are described in package_desktop.py;
-# the empty variant builds the defaults of the packaging repositories
+# desktop package sets, keys in package_desktop.py; {} builds the defaults
 desktop_variants = [{}]
 
-# the targets server_<edition> of make_package.py: the make arguments per host
-# os, as {"<edition>": {"windows": [...], "linux": [...]}}
+# server_<edition> targets: {"<edition>": {"windows": [make args], "linux": [make args]}}
 server_editions = {}
 
-# the closure maps targets of make_package.py, as {"<target>": ["sdkjs" or
-# "webapps", "<s3 subdirectory>"]}
+# closure maps targets: {"<target>": ["sdkjs" or "webapps", "<s3 subdirectory>"]}
 closuremaps_targets = {}
 
 if utils.is_windows():

@@ -62,7 +62,7 @@ utils.log("timestamp:     " + common.timestamp)
 utils.log("workspace_dir: " + common.workspace_dir)
 utils.log("branding_dir:  " + common.branding_dir)
 
-# branding: its package_branding.py replaces the one of build_tools/scripts
+# package_branding.py of the branding overrides scripts/package_branding.py
 branding_scripts_dir = None
 if common.branding is not None:
   branding_scripts_dir = common.branding_dir + "/build_tools/scripts"
@@ -79,8 +79,7 @@ if common.deploy and not getattr(branding, "s3_bucket", None):
   utils.log_err("deploy: the branding does not define s3_bucket")
   exit(1)
 
-# the targets in the order they are made; the closure maps and the server
-# editions are named by the branding
+# targets in build order; closure maps and server editions come from the branding
 closuremaps = {
   "sdkjs":   package_core.deploy_closuremaps_sdkjs,
   "webapps": package_core.deploy_closuremaps_webapps
@@ -94,10 +93,12 @@ for edition in getattr(branding, "server_editions", {}):
   targets.append(["server_" + edition, lambda e=edition: package_server.make(e)])
 targets.append(["mobile", package_mobile.make])
 
+# an unknown target is an error, not a silent skip
 names = [t[0] for t in targets] + ["clean", "sign", "deploy"]
-for name in common.targets:
-  if name not in names:
-    utils.log_err("unknown target: " + name)
+unknown = [name for name in common.targets if name not in names]
+if unknown:
+  utils.log_err("unknown targets: " + " ".join(unknown))
+  exit(1)
 
 # build
 utils.set_cwd(common.workspace_dir, verbose=True)
@@ -105,7 +106,7 @@ for name, make in targets:
   if name in common.targets:
     make()
 
-# the steps of the branding itself, as deploy_correct.py after the deploy of make.py
+# extra packaging steps of the branding, after all targets
 if branding_scripts_dir and utils.is_file(branding_scripts_dir + "/package_correct.py"):
   import package_correct
   package_correct.make()

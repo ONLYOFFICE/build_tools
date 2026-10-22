@@ -47,6 +47,10 @@ def make():
   branding = config.branding()
 
   platforms = config.option("platform").split()
+  xfa_dir = git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/xfa"
+  if any(p in config.platforms and p.startswith("linux") for p in platforms):
+    base.cmd_in_dir(xfa_dir, "python", ["prepare_vendor.py"])
+
   for native_platform in platforms:
     if not native_platform in config.platforms:
       continue
@@ -237,6 +241,11 @@ def make():
     for file in glob.glob(root_dir + "/editors/web-apps/apps/*/*/*.js.map"):
       base.delete_file(file)
     base.copy_dir(git_dir + "/desktop-sdk/ChromiumBasedEditors/resources/local", root_dir + "/editors/sdkjs/common/Images/local")
+    if platform.startswith("linux"):
+      base.create_dir(root_dir + "/editors/xfa")
+      for file in ["index.html", "viewer.js", "viewer.css"]:
+        base.copy_file(xfa_dir + "/" + file, root_dir + "/editors/xfa/" + file)
+      base.copy_dir(xfa_dir + "/pdfjs", root_dir + "/editors/xfa/pdfjs")
 
     base.create_dir(root_dir + "/editors/sdkjs-plugins")
     if not isWindowsXP:
